@@ -1,0 +1,95 @@
+[
+  {
+    "id": "strike",
+    "name": "Strike",
+    "description": "A reliable weapon strike.",
+    "power": 8,
+    "cooldownTurns": 0,
+    "target": "singleEnemy",
+    "manaCost": 0
+  },
+  {
+    "id": "guard_shout",
+    "name": "Guard Shout",
+    "description": "Bolsters ally defenses.",
+    "power": 0,
+    "cooldownTurns": 2,
+    "target": "singleAlly",
+    "manaCost": 0,
+    "applyStatus": "guarded"
+  },
+  {
+    "id": "arrow_shot",
+    "name": "Arrow Shot",
+    "description": "A precise long-range shot.",
+    "power": 10,
+    "cooldownTurns": 0,
+    "target": "singleEnemy",
+    "manaCost": 0
+  },
+  {
+    "id": "volley",
+    "name": "Volley",
+    "description": "Hits all enemies with reduced power.",
+    "power": 7,
+    "cooldownTurns": 2,
+    "target": "allEnemies",
+    "manaCost": 0
+  },
+  {
+    "id": "arcane_bolt",
+    "name": "Arcane Bolt",
+    "description": "Magic projectile.",
+    "power": 11,
+    "cooldownTurns": 0,
+    "target": "singleEnemy",
+    "manaCost": 0
+  },
+  {
+    "id": "focus_aura",
+    "name": "Focus Aura",
+    "description": "Improves allied precision.",
+    "power": 0,
+    "cooldownTurns": 2,
+    "target": "singleAlly",
+    "manaCost": 0,
+    "applyStatus": "focus"
+  },
+  {
+    "id": "stab",
+    "name": "Stab",
+    "description": "Quick dagger hit.",
+    "power": 9,
+    "cooldownTurns": 0,
+    "target": "singleEnemy",
+    "manaCost": 0
+  },
+  {
+    "id": "bleeding_cut",
+    "name": "Bleeding Cut",
+    "description": "Applies bleeding damage over time.",
+    "power": 8,
+    "cooldownTurns": 2,
+    "target": "singleEnemy",
+    "manaCost": 0,
+    "applyStatus": "bleed"
+  },
+  {
+    "id": "claw",
+    "name": "Claw",
+    "description": "Enemy melee attack.",
+    "power": 7,
+    "cooldownTurns": 0,
+    "target": "singleEnemy",
+    "manaCost": 0
+  },
+  {
+    "id": "boss_slash",
+    "name": "Boss Slash",
+    "description": "Heavy strike from a boss.",
+    "power": 12,
+    "cooldownTurns": 0,
+    "target": "singleEnemy",
+    "manaCost": 0
+  }
+]

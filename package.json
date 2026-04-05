@@ -1,0 +1,27 @@
+{
+  "name": "ygdrassil-dungeon",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
+  "scripts": {
+    "build": "npm run build -w shared && npm run build -w server && npm run build -w client",
+    "dev:client": "npm run dev -w client",
+    "dev:server": "npm run dev -w server",
+    "lint": "npm run lint -w shared && npm run lint -w server && npm run lint -w client",
+    "test": "npm run build -w shared && npm run test -w shared && npm run test -w server",
+    "typecheck": "npm run build -w shared && npm run typecheck -w shared && npm run typecheck -w server && npm run typecheck -w client"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.1",
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  }
+}

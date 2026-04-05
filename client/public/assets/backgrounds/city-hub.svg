@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="15%" r="80%">
+      <stop offset="0%" stop-color="#365f9e"/>
+      <stop offset="45%" stop-color="#223d6b"/>
+      <stop offset="100%" stop-color="#121c33"/>
+    </radialGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a3552"/>
+      <stop offset="100%" stop-color="#12182a"/>
+    </linearGradient>
+    <linearGradient id="road" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7c6d4c"/>
+      <stop offset="100%" stop-color="#4b402b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <circle cx="1540" cy="170" r="88" fill="#f4b942" opacity="0.28"/>
+  <rect y="590" width="1920" height="490" fill="url(#ground)"/>
+  <path d="M890 1080 L960 640 L1030 1080 Z" fill="url(#road)" opacity="0.92"/>
+
+  <g fill="#31486f" opacity="0.9">
+    <rect x="210" y="500" width="300" height="170" rx="16"/>
+    <rect x="650" y="420" width="360" height="250" rx="16"/>
+    <rect x="1140" y="500" width="330" height="170" rx="16"/>
+    <rect x="1520" y="440" width="220" height="230" rx="14"/>
+  </g>
+  <g fill="#496694" opacity="0.6">
+    <rect x="270" y="462" width="58" height="38" rx="6"/>
+    <rect x="730" y="378" width="74" height="42" rx="6"/>
+    <rect x="1230" y="462" width="66" height="38" rx="6"/>
+    <rect x="1578" y="396" width="46" height="44" rx="6"/>
+  </g>
+  <g stroke="#f4b942" stroke-width="4" opacity="0.42" fill="none">
+    <line x1="360" y1="672" x2="730" y2="672"/>
+    <line x1="1010" y1="672" x2="1230" y2="672"/>
+    <line x1="1470" y1="672" x2="1600" y2="672"/>
+    <line x1="730" y1="672" x2="960" y2="712"/>
+    <line x1="1230" y1="672" x2="960" y2="712"/>
+  </g>
+  <g fill="#f7f2e8" opacity="0.8" font-family="Georgia">
+    <text x="360" y="705" text-anchor="middle" font-size="36">Market District</text>
+    <text x="830" y="705" text-anchor="middle" font-size="36">Grand Keep</text>
+    <text x="1300" y="705" text-anchor="middle" font-size="36">Guild Quarter</text>
+  </g>
+</svg>

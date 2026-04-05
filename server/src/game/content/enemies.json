@@ -1,0 +1,22 @@
+[
+  { "id": "slime", "name": "Cave Slime", "level": 1, "skillId": "claw", "stats": { "maxHp": 18, "attack": 6, "defense": 3, "speed": 4, "critChance": 0.02, "accuracy": 0.85 } },
+  { "id": "bat", "name": "Night Bat", "level": 1, "skillId": "claw", "stats": { "maxHp": 14, "attack": 5, "defense": 2, "speed": 8, "critChance": 0.05, "accuracy": 0.9 } },
+  { "id": "skeleton", "name": "Bone Skirmisher", "level": 2, "skillId": "claw", "stats": { "maxHp": 22, "attack": 8, "defense": 4, "speed": 5, "critChance": 0.04, "accuracy": 0.88 } },
+  { "id": "cultist", "name": "Ruin Cultist", "level": 2, "skillId": "claw", "stats": { "maxHp": 20, "attack": 9, "defense": 3, "speed": 6, "critChance": 0.05, "accuracy": 0.9 } },
+  { "id": "golem", "name": "Stone Golem", "level": 3, "skillId": "claw", "stats": { "maxHp": 34, "attack": 10, "defense": 8, "speed": 2, "critChance": 0.02, "accuracy": 0.86 } },
+  { "id": "poison_frog", "name": "Poison Frog", "level": 2, "skillId": "claw", "stats": { "maxHp": 18, "attack": 8, "defense": 3, "speed": 7, "critChance": 0.04, "accuracy": 0.9 } },
+  { "id": "bandit", "name": "Tunnel Bandit", "level": 3, "skillId": "claw", "stats": { "maxHp": 24, "attack": 11, "defense": 4, "speed": 7, "critChance": 0.08, "accuracy": 0.9 } },
+  { "id": "spider", "name": "Web Spider", "level": 2, "skillId": "claw", "stats": { "maxHp": 19, "attack": 8, "defense": 3, "speed": 6, "critChance": 0.05, "accuracy": 0.9 } },
+  { "id": "harpy", "name": "Dust Harpy", "level": 3, "skillId": "claw", "stats": { "maxHp": 21, "attack": 10, "defense": 4, "speed": 9, "critChance": 0.09, "accuracy": 0.92 } },
+  { "id": "wisp", "name": "Echo Wisp", "level": 3, "skillId": "claw", "stats": { "maxHp": 16, "attack": 11, "defense": 2, "speed": 10, "critChance": 0.1, "accuracy": 0.94 } },
+  { "id": "mimic", "name": "Mimic", "level": 4, "skillId": "claw", "stats": { "maxHp": 30, "attack": 13, "defense": 6, "speed": 5, "critChance": 0.07, "accuracy": 0.9 } },
+  { "id": "beetle", "name": "Iron Beetle", "level": 4, "skillId": "claw", "stats": { "maxHp": 33, "attack": 12, "defense": 8, "speed": 3, "critChance": 0.03, "accuracy": 0.88 } },
+  { "id": "assassin", "name": "Crypt Assassin", "level": 4, "skillId": "claw", "stats": { "maxHp": 25, "attack": 14, "defense": 5, "speed": 10, "critChance": 0.12, "accuracy": 0.93 } },
+  { "id": "lichling", "name": "Lichling", "level": 4, "skillId": "claw", "stats": { "maxHp": 24, "attack": 15, "defense": 4, "speed": 7, "critChance": 0.1, "accuracy": 0.92 } },
+  { "id": "hound", "name": "Abyss Hound", "level": 3, "skillId": "claw", "stats": { "maxHp": 22, "attack": 12, "defense": 4, "speed": 9, "critChance": 0.08, "accuracy": 0.92 } },
+  { "id": "sentinel", "name": "Vault Sentinel", "level": 5, "skillId": "claw", "stats": { "maxHp": 38, "attack": 15, "defense": 10, "speed": 4, "critChance": 0.04, "accuracy": 0.9 } },
+  { "id": "reaper", "name": "Gloom Reaper", "level": 5, "skillId": "claw", "stats": { "maxHp": 28, "attack": 17, "defense": 6, "speed": 9, "critChance": 0.14, "accuracy": 0.94 } },
+  { "id": "serpent", "name": "Cinder Serpent", "level": 5, "skillId": "claw", "stats": { "maxHp": 31, "attack": 16, "defense": 7, "speed": 8, "critChance": 0.1, "accuracy": 0.92 } },
+  { "id": "warden", "name": "Dread Warden", "level": 5, "skillId": "claw", "stats": { "maxHp": 42, "attack": 14, "defense": 11, "speed": 3, "critChance": 0.05, "accuracy": 0.89 } },
+  { "id": "shade", "name": "Null Shade", "level": 4, "skillId": "claw", "stats": { "maxHp": 26, "attack": 14, "defense": 5, "speed": 9, "critChance": 0.1, "accuracy": 0.93 } }
+]
