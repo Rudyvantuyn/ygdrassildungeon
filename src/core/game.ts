@@ -1,6 +1,8 @@
 import { emptyChart, setTerrain, type Chart, type ChartMode } from './chart';
 import { Combat } from './combat';
 import { FLOORS, type FloorDef } from './data/floors';
+import { makeInventory } from './data/items';
+import type { QuestState } from './quests';
 import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
 import { createStartingParty, fullRestore, isAlive } from './party';
 import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
@@ -39,6 +41,15 @@ export interface GameState {
   reserve: Member[];
   gold: number;
   inventory: Record<ItemId, number>;
+  /** Materials carried, by material id. */
+  materials: Record<string, number>;
+  /** Materials sold to the shop over the whole game (unlocks special gear). */
+  sold: Record<string, number>;
+  /** Enemies defeated, by enemy id (for quests). */
+  kills: Record<string, number>;
+  quests: Record<string, QuestState>;
+  /** Story scenes already shown. */
+  story: string[];
   /** Steps taken since the last encounter, compared against `encounterAt`. */
   danger: number;
   encounterAt: number;
@@ -85,7 +96,12 @@ export class Game {
     // Fill in fields that saves from earlier builds don't have yet.
     state.chartMode ??= 'assisted';
     state.reserve ??= [];
-    state.inventory.kindlingMoss ??= 0;
+    state.inventory = makeInventory(state.inventory);
+    state.materials ??= {};
+    state.sold ??= {};
+    state.kills ??= {};
+    state.quests ??= {};
+    state.story ??= [];
     state.progress.forEach((p, i) => {
       p.prowlers ??= initProwlers(FLOORS[i]);
       p.chart ??= emptyChart(p.explored.length);
@@ -118,13 +134,18 @@ export class Game {
       party: createStartingParty(),
       reserve: [],
       gold: 150,
-      inventory: { sapTonic: 3, spiritDew: 1, kindlingMoss: 1, homingFeather: 1 },
+      inventory: makeInventory({ sapTonic: 3, spiritDew: 1, clearwater: 2, kindlingMoss: 1, homingFeather: 1 }),
       danger: 0,
       encounterAt: 0,
       progress,
       steps: 0,
       battles: 0,
       cleared: false,
+      materials: {},
+      sold: {},
+      kills: {},
+      quests: {},
+      story: [],
     });
     game.rollEncounterAt();
     return game;
@@ -322,6 +343,8 @@ export class Game {
     }
     if (combat.outcome === 'victory' && combat.rewards) {
       this.state.gold += combat.rewards.gold;
+      for (const id of combat.rewards.materials) this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
+      for (const e of combat.enemies) this.state.kills[e.def.id] = (this.state.kills[e.def.id] ?? 0) + 1;
       if (combat.boss) {
         this.progress.bossDefeated = true;
         if (this.isLastFloor) this.state.cleared = true;

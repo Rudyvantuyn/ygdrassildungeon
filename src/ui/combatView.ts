@@ -7,7 +7,7 @@ import type { ItemId } from '../core/types';
 import type { CorridorRenderer } from '../render/corridor';
 import { drawMonster } from '../render/monsters';
 import { audio, type Sfx } from '../audio/audio';
-import type { Element } from '../core/types';
+import type { Ailment, Element } from '../core/types';
 import { el, floater } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import type { PartyView } from './partyView';
@@ -28,6 +28,12 @@ interface EnemyFx {
   dyingSince: number | null;
 }
 
+export const AILMENT_BADGE: Record<Ailment, { short: string; color: string }> = {
+  poison: { short: 'PSN', color: '#9be05a' },
+  sleep: { short: 'SLP', color: '#8ab4ff' },
+  paralysis: { short: 'PAR', color: '#f0d050' },
+};
+
 const HIT_SOUND: Record<Element, Sfx> = { phys: 'hitPhys', fire: 'hitFire', frost: 'hitFrost', storm: 'hitStorm' };
 
 /** View offset of the corridor canvas inside the stage. */
@@ -36,6 +42,8 @@ const VIEW_Y = 20;
 
 export class CombatView {
   private fx: EnemyFx[];
+  private enemyAilment: (Ailment | null)[];
+  private partyAilment: (Ailment | null)[] = [];
   private enemyHp: number[];
   private partyHp: number[] = [];
   private partySp: number[] = [];
@@ -54,6 +62,8 @@ export class CombatView {
   ) {
     this.fx = combat.enemies.map(() => ({ flashUntil: 0, lungeUntil: 0, dyingSince: null }));
     this.enemyHp = combat.enemies.map((e) => e.hp);
+    this.enemyAilment = combat.enemies.map(() => null);
+    this.partyAilment = combat.party.map(() => null);
   }
 
   async start(): Promise<void> {
@@ -112,6 +122,16 @@ export class CombatView {
         ctx.fillRect(x - bw / 2 - 2, ground + 14, bw + 4, 10);
         ctx.fillStyle = ratio > 0.5 ? '#e0a030' : ratio > 0.25 ? '#e07030' : '#e0483a';
         ctx.fillRect(x - bw / 2, ground + 16, bw * ratio, 6);
+        const ailment = this.enemyAilment[i];
+        if (ailment) {
+          const badge = AILMENT_BADGE[ailment];
+          ctx.font = '800 13px "Nunito Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = badge.color;
+          ctx.fillRect(x - 22, ground + 28, 44, 18);
+          ctx.fillStyle = '#000';
+          ctx.fillText(badge.short, x, ground + 41);
+        }
       }
 
       if (this.target === i) {
@@ -355,7 +375,20 @@ export class CombatView {
         await this.wait(300);
         return;
       }
+      case 'ailment': {
+        audio.play(ev.ailment ? 'ailment' : 'cure');
+        if (ev.side === 'enemy') this.enemyAilment[ev.target] = ev.ailment;
+        else {
+          this.partyAilment[ev.target] = ev.ailment;
+          this.renderParty();
+        }
+        this.say(ev.text);
+        await this.wait(ev.ailment ? 520 : 380);
+        return;
+      }
       case 'down':
+        if (ev.side === 'enemy') this.enemyAilment[ev.target] = null;
+        else this.partyAilment[ev.target] = null;
         audio.play(ev.side === 'enemy' ? 'enemyDown' : 'allyDown');
         this.say(ev.text);
         if (ev.side === 'enemy') this.fx[ev.target].dyingSince = this.time;
@@ -378,7 +411,12 @@ export class CombatView {
   }
 
   private renderParty(): void {
-    this.host.party.render(this.combat.party, { hp: this.partyHp, sp: this.partySp, active: this.current >= 0 ? this.current : null });
+    this.host.party.render(this.combat.party, {
+      hp: this.partyHp,
+      sp: this.partySp,
+      ailments: this.partyAilment,
+      active: this.current >= 0 ? this.current : null,
+    });
   }
 
   private say(text: string): void {

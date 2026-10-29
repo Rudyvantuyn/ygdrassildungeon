@@ -4,6 +4,14 @@ export type Element = 'phys' | 'fire' | 'frost' | 'storm';
 
 export type Row = 'front' | 'back';
 
+/** Lasting combat conditions. Gone when the fight ends. */
+export type Ailment = 'poison' | 'sleep' | 'paralysis';
+
+export interface Inflict {
+  ailment: Ailment;
+  chance: number;
+}
+
 export interface Stats {
   hp: number;
   sp: number;
@@ -16,7 +24,7 @@ export interface Stats {
 
 export type ClassId = 'bastion' | 'strider' | 'mender' | 'runecaller';
 
-export type ItemId = 'sapTonic' | 'spiritDew' | 'kindlingMoss' | 'homingFeather';
+export type ItemId = 'sapTonic' | 'spiritDew' | 'clearwater' | 'kindlingMoss' | 'homingFeather';
 
 export type SkillId =
   | 'challenge'
@@ -30,7 +38,10 @@ export type SkillId =
   | 'frostRune'
   | 'stormRune'
   | 'wildfire'
-  | 'rekindle';
+  | 'rekindle'
+  | 'cleanse'
+  | 'venomArrow'
+  | 'slumberRune';
 
 export interface Member {
   name: string;

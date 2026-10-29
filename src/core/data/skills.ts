@@ -1,4 +1,4 @@
-import type { Element, SkillId } from '../types';
+import type { Element, Inflict, SkillId } from '../types';
 
 export type SkillTarget = 'enemy' | 'allEnemies' | 'ally' | 'allAllies' | 'self';
 
@@ -7,13 +7,15 @@ export interface SkillDef {
   name: string;
   sp: number;
   target: SkillTarget;
-  kind: 'phys' | 'magic' | 'heal' | 'revive' | 'challenge' | 'guard';
+  kind: 'phys' | 'magic' | 'heal' | 'revive' | 'cure' | 'ailment' | 'challenge' | 'guard';
   element: Element;
   /** Percent of a normal attack (damage) or of the heal formula. */
   power: number;
   hits: number;
   /** Usable outside combat from the pack menu. */
   field: boolean;
+  /** Chance to inflict an ailment on each enemy hit (or, for kind 'ailment', on each target). */
+  inflict?: Inflict;
   description: string;
 }
 
@@ -137,5 +139,34 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     power: 30,
     field: true,
     description: 'Call a fallen ally back to their feet with 30% HP.',
+  }),
+  cleanse: skill({
+    id: 'cleanse',
+    name: 'Cleanse',
+    sp: 3,
+    target: 'ally',
+    kind: 'cure',
+    power: 0,
+    description: 'Wash away poison, sleep and paralysis from one ally.',
+  }),
+  venomArrow: skill({
+    id: 'venomArrow',
+    name: 'Venom Arrow',
+    sp: 5,
+    target: 'enemy',
+    kind: 'phys',
+    power: 90,
+    inflict: { ailment: 'poison', chance: 0.65 },
+    description: 'A barbed arrow dipped in nightshade. Often poisons the target.',
+  }),
+  slumberRune: skill({
+    id: 'slumberRune',
+    name: 'Slumber Rune',
+    sp: 8,
+    target: 'allEnemies',
+    kind: 'ailment',
+    power: 0,
+    inflict: { ailment: 'sleep', chance: 0.5 },
+    description: 'A drowsy rune that may put every enemy to sleep. Hits wake them.',
   }),
 };

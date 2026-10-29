@@ -7,6 +7,8 @@ export interface EquipDef {
   classes: ClassId[];
   /** Appears in the shop once the party has reached floor `tier` (0 = from the start). */
   tier: number;
+  /** Special gear: only appears once this many of a material have been sold to the shop. */
+  requires?: { material: string; qty: number };
   price: number;
   bonus: Partial<Stats>;
 }
@@ -44,6 +46,19 @@ const list: EquipDef[] = [
   { id: 'ashrootRod', name: 'Ashroot Rod', slot: 'weapon', classes: CASTERS, tier: 4, price: 2400, bonus: { mag: 25 } },
   { id: 'emberscalePlate', name: 'Emberscale Plate', slot: 'armor', classes: ['bastion'], tier: 4, price: 2700, bonus: { def: 24, spd: -1 } },
   { id: 'starveilRobe', name: 'Starveil Robe', slot: 'armor', classes: CASTERS, tier: 4, price: 2300, bonus: { def: 14, res: 19 } },
+  // Special gear, unlocked by selling materials
+  { id: 'briarthornSpear', name: 'Briarthorn Spear', slot: 'weapon', classes: ['bastion'], tier: 0, price: 220, bonus: { atk: 8 }, requires: { material: 'briarQuill', qty: 5 } },
+  { id: 'duskweaveCloak', name: 'Duskweave Cloak', slot: 'armor', classes: ALL, tier: 0, price: 200, bonus: { def: 5, res: 4 }, requires: { material: 'duskMembrane', qty: 6 } },
+  { id: 'barkshellMail', name: 'Barkshell Mail', slot: 'armor', classes: ['bastion', 'strider'], tier: 1, price: 420, bonus: { def: 11 }, requires: { material: 'barkShell', qty: 5 } },
+  { id: 'gloamscaleRobe', name: 'Gloamscale Robe', slot: 'armor', classes: CASTERS, tier: 2, price: 520, bonus: { def: 6, res: 9 }, requires: { material: 'gloamScale', qty: 5 } },
+  { id: 'heartknotStaff', name: 'Heartknot Staff', slot: 'weapon', classes: CASTERS, tier: 2, price: 560, bonus: { mag: 12, spd: 1 }, requires: { material: 'heartwoodKnot', qty: 3 } },
+  { id: 'elderheartMail', name: 'Elderheart Mail', slot: 'armor', classes: ['bastion', 'strider'], tier: 2, price: 1800, bonus: { def: 20 }, requires: { material: 'blightedHeartwood', qty: 1 } },
+  { id: 'rimefangBlade', name: 'Rimefang Blade', slot: 'weapon', classes: ['bastion'], tier: 3, price: 1100, bonus: { atk: 19 }, requires: { material: 'rimePelt', qty: 6 } },
+  { id: 'snowveilBow', name: 'Snowveil Bow', slot: 'weapon', classes: ['strider'], tier: 3, price: 1100, bonus: { atk: 19, spd: 3 }, requires: { material: 'snowveilWing', qty: 5 } },
+  { id: 'embercoreRod', name: 'Embercore Rod', slot: 'weapon', classes: CASTERS, tier: 4, price: 2100, bonus: { mag: 23 }, requires: { material: 'emberCore', qty: 5 } },
+  { id: 'grimtuskCleaver', name: 'Grimtusk Cleaver', slot: 'weapon', classes: ['bastion'], tier: 4, price: 3200, bonus: { atk: 34 }, requires: { material: 'grimTusk', qty: 1 } },
+  { id: 'draugrboneBow', name: 'Draugrbone Bow', slot: 'weapon', classes: ['strider'], tier: 4, price: 3200, bonus: { atk: 32, spd: 4 }, requires: { material: 'draugrBone', qty: 1 } },
+  { id: 'wraithsilkRobe', name: 'Wraithsilk Robe', slot: 'armor', classes: CASTERS, tier: 4, price: 3000, bonus: { def: 15, res: 22 }, requires: { material: 'wraithSilk', qty: 1 } },
 ];
 
 export const EQUIPMENT: Record<string, EquipDef> = Object.fromEntries(list.map((e) => [e.id, e]));

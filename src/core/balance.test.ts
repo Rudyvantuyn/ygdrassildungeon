@@ -4,6 +4,7 @@ import { Combat } from './combat';
 import { EQUIPMENT_LIST } from './data/equipment';
 import { createStartingParty, fullRestore, xpForLevel } from './party';
 import { Rng } from './rng';
+import { makeInventory } from './data/items';
 
 /** A party at `level` wearing the best gear the shop sells. */
 function trainedParty(level: number) {
@@ -22,7 +23,7 @@ function trainedParty(level: number) {
 function prowlerWinRate(id: string, level: number, fights = 100): number {
   let wins = 0;
   for (let seed = 1; seed <= fights; seed++) {
-    const combat = new Combat(trainedParty(level), [id], { sapTonic: 3, spiritDew: 1, kindlingMoss: 0, homingFeather: 0 }, new Rng(seed), { prowler: true });
+    const combat = new Combat(trainedParty(level), [id], makeInventory({ sapTonic: 3, spiritDew: 1, kindlingMoss: 0, homingFeather: 0 }), new Rng(seed), { prowler: true });
     for (let r = 0; r < 100 && !combat.outcome; r++) combat.resolveRound(chooseCommands(combat));
     if (combat.outcome === 'victory') wins++;
   }

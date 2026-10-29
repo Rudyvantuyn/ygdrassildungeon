@@ -13,6 +13,7 @@ import { buyEquipment, buyItem, equipmentForSale, innCost, netPrice, restAtInn }
 import { moveProwlers, nextStep, prowlerCanEnter } from './prowlers';
 import { createStartingParty, grantXp, memberStats, xpForLevel } from './party';
 import { Rng } from './rng';
+import { makeInventory } from './data/items';
 import type { ItemId } from './types';
 
 function reachable(map: ReturnType<typeof parseFloor>): Set<string> {
@@ -150,7 +151,7 @@ describe('party', () => {
 });
 
 describe('combat', () => {
-  const inventory = (): Record<ItemId, number> => ({ sapTonic: 2, spiritDew: 0, kindlingMoss: 0, homingFeather: 0 });
+  const inventory = (): Record<ItemId, number> => (makeInventory({ sapTonic: 2, spiritDew: 0, kindlingMoss: 0, homingFeather: 0 }));
   const attackAll = (combat: Combat): Command[] => combat.party.map(() => ({ kind: 'attack', target: 0 }));
 
   it('a fresh party beats two slimes', () => {

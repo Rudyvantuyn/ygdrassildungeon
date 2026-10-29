@@ -1,4 +1,4 @@
-import type { Element, ItemId } from '../types';
+import type { Element, Inflict, ItemId } from '../types';
 
 export type MonsterShape = 'slime' | 'bat' | 'beast' | 'shroom' | 'beetle' | 'moth' | 'golem' | 'treant' | 'wyrm';
 
@@ -9,6 +9,7 @@ export interface EnemySkill {
   element: Element;
   power: number;
   target: 'one' | 'all';
+  inflict?: Inflict;
 }
 
 export interface EnemyDef {
@@ -28,6 +29,8 @@ export interface EnemyDef {
   ranged?: boolean;
   skills?: EnemySkill[];
   drop?: { item: ItemId; chance: number };
+  /** Material left behind for selling in town. */
+  material?: { id: string; chance: number };
   art: { shape: MonsterShape; color: string; accent: string; size: number };
 }
 
@@ -40,6 +43,7 @@ const list: EnemyDef[] = [
     xp: 7, gold: 4,
     weak: ['fire'], resist: [],
     drop: { item: 'sapTonic', chance: 0.12 },
+    material: { id: 'bogJelly', chance: 0.5 },
     art: { shape: 'slime', color: '#5e9e4a', accent: '#c7f08a', size: 0.8 },
   },
   {
@@ -49,6 +53,7 @@ const list: EnemyDef[] = [
     xp: 8, gold: 5,
     weak: ['storm'], resist: [],
     ranged: true,
+    material: { id: 'duskMembrane', chance: 0.5 },
     art: { shape: 'bat', color: '#5b4a7a', accent: '#f2c14e', size: 0.8 },
   },
   {
@@ -57,7 +62,8 @@ const list: EnemyDef[] = [
     hp: 36, atk: 13, def: 5, mag: 2, res: 3, spd: 10,
     xp: 10, gold: 6,
     weak: ['frost'], resist: [],
-    skills: [{ name: 'Gnash', chance: 0.25, kind: 'phys', element: 'phys', power: 150, target: 'one' }],
+    skills: [{ name: 'Gnash', chance: 0.25, kind: 'phys', element: 'phys', power: 150, target: 'one', inflict: { ailment: 'poison', chance: 0.35 } }],
+    material: { id: 'briarQuill', chance: 0.45 },
     art: { shape: 'beast', color: '#8a6a4a', accent: '#e05a4a', size: 0.85 },
   },
   // ── Depth 2: Rootway ─────────────────────────────────────────────────────
@@ -68,6 +74,7 @@ const list: EnemyDef[] = [
     xp: 18, gold: 10,
     weak: ['fire'], resist: [],
     skills: [{ name: 'Rend', chance: 0.3, kind: 'phys', element: 'phys', power: 160, target: 'one' }],
+    material: { id: 'hollowFang', chance: 0.45 },
     art: { shape: 'beast', color: '#4b5a6e', accent: '#f2e14e', size: 1.0 },
   },
   {
@@ -77,8 +84,9 @@ const list: EnemyDef[] = [
     xp: 16, gold: 9,
     weak: ['fire'], resist: ['frost'],
     ranged: true,
-    skills: [{ name: 'Spore Burst', chance: 0.4, kind: 'magic', element: 'phys', power: 70, target: 'all' }],
+    skills: [{ name: 'Spore Burst', chance: 0.4, kind: 'magic', element: 'phys', power: 70, target: 'all', inflict: { ailment: 'sleep', chance: 0.2 } }],
     drop: { item: 'spiritDew', chance: 0.12 },
+    material: { id: 'puffcapSpores', chance: 0.5 },
     art: { shape: 'shroom', color: '#b8473f', accent: '#f6e7c8', size: 0.9 },
   },
   {
@@ -87,6 +95,7 @@ const list: EnemyDef[] = [
     hp: 58, atk: 16, def: 18, mag: 3, res: 6, spd: 7,
     xp: 17, gold: 12,
     weak: ['fire', 'storm'], resist: ['phys'],
+    material: { id: 'barkShell', chance: 0.45 },
     art: { shape: 'beetle', color: '#3f5a3a', accent: '#a7d36b', size: 0.95 },
   },
   // ── Depth 3: Heartwood ───────────────────────────────────────────────────
@@ -97,7 +106,8 @@ const list: EnemyDef[] = [
     xp: 28, gold: 14,
     weak: ['frost'], resist: ['storm'],
     ranged: true,
-    skills: [{ name: 'Gloam Dust', chance: 0.35, kind: 'magic', element: 'storm', power: 75, target: 'all' }],
+    skills: [{ name: 'Gloam Dust', chance: 0.35, kind: 'magic', element: 'storm', power: 75, target: 'all', inflict: { ailment: 'paralysis', chance: 0.25 } }],
+    material: { id: 'gloamScale', chance: 0.45 },
     art: { shape: 'moth', color: '#6a4e8a', accent: '#f0d070', size: 1.0 },
   },
   {
@@ -108,6 +118,7 @@ const list: EnemyDef[] = [
     weak: ['fire'], resist: ['phys'],
     skills: [{ name: 'Stonefist', chance: 0.3, kind: 'phys', element: 'phys', power: 170, target: 'one' }],
     drop: { item: 'sapTonic', chance: 0.25 },
+    material: { id: 'heartwoodKnot', chance: 0.4 },
     art: { shape: 'golem', color: '#6e5a44', accent: '#7fe0c0', size: 1.1 },
   },
   // ── Depth 4: Rimehollow ─────────────────────────────────────────────────
@@ -118,6 +129,7 @@ const list: EnemyDef[] = [
     xp: 45, gold: 22,
     weak: ['fire'], resist: ['frost'],
     skills: [{ name: 'Frostfang', chance: 0.3, kind: 'phys', element: 'frost', power: 150, target: 'one' }],
+    material: { id: 'rimePelt', chance: 0.45 },
     art: { shape: 'beast', color: '#8aa0b8', accent: '#d8f4ff', size: 1.0 },
   },
   {
@@ -127,8 +139,9 @@ const list: EnemyDef[] = [
     xp: 40, gold: 20,
     weak: ['fire'], resist: ['frost'],
     ranged: true,
-    skills: [{ name: 'Rime Spores', chance: 0.4, kind: 'magic', element: 'frost', power: 75, target: 'all' }],
+    skills: [{ name: 'Rime Spores', chance: 0.4, kind: 'magic', element: 'frost', power: 75, target: 'all', inflict: { ailment: 'sleep', chance: 0.2 } }],
     drop: { item: 'spiritDew', chance: 0.15 },
+    material: { id: 'frostGill', chance: 0.5 },
     art: { shape: 'shroom', color: '#5a8ab8', accent: '#e8f8ff', size: 0.9 },
   },
   {
@@ -137,6 +150,7 @@ const list: EnemyDef[] = [
     hp: 130, atk: 30, def: 32, mag: 5, res: 12, spd: 9,
     xp: 48, gold: 28,
     weak: ['fire', 'storm'], resist: ['phys', 'frost'],
+    material: { id: 'iceCarapace', chance: 0.4 },
     art: { shape: 'beetle', color: '#6a8aa0', accent: '#c8f0ff', size: 0.95 },
   },
   {
@@ -146,7 +160,8 @@ const list: EnemyDef[] = [
     xp: 50, gold: 26,
     weak: ['fire'], resist: ['frost'],
     ranged: true,
-    skills: [{ name: 'Whiteout', chance: 0.35, kind: 'magic', element: 'frost', power: 80, target: 'all' }],
+    skills: [{ name: 'Whiteout', chance: 0.35, kind: 'magic', element: 'frost', power: 80, target: 'all', inflict: { ailment: 'paralysis', chance: 0.15 } }],
+    material: { id: 'snowveilWing', chance: 0.45 },
     art: { shape: 'moth', color: '#c8d8e8', accent: '#7ab8ff', size: 1.0 },
   },
   // ── Depth 5: Wyrmroot ───────────────────────────────────────────────────
@@ -158,6 +173,7 @@ const list: EnemyDef[] = [
     weak: ['frost'], resist: ['fire'],
     ranged: true,
     skills: [{ name: 'Ember Dive', chance: 0.3, kind: 'phys', element: 'fire', power: 160, target: 'one' }],
+    material: { id: 'cinderFeather', chance: 0.45 },
     art: { shape: 'bat', color: '#5a2a1a', accent: '#ffb04a', size: 0.85 },
   },
   {
@@ -168,6 +184,7 @@ const list: EnemyDef[] = [
     weak: ['frost'], resist: ['fire'],
     skills: [{ name: 'Flare', chance: 0.35, kind: 'magic', element: 'fire', power: 85, target: 'all' }],
     drop: { item: 'sapTonic', chance: 0.2 },
+    material: { id: 'emberCore', chance: 0.4 },
     art: { shape: 'slime', color: '#c0502a', accent: '#ffd070', size: 0.9 },
   },
   {
@@ -176,7 +193,8 @@ const list: EnemyDef[] = [
     hp: 190, atk: 46, def: 24, mag: 8, res: 14, spd: 22,
     xp: 85, gold: 40,
     weak: ['fire'], resist: [],
-    skills: [{ name: 'Rending Roots', chance: 0.25, kind: 'phys', element: 'phys', power: 80, target: 'all' }],
+    skills: [{ name: 'Rending Roots', chance: 0.25, kind: 'phys', element: 'phys', power: 80, target: 'all', inflict: { ailment: 'poison', chance: 0.3 } }],
+    material: { id: 'fiendRoot', chance: 0.4 },
     art: { shape: 'beast', color: '#4a3020', accent: '#ff7a3a', size: 1.05 },
   },
   {
@@ -187,6 +205,7 @@ const list: EnemyDef[] = [
     weak: ['frost'], resist: ['phys', 'fire'],
     skills: [{ name: 'Ashfall', chance: 0.25, kind: 'magic', element: 'fire', power: 90, target: 'all' }],
     drop: { item: 'spiritDew', chance: 0.2 },
+    material: { id: 'ashSlab', chance: 0.4 },
     art: { shape: 'golem', color: '#5a4a44', accent: '#ff8a4a', size: 1.1 },
   },
   // ── Prowlers: strong monsters that roam the map (floor 5 and deeper) ───────
@@ -200,17 +219,19 @@ const list: EnemyDef[] = [
     weak: ['fire'], resist: [],
     skills: [{ name: 'Gore', chance: 0.35, kind: 'phys', element: 'phys', power: 175, target: 'one' }],
     drop: { item: 'sapTonic', chance: 0.6 },
+    material: { id: 'grimTusk', chance: 1 },
     art: { shape: 'beast', color: '#6a3a2a', accent: '#ff6a3a', size: 1.2 },
   },
   {
     id: 'fenwraith',
     name: 'Fenwraith',
-    hp: 2450, atk: 48, def: 30, mag: 59, res: 42, spd: 26,
+    hp: 3200, atk: 44, def: 32, mag: 56, res: 30, spd: 24,
     xp: 580, gold: 340,
     weak: ['frost'], resist: ['storm'],
     ranged: true,
-    skills: [{ name: 'Wailing Gust', chance: 0.35, kind: 'magic', element: 'storm', power: 85, target: 'all' }],
+    skills: [{ name: 'Wailing Gust', chance: 0.35, kind: 'magic', element: 'storm', power: 85, target: 'all', inflict: { ailment: 'sleep', chance: 0.08 } }],
     drop: { item: 'spiritDew', chance: 0.5 },
+    material: { id: 'wraithSilk', chance: 1 },
     art: { shape: 'moth', color: '#3a5a5a', accent: '#a0fff0', size: 1.15 },
   },
   {
@@ -224,6 +245,7 @@ const list: EnemyDef[] = [
       { name: 'Barrow Chill', chance: 0.2, kind: 'magic', element: 'frost', power: 80, target: 'all' },
     ],
     drop: { item: 'sapTonic', chance: 0.8 },
+    material: { id: 'draugrBone', chance: 1 },
     art: { shape: 'golem', color: '#3e4a3a', accent: '#d0f0ff', size: 1.2 },
   },
   // ── Boss ───────────────────────────────────────────────────────────────────
@@ -235,9 +257,10 @@ const list: EnemyDef[] = [
     weak: ['fire'], resist: ['frost'],
     skills: [
       { name: 'Root Lash', chance: 0.3, kind: 'phys', element: 'phys', power: 85, target: 'all' },
-      { name: 'Rot Breath', chance: 0.2, kind: 'magic', element: 'frost', power: 90, target: 'all' },
+      { name: 'Rot Breath', chance: 0.2, kind: 'magic', element: 'frost', power: 90, target: 'all', inflict: { ailment: 'poison', chance: 0.45 } },
       { name: 'Trunk Slam', chance: 0.2, kind: 'phys', element: 'phys', power: 190, target: 'one' },
     ],
+    material: { id: 'blightedHeartwood', chance: 1 },
     art: { shape: 'treant', color: '#5a4636', accent: '#c4ff6a', size: 1.6 },
   },
   {
@@ -247,10 +270,11 @@ const list: EnemyDef[] = [
     xp: 1500, gold: 1200,
     weak: ['frost'], resist: ['fire'],
     skills: [
-      { name: 'Gnashing Coil', chance: 0.3, kind: 'phys', element: 'phys', power: 90, target: 'all' },
-      { name: 'Bile Torrent', chance: 0.2, kind: 'magic', element: 'fire', power: 95, target: 'all' },
+      { name: 'Gnashing Coil', chance: 0.3, kind: 'phys', element: 'phys', power: 90, target: 'all', inflict: { ailment: 'paralysis', chance: 0.2 } },
+      { name: 'Bile Torrent', chance: 0.2, kind: 'magic', element: 'fire', power: 95, target: 'all', inflict: { ailment: 'poison', chance: 0.5 } },
       { name: 'Devour', chance: 0.2, kind: 'phys', element: 'phys', power: 200, target: 'one' },
     ],
+    material: { id: 'gnawerFang', chance: 1 },
     art: { shape: 'wyrm', color: '#3a2a30', accent: '#ff5a2a', size: 1.6 },
   },
 ];

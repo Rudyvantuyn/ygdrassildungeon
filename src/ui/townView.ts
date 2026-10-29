@@ -4,7 +4,12 @@ import { EQUIPMENT, type EquipDef } from '../core/data/equipment';
 import { FLOORS } from '../core/data/floors';
 import { ITEMS } from '../core/data/items';
 import type { Game } from '../core/game';
+import { MATERIALS } from '../core/data/materials';
+import type { QuestDef } from '../core/data/quests';
+import { acceptQuest, boardQuests, questGoal, questProgress, questStage, rewardText, turnInQuest } from '../core/quests';
 import {
+  sellMaterial,
+  unlocksFrom,
   buyEquipment,
   buyItem,
   canEquip,
@@ -32,6 +37,7 @@ export interface TownHost {
   showTitle(): void;
   partyStatus(back: () => void): void;
   soundOptions(back: () => void): void;
+  showHelp(back: () => void): void;
 }
 
 const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', sp: 'SP', atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES', spd: 'SPD' };
@@ -40,7 +46,7 @@ const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', sp: 'SP', atk: 'ATK
 export class TownView {
   focus: TownSpot | null = 'rootdeep';
   menu: ListMenu | null = null;
-  private lastIndex = 3;
+  private lastIndex = 4;
 
   constructor(
     private readonly host: TownHost,
@@ -57,11 +63,16 @@ export class TownView {
       { label: 'Inn', detail: `${innCost(this.game)} G`, description: 'Rest to restore HP and SP, revive fallen members, and save.', spot: 'inn', onSelect: () => this.inn() },
       { label: 'Oath Hall', description: 'Register new adventurers and choose who joins the party.', spot: 'hall', onSelect: () => this.hall() },
       { label: 'Shop', description: 'Buy items and equipment. Better gear appears as you go deeper.', spot: 'shop', onSelect: () => this.shop() },
+      {
+        label: 'Notice Board',
+        detail: this.boardBadge(),
+        description: 'Requests from the people of Lindholm. Finished work pays well.',
+        spot: 'board',
+        onSelect: () => this.board(),
+      },
       { label: 'Rootdeep', description: 'Enter the Rootdeep at any floor you have reached.', spot: 'rootdeep', onSelect: () => this.rootdeep() },
       { label: 'Party', description: 'View stats and equipment.', spot: null, onSelect: () => this.host.partyStatus(() => this.back()) },
-      { label: 'Sound', description: 'Music and effect volume.', spot: null, onSelect: () => this.host.soundOptions(() => this.back()) },
-      { label: 'Save', description: 'Save your progress.', spot: null, onSelect: () => { this.host.save(); this.host.toast('Game saved.'); } },
-      { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', spot: null, onSelect: () => this.host.showTitle() },
+      { label: 'System', description: 'Save, sound, help, and quit to the title screen.', spot: null, onSelect: () => this.system() },
     ];
     const items: MenuItem[] = entries.map(({ spot, ...item }, i) => ({
       ...item,
@@ -106,6 +117,98 @@ export class TownView {
       { onCancel: back },
     );
     this.dialog('The Sleeping Stag', [el('p', { text: `"Welcome, explorers! A warm bed and a hot meal for ${cost} gold."` })], menu);
+  }
+
+  private system(): void {
+    const back = () => this.back();
+    const menu = new ListMenu(
+      [
+        { label: 'Save', description: 'Save your progress.', onSelect: () => { this.host.save(); this.back(); this.host.toast('Game saved.'); } },
+        { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.host.soundOptions(() => this.system()) },
+        { label: 'How to Play', description: 'Controls and tips.', onSelect: () => this.host.showHelp(() => this.system()) },
+        { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onSelect: () => this.host.showTitle() },
+        { label: 'Back', onSelect: back },
+      ],
+      { onCancel: back },
+    );
+    this.dialog('System', [], menu, true);
+  }
+
+  // ── Notice board ───────────────────────────────────────────────────────────
+
+  private boardBadge(): string {
+    const quests = boardQuests(this.game);
+    const ready = quests.filter((q) => questStage(this.game, q) === 'ready').length;
+    const fresh = quests.filter((q) => questStage(this.game, q) === 'new').length;
+    return ready ? `${ready} ready!` : fresh ? `${fresh} new` : '';
+  }
+
+  private board(start = 0): void {
+    const back = () => this.back();
+    const quests = boardQuests(this.game);
+    const done = Object.values(this.game.state.quests).filter((q) => q.status === 'done').length;
+    const tag = (q: QuestDef) => {
+      const stage = questStage(this.game, q);
+      if (stage === 'new') return 'new';
+      if (stage === 'ready') return 'ready!';
+      const p = questProgress(this.game, q);
+      return `${p.current}/${p.target}`;
+    };
+    const items: MenuItem[] = quests.map((q, i) => ({
+      label: q.title,
+      detail: tag(q),
+      description: `${questGoal(q)} · reward ${rewardText(q)}`,
+      onSelect: () => this.questDetail(q, i),
+    }));
+    if (items.length === 0) items.push({ label: 'No requests right now', disabled: true, onSelect: () => {} });
+    items.push({ label: 'Leave', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back, startIndex: start });
+    this.dialog('Notice Board', [el('p', { className: 'gold-line', text: `Requests completed: ${done}` })], menu, true);
+  }
+
+  private questDetail(q: QuestDef, listIndex: number): void {
+    const stage = questStage(this.game, q);
+    const p = questProgress(this.game, q);
+    const back = () => this.board(listIndex);
+    const actions: MenuItem[] = [];
+    if (stage === 'new') {
+      actions.push({
+        label: 'Accept',
+        onSelect: () => {
+          acceptQuest(this.game, q.id);
+          this.host.toast(`Accepted: ${q.title}`);
+          this.board(listIndex);
+        },
+      });
+    }
+    if (stage === 'ready') {
+      actions.push({
+        label: q.kind === 'gather' ? 'Hand over the materials' : 'Report back',
+        onSelect: () => {
+          turnInQuest(this.game, q.id);
+          audio.play('levelUp');
+          this.host.updateHud();
+          this.host.toast(`${q.giver}: "Thank you!" You receive ${rewardText(q)}.`);
+          this.board(0);
+        },
+      });
+    }
+    actions.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(actions, { onCancel: back });
+    const status = stage === 'new' ? 'Not accepted yet' : stage === 'ready' ? 'Done! Report back for your reward.' : `In progress: ${p.current}/${p.target}`;
+    this.dialog(
+      q.title,
+      [
+        el('p', { className: 'quest-giver', text: q.giver }),
+        el('p', { text: `"${q.text}"` }),
+        el('div', { className: 'rewards' }, [
+          el('span', { text: 'Goal' }), el('span', { className: 'v', text: questGoal(q) }),
+          el('span', { text: 'Reward' }), el('span', { className: 'v', text: rewardText(q) }),
+          el('span', { text: 'Status' }), el('span', { className: 'v', text: status }),
+        ]),
+      ],
+      menu,
+    );
   }
 
   // ── Oath Hall ──────────────────────────────────────────────────────────────
@@ -255,6 +358,7 @@ export class TownView {
       [
         { label: 'Items', onSelect: () => this.shopItems() },
         { label: 'Equipment', onSelect: () => this.shopEquipment() },
+        { label: 'Sell materials', detail: `${Object.values(this.game.state.materials).reduce((a, b) => a + b, 0)} carried`, onSelect: () => this.shopSell() },
         { label: 'Leave', onSelect: back },
       ],
       { onCancel: back, startIndex: start },
@@ -285,14 +389,57 @@ export class TownView {
     const items: MenuItem[] = equipmentForSale(this.game).map((e, i) => {
       const users = party.filter((m) => canEquip(m, e)).map((m) => m.name);
       return {
-        label: e.name,
+        label: e.requires ? `★ ${e.name}` : e.name,
         detail: `${e.price} G`,
-        description: `${bonusText(e)} · ${e.slot} · for ${users.join(', ')}`,
+        description: `${bonusText(e)} · ${e.slot} · for ${users.join(', ')}${e.requires ? ' · special' : ''}`,
         onSelect: () => this.chooseWearer(e, i),
       };
     });
     const menu = new ListMenu(items, { onCancel: () => this.shop(1), startIndex: start });
     this.dialog('Equipment', [this.goldLine()], menu, true);
+  }
+
+  private shopSell(start = 0): void {
+    const entries = Object.entries(this.game.state.materials).filter(([, n]) => n > 0);
+    const hint = (id: string) => {
+      const next = unlocksFrom(this.game, id).filter((u) => u.remaining > 0 && u.gear.tier <= this.game.state.deepest);
+      if (next.length) return ` Sell ${next[0].remaining} more and I can make a ${next[0].gear.name}.`;
+      const locked = unlocksFrom(this.game, id).find((u) => u.remaining > 0);
+      return locked ? ' I have plans for these, once you have been deeper.' : '';
+    };
+    const items: MenuItem[] = entries.map(([id, n], i) => ({
+      label: `${MATERIALS[id].name} ×${n}`,
+      detail: `${MATERIALS[id].price} G`,
+      description: `${MATERIALS[id].description}${hint(id)}`,
+      onSelect: () => this.sellChoice(id, i),
+    }));
+    if (items.length === 0) items.push({ label: 'You have nothing to sell', disabled: true, onSelect: () => {} });
+    items.push({ label: 'Back', onSelect: () => this.shop(2) });
+    const menu = new ListMenu(items, { onCancel: () => this.shop(2), startIndex: start });
+    this.dialog('Sell materials', [el('p', { text: '"Monster parts! Bring me enough of one kind and I can forge something special."' }), this.goldLine()], menu, true);
+  }
+
+  private sellChoice(id: string, listIndex: number): void {
+    const n = this.game.state.materials[id] ?? 0;
+    const price = MATERIALS[id].price;
+    const sell = (qty: number) => () => {
+      const before = equipmentForSale(this.game).length;
+      const gold = sellMaterial(this.game, id, qty);
+      audio.play('coin');
+      this.host.updateHud();
+      const unlocked = equipmentForSale(this.game).length > before;
+      this.host.toast(unlocked ? `Sold for ${gold} G. Hilde has something new for you!` : `Sold for ${gold} G.`);
+      this.shopSell(Math.min(listIndex, Object.keys(this.game.state.materials).length - 1));
+    };
+    const menu = new ListMenu(
+      [
+        { label: 'Sell one', detail: `${price} G`, onSelect: sell(1) },
+        { label: `Sell all ${n}`, detail: `${price * n} G`, onSelect: sell(n) },
+        { label: 'Back', onSelect: () => this.shopSell(listIndex) },
+      ],
+      { onCancel: () => this.shopSell(listIndex) },
+    );
+    this.dialog(MATERIALS[id].name, [el('p', { text: MATERIALS[id].description })], menu);
   }
 
   private chooseWearer(e: EquipDef, listIndex: number): void {

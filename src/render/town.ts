@@ -2,12 +2,13 @@
  * The town of Lindholm at dusk, at the roots of the Great Tree.
  * `focus` lights up the building that matches the selected town menu entry.
  */
-export type TownSpot = 'inn' | 'hall' | 'shop' | 'rootdeep';
+export type TownSpot = 'inn' | 'hall' | 'shop' | 'board' | 'rootdeep';
 
 const SPOTS: Record<TownSpot, { x: number; label: string }> = {
   inn: { x: 105, label: 'Inn' },
   hall: { x: 285, label: 'Oath Hall' },
   shop: { x: 465, label: 'Shop' },
+  board: { x: 583, label: 'Notices' },
   rootdeep: { x: 700, label: 'Rootdeep' },
 };
 
@@ -148,6 +149,38 @@ function drawSign(ctx: CanvasRenderingContext2D, x: number, ground: number, labe
   const bh = spot === 'rootdeep' ? 120 : 130;
   const top = ground - bh;
   ctx.save();
+  if (spot === 'board') {
+    // A notice board on two posts, pinned with papers
+    ctx.fillStyle = lit ? '#7a5a36' : '#4a3620';
+    ctx.fillRect(x - 34, ground - 74, 6, 74);
+    ctx.fillRect(x + 28, ground - 74, 6, 74);
+    ctx.fillStyle = lit ? '#8a6a40' : '#54402a';
+    ctx.fillRect(x - 40, ground - 92, 80, 46);
+    const papers: [number, number, number][] = [[-30, -88, -0.1], [-6, -86, 0.08], [16, -89, -0.05], [-20, -70, 0.12], [6, -68, -0.1]];
+    for (const [dx, dy, rot] of papers) {
+      ctx.save();
+      ctx.translate(x + dx + 8, ground + dy + 9);
+      ctx.rotate(rot);
+      ctx.fillStyle = lit ? '#f4ead0' : '#a8a08a';
+      ctx.fillRect(-8, -9, 16, 18);
+      ctx.restore();
+    }
+    if (lit) {
+      const g = ctx.createRadialGradient(x, ground - 70, 0, x, ground - 70, 70);
+      g.addColorStop(0, 'rgba(255,220,150,0.3)');
+      g.addColorStop(1, 'rgba(255,220,150,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - 70, ground - 140, 140, 140);
+    }
+    ctx.restore();
+    ctx.save();
+    ctx.font = '800 16px Cinzel, Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = lit ? '#f0cf6a' : '#c9c0a8';
+    ctx.fillText(label, x, ground - 100);
+    ctx.restore();
+    return;
+  }
   if (spot === 'rootdeep') {
     // A stone gate into the roots
     ctx.fillStyle = lit ? '#5a5070' : '#3a3450';

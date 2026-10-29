@@ -4,16 +4,22 @@ import { ITEMS } from './data/items';
 import { SKILLS } from './data/skills';
 import { grantXp, healAmount, healMember, isAlive, memberStats, restoreSp, revive } from './party';
 import type { Rng } from './rng';
-import type { Element, ItemId, Member, SkillId } from './types';
+import type { Ailment, Element, Inflict, ItemId, Member, SkillId } from './types';
 
-export interface EnemyUnit {
+/** Something in the fight that can suffer an ailment. */
+interface Afflictable {
+  ailment: Ailment | null;
+  ailmentTurns: number;
+}
+
+export interface EnemyUnit extends Afflictable {
   def: EnemyDef;
   name: string;
   hp: number;
   maxHp: number;
 }
 
-export interface PartyStatus {
+export interface PartyStatus extends Afflictable {
   defending: boolean;
   /** Rounds left in which enemies prefer to attack this member. */
   taunt: number;
@@ -35,6 +41,8 @@ export interface Rewards {
   xp: number;
   gold: number;
   drops: ItemId[];
+  /** Material ids, one entry per piece. */
+  materials: string[];
   levelUps: { member: number; level: number }[];
 }
 
@@ -45,6 +53,8 @@ export type CombatEvent =
   | { type: 'sp'; target: number; sp: number }
   | { type: 'miss'; side: Side; target: number }
   | { type: 'down'; side: Side; target: number; text: string }
+  /** An ailment starts (ailment set) or ends (null). */
+  | { type: 'ailment'; side: Side; target: number; ailment: Ailment | null; text: string }
   | { type: 'info'; text: string }
   | { type: 'end'; outcome: Outcome; rewards?: Rewards };
 
@@ -57,6 +67,11 @@ const WEAK_MULT = 1.5;
 /** Prowlers are hard to shake off, whatever the party's speed. */
 export const PROWLER_FLEE_CHANCE = 0.3;
 const RESIST_MULT = 0.5;
+
+export const AILMENT_NAMES: Record<Ailment, string> = { poison: 'Poison', sleep: 'Sleep', paralysis: 'Paralysis' };
+const AILMENT_TURNS: Record<Ailment, number> = { poison: 4, sleep: 3, paralysis: 3 };
+/** Chance that a paralysed fighter can't act on their turn. */
+export const PARALYSIS_FAIL = 0.5;
 
 export class Combat {
   readonly enemies: EnemyUnit[];
@@ -79,14 +94,14 @@ export class Combat {
     this.enemies = enemyIds.map((id) => {
       const def = ENEMIES[id];
       if (!def) throw new Error(`Unknown enemy "${id}"`);
-      return { def, name: def.name, hp: def.hp, maxHp: def.hp };
+      return { def, name: def.name, hp: def.hp, maxHp: def.hp, ailment: null, ailmentTurns: 0 };
     });
     // "Bogling A", "Bogling B" when an enemy appears more than once.
     for (const e of this.enemies) {
       const same = this.enemies.filter((o) => o.def.id === e.def.id);
       if (same.length > 1) e.name = `${e.def.name} ${String.fromCharCode(65 + same.indexOf(e))}`;
     }
-    this.status = party.map(() => ({ defending: false, taunt: 0, guard: 0 }));
+    this.status = party.map(() => ({ defending: false, taunt: 0, guard: 0, ailment: null, ailmentTurns: 0 }));
   }
 
   get canFlee(): boolean {
@@ -127,13 +142,20 @@ export class Combat {
     for (const turn of turns) {
       if (turn.side === 'party') {
         if (!isAlive(this.party[turn.index])) continue;
+        if (this.held('party', turn.index, events)) continue;
         this.partyAct(turn.index, commands[turn.index]!, events);
       } else {
         if (this.enemies[turn.index].hp <= 0) continue;
+        if (this.held('enemy', turn.index, events)) continue;
         this.enemyAct(turn.index, events);
       }
       if (this.outcome) break;
       if (this.checkEnd(events)) break;
+    }
+
+    if (!this.outcome) {
+      this.tickAilments(events);
+      this.checkEnd(events);
     }
 
     for (const s of this.status) {
@@ -180,7 +202,18 @@ export class Combat {
             for (let h = 0; h < skill.hits && this.enemies[t].hp > 0; h++) {
               this.hitEnemy(i, t, skill.power, skill.kind, skill.element, events);
             }
+            if (skill.inflict && this.enemies[t].hp > 0) this.tryInflict('enemy', t, skill.inflict, events);
           }
+        } else if (skill.kind === 'ailment') {
+          const first = this.retargetEnemy(cmd.target);
+          const targets = skill.target === 'allEnemies' ? this.livingEnemies() : first >= 0 ? [first] : [];
+          for (const t of targets) {
+            if (skill.inflict && !this.tryInflict('enemy', t, skill.inflict, events)) events.push({ type: 'miss', side: 'enemy', target: t });
+          }
+        } else if (skill.kind === 'cure') {
+          const t = this.retargetAlly(cmd.target);
+          if (t < 0 || !this.status[t].ailment) events.push({ type: 'info', text: 'But nothing happened.' });
+          else this.clearAilment('party', t, events);
         } else if (skill.kind === 'heal') {
           const targets = skill.target === 'allAllies' ? this.livingParty() : [this.retargetAlly(cmd.target)];
           const amount = healAmount(m, skill.power);
@@ -228,6 +261,9 @@ export class Combat {
           const hp = revive(target, item.amount);
           events.push({ type: 'heal', target: cmd.target, amount: hp, hp });
           events.push({ type: 'info', text: `${target.name} is back on their feet!` });
+        } else if (item.effect === 'cure') {
+          if (this.status[cmd.target].ailment) this.clearAilment('party', cmd.target, events);
+          else events.push({ type: 'info', text: 'But nothing happened.' });
         } else if (item.effect === 'hp') {
           const healed = healMember(target, item.amount);
           events.push({ type: 'heal', target: cmd.target, amount: healed, hp: target.hp });
@@ -290,6 +326,8 @@ export class Combat {
     events.push({ type: 'damage', side: 'enemy', target: enemyIndex, amount: damage, hp: enemy.hp, crit, weak, resist, element });
     if (enemy.hp === 0) {
       events.push({ type: 'down', side: 'enemy', target: enemyIndex, text: `${enemy.name} is defeated!` });
+    } else if (enemy.ailment === 'sleep') {
+      this.clearAilment('enemy', enemyIndex, events, `${enemy.name} wakes up!`);
     }
   }
 
@@ -347,8 +385,101 @@ export class Combat {
     m.hp = Math.max(0, m.hp - damage);
     events.push({ type: 'damage', side: 'party', target: memberIndex, amount: damage, hp: m.hp, crit, weak: false, resist: false, element: action.element });
     if (m.hp === 0) {
+      this.status[memberIndex].ailment = null;
       events.push({ type: 'down', side: 'party', target: memberIndex, text: `${m.name} falls!` });
+      return;
     }
+    if (status.ailment === 'sleep') this.clearAilment('party', memberIndex, events, `${m.name} wakes up!`);
+    if (action.inflict) this.tryInflict('party', memberIndex, action.inflict, events);
+  }
+
+  // ── Ailments ───────────────────────────────────────────────────────────────
+
+  private afflicted(side: Side, index: number): Afflictable {
+    return side === 'party' ? this.status[index] : this.enemies[index];
+  }
+
+  private nameOf(side: Side, index: number): string {
+    return side === 'party' ? this.party[index].name : this.enemies[index].name;
+  }
+
+  /** Rolls an ailment on a target. Bosses can't be put to sleep and resist the rest. Returns true if it took. */
+  private tryInflict(side: Side, index: number, inflict: Inflict, events: CombatEvent[]): boolean {
+    const target = this.afflicted(side, index);
+    if (target.ailment) return false;
+    let chance = inflict.chance;
+    if (side === 'enemy' && this.boss) {
+      if (inflict.ailment === 'sleep') return false;
+      chance *= 0.4;
+    } else if (side === 'enemy' && this.prowler) {
+      chance *= 0.6;
+    } else if (side === 'party') {
+      chance *= 1 - Math.min(0.5, memberStats(this.party[index]).res / 120);
+    }
+    if (!this.rng.chance(chance)) return false;
+    target.ailment = inflict.ailment;
+    target.ailmentTurns = AILMENT_TURNS[inflict.ailment];
+    const who = this.nameOf(side, index);
+    const text = { poison: `${who} is poisoned!`, sleep: `${who} falls asleep!`, paralysis: `${who} is paralysed!` }[inflict.ailment];
+    events.push({ type: 'ailment', side, target: index, ailment: inflict.ailment, text });
+    return true;
+  }
+
+  private clearAilment(side: Side, index: number, events: CombatEvent[], text?: string): void {
+    const target = this.afflicted(side, index);
+    if (!target.ailment) return;
+    target.ailment = null;
+    target.ailmentTurns = 0;
+    events.push({ type: 'ailment', side, target: index, ailment: null, text: text ?? `${this.nameOf(side, index)} recovers.` });
+  }
+
+  /** Sleep and paralysis can cost a fighter their turn. Returns true when they don't act. */
+  private held(side: Side, index: number, events: CombatEvent[]): boolean {
+    const a = this.afflicted(side, index).ailment;
+    const who = this.nameOf(side, index);
+    if (a === 'sleep') {
+      events.push({ type: 'info', text: `${who} is fast asleep.` });
+      return true;
+    }
+    if (a === 'paralysis' && this.rng.chance(PARALYSIS_FAIL)) {
+      events.push({ type: 'info', text: `${who} is paralysed and can't move!` });
+      return true;
+    }
+    return false;
+  }
+
+  /** End of round: poison bites, and ailments wear off. */
+  private tickAilments(events: CombatEvent[]): void {
+    const tick = (side: Side, index: number) => {
+      const target = this.afflicted(side, index);
+      if (!target.ailment) return;
+      if (target.ailment === 'poison') {
+        const maxHp = side === 'party' ? memberStats(this.party[index]).hp : this.enemies[index].maxHp;
+        const damage = Math.max(3, Math.round(maxHp * (side === 'enemy' && this.boss ? 0.03 : 0.08)));
+        if (side === 'party') {
+          const m = this.party[index];
+          m.hp = Math.max(0, m.hp - damage);
+          events.push({ type: 'damage', side, target: index, amount: damage, hp: m.hp, crit: false, weak: false, resist: false, element: 'phys' });
+          if (m.hp === 0) {
+            target.ailment = null;
+            events.push({ type: 'down', side, target: index, text: `${m.name} succumbs to the poison!` });
+            return;
+          }
+        } else {
+          const e = this.enemies[index];
+          e.hp = Math.max(0, e.hp - damage);
+          events.push({ type: 'damage', side, target: index, amount: damage, hp: e.hp, crit: false, weak: false, resist: false, element: 'phys' });
+          if (e.hp === 0) {
+            events.push({ type: 'down', side, target: index, text: `${e.name} succumbs to the poison!` });
+            return;
+          }
+        }
+      }
+      target.ailmentTurns -= 1;
+      if (target.ailmentTurns <= 0) this.clearAilment(side, index, events);
+    };
+    this.livingParty().forEach((i) => tick('party', i));
+    this.livingEnemies().forEach((i) => tick('enemy', i));
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
@@ -399,11 +530,15 @@ export class Combat {
       if (e.def.drop && this.rng.chance(e.def.drop.chance)) drops.push(e.def.drop.item);
     }
     for (const item of drops) this.inventory[item] = (this.inventory[item] ?? 0) + 1;
+    const materials: string[] = [];
+    for (const e of this.enemies) {
+      if (e.def.material && this.rng.chance(e.def.material.chance)) materials.push(e.def.material.id);
+    }
 
     const levelUps: Rewards['levelUps'] = [];
     this.party.forEach((m, i) => {
       if (grantXp(m, xp) > 0) levelUps.push({ member: i, level: m.level });
     });
-    return { xp, gold, drops, levelUps };
+    return { xp, gold, drops, materials, levelUps };
   }
 }

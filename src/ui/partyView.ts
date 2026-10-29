@@ -1,11 +1,14 @@
 import { CLASSES } from '../core/data/classes';
 import { memberStats } from '../core/party';
-import type { Member } from '../core/types';
+import type { Ailment, Member } from '../core/types';
+import { AILMENT_BADGE } from './combatView';
+import { drawPortrait } from '../render/portraits';
 
 export interface PartyDisplay {
   /** Overrides for shown HP/SP (used to animate combat playback). */
   hp?: number[];
   sp?: number[];
+  ailments?: (Ailment | null)[];
   active?: number | null;
 }
 
@@ -17,6 +20,7 @@ interface Card {
   hpText: HTMLElement;
   spFill: HTMLElement;
   spText: HTMLElement;
+  ailment: HTMLElement;
 }
 
 export class PartyView {
@@ -46,6 +50,10 @@ export class PartyView {
       card.spFill.style.width = `${(sp / stats.sp) * 100}%`;
       card.spText.textContent = `${sp} / ${stats.sp}`;
       card.root.classList.toggle('ko', hp <= 0);
+      const ailment = display.ailments?.[i] ?? null;
+      card.ailment.textContent = ailment ? AILMENT_BADGE[ailment].short : '';
+      card.ailment.style.background = ailment ? AILMENT_BADGE[ailment].color : '';
+      card.ailment.classList.toggle('hidden', !ailment);
       card.root.classList.toggle('active', display.active === i);
     });
   }
@@ -73,11 +81,12 @@ export class PartyView {
       const root = document.createElement('div');
       root.className = 'member panel';
       root.innerHTML = `
-        <div class="portrait" style="background: radial-gradient(circle at 35% 30%, #fff8, ${def.color} 45%, #0006)">${m.name[0]}</div>
-        <div class="member-head"><span class="member-name"></span><span class="member-class"></span><span class="member-row">${m.row}</span></div>
+        <canvas class="portrait" width="132" height="132"></canvas>
+        <div class="member-head"><span class="member-name"></span><span class="member-class"></span><span class="ailment hidden"></span><span class="member-row">${m.row}</span></div>
         <div class="bar hp"><i></i><span><b>HP</b><b class="v"></b></span></div>
         <div class="bar sp"><i></i><span><b>SP</b><b class="v"></b></span></div>`;
       root.querySelector('.member-name')!.textContent = m.name;
+      drawPortrait(root.querySelector<HTMLCanvasElement>('canvas.portrait')!.getContext('2d')!, 132, m.classId, m.name, def.color);
       this.container.appendChild(root);
       const hpBar = root.querySelector<HTMLElement>('.bar.hp')!;
       const spBar = root.querySelector<HTMLElement>('.bar.sp')!;
@@ -89,6 +98,7 @@ export class PartyView {
         hpText: hpBar.querySelector('.v')!,
         spFill: spBar.querySelector('i')!,
         spText: spBar.querySelector('.v')!,
+        ailment: root.querySelector<HTMLElement>('.ailment')!,
       };
     });
   }

@@ -29,6 +29,19 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Verhaal, quests en materialen (mijlpaal 4)
+
+- **Verhaal**: Sigrid, de hoedster van Lindholm, vertelt waarom de Grote Boom ziek is. Scènes bij de start, bij je eerste
+  afdaling, na de Blighted Elder, op Wyrmroot V en na de Rootgnawer, met een epiloog en een aftiteling.
+- **Notice Board**: twaalf opdrachten van de inwoners (vijanden verslaan, materialen brengen, dieper gaan, bazen verslaan).
+  Nieuwe opdrachten verschijnen naarmate je dieper komt.
+- **Materialen**: elke vijand laat onderdelen achter. Verkoop ze in de winkel; wie genoeg van één soort verkoopt,
+  ontgrendelt speciale uitrusting (★ in de winkel).
+- **Statuseffecten**: gif (schade per ronde), slaap (beurt overslaan, wakker bij een treffer) en verlamming (kans om een
+  beurt te missen). Genezen met de Mender-skill Cleanse of het item Clearwater. Eindbazen slapen nooit.
+- **Portretten**: elke avonturier krijgt een eigen getekend gezicht, afhankelijk van naam en klasse.
+- **Help-scherm** (H, of How to Play op het titelscherm).
+
 ### De stad Lindholm (mijlpaal 2)
 
 - **Oath Hall**: meld nieuwe avonturiers aan (eigen naam, klasse naar keuze) en stel je party samen: maximaal 4 leden,
@@ -81,16 +94,20 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
 | Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimehollow IV, Wyrmroot V |
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
+| Personages | Sigrid (hoedster van Lindholm), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder) |
 | Party | Bram, Sela, Wren, Orrin |
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |
 | Elementen | fysiek, vuur (fire), vorst (frost), storm |
-| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Scatter Volley, Mend, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire |
-| Items | Sap Tonic (HP), Spirit Dew (SP), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
+| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune |
+| Statuseffecten | Poison, Sleep, Paralysis |
+| Items | Sap Tonic (HP), Spirit Dew (SP), Clearwater (statuseffecten), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
 | Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe, Runehewn Axe, Hrimstring Bow, Frostbirch Rod, Scalehide Mail, Rimeweave Robe, Wyrmtooth Blade, Embersong Bow, Ashroot Rod, Emberscale Plate, Starveil Robe |
 | Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, Hrimwolf, Frostcap, Rimeshell, Snowveil Moth, Cinderwing, Emberling, Rootfiend, Ashen Colossus; bazen **The Blighted Elder** en **The Rootgnawer** |
 | Prowlers | Sterke monsters die zichtbaar over de kaart lopen: Grimtusk, Fenwraith, Root Draugr |
-| Menu's | Pack (rugzak-menu in de dungeon), Map (kaarteditor), Danger-bol |
+| Materialen | Bog Jelly, Dusk Membrane, Briar Quill, Hollow Fang, Puffcap Spores, Bark Shell, Gloam Scale, Heartwood Knot, Rime Pelt, Frost Gill, Ice Carapace, Snowveil Wing, Cinder Feather, Ember Core, Fiend Root, Ash Slab, Grim Tusk, Wraith Silk, Draugr Bone, Blighted Heartwood, Gnawer Fang |
+| Speciale uitrusting | Briarthorn Spear, Duskweave Cloak, Barkshell Mail, Gloamscale Robe, Heartknot Staff, Elderheart Mail, Rimefang Blade, Snowveil Bow, Embercore Rod, Grimtusk Cleaver, Draugrbone Bow, Wraithsilk Robe |
+| Menu's | Pack (rugzak-menu in de dungeon), Map (kaarteditor), Notice Board (quests), System, Danger-bol |
 
 ## Projectstructuur
 

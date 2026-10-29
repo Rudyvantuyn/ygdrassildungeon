@@ -35,8 +35,10 @@ const out = 'screenshots';
   await shot('01-title');
 
   await press('Enter'); // New Game -> town
+  await page.waitForTimeout(300); // skipped intro:
+  for (let i = 0; i < 12 && (await page.evaluate(() => window.ygg.mode)) === 'story'; i++) await page.keyboard.press('Escape');
   await shot('02-town');
-  await press('ArrowUp'); // Shop
+  await press('ArrowUp', 2); // Shop
   await press('Enter');
   await press('ArrowDown'); // Equipment
   await press('Enter');
@@ -47,7 +49,7 @@ const out = 'screenshots';
   await press('Escape');
   await press('Escape');
   await press('Escape');
-  await press('ArrowDown'); // Rootdeep
+  await press('ArrowDown', 2); // Rootdeep
   await press('Enter');
   await press('Enter'); // first floor
   await page.evaluate(() => (window.ygg.game.state.encounterAt = 999));

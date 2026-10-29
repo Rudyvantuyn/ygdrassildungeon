@@ -9,7 +9,7 @@ export type Sfx =
   | 'step' | 'turn' | 'bump' | 'menuMove' | 'menuSelect' | 'menuBack'
   | 'chest' | 'stairs' | 'spring' | 'encounter' | 'prowlerAlert' | 'bossIntro'
   | 'hitPhys' | 'hitFire' | 'hitFrost' | 'hitStorm' | 'crit' | 'hurt' | 'miss'
-  | 'heal' | 'revive' | 'enemyDown' | 'allyDown' | 'victory' | 'defeat' | 'levelUp' | 'coin';
+  | 'heal' | 'revive' | 'ailment' | 'cure' | 'enemyDown' | 'allyDown' | 'victory' | 'defeat' | 'levelUp' | 'coin';
 
 export interface AudioSettings {
   music: number;
@@ -167,6 +167,13 @@ export class AudioEngine {
         break;
       case 'heal':
         [72, 76, 79].forEach((n, i) => this.tone(t + i * 0.08, 'sine', midiToHz(n), midiToHz(n + 12), 0.35, 0.16, out, true));
+        break;
+      case 'ailment':
+        this.tone(t, 'sawtooth', 300, 180, 0.3, 0.12, out, true);
+        this.tone(t + 0.04, 'square', 420, 250, 0.25, 0.08, out);
+        break;
+      case 'cure':
+        [76, 83].forEach((n, i) => this.tone(t + i * 0.07, 'sine', midiToHz(n), midiToHz(n), 0.3, 0.15, out, true));
         break;
       case 'revive':
         [67, 72, 76, 79, 84].forEach((n, i) => this.tone(t + i * 0.09, 'triangle', midiToHz(n), midiToHz(n), 0.5, 0.16, out, true));

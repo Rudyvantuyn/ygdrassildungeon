@@ -1,5 +1,6 @@
 import { EQUIPMENT, EQUIPMENT_LIST, type EquipDef } from './data/equipment';
 import { ITEMS } from './data/items';
+import { MATERIALS } from './data/materials';
 import type { Game } from './game';
 import { fullRestore, memberStats } from './party';
 import type { ItemId, Member, Stats } from './types';
@@ -27,7 +28,28 @@ export function buyItem(game: Game, id: ItemId): boolean {
 }
 
 export function equipmentForSale(game: Game): EquipDef[] {
-  return EQUIPMENT_LIST.filter((e) => e.tier <= game.state.deepest);
+  return EQUIPMENT_LIST.filter((e) => e.tier <= game.state.deepest && (!e.requires || (game.state.sold[e.requires.material] ?? 0) >= e.requires.qty));
+}
+
+/** Sells `qty` of a carried material. Returns the gold earned (0 if there was nothing to sell). */
+export function sellMaterial(game: Game, id: string, qty = 1): number {
+  const have = game.state.materials[id] ?? 0;
+  const def = MATERIALS[id];
+  const n = Math.min(have, qty);
+  if (!def || n <= 0) return 0;
+  game.state.materials[id] = have - n;
+  if (game.state.materials[id] === 0) delete game.state.materials[id];
+  game.state.sold[id] = (game.state.sold[id] ?? 0) + n;
+  game.state.gold += def.price * n;
+  return def.price * n;
+}
+
+/** Special gear that selling `materialId` unlocks, and how many more must be sold for it. */
+export function unlocksFrom(game: Game, materialId: string): { gear: EquipDef; remaining: number }[] {
+  return EQUIPMENT_LIST.filter((e) => e.requires?.material === materialId).map((gear) => ({
+    gear,
+    remaining: Math.max(0, gear.requires!.qty - (game.state.sold[materialId] ?? 0)),
+  }));
 }
 
 export function canEquip(m: Member, e: EquipDef): boolean {

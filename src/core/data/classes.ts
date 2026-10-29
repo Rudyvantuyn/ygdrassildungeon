@@ -38,6 +38,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     growth: { hp: 8, sp: 2.5, atk: 1.9, def: 1.1, mag: 0.5, res: 0.9, spd: 1.6 },
     skills: [
       { skill: 'twinFang', level: 1 },
+      { skill: 'venomArrow', level: 2 },
       { skill: 'scatterVolley', level: 3 },
     ],
     color: '#6fbf73',
@@ -52,6 +53,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     growth: { hp: 6.5, sp: 4, atk: 0.8, def: 0.9, mag: 1.7, res: 1.6, spd: 1.0 },
     skills: [
       { skill: 'mend', level: 1 },
+      { skill: 'cleanse', level: 2 },
       { skill: 'verdantChorus', level: 3 },
       { skill: 'rekindle', level: 6 },
     ],
@@ -70,6 +72,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'frostRune', level: 1 },
       { skill: 'stormRune', level: 1 },
       { skill: 'wildfire', level: 4 },
+      { skill: 'slumberRune', level: 5 },
     ],
     color: '#c58af0',
     description: 'Carver of elemental runes. Fragile, but hits enemy weaknesses hard.',

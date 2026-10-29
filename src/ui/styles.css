@@ -253,13 +253,6 @@ button:active {
   align-self: center;
   border-radius: 50%;
   border: 2px solid var(--border);
-  display: grid;
-  place-items: center;
-  font-family: var(--font-title);
-  font-weight: 800;
-  font-size: 30px;
-  color: #10181c;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .member-head {
@@ -281,6 +274,15 @@ button:active {
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+}
+
+.ailment {
+  font-size: 11px;
+  font-weight: 800;
+  color: #000;
+  padding: 0 5px;
+  border-radius: 3px;
+  line-height: 15px;
 }
 
 .member-row {
@@ -714,6 +716,121 @@ table.stats th.gear {
   color: #f07060 !important;
   min-height: 22px;
   font-size: 15px !important;
+}
+
+.quest-giver {
+  color: var(--gold) !important;
+  font-weight: 800;
+  font-size: 15px !important;
+}
+
+.story-box {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  min-height: 132px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 16px 22px;
+  cursor: pointer;
+  animation: fade-in 0.2s;
+  z-index: 5;
+}
+
+.story-portrait {
+  width: 96px;
+  height: 96px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--border-hi);
+}
+
+.story-text {
+  flex: 1;
+  position: relative;
+}
+
+.story-speaker {
+  font-family: var(--font-title);
+  font-weight: 800;
+  color: var(--gold);
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.story-text p {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.45;
+  min-height: 56px;
+}
+
+.story-box.narrator .story-text p {
+  font-style: italic;
+  color: #d8e0e0;
+  text-align: center;
+}
+
+.story-more {
+  position: absolute;
+  right: 0;
+  bottom: -6px;
+  color: var(--gold);
+  font-size: 13px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.help {
+  max-width: 1040px;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 20px;
+}
+
+.help-section h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-title);
+  color: var(--gold);
+  font-size: 17px;
+}
+
+.help-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+
+.help-key {
+  font-weight: 800;
+  color: #fff;
+}
+
+.credits {
+  background: radial-gradient(ellipse at 50% 40%, rgba(20, 40, 30, 0.6), rgba(3, 6, 8, 0.95));
+}
+
+.credits-line {
+  font-size: 20px;
+  margin: 0;
+}
+
+.credits-line.small {
+  font-size: 14px;
+  color: var(--muted);
 }
 
 .title-notice {

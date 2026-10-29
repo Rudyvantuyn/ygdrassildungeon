@@ -7,7 +7,7 @@ import { SKILLS } from './data/skills';
 import { DX, DY, isPassable, type FloorMap } from './dungeon';
 import { FLOORS } from './data/floors';
 import { Game, type StepEvent } from './game';
-import { buyEquipment, buyItem, canEquip, equipmentForSale, innCost, netPrice, restAtInn } from './town';
+import { buyEquipment, buyItem, canEquip, equipmentForSale, innCost, netPrice, restAtInn, sellMaterial } from './town';
 import { healAmount, healMember, isAlive, knownSkills, memberStats, revive } from './party';
 import { ITEMS } from './data/items';
 import type { Dir, SkillId } from './types';
@@ -41,11 +41,15 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
       return { kind: 'item', item: 'kindlingMoss', target: fallen.shift()! };
     }
     switch (m.classId) {
-      case 'mender':
+      case 'mender': {
+        // Sleep and paralysis cost turns: wash them off once nobody is in danger.
+        const held = party.findIndex((p, j) => isAlive(p) && j !== i && (combat.status[j].ailment === 'sleep' || combat.status[j].ailment === 'paralysis'));
+        if (held >= 0 && hurt.length === 0 && canUse(i, 'cleanse')) return { kind: 'skill', skill: 'cleanse', target: held };
         if (hurt.length >= 2 && canUse(i, 'verdantChorus')) return { kind: 'skill', skill: 'verdantChorus', target: -1 };
         if (hurt.length >= 1 && canUse(i, 'mend')) return { kind: 'skill', skill: 'mend', target: hurt[0] };
         if (hurt.length >= 1 && combat.inventory.sapTonic > 0) return { kind: 'item', item: 'sapTonic', target: hurt[0] };
         break;
+      }
       case 'runecaller': {
         if (living.length >= 2 && canUse(i, 'wildfire')) return { kind: 'skill', skill: 'wildfire', target: -1 };
         const weak = combat.enemies[weakest].def.weak;
@@ -159,6 +163,7 @@ function find(map: FloorMap, tile: string): { x: number; y: number }[] {
 /** A town visit: buy the best gear that fits the budget, top up Sap Tonic, sleep at the inn. */
 function visitTown(game: Game): void {
   game.returnToTown();
+  for (const id of Object.keys(game.state.materials)) sellMaterial(game, id, game.state.materials[id]);
   restAtInn(game);
   const forSale = equipmentForSale(game).sort((a, b) => b.price - a.price);
   for (const slot of ['weapon', 'armor'] as const) {

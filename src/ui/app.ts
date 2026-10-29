@@ -3,6 +3,7 @@ import { FLOORS } from '../core/data/floors';
 import { ENEMIES } from '../core/data/enemies';
 import { EQUIPMENT } from '../core/data/equipment';
 import { ITEMS } from '../core/data/items';
+import { MATERIALS } from '../core/data/materials';
 import { DIR_NAMES } from '../core/dungeon';
 import { Game, type StepEvent } from '../core/game';
 import { healAmount, healMember, isAlive, knownSkills, memberStats, restoreSp, revive, xpForLevel } from '../core/party';
@@ -17,6 +18,8 @@ import { themeFor } from '../audio/compose';
 import { CombatView, type CombatHost } from './combatView';
 import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
+import { markSeen, pendingScene, type StoryLine } from '../core/data/story';
+import { drawPortrait } from '../render/portraits';
 import { ListMenu, type MenuItem } from './menu';
 import { PartyView } from './partyView';
 import { clearSave, readSave, writeSave } from './storage';
@@ -27,7 +30,7 @@ const VIEW_H = 520;
 const MAP_SIZE = 270;
 const MOVE_COOLDOWN = 150;
 
-type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'editor' | 'busy';
+type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'editor' | 'story' | 'busy';
 type SidePanel = 'explore' | 'combat' | 'town';
 type ViewFx = { kind: 'step' | 'turn' | 'bump' | 'encounter' | 'shake'; start: number };
 
@@ -57,6 +60,7 @@ export class App implements CombatHost, TownHost {
   private overlayMenu: ListMenu | null = null;
   private combatView: CombatView | null = null;
   private mapEditor: MapEditor | null = null;
+  private story: { lines: StoryLine[]; index: number; shown: number; then: () => void; box: HTMLElement } | null = null;
   private fx: ViewFx | null = null;
   private lastMove = 0;
   private toastTimer = 0;
@@ -184,9 +188,18 @@ export class App implements CombatHost, TownHost {
         return this.overlayMenu?.handleKey(key) ?? false;
       case 'combat':
         return this.combatView?.handleKey(key) ?? false;
+      case 'story':
+        return this.storyKey(key);
       case 'editor':
         return this.mapEditor?.handleKey(key) ?? false;
       case 'town':
+        if (key === 'h' || key === 'H') {
+          this.showHelp(() => {
+            this.closeOverlay();
+            this.enterTown();
+          });
+          return true;
+        }
         return this.town.menu?.handleKey(key) ?? false;
       case 'explore':
         return this.exploreKey(key);
@@ -232,6 +245,12 @@ export class App implements CombatHost, TownHost {
       case 'm':
         this.showMapOverlay();
         return true;
+      case 'h':
+        this.showHelp(() => {
+          this.closeOverlay();
+          this.enterExplore();
+        });
+        return true;
     }
     return false;
   }
@@ -250,6 +269,7 @@ export class App implements CombatHost, TownHost {
       [
         { label: 'New Game', onSelect: () => this.newGame() },
         { label: 'Continue', disabled: !hasSave, onSelect: () => this.loadSave() },
+        { label: 'How to Play', onSelect: () => this.showHelp(() => this.showTitle()) },
       ],
       { startIndex: hasSave ? 1 : 0 },
     );
@@ -268,7 +288,6 @@ export class App implements CombatHost, TownHost {
     this.save();
     this.closeOverlay();
     this.enterTown();
-    this.toast('Welcome to Lindholm. Gear up, then enter the Rootdeep.');
   }
 
   private loadSave(): void {
@@ -303,6 +322,7 @@ export class App implements CombatHost, TownHost {
     this.message.classList.add('hidden');
     this.town.show();
     this.updateHud();
+    this.playStory('town', (id) => (id === 'epilogue' ? this.showCredits() : (this.mode = 'town')));
   }
 
   enterDungeon(): void {
@@ -315,6 +335,150 @@ export class App implements CombatHost, TownHost {
     this.showSide('explore');
     this.message.classList.add('hidden');
     this.updateHud();
+    this.playStory('floor', () => (this.mode = 'explore'));
+  }
+
+  // ── Help & credits ─────────────────────────────────────────────────────────
+
+  showHelp(back: () => void): void {
+    const section = (title: string, rows: [string, string][]) =>
+      el('div', { className: 'help-section' }, [
+        el('h3', { text: title }),
+        ...rows.map(([k, v]) => el('div', { className: 'help-row' }, [el('span', { className: 'help-key', text: k }), el('span', { text: v })])),
+      ]);
+    const menu = new ListMenu([{ label: 'Close', onSelect: back }], { onCancel: back });
+    this.openOverlay(
+      el('div', { className: 'panel dialog wide help' }, [
+        el('h2', { text: 'How to Play' }),
+        el('div', { className: 'help-grid' }, [
+          section('Exploring', [
+            ['↑ / W', 'Step forward'],
+            ['↓ / S', 'Step back'],
+            ['← → / A D', 'Turn'],
+            ['Q / E', 'Side-step'],
+            ['Space / Act', 'Open a chest in front of you'],
+            ['M', 'Map: draw walls, marks and notes'],
+            ['C / Esc', 'Pack: skills, items, party, sound'],
+            ['H', 'This help'],
+          ]),
+          section('Fighting', [
+            ['↑↓ Enter', 'Choose a command for each member'],
+            ['← →', 'Pick a target'],
+            ['Esc', 'Back to the previous member'],
+            ['Enter', 'Speed up the round'],
+          ]),
+          section('Tips', [
+            ['Rows', 'The back row takes and deals less melee damage. Archers fight fine from anywhere.'],
+            ['Weakness', 'Most monsters fear one element. Big yellow numbers mean you found it.'],
+            ['Danger orb', 'Blue, yellow, red: the next fight is getting close.'],
+            ['Prowlers', 'Glowing silhouettes on deep floors. Avoid them until you are strong.'],
+            ['Town', 'Rest at the Inn, sell materials, take requests from the Notice Board.'],
+          ]),
+        ]),
+        menu.el,
+      ]),
+      menu,
+    );
+  }
+
+  private showCredits(): void {
+    const s = this.game.state;
+    const quests = Object.values(s.quests).filter((q) => q.status === 'done').length;
+    const close = () => {
+      this.closeOverlay();
+      this.enterTown();
+    };
+    const menu = new ListMenu([{ label: 'Return to Lindholm', onSelect: close }], { onCancel: close });
+    this.openOverlay(
+      el('div', { className: 'title-screen credits' }, [
+        el('div', { className: 'logo', text: 'YGDRASSIL' }),
+        el('div', { className: 'tagline', text: 'Descent beneath the Great Tree' }),
+        el('p', { className: 'credits-line', text: 'Thank you for playing.' }),
+        el('div', { className: 'rewards' }, [
+          el('span', { text: 'Party' }), el('span', { className: 'v', text: s.party.map((m) => `${m.name} Lv ${m.level}`).join(', ') }),
+          el('span', { text: 'Steps taken' }), el('span', { className: 'v', text: String(s.steps) }),
+          el('span', { text: 'Battles fought' }), el('span', { className: 'v', text: String(s.battles) }),
+          el('span', { text: 'Requests completed' }), el('span', { className: 'v', text: `${quests}` }),
+          el('span', { text: 'Gold' }), el('span', { className: 'v', text: `${s.gold} G` }),
+        ]),
+        el('p', { className: 'credits-line small', text: 'A game by Rudy van Tuijn · built with Claude' }),
+        el('div', { className: 'panel dialog' }, [menu.el]),
+      ]),
+      menu,
+    );
+  }
+
+  // ── Story ──────────────────────────────────────────────────────────────────
+
+  /** Plays the next unseen story scene for this moment, then calls `then`. */
+  private playStory(when: 'town' | 'floor' | 'victory', then: (sceneId?: string) => void): void {
+    const scene = pendingScene(this.game, when);
+    if (!scene) {
+      if (when === 'victory') then();
+      return;
+    }
+    markSeen(this.game, scene.id);
+    const box = el('div', { className: 'story-box panel' });
+    box.addEventListener('click', () => this.storyKey('Enter'));
+    this.viewWrap.appendChild(box);
+    this.story = { lines: scene.lines, index: 0, shown: 0, then: () => then(scene.id), box };
+    this.mode = 'story';
+    this.toastEl.classList.add('hidden');
+    this.showStoryLine();
+  }
+
+  private showStoryLine(): void {
+    const st = this.story!;
+    const line = st.lines[st.index];
+    st.box.innerHTML = '';
+    st.box.classList.toggle('narrator', !line.speaker);
+    if (line.speaker) {
+      const portrait = el('canvas', { className: 'story-portrait' });
+      portrait.width = portrait.height = 192;
+      drawPortrait(portrait.getContext('2d')!, 192, 'sigrid', line.speaker, '#8aa0c0');
+      st.box.append(portrait);
+    }
+    const text = el('div', { className: 'story-text' });
+    const body = el('p');
+    if (line.speaker) text.append(el('div', { className: 'story-speaker', text: line.speaker }));
+    text.append(body, el('div', { className: 'story-more', text: st.index < st.lines.length - 1 ? '▼' : '■' }));
+    st.box.append(text);
+    // Typewriter: reveal the line a few letters at a time.
+    st.shown = 0;
+    const step = () => {
+      if (this.story !== st || st.lines[st.index] !== line) return;
+      st.shown = Math.min(line.text.length, st.shown + 2);
+      body.textContent = line.text.slice(0, st.shown);
+      if (st.shown < line.text.length) window.setTimeout(step, 18);
+    };
+    step();
+  }
+
+  private storyKey(key: string): boolean {
+    const st = this.story;
+    if (!st) return false;
+    if (key === 'Escape') {
+      st.index = st.lines.length;
+    } else if (key === 'Enter' || key === ' ' || key === 'z' || key === 'Z') {
+      const line = st.lines[st.index];
+      if (st.shown < line.text.length) {
+        st.shown = line.text.length;
+        st.box.querySelector('p')!.textContent = line.text;
+        return true;
+      }
+      audio.play('menuMove');
+      st.index += 1;
+    } else {
+      return true;
+    }
+    if (st.index >= st.lines.length) {
+      st.box.remove();
+      this.story = null;
+      st.then();
+    } else {
+      this.showStoryLine();
+    }
+    return true;
   }
 
   updateHud(): void {
@@ -468,13 +632,14 @@ export class App implements CombatHost, TownHost {
       el('span', { text: 'Experience' }), el('span', { className: 'v', text: `+${r.xp}` }),
       el('span', { text: 'Gold' }), el('span', { className: 'v', text: `+${r.gold} G` }),
       ...r.drops.flatMap((id) => [el('span', { text: 'Found' }), el('span', { className: 'v', text: ITEMS[id].name })]),
+      ...r.materials.flatMap((id) => [el('span', { text: 'Material' }), el('span', { className: 'v', text: MATERIALS[id].name })]),
     ]);
     const levelUps = r.levelUps.map((l) =>
       el('div', { className: 'levelup', text: `${this.game.state.party[l.member].name} reached level ${l.level}!` }),
     );
     const done = () => {
       this.closeOverlay();
-      if (this.game.state.cleared && combat.boss) return this.showCleared();
+      if (this.game.state.cleared && combat.boss) return this.playStory('victory', () => this.showCleared());
       this.enterExplore();
       if (combat.boss) this.toast(`${combat.enemies[0].def.name} has fallen. The way down lies open.`);
     };
@@ -537,6 +702,7 @@ export class App implements CombatHost, TownHost {
         { label: 'Skills', description: 'Use a healing skill.', onSelect: () => this.packSkills() },
         { label: 'Items', description: 'Use an item.', onSelect: () => this.packItems() },
         { label: 'Party', description: 'View stats and equipment.', onSelect: () => this.partyStatus(() => this.openPack()) },
+        { label: 'Materials', description: 'Monster parts to sell in town.', onSelect: () => this.materialsList(() => this.openPack()) },
         {
           label: 'Homing Feather',
           detail: `×${this.game.state.inventory.homingFeather ?? 0}`,
@@ -618,6 +784,18 @@ export class App implements CombatHost, TownHost {
         }, () => this.packItems(), ITEMS[id].effect === 'revive'),
     }));
     this.subMenu('Items', items, () => this.openPack());
+  }
+
+  materialsList(back: () => void): void {
+    const entries = Object.entries(this.game.state.materials).filter(([, n]) => n > 0);
+    const items: MenuItem[] = entries.length
+      ? entries.map(([id, n]) => ({ label: MATERIALS[id].name, detail: `×${n} · ${MATERIALS[id].price} G each`, description: MATERIALS[id].description, onSelect: () => {} }))
+      : [{ label: 'Nothing yet', disabled: true, onSelect: () => {} }];
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back });
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Materials' }), el('p', { text: 'Sell them at the shop in Lindholm. Some unlock special gear.' }), menu.el, desc]), menu);
   }
 
   /** Music and effect volume, each cycling through five steps. */
@@ -732,6 +910,7 @@ export class App implements CombatHost, TownHost {
   }
 
   toast(text: string): void {
+    if (this.story) return; // the story box has the stage
     this.toastEl.textContent = text;
     this.toastEl.classList.remove('hidden');
     window.clearTimeout(this.toastTimer);
