@@ -1,3 +1,4 @@
+import { emptyChart, setTerrain, type Chart, type ChartMode } from './chart';
 import { Combat } from './combat';
 import { FLOORS, type FloorDef } from './data/floors';
 import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
@@ -16,6 +17,8 @@ export interface FloorProgress {
   springUsed: boolean;
   bossDefeated: boolean;
   prowlers: ProwlerState[];
+  /** The map the player draws. */
+  chart: Chart;
 }
 
 export type Location = 'town' | 'dungeon';
@@ -26,6 +29,7 @@ export interface GameState {
   location: Location;
   /** Deepest floor index the party has reached (unlocks shop stock and floor entry). */
   deepest: number;
+  chartMode: ChartMode;
   floor: number;
   x: number;
   y: number;
@@ -72,8 +76,12 @@ export class Game {
   private constructor(public state: GameState) {
     this.rng = new Rng(state.rng);
     this.map = parseFloor(this.floorDef);
-    // Saves from before prowlers existed have none yet.
-    state.progress.forEach((p, i) => (p.prowlers ??= initProwlers(FLOORS[i])));
+    // Fill in fields that saves from earlier builds don't have yet.
+    state.chartMode ??= 'assisted';
+    state.progress.forEach((p, i) => {
+      p.prowlers ??= initProwlers(FLOORS[i]);
+      p.chart ??= emptyChart(p.explored.length);
+    });
   }
 
   static newGame(seed: number): Game {
@@ -85,6 +93,7 @@ export class Game {
         springUsed: false,
         bossDefeated: false,
         prowlers: initProwlers(def),
+        chart: emptyChart(map.width * map.height),
       };
     });
     const start = parseFloor(FLOORS[0]).start;
@@ -93,6 +102,7 @@ export class Game {
       rng: seed,
       location: 'town',
       deepest: 0,
+      chartMode: 'assisted',
       floor: 0,
       x: start.x,
       y: start.y,
@@ -108,7 +118,6 @@ export class Game {
       cleared: false,
     });
     game.rollEncounterAt();
-    game.markExplored();
     return game;
   }
 
@@ -331,8 +340,17 @@ export class Game {
     this.state.encounterAt = this.rng.int(Math.round(avg * 0.6), Math.round(avg * 1.4));
   }
 
-  /** Auto-map: the current cell and its eight neighbours become known. */
+  /** The map the player has drawn of the current floor. */
+  get chart(): Chart {
+    return this.progress.chart;
+  }
+
+  /**
+   * What the party has seen (always tracked; drawn on the map in auto mode),
+   * plus, in assisted mode, the cell the party stands on is charted as floor.
+   */
   private markExplored(): void {
+    if (this.state.chartMode === 'assisted') setTerrain(this.chart, this.state.y * this.map.width + this.state.x, 'floor');
     const cells = this.progress.explored.split('');
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -1; dx <= 1; dx++) {

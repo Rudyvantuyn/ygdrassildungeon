@@ -14,6 +14,7 @@ import { drawMinimap } from '../render/minimap';
 import { drawTown } from '../render/town';
 import { CombatView, type CombatHost } from './combatView';
 import { el, floater } from './dom';
+import { MapEditor } from './mapEditor';
 import { ListMenu, type MenuItem } from './menu';
 import { PartyView } from './partyView';
 import { clearSave, readSave, writeSave } from './storage';
@@ -24,7 +25,7 @@ const VIEW_H = 520;
 const MAP_SIZE = 270;
 const MOVE_COOLDOWN = 150;
 
-type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'busy';
+type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'editor' | 'busy';
 type SidePanel = 'explore' | 'combat' | 'town';
 type ViewFx = { kind: 'step' | 'turn' | 'bump' | 'encounter' | 'shake'; start: number };
 
@@ -53,6 +54,7 @@ export class App implements CombatHost, TownHost {
   private mode: Mode = 'title';
   private overlayMenu: ListMenu | null = null;
   private combatView: CombatView | null = null;
+  private mapEditor: MapEditor | null = null;
   private fx: ViewFx | null = null;
   private lastMove = 0;
   private toastTimer = 0;
@@ -116,6 +118,7 @@ export class App implements CombatHost, TownHost {
 
     window.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (this.onKey(e.key)) e.preventDefault();
     });
 
@@ -140,6 +143,7 @@ export class App implements CombatHost, TownHost {
     }
     ctx.restore();
     this.drawFx(time);
+    if (this.mode === 'editor') this.mapEditor?.draw(time);
     if (this.game && this.mode !== 'combat' && this.game.state.location === 'dungeon') drawMinimap(this.minimap, MAP_SIZE, this.game, time);
   }
 
@@ -177,6 +181,8 @@ export class App implements CombatHost, TownHost {
         return this.overlayMenu?.handleKey(key) ?? false;
       case 'combat':
         return this.combatView?.handleKey(key) ?? false;
+      case 'editor':
+        return this.mapEditor?.handleKey(key) ?? false;
       case 'town':
         return this.town.menu?.handleKey(key) ?? false;
       case 'explore':
@@ -602,16 +608,16 @@ export class App implements CombatHost, TownHost {
   }
 
   private showMapOverlay(): void {
-    const canvas = el('canvas');
-    canvas.width = 480;
-    canvas.height = 480;
-    drawMinimap(canvas.getContext('2d')!, 480, this.game, this.now);
-    const close = () => {
+    this.mapEditor = new MapEditor(this.game, () => {
+      this.mapEditor = null;
       this.closeOverlay();
       this.enterExplore();
-    };
-    const menu = new ListMenu([{ label: 'Close', onSelect: close }], { onCancel: close });
-    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: this.game.floorDef.name }), canvas, menu.el]), menu);
+    });
+    this.overlay.innerHTML = '';
+    this.overlay.appendChild(this.mapEditor.el);
+    this.overlay.classList.remove('hidden');
+    this.overlayMenu = null;
+    this.mode = 'editor';
   }
 
   // ── Overlay helpers ────────────────────────────────────────────────────────

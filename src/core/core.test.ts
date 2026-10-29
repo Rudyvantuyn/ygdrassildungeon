@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { NOTE_MAX_LENGTH, emptyChart, eraseCell, setMark, setNote, setTerrain, terrainAt } from './chart';
 import { Combat, PROWLER_FLEE_CHANCE, type Command } from './combat';
 import { ENEMIES } from './data/enemies';
 import { FIRST_PROWLER_FLOOR, FLOORS } from './data/floors';
@@ -411,5 +412,66 @@ describe('prowlers', () => {
     expect({ x: p.x, y: p.y }).toEqual(at);
     moveProwlers(game.map, game.floorDef, game.progress.prowlers, { x: 1, y: 1 });
     expect({ x: p.x, y: p.y }).not.toEqual(at);
+  });
+});
+
+describe('chart (player-drawn map)', () => {
+  it('assisted mode fills in the cells the party walks on, and nothing else', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(0);
+    game.state.encounterAt = 999;
+    const w = game.map.width;
+    const start = game.state.y * w + game.state.x;
+    expect(terrainAt(game.chart, start)).toBe('floor');
+    game.step(1, 0);
+    expect(terrainAt(game.chart, game.state.y * w + game.state.x)).toBe('floor');
+    // A wall next to the party is seen, but not drawn for the player.
+    expect(terrainAt(game.chart, (game.state.y - 1) * w + game.state.x)).toBe('none');
+  });
+
+  it('manual mode draws nothing by itself', () => {
+    const game = Game.newGame(1);
+    game.state.chartMode = 'manual';
+    game.enterFloor(0);
+    game.state.encounterAt = 999;
+    game.step(1, 0);
+    expect(game.chart.terrain).not.toContain('1');
+  });
+
+  it('draws terrain, marks and notes, and erases them', () => {
+    const chart = emptyChart(10);
+    setTerrain(chart, 3, 'wall');
+    expect(terrainAt(chart, 3)).toBe('wall');
+    setMark(chart, 4, 'chest');
+    setNote(chart, 5, '  Locked door, need a key  ');
+    expect(chart.notes[5]).toBe('Locked door, need a key');
+    expect(chart.marks[5]).toBe('note');
+    setNote(chart, 6, 'x'.repeat(200));
+    expect(chart.notes[6].length).toBe(NOTE_MAX_LENGTH);
+    setNote(chart, 5, '');
+    expect(chart.marks[5]).toBeUndefined();
+    eraseCell(chart, 3);
+    eraseCell(chart, 4);
+    expect(terrainAt(chart, 3)).toBe('none');
+    expect(chart.marks[4]).toBeUndefined();
+  });
+
+  it('each floor keeps its own chart, and it survives a save', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(0);
+    setNote(game.chart, 20, 'Grimtusk lair');
+    game.enterFloor(1, true);
+    expect(game.chart.notes[20]).toBeUndefined();
+    const copy = Game.load(game.serialize());
+    expect(copy.state.progress[0].chart.notes[20]).toBe('Grimtusk lair');
+  });
+
+  it('older saves without a chart get an empty one', () => {
+    const state = JSON.parse(Game.newGame(1).serialize()) as Omit<GameState, 'chartMode'> & { chartMode?: unknown };
+    delete state.chartMode;
+    for (const p of state.progress) delete (p as Partial<typeof p>).chart;
+    const game = Game.load(JSON.stringify(state));
+    expect(game.state.chartMode).toBe('assisted');
+    expect(game.chart.terrain.length).toBe(game.map.width * game.map.height);
   });
 });

@@ -23,7 +23,7 @@ npm run dev        # open de URL die Vite toont (meestal http://localhost:5173)
 | Q / E | zijstap links / rechts | |
 | Enter / Spatie | | bevestigen (tijdens een ronde: versnellen) |
 | Esc | rugzak-menu (Pack) | terug |
-| C / M | rugzak-menu / grote kaart | |
+| C / M | rugzak-menu / kaarteditor | |
 
 De knoppen rechts op het scherm werken ook met muis of touch.
 
@@ -40,7 +40,10 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ### De dungeon (mijlpaal 1)
 
-- **Verkennen** op een grid in first-person, met een automatische kaart die alleen laat zien waar je bent geweest.
+- **Verkennen** op een grid in first-person.
+- **Zelf de kaart tekenen** (toets M of de knop Map): vloer, muren, gum, symbolen (trap omlaag/omhoog, kist, bron,
+  gevaar) en notities met tekst per vakje. Tekenen met muis, touch (slepen) of toetsenbord.
+  Drie kaartmodi: *Assisted* (standaard: je stappen worden ingekleurd, de rest teken je), *Manual* en *Auto*.
 - **Willekeurige gevechten**: de "Danger"-bol kleurt van blauw via geel naar rood naarmate het volgende gevecht dichterbij komt.
 - **Beurtgevechten** met een party van 4 (Bastion, Strider, Mender, Runecaller): aanvallen, skills (kosten SP), verdedigen, items, vluchten.
   Voorste en achterste rij, zwaktes en resistenties (vuur/vorst/storm), kritieke treffers, Challenge en Iron Formation.
@@ -73,7 +76,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe |
 | Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, eindbaas **The Blighted Elder** |
 | Prowlers | Sterke monsters die zichtbaar over de kaart lopen: Grimtusk, Fenwraith, Root Draugr |
-| Menu's | Pack (rugzak-menu in de dungeon), Danger-bol |
+| Menu's | Pack (rugzak-menu in de dungeon), Map (kaarteditor), Danger-bol |
 
 ## Projectstructuur
 

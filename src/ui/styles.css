@@ -582,6 +582,105 @@ table.stats th.gear {
   min-width: 280px;
 }
 
+.map-editor {
+  max-width: none;
+  padding: 16px 20px;
+  gap: 10px;
+}
+
+.map-body {
+  display: flex;
+  gap: 16px;
+}
+
+.map-canvas {
+  width: 480px;
+  height: 480px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.map-side {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-label {
+  font-family: var(--font-title);
+  font-weight: 800;
+  color: var(--gold);
+  font-size: 15px;
+}
+
+.map-tools {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.map-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 4px;
+  position: relative;
+  font-size: 12px;
+}
+
+.map-tool .glyph {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.map-tool .key {
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.map-tool.selected {
+  border-color: var(--border-hi);
+  background: linear-gradient(#5a4a26, #2e2614);
+}
+
+.map-mode {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.map-cell-info {
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 18px;
+}
+
+.map-note {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  padding: 7px 9px;
+  color: var(--text);
+  background: #0a1013;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.map-note:focus {
+  outline: none;
+  border-color: var(--border-hi);
+}
+
+.map-close {
+  margin-top: auto;
+}
+
 .title-notice {
   max-width: 520px;
   padding: 10px 16px;
