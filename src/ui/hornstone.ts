@@ -205,7 +205,11 @@ export class Hornstone {
       );
     const items: MenuItem[] = [];
     if (isHost) {
-      const fill = this.roster().filter((m) => isAlive(m) && !state.seats.some((s) => s.user === me && s.member.name === m.name));
+      // Classes the party still lacks come first.
+      const classes = new Set(state.seats.map((s) => s.member.classId));
+      const fill = this.roster()
+        .filter((m) => isAlive(m) && !state.seats.some((s) => s.user === me && s.member.name === m.name))
+        .sort((x, y) => Number(classes.has(x.classId)) - Number(classes.has(y.classId)));
       const free = MAX_SEATS - state.seats.length;
       items.push({
         label: 'Set out',

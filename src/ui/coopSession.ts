@@ -40,8 +40,10 @@ export class CoopSession {
   private lastTick = 0;
   /** Playback runs one state change at a time, in order. */
   private queue: Promise<void> = Promise.resolve();
-  /** A request (move or command) is on its way. */
-  private sending = false;
+  /** Leader's moves waiting to be sent (already shown on screen). */
+  private outbox: Action[] = [];
+  /** The leader waits for the server before moving on (it has something to decide). */
+  private blocked = false;
   /** Settled round(s) that arrived before the fight view asked for them. */
   private arrived: CombatEvent[] | null = null;
   private waiting: ((events: CombatEvent[]) => void) | null = null;
@@ -90,18 +92,62 @@ export class CoopSession {
 
   // ── Input ──────────────────────────────────────────────────────────────────
 
-  /** Movement and the action button while exploring. Returns true when handled. */
+  /**
+   * Movement and the action button while exploring (leader only).
+   * The local copy of the game has the same random state as the server's, so plain moves are
+   * played right away and give the same result there; they are sent in order behind the scenes.
+   * Anything the server has to decide (a chest, a fight, stairs, a spring) waits for its answer.
+   */
   exploreKey(action: Action): void {
     if (!this.isLeader) {
       this.host.toast(`${this.leaderName} leads the way.`);
       return;
     }
-    if (this.sending) return;
-    void this.send(action);
+    if (this.blocked || this.combat || this.state.phase !== 'explore' || this.outbox.length >= 4) return;
+    if (action.type === 'turn') {
+      this.mirror.turn(action.delta);
+      audio.play('turn');
+      this.host.viewFx('turn');
+      this.host.updateHud();
+    } else if (action.type === 'step') {
+      const events = this.mirror.step(action.forward, action.right);
+      for (const ev of events) {
+        if (ev.type === 'bump' || ev.type === 'moved' || ev.type === 'chestAhead') void this.showStep(ev);
+        else this.blocked = true;
+      }
+      this.host.updateHud();
+    } else {
+      this.blocked = true;
+    }
+    this.outbox.push(action);
+    if (this.outbox.length === 1) void this.flush();
+  }
+
+  /** Sends the queued moves one after another. */
+  private async flush(): Promise<void> {
+    while (this.outbox.length) {
+      try {
+        const row = await online.act(this.id, this.outbox[0]);
+        this.outbox.shift();
+        this.receive(row);
+      } catch (e) {
+        // Out of step with the server: drop what is queued and show the server's state again.
+        this.outbox = [];
+        this.blocked = false;
+        this.host.toast(e instanceof OnlineError ? e.message : 'The Hornstone did not answer.');
+        this.resync();
+      }
+    }
+  }
+
+  private resync(): void {
+    if (this.combat || this.state.phase !== 'explore') return;
+    this.mirror = Game.fromState(clone(this.state.game!));
+    this.host.game = this.mirror;
+    this.host.updateHud();
   }
 
   private async send(action: Action, quiet = false): Promise<ExpeditionRow | null> {
-    this.sending = true;
     try {
       const row = await online.act(this.id, action);
       this.receive(row);
@@ -109,8 +155,6 @@ export class CoopSession {
     } catch (e) {
       if (!quiet) this.host.toast(e instanceof OnlineError ? e.message : 'The Hornstone did not answer.');
       return null;
-    } finally {
-      this.sending = false;
     }
   }
 
@@ -152,14 +196,23 @@ export class CoopSession {
       return;
     }
 
+    // The leader has already seen their own plain moves.
+    const predicted = this.isLeader;
     for (const entry of entries) {
       if (entry.kind === 'note') this.host.toast(entry.text);
-      if (entry.kind === 'step') for (const ev of entry.events) await this.showStep(ev);
+      if (entry.kind !== 'step') continue;
+      for (const ev of entry.events) {
+        if (predicted && (ev.type === 'bump' || ev.type === 'moved' || ev.type === 'chestAhead')) continue;
+        await this.showStep(ev);
+      }
     }
     if (state.phase === 'ended') return this.finish(row);
+    // More of the leader's moves are on their way: keep showing the moves already made.
+    if (predicted && this.outbox.length && state.phase === 'explore') return;
+    if (state.phase === 'explore') this.blocked = false;
 
     const floorChanged = state.game!.floor !== this.mirror.state.floor;
-    if (!floorChanged && state.game!.dir !== this.mirror.state.dir) {
+    if (!predicted && !floorChanged && state.game!.dir !== this.mirror.state.dir) {
       audio.play('turn');
       this.host.viewFx('turn');
     }

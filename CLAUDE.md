@@ -33,6 +33,14 @@ Add new names there and keep the glossary in sync.
   prowler fight before about **level 10**, and even then only barely: they are meant to be avoided, or beaten
   after training. Every prowler floor must have a route around them. Fleeing from a prowler is a fixed **30%**.
 
+- **Multiplayer** means going into the dungeon together: each player brings one of their own adventurers into a
+  party of up to four (an "expedition"). No shared town. Trading may come later (low priority). Leaderboards and
+  contests are "events" and only come once the game is finished.
+- The game is meant to be released **commercially**: keep everything we ship (art, music, names, code) cleared for
+  commercial use, and keep the server authoritative so players cannot cheat.
+- Art direction: **AI-generated art** in one consistent style is the plan for the "fantastic graphics" goal; only use
+  tools/models whose terms allow commercial use, and keep a record of where each asset came from.
+
 ## Working with the owner
 
 - Don't ask the owner to test after every update. Work in larger chunks and announce a **test phase** only after
@@ -45,3 +53,8 @@ Add new names there and keep the glossary in sync.
 - After UI changes, run the game (`npm run dev`) and check it with `node scripts/screenshots.cjs` (needs Playwright).
 - Balance changes: run the balance tests and look at the numbers on purpose; don't just loosen the bounds.
 - The live site (Vercel project `ygdrassil-dungeon`) deploys production from `main`.
+- Online features use the Supabase project `ygdrassil` (`src/net/online.ts`). The `expedition` Edge Function runs
+  `server/expedition.ts`, which uses the same rules as the client (`src/core/expedition.ts`). Deploy it after pushing,
+  by pinning it to the pushed commit: an `index.ts` that imports
+  `https://esm.sh/gh/rudyvantuyn/ygdrassildungeon@<commit>/es2022/server/expedition.ts.bundle.mjs` (verify_jwt off;
+  the function checks tokens itself). Only that function writes the `expeditions` table.
