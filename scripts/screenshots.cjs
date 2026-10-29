@@ -41,7 +41,7 @@ const out = 'screenshots';
   await press('ArrowDown'); // Equipment
   await press('Enter');
   await shot('02b-shop-equipment');
-  await press('Enter'); // Bronze Sword -> choose wearer
+  await press('Enter'); // Copper Edge -> choose wearer
   await shot('02c-shop-wearer');
   await press('Enter'); // Bram buys it
   await press('Escape');

@@ -19,6 +19,11 @@ Yggdrasil Labyrinth, Etria, Explorers Guild, Landsknecht, Protector, Medic, Alch
 Dark Hunter, Troubadour, Ronin, Hexer, Gunner, Provoke, Shield Smite, Line Heal, Party Heal,
 Chain/Link skills, Limit/Burst/Force skills, Boost, Grimoire, Floor Jump, Floor 'B1F' labels.
 
+Decided by the owner (don't raise again):
+- The title **Ygdrassil** and Norse mythology as a theme are allowed and wanted. Norse myth is public domain and
+  popular with players, so names and themes from it (gods, realms, creatures, runes) are fine to use.
+  Just don't copy how Etrian Odyssey uses it, e.g. no "Yggdrasil Labyrinth" as a dungeon name.
+
 The game's own vocabulary lives in `src/core/data/` and is listed in the README glossary.
 Add new names there and keep the glossary in sync.
 
