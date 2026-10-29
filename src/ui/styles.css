@@ -343,7 +343,13 @@ button:active {
   display: flex;
   flex-direction: column;
   padding: 12px;
-  gap: 8px;
+  gap: 6px;
+  min-height: 0;
+}
+
+#town-panel .menu-item {
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .town-gold {
@@ -930,4 +936,75 @@ table.stats thead th {
   from {
     opacity: 0;
   }
+}
+
+/* ── Hornstone & expeditions ─────────────────────────────────────────────── */
+.name-input + .name-input {
+  margin-top: 8px;
+}
+
+.lobby-code {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 14px;
+  margin: 4px 0 8px;
+}
+
+.lobby-code span {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 14px;
+}
+
+.lobby-code b {
+  font-family: Cinzel, Georgia, serif;
+  font-size: 44px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+}
+
+.seats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+
+.seat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 1px solid rgba(240, 207, 106, 0.35);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.seat.empty {
+  border-style: dashed;
+  opacity: 0.55;
+}
+
+.seat-player {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.cmd-timer {
+  margin-top: 6px;
+  text-align: center;
+  color: var(--gold);
+  font-size: 14px;
+}
+
+.member-row.owner {
+  max-width: 7em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--gold);
+  text-transform: none;
+  letter-spacing: 0;
 }

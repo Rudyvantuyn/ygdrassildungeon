@@ -10,6 +10,8 @@ export interface PartyDisplay {
   sp?: number[];
   ailments?: (Ailment | null)[];
   active?: number | null;
+  /** On an expedition: the player behind each card (shown instead of the row). */
+  owners?: string[];
 }
 
 interface Card {
@@ -21,6 +23,7 @@ interface Card {
   spFill: HTMLElement;
   spText: HTMLElement;
   ailment: HTMLElement;
+  row: HTMLElement;
 }
 
 export class PartyView {
@@ -55,6 +58,8 @@ export class PartyView {
       card.ailment.style.background = ailment ? AILMENT_BADGE[ailment].color : '';
       card.ailment.classList.toggle('hidden', !ailment);
       card.root.classList.toggle('active', display.active === i);
+      card.row.textContent = display.owners?.[i] ?? m.row;
+      card.row.classList.toggle('owner', !!display.owners);
     });
   }
 
@@ -99,6 +104,7 @@ export class PartyView {
         spFill: spBar.querySelector('i')!,
         spText: spBar.querySelector('.v')!,
         ailment: root.querySelector<HTMLElement>('.ailment')!,
+        row: root.querySelector<HTMLElement>('.member-row')!,
       };
     });
   }

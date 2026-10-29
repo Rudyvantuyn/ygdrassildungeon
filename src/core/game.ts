@@ -1,5 +1,5 @@
 import { emptyChart, setTerrain, type Chart, type ChartMode } from './chart';
-import { Combat } from './combat';
+import { Combat, type CombatSnapshot } from './combat';
 import { FLOORS, type FloorDef } from './data/floors';
 import { makeInventory } from './data/items';
 import type { QuestState } from './quests';
@@ -57,6 +57,10 @@ export interface GameState {
   steps: number;
   battles: number;
   cleared: boolean;
+  /** Prowler the current fight is against, if any. */
+  fighting?: number | null;
+  /** Expeditions whose share has already been brought home. */
+  claimed?: string[];
 }
 
 export type StepEvent =
@@ -87,8 +91,6 @@ export class SaveVersionError extends Error {
 export class Game {
   map: FloorMap;
   private rng: Rng;
-  /** Prowler the current combat is against, if any. */
-  private activeProwler: number | null = null;
 
   private constructor(public state: GameState) {
     this.rng = new Rng(state.rng);
@@ -149,6 +151,11 @@ export class Game {
     });
     game.rollEncounterAt();
     return game;
+  }
+
+  /** Wraps an existing state (shared, not copied). Used for expeditions, which keep their own state. */
+  static fromState(state: GameState): Game {
+    return new Game(state);
   }
 
   static load(json: string): Game {
@@ -320,8 +327,13 @@ export class Game {
     return this.progress.prowlers.findIndex((p) => !p.defeated && p.x === x && p.y === y);
   }
 
+  /** Picks up a fight saved with `Combat.snapshot()`, using this game's party, pack and random source. */
+  resumeCombat(snap: CombatSnapshot): Combat {
+    return Combat.restore(snap, this.state.party, this.state.inventory, this.rng);
+  }
+
   startProwlerCombat(index: number): Combat {
-    this.activeProwler = index;
+    this.state.fighting = index;
     return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true });
   }
 
@@ -334,12 +346,13 @@ export class Game {
     this.state.battles += 1;
     this.state.danger = 0;
     this.rollEncounterAt();
-    if (this.activeProwler !== null) {
-      const prowler = this.progress.prowlers[this.activeProwler];
+    const fighting = this.state.fighting ?? null;
+    if (fighting !== null) {
+      const prowler = this.progress.prowlers[fighting];
       if (combat.outcome === 'victory') prowler.defeated = true;
       // After a successful escape the prowler is dazed for a few steps.
       if (combat.outcome === 'fled') prowler.stun = 3;
-      this.activeProwler = null;
+      this.state.fighting = null;
     }
     if (combat.outcome === 'victory' && combat.rewards) {
       this.state.gold += combat.rewards.gold;

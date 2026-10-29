@@ -5,15 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && npm run build:server",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "screenshots": "node scripts/screenshots.cjs"
+    "screenshots": "node scripts/screenshots.cjs",
+    "build:server": "esbuild server/expedition.ts --bundle --format=esm --platform=neutral --target=es2022 --minify --entry-names=[name]-[hash] --outdir=dist/server"
   },
   "devDependencies": {
+    "esbuild": "^0.25.12",
     "typescript": "5.9.3",
     "vite": "6.4.5",
     "vitest": "3.2.7"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.58.0"
   }
 }

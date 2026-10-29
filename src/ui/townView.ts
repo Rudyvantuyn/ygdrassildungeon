@@ -38,6 +38,7 @@ export interface TownHost {
   partyStatus(back: () => void): void;
   soundOptions(back: () => void): void;
   showHelp(back: () => void): void;
+  openHornstone(): void;
 }
 
 const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', sp: 'SP', atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES', spd: 'SPD' };
@@ -71,6 +72,12 @@ export class TownView {
         onSelect: () => this.board(),
       },
       { label: 'Rootdeep', description: 'Enter the Rootdeep at any floor you have reached.', spot: 'rootdeep', onSelect: () => this.rootdeep() },
+      {
+        label: 'Hornstone',
+        description: 'Sound the horn to descend together with players from other halls.',
+        spot: 'horn',
+        onSelect: () => this.host.openHornstone(),
+      },
       { label: 'Party', description: 'View stats and equipment.', spot: null, onSelect: () => this.host.partyStatus(() => this.back()) },
       { label: 'System', description: 'Save, sound, help, and quit to the title screen.', spot: null, onSelect: () => this.system() },
     ];

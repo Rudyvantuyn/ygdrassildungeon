@@ -15,7 +15,10 @@ import { drawMinimap } from '../render/minimap';
 import { drawTown } from '../render/town';
 import { audio } from '../audio/audio';
 import { themeFor } from '../audio/compose';
-import { CombatView, type CombatHost } from './combatView';
+import { CombatView, type CombatHost, type RoundDriver } from './combatView';
+import { CoopSession, type CoopHost } from './coopSession';
+import { Hornstone, shareLines, type HornstoneHost } from './hornstone';
+import { online, type ExpeditionRow } from '../net/online';
 import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
 import { markSeen, pendingScene, type StoryLine } from '../core/data/story';
@@ -34,8 +37,12 @@ type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'editor' | 'st
 type SidePanel = 'explore' | 'combat' | 'town';
 type ViewFx = { kind: 'step' | 'turn' | 'bump' | 'encounter' | 'shake'; start: number };
 
-export class App implements CombatHost, TownHost {
+export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   game!: Game;
+  /** While on an expedition: the player's own game, kept aside (`game` is then the shared one). */
+  private home: Game | null = null;
+  private coop: CoopSession | null = null;
+  private readonly hornstone = new Hornstone(this);
   readonly party: PartyView;
   readonly corridor: CorridorRenderer;
   readonly floaters: HTMLElement;
@@ -210,6 +217,7 @@ export class App implements CombatHost, TownHost {
 
   private exploreKey(key: string): boolean {
     const k = key.length === 1 ? key.toLowerCase() : key;
+    if (this.coop) return this.coopKey(k);
     const move = (fn: () => void) => {
       if (this.now - this.lastMove < MOVE_COOLDOWN) return true;
       this.lastMove = this.now;
@@ -241,6 +249,48 @@ export class App implements CombatHost, TownHost {
       case 'c':
       case 'Escape':
         this.openPack();
+        return true;
+      case 'm':
+        this.showMapOverlay();
+        return true;
+      case 'h':
+        this.showHelp(() => {
+          this.closeOverlay();
+          this.enterExplore();
+        });
+        return true;
+    }
+    return false;
+  }
+
+  /** Exploring on an expedition: moves go to the server. */
+  private coopKey(k: string): boolean {
+    const coop = this.coop!;
+    const moves: Record<string, Parameters<CoopSession['exploreKey']>[0]> = {
+      ArrowUp: { type: 'step', forward: 1, right: 0 },
+      w: { type: 'step', forward: 1, right: 0 },
+      ArrowDown: { type: 'step', forward: -1, right: 0 },
+      s: { type: 'step', forward: -1, right: 0 },
+      ArrowLeft: { type: 'turn', delta: -1 },
+      a: { type: 'turn', delta: -1 },
+      ArrowRight: { type: 'turn', delta: 1 },
+      d: { type: 'turn', delta: 1 },
+      q: { type: 'step', forward: 0, right: -1 },
+      e: { type: 'step', forward: 0, right: 1 },
+      ' ': { type: 'interact' },
+      Enter: { type: 'interact' },
+    };
+    const action = moves[k];
+    if (action) {
+      if (this.now - this.lastMove < MOVE_COOLDOWN) return true;
+      this.lastMove = this.now;
+      coop.exploreKey(action);
+      return true;
+    }
+    switch (k) {
+      case 'c':
+      case 'Escape':
+        this.openCoopPack();
         return true;
       case 'm':
         this.showMapOverlay();
@@ -306,7 +356,16 @@ export class App implements CombatHost, TownHost {
   }
 
   save(): void {
-    writeSave(this.game.serialize());
+    writeSave((this.home ?? this.game).serialize());
+  }
+
+  loadSaveData(data: string): boolean {
+    try {
+      this.game = Game.load(data);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /** Back to the town menu or the dungeon, wherever the party is. */
@@ -329,13 +388,107 @@ export class App implements CombatHost, TownHost {
     this.enterExplore();
   }
 
-  private enterExplore(): void {
+  openHornstone(): void {
+    void this.hornstone.open();
+  }
+
+  enterExplore(): void {
     audio.music(themeFor({ location: 'dungeon', floor: this.game.state.floor }));
     this.mode = 'explore';
     this.showSide('explore');
     this.message.classList.add('hidden');
     this.updateHud();
-    this.playStory('floor', () => (this.mode = 'explore'));
+    // The story belongs to your own hall; expeditions skip it.
+    if (!this.coop) this.playStory('floor', () => (this.mode = 'explore'));
+  }
+
+  // ── Expeditions ────────────────────────────────────────────────────────────
+
+  startExpedition(row: ExpeditionRow): void {
+    if (this.coop) return;
+    this.closeOverlay();
+    this.home = this.game;
+    this.coop = new CoopSession(this, row.id, row.code, row.state);
+    this.coop.start();
+    this.toast(this.coop.isLeader ? 'You lead the way. The others follow your steps.' : `${this.coop.leaderName} leads the way.`);
+  }
+
+  get partyOwners(): string[] | undefined {
+    return this.coop?.owners;
+  }
+
+  viewFx(kind: 'step' | 'turn' | 'bump' | 'encounter'): void {
+    this.fx = { kind, start: this.now };
+  }
+
+  forceCombatRound(): void {
+    this.combatView?.forceRound();
+  }
+
+  finishExpedition(row: ExpeditionRow | null): void {
+    const coop = this.coop;
+    this.coop = null;
+    this.combatView = null;
+    this.game = this.home ?? this.game;
+    this.home = null;
+    const state = row?.state;
+    const share = state?.phase === 'ended' ? state.result?.shares.find((s) => s.user === online.userId) : undefined;
+    let body: HTMLElement[];
+    if (row && state && share) {
+      this.game.state.claimed = [...(this.game.state.claimed ?? []), row.id];
+      body = shareLines(this.game, share, state);
+    } else {
+      body = [el('p', { text: 'You head home. Your adventurer stays with the others; collect their share at the Hornstone once the expedition is over.' })];
+    }
+    this.save();
+    audio.music(null);
+    audio.play(state?.result?.reason === 'wiped' ? 'defeat' : 'stairs');
+    const done = () => {
+      this.closeOverlay();
+      this.enterTown();
+    };
+    const menu = new ListMenu([{ label: 'Back to Lindholm', onSelect: done }], { onCancel: done });
+    const title = state?.result?.reason === 'wiped' ? 'The expedition has fallen' : coop && state?.phase === 'ended' ? 'Home again' : 'You left the expedition';
+    this.showSide('town');
+    this.updateHud();
+    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: title }), ...body, menu.el]), menu);
+  }
+
+  private openCoopPack(): void {
+    const coop = this.coop!;
+    const close = () => {
+      this.closeOverlay();
+      this.enterExplore();
+    };
+    const feathers = this.game.state.inventory.homingFeather ?? 0;
+    const menu = new ListMenu(
+      [
+        { label: 'Party', description: 'View stats and equipment.', onSelect: () => this.partyStatus(() => this.openCoopPack()) },
+        {
+          label: 'Homing Feather',
+          detail: `×${feathers}`,
+          description: coop.isLeader ? 'Take everyone home and end the expedition.' : `Only ${coop.leaderName} can use it.`,
+          disabled: !coop.isLeader || feathers <= 0,
+          onSelect: () =>
+            this.confirm('Homing Feather', 'Take the whole expedition back to Lindholm?', () => {
+              audio.play('spring');
+              coop.useFeather();
+              this.enterExplore();
+            }),
+        },
+        {
+          label: 'Leave the expedition',
+          description: 'Go home alone. Your adventurer fights on without you and comes home with the others.',
+          onSelect: () => this.confirm('Leave', 'Leave the expedition and head home?', () => coop.leave()),
+        },
+        { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.soundOptions(() => this.openCoopPack()) },
+        { label: 'Close', onSelect: close },
+      ],
+      { onCancel: close },
+    );
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: `Expedition ${coop.code}` }), menu.el, desc]), menu);
   }
 
   // ── Help & credits ─────────────────────────────────────────────────────────
@@ -494,7 +647,7 @@ export class App implements CombatHost, TownHost {
     this.dangerOrb.style.background = `radial-gradient(circle at 35% 30%, #fff, ${color} 55%, #000 120%)`;
     this.dangerOrb.style.color = color;
     this.goldEl.textContent = `${g.state.gold} G`;
-    this.party.render(g.state.party);
+    this.party.render(g.state.party, { owners: this.coop?.owners });
   }
 
   // ── Exploration ────────────────────────────────────────────────────────────
@@ -599,17 +752,19 @@ export class App implements CombatHost, TownHost {
 
   // ── Combat ─────────────────────────────────────────────────────────────────
 
-  private startCombat(combat: Combat): void {
+  startCombat(combat: Combat, driver: RoundDriver | null = null): void {
+    this.closeOverlay();
     this.mode = 'combat';
     this.toastEl.classList.add('hidden');
     this.showSide('combat');
     audio.music(themeFor({ location: 'dungeon', combat: combat.boss ? 'boss' : combat.prowler ? 'prowler' : 'normal' }));
-    this.combatView = new CombatView(this, combat, (c) => this.endCombat(c));
+    this.combatView = new CombatView(this, combat, (c) => this.endCombat(c), driver);
     void this.combatView.start();
   }
 
   private endCombat(combat: Combat): void {
-    this.game.finishCombat(combat);
+    // On an expedition the server has already settled the fight.
+    if (!this.coop) this.game.finishCombat(combat);
     this.combatView = null;
     this.showSide('explore');
     this.updateHud();
@@ -617,9 +772,15 @@ export class App implements CombatHost, TownHost {
     if (combat.outcome === 'defeat') {
       audio.music(null);
       audio.play('defeat');
+      if (this.coop) return this.coop.combatOver();
       return this.showGameOver();
     }
     if (combat.outcome === 'fled') {
+      if (this.coop) {
+        this.coop.combatOver();
+        this.toast('The party got away.');
+        return;
+      }
       this.enterExplore();
       this.toast(combat.prowler ? `You slipped away! The ${combat.enemies[0].def.name} is dazed for a few steps.` : 'The party got away.');
       return;
@@ -639,6 +800,7 @@ export class App implements CombatHost, TownHost {
     );
     const done = () => {
       this.closeOverlay();
+      if (this.coop) return this.coop.combatOver();
       if (this.game.state.cleared && combat.boss) return this.playStory('victory', () => this.showCleared());
       this.enterExplore();
       if (combat.boss) this.toast(`${combat.enemies[0].def.name} has fallen. The way down lies open.`);
@@ -709,12 +871,12 @@ export class App implements CombatHost, TownHost {
           description: 'Return to Lindholm right away. Saves on arrival.',
           disabled: (this.game.state.inventory.homingFeather ?? 0) <= 0,
           onSelect: () =>
-            this.confirm('Homing Feather', 'Follow the homingFeather back to Lindholm?', () => {
+            this.confirm('Homing Feather', 'Follow the Homing Feather back to Lindholm?', () => {
               audio.play('spring');
               this.game.useFeather();
               this.save();
               this.enterTown();
-              this.toast('The homingFeather leads you home. Game saved.');
+              this.toast('The feather carries you home. Game saved.');
             }),
         },
         { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.soundOptions(() => this.openPack()) },
@@ -880,7 +1042,7 @@ export class App implements CombatHost, TownHost {
 
   // ── Overlay helpers ────────────────────────────────────────────────────────
 
-  private confirm(title: string, text: string, yes: () => void): void {
+  confirm(title: string, text: string, yes: () => void): void {
     const no = () => {
       this.closeOverlay();
       this.enterExplore();

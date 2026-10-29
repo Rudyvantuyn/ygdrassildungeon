@@ -58,6 +58,17 @@ export type CombatEvent =
   | { type: 'info'; text: string }
   | { type: 'end'; outcome: Outcome; rewards?: Rewards };
 
+/** Everything about a fight that changes while it runs, in plain JSON (for saving or sending). */
+export interface CombatSnapshot {
+  enemies: { id: string; name: string; hp: number; ailment: Ailment | null; ailmentTurns: number }[];
+  status: PartyStatus[];
+  round: number;
+  outcome: Outcome | null;
+  rewards: Rewards | null;
+  boss: boolean;
+  prowler: boolean;
+}
+
 export interface CombatOptions {
   boss?: boolean;
   prowler?: boolean;
@@ -102,6 +113,36 @@ export class Combat {
       if (same.length > 1) e.name = `${e.def.name} ${String.fromCharCode(65 + same.indexOf(e))}`;
     }
     this.status = party.map(() => ({ defending: false, taunt: 0, guard: 0, ailment: null, ailmentTurns: 0 }));
+  }
+
+  snapshot(): CombatSnapshot {
+    return {
+      enemies: this.enemies.map((e) => ({ id: e.def.id, name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns })),
+      status: this.status.map((s) => ({ ...s })),
+      round: this.round,
+      outcome: this.outcome,
+      rewards: this.rewards,
+      boss: this.boss,
+      prowler: this.prowler,
+    };
+  }
+
+  /** Rebuilds a fight from a snapshot, around the given party, pack and random source. */
+  static restore(snap: CombatSnapshot, party: Member[], inventory: Record<ItemId, number>, rng: Rng): Combat {
+    const combat = new Combat(party, snap.enemies.map((e) => e.id), inventory, rng, { boss: snap.boss, prowler: snap.prowler });
+    combat.apply(snap);
+    return combat;
+  }
+
+  /** Overwrites this fight's changing state in place with a snapshot of the same fight. */
+  apply(snap: CombatSnapshot): void {
+    snap.enemies.forEach((e, i) => Object.assign(this.enemies[i], { name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns }));
+    snap.status.forEach((s, i) => {
+      if (this.status[i]) Object.assign(this.status[i], s);
+    });
+    this.round = snap.round;
+    this.outcome = snap.outcome;
+    this.rewards = snap.rewards;
   }
 
   get canFlee(): boolean {

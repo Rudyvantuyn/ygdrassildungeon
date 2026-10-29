@@ -20,6 +20,21 @@ export interface CombatHost {
   commandPanel: HTMLElement;
   message: HTMLElement;
   shakeView(): void;
+  /** On an expedition: the player behind each party member. */
+  readonly partyOwners?: string[];
+}
+
+/**
+ * Decides who picks commands and how a round gets resolved. Without one, the player
+ * commands the whole party and the round is resolved right here.
+ */
+export interface RoundDriver {
+  /** Whether this player picks the command for party member `i`. */
+  controls(i: number): boolean;
+  /** Hands over this player's commands; resolves with the round's events once it is settled. */
+  resolve(commands: (Command | null)[]): Promise<CombatEvent[]>;
+  /** A short line shown while choosing (for example the time left). */
+  status?(): string;
 }
 
 interface EnemyFx {
@@ -54,11 +69,13 @@ export class CombatView {
   private playing = false;
   private fast = false;
   private time = 0;
+  private statusEl: HTMLElement | null = null;
 
   constructor(
     private readonly host: CombatHost,
     private readonly combat: Combat,
     private readonly onDone: (combat: Combat) => void,
+    private readonly driver: RoundDriver | null = null,
   ) {
     this.fx = combat.enemies.map(() => ({ flashUntil: 0, lungeUntil: 0, dyingSince: null }));
     this.enemyHp = combat.enemies.map((e) => e.hp);
@@ -88,6 +105,7 @@ export class CombatView {
   draw(ctx: CanvasRenderingContext2D, w: number, h: number, time: number): void {
     this.time = time;
     this.host.corridor.draw(this.host.game, time);
+    if (this.statusEl && this.driver?.status) this.statusEl.textContent = this.driver.status();
     ctx.fillStyle = this.combat.boss ? 'rgba(40,0,0,0.5)' : this.combat.prowler ? 'rgba(40,16,0,0.5)' : 'rgba(0,0,0,0.45)';
     ctx.fillRect(0, 0, w, h);
 
@@ -194,7 +212,7 @@ export class CombatView {
   private nextMember(): void {
     const party = this.combat.party;
     for (let i = this.current + 1; i < party.length; i++) {
-      if (isAlive(party[i])) {
+      if (isAlive(party[i]) && (this.driver?.controls(i) ?? true)) {
         this.current = i;
         this.showCommandMenu();
         return;
@@ -206,7 +224,7 @@ export class CombatView {
   private previousMember(): void {
     const party = this.combat.party;
     for (let i = this.current - 1; i >= 0; i--) {
-      if (isAlive(party[i])) {
+      if (isAlive(party[i]) && (this.driver?.controls(i) ?? true)) {
         this.commands[i] = null;
         this.current = i;
         this.showCommandMenu();
@@ -303,16 +321,29 @@ export class CombatView {
 
   // ── Resolution ─────────────────────────────────────────────────────────────
 
+  /** Settles the round now with whatever has been chosen so far (the others' time ran out). */
+  forceRound(): void {
+    if (!this.playing) void this.execute();
+  }
+
   private async execute(): Promise<void> {
     this.playing = true;
     this.fast = false;
     this.current = -1;
     this.target = null;
     this.menu = null;
-    this.showPanel(`Round ${this.combat.round}`, null, 'Enter: speed up');
     this.renderParty();
 
-    const events = this.combat.resolveRound(this.commands);
+    let events: CombatEvent[];
+    const round = this.combat.round;
+    if (this.driver) {
+      this.showPanel(`Round ${round}`, null, 'Waiting for the others...');
+      events = await this.driver.resolve(this.commands);
+      this.showPanel(`Round ${round}`, null, 'Enter: speed up');
+    } else {
+      this.showPanel(`Round ${round}`, null, 'Enter: speed up');
+      events = this.combat.resolveRound(this.commands);
+    }
     for (const ev of events) await this.play(ev);
 
     this.playing = false;
@@ -416,6 +447,7 @@ export class CombatView {
       sp: this.partySp,
       ailments: this.partyAilment,
       active: this.current >= 0 ? this.current : null,
+      owners: this.host.partyOwners,
     });
   }
 
@@ -431,6 +463,8 @@ export class CombatView {
     panel.append(el('div', { className: 'cmd-title', text: title }));
     if (menu) panel.append(menu.el);
     panel.append(desc, el('div', { className: 'cmd-hint', text: hint }));
+    this.statusEl = this.driver?.status ? el('div', { className: 'cmd-timer' }) : null;
+    if (this.statusEl) panel.append(this.statusEl);
     this.menu = menu;
     menu?.describeInto(desc);
   }

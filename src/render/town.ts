@@ -2,14 +2,15 @@
  * The town of Lindholm at dusk, at the roots of the Great Tree.
  * `focus` lights up the building that matches the selected town menu entry.
  */
-export type TownSpot = 'inn' | 'hall' | 'shop' | 'board' | 'rootdeep';
+export type TownSpot = 'inn' | 'hall' | 'shop' | 'board' | 'rootdeep' | 'horn';
 
 const SPOTS: Record<TownSpot, { x: number; label: string }> = {
-  inn: { x: 105, label: 'Inn' },
-  hall: { x: 285, label: 'Oath Hall' },
-  shop: { x: 465, label: 'Shop' },
-  board: { x: 583, label: 'Notices' },
-  rootdeep: { x: 700, label: 'Rootdeep' },
+  inn: { x: 92, label: 'Inn' },
+  hall: { x: 260, label: 'Oath Hall' },
+  shop: { x: 428, label: 'Shop' },
+  board: { x: 545, label: 'Notices' },
+  rootdeep: { x: 662, label: 'Rootdeep' },
+  horn: { x: 798, label: 'Hornstone' },
 };
 
 export function drawTown(ctx: CanvasRenderingContext2D, w: number, h: number, time: number, focus: TownSpot | null): void {
@@ -149,6 +150,11 @@ function drawSign(ctx: CanvasRenderingContext2D, x: number, ground: number, labe
   const bh = spot === 'rootdeep' ? 120 : 130;
   const top = ground - bh;
   ctx.save();
+  if (spot === 'horn') {
+    drawHornstone(ctx, x, ground, label, lit, time);
+    ctx.restore();
+    return;
+  }
   if (spot === 'board') {
     // A notice board on two posts, pinned with papers
     ctx.fillStyle = lit ? '#7a5a36' : '#4a3620';
@@ -255,4 +261,60 @@ function drawSign(ctx: CanvasRenderingContext2D, x: number, ground: number, labe
   ctx.textBaseline = 'middle';
   ctx.fillText(label, x, sy + 15);
   ctx.restore();
+}
+
+/** A tall standing stone carved with runes, a great horn hanging from an iron hook. */
+function drawHornstone(ctx: CanvasRenderingContext2D, x: number, ground: number, label: string, lit: boolean, time: number): void {
+  const top = ground - 118;
+  if (lit) {
+    const g = ctx.createRadialGradient(x, ground - 60, 0, x, ground - 60, 90);
+    g.addColorStop(0, `rgba(150,200,255,${0.28 + 0.1 * Math.sin(time / 400)})`);
+    g.addColorStop(1, 'rgba(150,200,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x - 90, ground - 150, 180, 160);
+  }
+  ctx.fillStyle = lit ? '#6a6878' : '#454352';
+  ctx.beginPath();
+  ctx.moveTo(x - 24, ground);
+  ctx.lineTo(x - 28, top + 30);
+  ctx.quadraticCurveTo(x - 20, top, x + 2, top - 4);
+  ctx.quadraticCurveTo(x + 22, top + 4, x + 26, top + 34);
+  ctx.lineTo(x + 22, ground);
+  ctx.closePath();
+  ctx.fill();
+  // Runes down the face
+  ctx.strokeStyle = lit ? '#9fd4ff' : '#6a7088';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < 4; i++) {
+    const y = top + 24 + i * 22;
+    ctx.moveTo(x - 4, y);
+    ctx.lineTo(x - 4, y + 14);
+    ctx.moveTo(x - 4, y + 4);
+    ctx.lineTo(x + 5, y + (i % 2 ? 0 : 9));
+  }
+  ctx.stroke();
+  // Hook and horn
+  ctx.strokeStyle = '#2a2a30';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x + 22, top + 40);
+  ctx.lineTo(x + 34, top + 40);
+  ctx.lineTo(x + 34, top + 50);
+  ctx.stroke();
+  ctx.fillStyle = lit ? '#e8d8b0' : '#a89a7a';
+  ctx.beginPath();
+  ctx.moveTo(x + 20, top + 56);
+  ctx.quadraticCurveTo(x + 34, top + 46, x + 50, top + 60);
+  ctx.quadraticCurveTo(x + 46, top + 80, x + 36, top + 86);
+  ctx.lineTo(x + 32, top + 80);
+  ctx.quadraticCurveTo(x + 38, top + 66, x + 24, top + 62);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = lit ? '#c8a050' : '#7a6438';
+  ctx.fillRect(x + 28, top + 52, 4, 10);
+  ctx.font = '800 15px Cinzel, Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = lit ? '#f0cf6a' : '#c9c0a8';
+  ctx.fillText(label, x + 8, top - 14);
 }

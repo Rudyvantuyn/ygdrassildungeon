@@ -29,6 +29,19 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Samen spelen (mijlpaal 5)
+
+- **Hornstone** (in Lindholm): log in met e-mail of als gast, en ga met andere spelers op **expeditie**. Elke speler
+  neemt één eigen avonturier mee; samen vormen jullie een party van maximaal 4. De host leidt in de gangen, in
+  gevechten kiest iedereen het commando voor de eigen avonturier (40 seconden, daarna handelt die zelf).
+- **Sound the Horn** start een expeditie met een code van vier letters; **Answer a Horn** of **Join by code** om mee
+  te doen. De host kan lege plekken opvullen met eigen avonturiers.
+- Na afloop brengt iedereen zijn deel mee naar huis: XP en levels, een gelijk deel van het goud en de materialen.
+  Valt de party, dan blijft de XP maar is de buit weg. Wie tussentijds vertrekt, haalt zijn deel later op bij de Hornstone.
+- **Cloud-save**: zet je spel online (Account in de Hornstone) en speel verder op een ander apparaat.
+- De server (Supabase Edge Function, `server/expedition.ts`) draait dezelfde spelregels (`src/core/expedition.ts`)
+  en beslist alles; spelers kunnen alleen acties sturen. Avonturiers worden gecontroleerd bij het meedoen.
+
 ### Verhaal, quests en materialen (mijlpaal 4)
 
 - **Verhaal**: Sigrid, de hoedster van Lindholm, vertelt waarom de Grote Boom ziek is. Scènes bij de start, bij je eerste
@@ -107,6 +120,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Prowlers | Sterke monsters die zichtbaar over de kaart lopen: Grimtusk, Fenwraith, Root Draugr |
 | Materialen | Bog Jelly, Dusk Membrane, Briar Quill, Hollow Fang, Puffcap Spores, Bark Shell, Gloam Scale, Heartwood Knot, Rime Pelt, Frost Gill, Ice Carapace, Snowveil Wing, Cinder Feather, Ember Core, Fiend Root, Ash Slab, Grim Tusk, Wraith Silk, Draugr Bone, Blighted Heartwood, Gnawer Fang |
 | Speciale uitrusting | Briarthorn Spear, Duskweave Cloak, Barkshell Mail, Gloamscale Robe, Heartknot Staff, Elderheart Mail, Rimefang Blade, Snowveil Bow, Embercore Rod, Grimtusk Cleaver, Draugrbone Bow, Wraithsilk Robe |
+| Samen spelen | **Hornstone** (ontmoetingssteen), expeditie, Sound the Horn, Answer a Horn, gathering (lobby), share (je deel van de buit) |
 | Menu's | Pack (rugzak-menu in de dungeon), Map (kaarteditor), Notice Board (quests), System, Danger-bol |
 
 ## Projectstructuur
@@ -118,10 +132,15 @@ src/
     combat.ts   Gevechtssysteem
     game.ts     Spelstatus: stad/dungeon, bewegen, vijanden, kisten, trappen, opslaan
     town.ts     Herberg en winkel
+    expedition.ts Spelregels van expedities met meerdere spelers (draait op de server)
+    tactics.ts  Hoe de computer commando's kiest (autoplay en afwezige spelers)
     autoplay.ts Computer-speler die het spel uitspeelt (gebruikt voor balanstests)
   render/       Canvas-tekenwerk: gang, monsters, minikaart, stad
   audio/        Muziek (compose.ts: componeert de loops, getest) en geluid (audio.ts: Web Audio)
-  ui/           Schermen, menu's, gevechtsweergave
+  net/          Online: accounts, cloud-save, expedities (Supabase)
+  ui/           Schermen, menu's, gevechtsweergave, Hornstone en expedities
+server/
+  expedition.ts De expeditie-server (Supabase Edge Function); `npm run build` bundelt hem in dist/server/
 scripts/
   screenshots.cjs  Speelt het spel automatisch in een browser en maakt screenshots
 ```
