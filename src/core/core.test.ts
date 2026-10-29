@@ -43,7 +43,14 @@ describe('floor data', () => {
           const tile = tileAt(map, x, y);
           const edge = x === 0 || y === 0 || x === map.width - 1 || y === map.height - 1;
           if (edge) expect(tile, `border at ${x},${y}`).toBe('wall');
-          if (tile !== 'wall') expect(reach.has(`${x},${y}`), `${tile} at ${x},${y} reachable`).toBe(true);
+          if (tile === 'chest') {
+            // Chests block the way, so they must be reachable from a cell next to them...
+            const besides = [0, 1, 2, 3].some((d) => reach.has(`${x + DX[d]},${y + DY[d]}`));
+            expect(besides, `chest at ${x},${y} can be opened`).toBe(true);
+          } else if (tile !== 'wall') {
+            // ...and must never be the only way through.
+            expect(reach.has(`${x},${y}`), `${tile} at ${x},${y} reachable`).toBe(true);
+          }
         }
       }
       const isLast = index === FLOORS.length - 1;
@@ -101,10 +108,15 @@ describe('dungeon movement', () => {
     game.state.y = chest.y;
     game.state.dir = 1;
     const before = game.state.inventory.sapTonic;
-    expect(game.step(1, 0).some((e) => e.type === 'chest')).toBe(true);
+    // Walking into it doesn't work: it's an object you open.
+    expect(game.step(1, 0)).toEqual([{ type: 'chestAhead', opened: false }]);
+    expect(game.state.x).toBe(chest.x - 1);
+    expect(game.interact().type).toBe('chest');
     expect(game.state.inventory.sapTonic).toBe(before + 2);
-    game.step(-1, 0);
-    expect(game.step(1, 0).some((e) => e.type === 'emptyChest')).toBe(true);
+    expect(game.interact().type).toBe('emptyChest');
+    expect(game.step(1, 0)).toEqual([{ type: 'chestAhead', opened: true }]);
+    game.turn(1);
+    expect(game.interact().type).toBe('nothing');
   });
 
   it('descends the stairs to the next floor', () => {

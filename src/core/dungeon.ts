@@ -53,8 +53,10 @@ export function tileAt(map: FloorMap, x: number, y: number): Tile {
   return map.tiles[y * map.width + x];
 }
 
+/** Walls and chests block movement; chests are opened from the cell in front of them. */
 export function isPassable(map: FloorMap, x: number, y: number): boolean {
-  return tileAt(map, x, y) !== 'wall';
+  const tile = tileAt(map, x, y);
+  return tile !== 'wall' && tile !== 'chest';
 }
 
 export function turnDir(dir: Dir, delta: number): Dir {

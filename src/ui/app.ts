@@ -84,12 +84,13 @@ export class App implements CombatHost, TownHost {
       this.goldEl,
     ]);
     const controls = el('div', { id: 'controls', className: 'panel' });
-    const buttons: [string, string][] = [
-      ['↶', 'q'], ['▲', 'ArrowUp'], ['↷', 'e'], ['Pack', 'c'],
+    // Act spans both rows; the grid places the rest around it.
+    const buttons: [string, string, string?][] = [
+      ['↶', 'q'], ['▲', 'ArrowUp'], ['↷', 'e'], ['Act', ' ', 'act'], ['Pack', 'c'],
       ['◀', 'ArrowLeft'], ['▼', 'ArrowDown'], ['▶', 'ArrowRight'], ['Map', 'm'],
     ];
-    for (const [label, key] of buttons) {
-      const b = el('button', { text: label });
+    for (const [label, key, className] of buttons) {
+      const b = el('button', { text: label, className });
       b.addEventListener('click', () => this.onKey(key));
       controls.appendChild(b);
     }
@@ -217,6 +218,11 @@ export class App implements CombatHost, TownHost {
         return move(() => this.step(0, -1));
       case 'e':
         return move(() => this.step(0, 1));
+      case ' ':
+      case 'Enter':
+        this.handleStep(this.game.interact());
+        this.updateHud();
+        return true;
       case 'c':
       case 'Escape':
         this.openPack();
@@ -340,6 +346,11 @@ export class App implements CombatHost, TownHost {
     switch (ev.type) {
       case 'bump':
         this.fx = { kind: 'bump', start: this.now };
+        return;
+      case 'chestAhead':
+        this.toast(ev.opened ? 'An empty chest.' : 'A chest! Press Space or Act to open it.');
+        return;
+      case 'nothing':
         return;
       case 'moved':
         this.fx = { kind: 'step', start: this.now };

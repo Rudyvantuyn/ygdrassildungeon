@@ -50,6 +50,10 @@ export interface GameState {
 
 export type StepEvent =
   | { type: 'bump' }
+  /** Walked into a chest: it has to be opened with the action button. */
+  | { type: 'chestAhead'; opened: boolean }
+  /** The action button was used with nothing to act on. */
+  | { type: 'nothing' }
   | { type: 'moved' }
   | { type: 'chest'; loot: Loot }
   | { type: 'emptyChest' }
@@ -176,7 +180,10 @@ export class Game {
   step(forward: number, right: number): StepEvent[] {
     const { x, y, dir } = this.state;
     const next = relCell(x, y, dir, forward, right);
-    if (!isPassable(this.map, next.x, next.y)) return [{ type: 'bump' }];
+    if (!isPassable(this.map, next.x, next.y)) {
+      if (tileAt(this.map, next.x, next.y) === 'chest') return [{ type: 'chestAhead', opened: this.isChestOpened(next.x, next.y) }];
+      return [{ type: 'bump' }];
+    }
 
     this.state.x = next.x;
     this.state.y = next.y;
@@ -199,10 +206,6 @@ export class Game {
     }
 
     const tile = this.tileHere();
-    if (tile === 'chest') {
-      events.push(this.openChest());
-      return events;
-    }
     if (tile === 'stairs') {
       events.push({ type: 'stairs' });
       return events;
@@ -329,8 +332,15 @@ export class Game {
     return this.state.party.some(isAlive);
   }
 
-  private openChest(): StepEvent {
-    const index = this.map.chests.findIndex((c) => c.x === this.state.x && c.y === this.state.y);
+  /** The action button: interact with whatever is right in front of the party. */
+  interact(): StepEvent {
+    const ahead = relCell(this.state.x, this.state.y, this.state.dir, 1, 0);
+    if (tileAt(this.map, ahead.x, ahead.y) === 'chest') return this.openChest(ahead.x, ahead.y);
+    return { type: 'nothing' };
+  }
+
+  private openChest(x: number, y: number): StepEvent {
+    const index = this.map.chests.findIndex((c) => c.x === x && c.y === y);
     if (index < 0 || this.progress.openedChests.includes(index)) return { type: 'emptyChest' };
     this.progress.openedChests.push(index);
     const loot = this.floorDef.chests[index] ?? { gold: 10 };

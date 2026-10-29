@@ -163,9 +163,18 @@ export function autoplay(seed: number, opts: { grindBattles?: number; town?: boo
         if (!walkTo(next) || !walkTo(here)) return result(game, floor, bossRounds);
       }
     }
-    const goals = [...game.map.chests, ...find(game.map, 'spring')];
-    for (const goal of goals) {
-      if (!walkTo(goal)) return result(game, floor, bossRounds);
+    for (const chest of game.map.chests) {
+      // Stand next to the chest, face it and open it.
+      const spot = [0, 1, 2, 3]
+        .map((d) => ({ x: chest.x - DX[d], y: chest.y - DY[d], dir: d as Dir }))
+        .find((c) => isPassable(game.map, c.x, c.y));
+      if (!spot) continue;
+      if (!walkTo(spot)) return result(game, floor, bossRounds);
+      game.state.dir = spot.dir;
+      game.interact();
+    }
+    for (const spring of find(game.map, 'spring')) {
+      if (!walkTo(spring)) return result(game, floor, bossRounds);
       game.drinkSpring();
     }
     if (floor < 2) {

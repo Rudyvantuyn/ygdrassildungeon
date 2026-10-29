@@ -170,10 +170,16 @@ body {
 
 #controls {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 6px;
   padding: 8px;
   margin-top: auto;
+}
+
+#controls .act {
+  grid-row: span 2;
+  border-color: var(--border-hi);
+  color: var(--gold);
 }
 
 button,

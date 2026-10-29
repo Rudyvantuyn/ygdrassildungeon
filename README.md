@@ -21,7 +21,7 @@ npm run dev        # open de URL die Vite toont (meestal http://localhost:5173)
 | ↓ / S | stap achteruit | omlaag |
 | ← / A, → / D | draai links / rechts | doelwit wisselen |
 | Q / E | zijstap links / rechts | |
-| Enter / Spatie | | bevestigen (tijdens een ronde: versnellen) |
+| Enter / Spatie | iets openen wat voor je staat, zoals een kist (knop Act) | bevestigen (tijdens een ronde: versnellen) |
 | Esc | rugzak-menu (Pack) | terug |
 | C / M | rugzak-menu / kaarteditor | |
 
@@ -55,7 +55,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
   te dichtbij komt (rood). Je moet ze ontwijken of eerst trainen: pas rond level 10 heb je een kleine kans.
   Vluchten lukt in 30% van de gevallen; daarna is de Prowler een paar stappen verdoofd.
   Verslagen Prowlers komen terug als je in de stad bent geweest.
-- **3 verdiepingen** met kisten, een genezende bron (eenmalig, slaat ook op) en een **eindbaas** op de derde verdieping.
+- **3 verdiepingen** met kisten (je loopt er niet doorheen: ga ervoor staan en open ze met Act), een genezende bron (eenmalig, slaat ook op) en een **eindbaas** op de derde verdieping.
 - **Opslaan** in de browser: in de stad (herberg of menu), en automatisch bij elke trap en bij de bron.
   In de dungeon kun je niet zomaar opslaan: wie valt, begint weer bij de laatste save.
 
