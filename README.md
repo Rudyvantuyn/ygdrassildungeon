@@ -49,13 +49,16 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Willekeurige gevechten**: de "Danger"-bol kleurt van blauw via geel naar rood naarmate het volgende gevecht dichterbij komt.
 - **Beurtgevechten** met een party van 4 (Bastion, Strider, Mender, Runecaller): aanvallen, skills (kosten SP), verdedigen, items, vluchten.
   Voorste en achterste rij, zwaktes en resistenties (vuur/vorst/storm), kritieke treffers, Challenge en Iron Formation.
-- **Ervaring en levels**: nieuwe skills op level 3 en 4.
-- **Prowlers** (klaar, maar pas vanaf verdieping 5, die er nog niet is): sterke monsters die je ziet in de gang en op de
+- **Ervaring en levels**: nieuwe skills op level 3, 4 en 6.
+- **Opwekken in de dungeon**: met Kindling Moss (winkel) of de Mender-skill Rekindle (level 6).
+- **Prowlers** (vanaf verdieping 5): sterke monsters die je ziet in de gang en op de
   kaart (◆). Ze zetten één stap per stap die jij zet. Patrouilleurs lopen een vaste route, jagers komen op je af als je
   te dichtbij komt (rood). Je moet ze ontwijken of eerst trainen: pas rond level 10 heb je een kleine kans.
   Vluchten lukt in 30% van de gevallen; daarna is de Prowler een paar stappen verdoofd.
   Verslagen Prowlers komen terug als je in de stad bent geweest.
-- **3 verdiepingen** met kisten (je loopt er niet doorheen: ga ervoor staan en open ze met Act), een genezende bron (eenmalig, slaat ook op) en een **eindbaas** op de derde verdieping.
+- **5 verdiepingen** met kisten (je loopt er niet doorheen: ga ervoor staan en open ze met Act) en per verdieping een genezende
+  bron (eenmalig, slaat ook op). Op verdieping 3 bewaakt **The Blighted Elder** de trap naar beneden; op verdieping 5 wacht de
+  laatste baas, **The Rootgnawer**.
 - **Opslaan** in de browser: in de stad (herberg of menu), en automatisch bij elke trap en bij de bron.
   In de dungeon kun je niet zomaar opslaan: wie valt, begint weer bij de laatste save.
 
@@ -67,16 +70,16 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Onderwerp | Namen |
 |---|---|
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
-| Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III |
+| Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimehollow IV, Wyrmroot V |
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
 | Party | Bram, Sela, Wren, Orrin |
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |
 | Elementen | fysiek, vuur (fire), vorst (frost), storm |
-| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Scatter Volley, Mend, Verdant Chorus, Ember/Frost/Storm Rune, Wildfire |
-| Items | Sap Tonic (HP), Spirit Dew (SP), Homing Feather (terug naar de stad) |
-| Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe |
-| Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, eindbaas **The Blighted Elder** |
+| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Scatter Volley, Mend, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire |
+| Items | Sap Tonic (HP), Spirit Dew (SP), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
+| Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe, Runehewn Axe, Hrimstring Bow, Frostbirch Rod, Scalehide Mail, Rimeweave Robe, Wyrmtooth Blade, Embersong Bow, Ashroot Rod, Emberscale Plate, Starveil Robe |
+| Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, Hrimwolf, Frostcap, Rimeshell, Snowveil Moth, Cinderwing, Emberling, Rootfiend, Ashen Colossus; bazen **The Blighted Elder** en **The Rootgnawer** |
 | Prowlers | Sterke monsters die zichtbaar over de kaart lopen: Grimtusk, Fenwraith, Root Draugr |
 | Menu's | Pack (rugzak-menu in de dungeon), Map (kaarteditor), Danger-bol |
 

@@ -233,7 +233,7 @@ export class CombatView {
     const set = (target: number) => this.setCommand({ kind: 'skill', skill: skill.id, target });
     const back = () => this.showSkillMenu();
     if (skill.target === 'enemy') this.chooseEnemy(set, back);
-    else if (skill.target === 'ally') this.chooseAlly(set, back);
+    else if (skill.target === 'ally') this.chooseAlly(set, back, skill.kind === 'revive');
     else set(-1);
   }
 
@@ -246,7 +246,8 @@ export class CombatView {
         detail: `×${left}`,
         description: ITEMS[id].description,
         disabled: left <= 0,
-        onSelect: () => this.chooseAlly((t) => this.setCommand({ kind: 'item', item: id, target: t }), () => this.showItemMenu()),
+        onSelect: () =>
+          this.chooseAlly((t) => this.setCommand({ kind: 'item', item: id, target: t }), () => this.showItemMenu(), ITEMS[id].effect === 'revive'),
       };
     });
     this.showPanel('Items', new ListMenu(items, { onCancel: () => this.showCommandMenu() }), 'Esc back');
@@ -262,16 +263,18 @@ export class CombatView {
     this.showPanel('Choose a target', new ListMenu(items, { onCancel: () => { this.target = null; cancel(); } }), '←→ / ↑↓ choose · Enter confirm · Esc back');
   }
 
-  private chooseAlly(pick: (i: number) => void, cancel: () => void): void {
+  /** `fallen`: pick among the fallen (for reviving) instead of the living. */
+  private chooseAlly(pick: (i: number) => void, cancel: () => void, fallen = false): void {
     const party = this.combat.party;
+    const eligible = (m: (typeof party)[number]) => isAlive(m) !== fallen;
     const items: MenuItem[] = party.map((m, i) => ({
       label: m.name,
-      detail: `${m.hp}/${memberStats(m).hp} HP`,
-      disabled: !isAlive(m),
+      detail: isAlive(m) ? `${m.hp}/${memberStats(m).hp} HP` : 'fallen',
+      disabled: !eligible(m),
       onSelect: () => pick(i),
     }));
-    const start = party.findIndex((m) => isAlive(m));
-    this.showPanel('Choose an ally', new ListMenu(items, { onCancel: cancel, startIndex: start }), 'Esc back');
+    const start = Math.max(0, party.findIndex(eligible));
+    this.showPanel(fallen ? 'Choose a fallen ally' : 'Choose an ally', new ListMenu(items, { onCancel: cancel, startIndex: start }), 'Esc back');
   }
 
   // ── Resolution ─────────────────────────────────────────────────────────────

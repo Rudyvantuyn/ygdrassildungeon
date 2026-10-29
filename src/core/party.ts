@@ -73,6 +73,13 @@ export function healMember(m: Member, amount: number): number {
   return healed;
 }
 
+/** Brings a fallen member back with `percent` of their max HP. Returns the HP they get back (0 if they weren't down). */
+export function revive(m: Member, percent: number): number {
+  if (isAlive(m)) return 0;
+  m.hp = Math.max(1, Math.round((memberStats(m).hp * percent) / 100));
+  return m.hp;
+}
+
 export function restoreSp(m: Member, amount: number): number {
   if (!isAlive(m)) return 0;
   const max = memberStats(m).sp;

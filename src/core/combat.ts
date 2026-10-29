@@ -2,7 +2,7 @@ import { CLASSES } from './data/classes';
 import { ENEMIES, type EnemyDef, type EnemySkill } from './data/enemies';
 import { ITEMS } from './data/items';
 import { SKILLS } from './data/skills';
-import { grantXp, healAmount, healMember, isAlive, memberStats, restoreSp } from './party';
+import { grantXp, healAmount, healMember, isAlive, memberStats, restoreSp, revive } from './party';
 import type { Rng } from './rng';
 import type { Element, ItemId, Member, SkillId } from './types';
 
@@ -189,6 +189,15 @@ export class Combat {
             const healed = healMember(this.party[t], amount);
             events.push({ type: 'heal', target: t, amount: healed, hp: this.party[t].hp });
           }
+        } else if (skill.kind === 'revive') {
+          const target = this.party[cmd.target];
+          if (!target || isAlive(target)) {
+            events.push({ type: 'info', text: 'But nothing happened.' });
+          } else {
+            const hp = revive(target, skill.power);
+            events.push({ type: 'heal', target: cmd.target, amount: hp, hp });
+            events.push({ type: 'info', text: `${target.name} is back on their feet!` });
+          }
         } else if (skill.kind === 'challenge') {
           this.status[i].taunt = 2;
           events.push({ type: 'info', text: `The enemies glare at ${m.name}.` });
@@ -207,13 +216,18 @@ export class Combat {
         }
         const target = this.party[cmd.target];
         events.push({ type: 'act', side: 'party', actor: i, text: `${m.name} uses ${item.name}.` });
-        if (!target || !isAlive(target)) {
+        // Revive items only work on the fallen; everything else only on the living.
+        if (!target || isAlive(target) === (item.effect === 'revive')) {
           events.push({ type: 'info', text: 'But nothing happened.' });
           return;
         }
         this.inventory[cmd.item] -= 1;
         if (item.effect === 'warp') {
           events.push({ type: 'info', text: 'It has no effect here.' });
+        } else if (item.effect === 'revive') {
+          const hp = revive(target, item.amount);
+          events.push({ type: 'heal', target: cmd.target, amount: hp, hp });
+          events.push({ type: 'info', text: `${target.name} is back on their feet!` });
         } else if (item.effect === 'hp') {
           const healed = healMember(target, item.amount);
           events.push({ type: 'heal', target: cmd.target, amount: healed, hp: target.hp });

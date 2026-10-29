@@ -53,6 +53,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     skills: [
       { skill: 'mend', level: 1 },
       { skill: 'verdantChorus', level: 3 },
+      { skill: 'rekindle', level: 6 },
     ],
     color: '#8fd3e8',
     description: 'Healer of the back row. Keeps the party standing with mending songs.',

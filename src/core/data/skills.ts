@@ -7,7 +7,7 @@ export interface SkillDef {
   name: string;
   sp: number;
   target: SkillTarget;
-  kind: 'phys' | 'magic' | 'heal' | 'challenge' | 'guard';
+  kind: 'phys' | 'magic' | 'heal' | 'revive' | 'challenge' | 'guard';
   element: Element;
   /** Percent of a normal attack (damage) or of the heal formula. */
   power: number;
@@ -127,5 +127,15 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     element: 'fire',
     power: 110,
     description: 'Fire damage to every enemy.',
+  }),
+  rekindle: skill({
+    id: 'rekindle',
+    name: 'Rekindle',
+    sp: 10,
+    target: 'ally',
+    kind: 'revive',
+    power: 30,
+    field: true,
+    description: 'Call a fallen ally back to their feet with 30% HP.',
   }),
 };

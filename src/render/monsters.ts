@@ -343,6 +343,89 @@ const SHAPES: Record<EnemyDef['art']['shape'], (ctx: Ctx, s: number, color: stri
     ctx.restore();
     eyes(ctx, 0, -s * 0.72, s * 0.16, s * 0.04, accent, t);
   },
+
+  wyrm(ctx, s, color, accent, t) {
+    const sway = Math.sin(t / 650);
+    // Spine: an S-curve rising out of the ground; drawn tail-first so the head ends on top.
+    const point = (k: number): [number, number] => {
+      const x = Math.sin(k * 3.4 + 0.6) * s * 0.32 * (1 - k * 0.4) + sway * s * 0.05 * k;
+      const y = -k * s * 0.78;
+      return [x, y];
+    };
+    const segments = 22;
+    for (let i = 0; i <= segments; i++) {
+      const k = i / segments;
+      const [x, y] = point(k);
+      const r = s * (0.2 - k * 0.09);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = body(ctx, i % 2 ? color : shade(color, 0.08), y - r, y + r);
+      ctx.fill();
+      // Glowing belly scales
+      ctx.fillStyle = shade(accent, -0.35);
+      ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.ellipse(x + r * 0.35, y, r * 0.35, r * 0.6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    // Spikes along the back
+    ctx.fillStyle = shade(color, -0.4);
+    for (let i = 3; i < segments; i += 3) {
+      const [x, y] = point(i / segments);
+      const r = s * (0.2 - (i / segments) * 0.09);
+      ctx.beginPath();
+      ctx.moveTo(x - r * 0.9, y - r * 0.2);
+      ctx.lineTo(x - r * 1.6, y - r * 0.9);
+      ctx.lineTo(x - r * 0.5, y - r * 0.8);
+      ctx.fill();
+    }
+    // Head
+    const [hx, hy] = point(1);
+    const jaw = 0.15 + 0.1 * Math.max(0, Math.sin(t / 400));
+    ctx.save();
+    ctx.translate(hx, hy - s * 0.05);
+    ctx.fillStyle = body(ctx, color, -s * 0.15, s * 0.15);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, s * 0.2, s * 0.13, 0, 0, Math.PI * 2);
+    ctx.fill();
+    outline(ctx, color, s);
+    // Lower jaw
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.05, s * 0.05);
+    ctx.lineTo(s * 0.26, s * (0.05 + jaw));
+    ctx.lineTo(s * 0.05, s * 0.12);
+    ctx.closePath();
+    ctx.fillStyle = shade(color, -0.2);
+    ctx.fill();
+    // Snout and fangs
+    ctx.beginPath();
+    ctx.moveTo(s * 0.1, -s * 0.06);
+    ctx.lineTo(s * 0.3, s * 0.02);
+    ctx.lineTo(s * 0.1, s * 0.07);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.fillStyle = '#f0e8d0';
+    for (const fx of [0.14, 0.2, 0.26]) {
+      ctx.beginPath();
+      ctx.moveTo(s * fx, s * 0.03);
+      ctx.lineTo(s * (fx + 0.015), s * 0.08);
+      ctx.lineTo(s * (fx + 0.03), s * 0.03);
+      ctx.fill();
+    }
+    // Horns
+    ctx.fillStyle = shade(color, 0.35);
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(-s * 0.08, -s * 0.06 * side - s * 0.04);
+      ctx.quadraticCurveTo(-s * 0.3, -s * 0.18 - side * s * 0.04, -s * 0.36, -s * 0.3 - side * s * 0.05);
+      ctx.lineTo(-s * 0.04, -s * 0.1);
+      ctx.fill();
+    }
+    ctx.restore();
+    eyes(ctx, hx + s * 0.02, hy - s * 0.09, s * 0.12, s * 0.03, accent, t);
+  },
 };
 
 function body(ctx: Ctx, color: string, top: number, bottom: number): CanvasGradient {

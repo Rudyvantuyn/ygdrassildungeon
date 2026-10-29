@@ -5,13 +5,17 @@
 import type { Combat, Command } from './combat';
 import { SKILLS } from './data/skills';
 import { DX, DY, isPassable, type FloorMap } from './dungeon';
-import { Game } from './game';
+import { FLOORS } from './data/floors';
+import { Game, type StepEvent } from './game';
 import { buyEquipment, buyItem, canEquip, equipmentForSale, innCost, netPrice, restAtInn } from './town';
-import { healAmount, healMember, isAlive, knownSkills, memberStats } from './party';
+import { healAmount, healMember, isAlive, knownSkills, memberStats, revive } from './party';
+import { ITEMS } from './data/items';
 import type { Dir, SkillId } from './types';
 
 export interface AutoplayResult {
+  /** Beat the final boss. */
   cleared: boolean;
+  bossesDefeated: number;
   diedOnFloor: number | null;
   battles: number;
   levels: number[];
@@ -25,9 +29,17 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
   const knows = (i: number, id: SkillId) => knownSkills(party[i]).some((s) => s.id === id);
   const canUse = (i: number, id: SkillId) => knows(i, id) && party[i].sp >= SKILLS[id].sp;
   const hurt = party.flatMap((m, i) => (isAlive(m) && m.hp < memberStats(m).hp * 0.45 ? [i] : []));
+  const fallen = party.flatMap((m, i) => (isAlive(m) ? [] : [i]));
+  let mossLeft = combat.inventory.kindlingMoss ?? 0;
 
   return party.map((m, i): Command | null => {
     if (!isAlive(m)) return null;
+    // Wake the fallen first: the Mender with a skill, anyone else with moss.
+    if (fallen.length && m.classId === 'mender' && canUse(i, 'rekindle')) return { kind: 'skill', skill: 'rekindle', target: fallen.shift()! };
+    if (fallen.length && mossLeft > 0 && (m.classId !== 'mender' || !canUse(i, 'rekindle'))) {
+      mossLeft -= 1;
+      return { kind: 'item', item: 'kindlingMoss', target: fallen.shift()! };
+    }
     switch (m.classId) {
       case 'mender':
         if (hurt.length >= 2 && canUse(i, 'verdantChorus')) return { kind: 'skill', skill: 'verdantChorus', target: -1 };
@@ -70,6 +82,16 @@ function healBetweenFights(game: Game): void {
   const party = game.state.party;
   const wren = party.find((m) => m.classId === 'mender');
   for (const m of party) {
+    if (isAlive(m)) continue;
+    if (wren && isAlive(wren) && knownSkills(wren).some((s) => s.id === 'rekindle') && wren.sp >= SKILLS.rekindle.sp) {
+      wren.sp -= SKILLS.rekindle.sp;
+      revive(m, SKILLS.rekindle.power);
+    } else if ((game.state.inventory.kindlingMoss ?? 0) > 0) {
+      game.state.inventory.kindlingMoss -= 1;
+      revive(m, ITEMS.kindlingMoss.amount);
+    }
+  }
+  for (const m of party) {
     if (!isAlive(m)) continue;
     while (m.hp < memberStats(m).hp * 0.7) {
       if (wren && isAlive(wren) && wren.sp >= SKILLS.mend.sp) {
@@ -83,8 +105,10 @@ function healBetweenFights(game: Game): void {
   }
 }
 
-function path(map: FloorMap, from: { x: number; y: number }, to: { x: number; y: number }): Dir[] {
+/** Shortest walk from `from` to `to`; cells in `avoid` are only entered if they are the goal. */
+function path(map: FloorMap, from: { x: number; y: number }, to: { x: number; y: number }, avoid?: Set<number>): Dir[] {
   const key = (x: number, y: number) => y * map.width + x;
+  const goal = key(to.x, to.y);
   const prev = new Map<number, { from: number; dir: Dir }>();
   const queue = [from];
   const seen = new Set([key(from.x, from.y)]);
@@ -94,14 +118,15 @@ function path(map: FloorMap, from: { x: number; y: number }, to: { x: number; y:
     for (let d = 0; d < 4; d++) {
       const nx = c.x + DX[d];
       const ny = c.y + DY[d];
-      if (!isPassable(map, nx, ny) || seen.has(key(nx, ny))) continue;
-      seen.add(key(nx, ny));
-      prev.set(key(nx, ny), { from: key(c.x, c.y), dir: d as Dir });
+      const k = key(nx, ny);
+      if (!isPassable(map, nx, ny) || seen.has(k) || (k !== goal && avoid?.has(k))) continue;
+      seen.add(k);
+      prev.set(k, { from: key(c.x, c.y), dir: d as Dir });
       queue.push({ x: nx, y: ny });
     }
   }
   const dirs: Dir[] = [];
-  let k = key(to.x, to.y);
+  let k = goal;
   while (k !== key(from.x, from.y)) {
     const p = prev.get(k);
     if (!p) return [];
@@ -109,6 +134,22 @@ function path(map: FloorMap, from: { x: number; y: number }, to: { x: number; y:
     k = p.from;
   }
   return dirs;
+}
+
+/** Cells a careful player keeps away from: around every prowler, wider around hunters. */
+function prowlerZone(game: Game): Set<number> {
+  const zone = new Set<number>();
+  const { map } = game;
+  game.progress.prowlers.forEach((p, i) => {
+    if (p.defeated) return;
+    const r = 2 + game.floorDef.prowlers[i].hunt;
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (Math.abs(dx) + Math.abs(dy) <= r) zone.add((p.y + dy) * map.width + (p.x + dx));
+      }
+    }
+  });
+  return zone;
 }
 
 function find(map: FloorMap, tile: string): { x: number; y: number }[] {
@@ -128,28 +169,61 @@ function visitTown(game: Game): void {
     });
   }
   while ((game.state.inventory.sapTonic ?? 0) < 5 && buyItem(game, 'sapTonic'));
+  while ((game.state.inventory.kindlingMoss ?? 0) < 2 && buyItem(game, 'kindlingMoss'));
 }
 
-export function autoplay(seed: number, opts: { grindBattles?: number; town?: boolean } = {}): AutoplayResult {
+export interface AutoplayOptions {
+  grindBattles?: number;
+  town?: boolean;
+  /** Stop after this many floors (default: all). */
+  floors?: number;
+}
+
+export function autoplay(seed: number, opts: AutoplayOptions = {}): AutoplayResult {
   const game = Game.newGame(seed);
   game.enterFloor(0);
   let bossRounds = 0;
+  const lastFloor = Math.min(FLOORS.length, opts.floors ?? FLOORS.length) - 1;
 
-  const walkTo = (target: { x: number; y: number }): boolean => {
-    for (const dir of path(game.map, game.state, target)) {
-      game.state.dir = dir;
-      for (const ev of game.step(1, 0)) {
-        if (ev.type === 'encounter' || ev.type === 'prowler') {
-          fight(game, ev.type === 'prowler' ? game.startProwlerCombat(ev.index) : game.startCombat(ev.enemies));
-          if (!game.partyAlive) return false;
-          healBetweenFights(game);
+  const handle = (events: StepEvent[]): boolean => {
+    for (const ev of events) {
+      if (ev.type === 'encounter' || ev.type === 'prowler') {
+        fight(game, ev.type === 'prowler' ? game.startProwlerCombat(ev.index) : game.startCombat(ev.enemies));
+        if (!game.partyAlive) return false;
+        healBetweenFights(game);
+        // Someone is still down and can't be woken here: go back to the inn, then return to this floor.
+        if (opts.town && !game.state.party.every(isAlive)) {
+          const floor = game.state.floor;
+          visitTown(game);
+          game.enterFloor(floor);
         }
       }
     }
     return true;
   };
 
-  for (let floor = 0; floor < 3; floor++) {
+  /** Walks one step at a time, steering clear of prowlers (waiting it out if it must). */
+  const walkTo = (target: { x: number; y: number }): boolean => {
+    for (let steps = 0; steps < 600; steps++) {
+      if (game.state.x === target.x && game.state.y === target.y) return true;
+      const zone = prowlerZone(game);
+      let route = path(game.map, game.state, target, zone);
+      if (route.length === 0) {
+        // No safe way right now: step to the free neighbour farthest from the prowlers, or go anyway after a while.
+        const free = [0, 1, 2, 3].filter((d) => {
+          const k = (game.state.y + DY[d]) * game.map.width + game.state.x + DX[d];
+          return isPassable(game.map, game.state.x + DX[d], game.state.y + DY[d]) && !zone.has(k);
+        });
+        route = steps < 300 && free.length ? [free[steps % free.length] as Dir] : path(game.map, game.state, target);
+      }
+      if (route.length === 0) return true;
+      game.state.dir = route[0];
+      if (!handle(game.step(1, 0))) return false;
+    }
+    return true;
+  };
+
+  for (let floor = 0; floor <= lastFloor; floor++) {
     if (opts.town) {
       visitTown(game);
       game.enterFloor(floor);
@@ -177,20 +251,31 @@ export function autoplay(seed: number, opts: { grindBattles?: number; town?: boo
       if (!walkTo(spring)) return result(game, floor, bossRounds);
       game.drinkSpring();
     }
-    if (floor < 2) {
-      if (!walkTo(find(game.map, 'stairs')[0])) return result(game, floor, bossRounds);
-      game.descend();
-    } else {
-      const boss = find(game.map, 'boss')[0];
+    const boss = find(game.map, 'boss')[0];
+    if (boss && !game.progress.bossDefeated) {
+      // Rest at the inn first, like a sensible player would before a boss.
+      if (opts.town) {
+        visitTown(game);
+        game.enterFloor(floor);
+      }
+      // Top up at the spring on the way (it refills after a town visit).
+      for (const spring of find(game.map, 'spring')) {
+        if (!walkTo(spring)) return result(game, floor, bossRounds);
+        game.drinkSpring();
+      }
       const approach = path(game.map, game.state, boss);
       // Stop one step short to heal up, then enter the boss tile.
-      const before = { x: boss.x - DX[approach[approach.length - 1]], y: boss.y - DY[approach[approach.length - 1]] };
-      if (!walkTo(before)) return result(game, floor, bossRounds);
+      const last = approach[approach.length - 1];
+      if (!walkTo({ x: boss.x - DX[last], y: boss.y - DY[last] })) return result(game, floor, bossRounds);
       healBetweenFights(game);
-      game.state.dir = approach[approach.length - 1];
+      game.state.dir = last;
       game.step(1, 0);
       bossRounds = fight(game, game.startBossCombat());
       if (!game.partyAlive) return result(game, floor, bossRounds);
+    }
+    if (floor < lastFloor) {
+      if (!walkTo(find(game.map, 'stairs')[0])) return result(game, floor, bossRounds);
+      game.descend();
     }
   }
   return result(game, null, bossRounds);
@@ -199,6 +284,7 @@ export function autoplay(seed: number, opts: { grindBattles?: number; town?: boo
 function result(game: Game, diedOnFloor: number | null, bossRounds: number): AutoplayResult {
   return {
     cleared: game.state.cleared,
+    bossesDefeated: game.state.progress.filter((p) => p.bossDefeated).length,
     diedOnFloor,
     battles: game.state.battles,
     levels: game.state.party.map((m) => m.level),

@@ -150,7 +150,7 @@ describe('party', () => {
 });
 
 describe('combat', () => {
-  const inventory = (): Record<ItemId, number> => ({ sapTonic: 2, spiritDew: 0, homingFeather: 0 });
+  const inventory = (): Record<ItemId, number> => ({ sapTonic: 2, spiritDew: 0, kindlingMoss: 0, homingFeather: 0 });
   const attackAll = (combat: Combat): Command[] => combat.party.map(() => ({ kind: 'attack', target: 0 }));
 
   it('a fresh party beats two slimes', () => {
@@ -225,16 +225,28 @@ describe('combat', () => {
     expect(combat.outcome).toBe('defeat');
   });
 
-  it('game applies gold after victory and marks the boss defeated', () => {
-    const game = Game.newGame(1);
-    game.state.floor = 2;
-    const goldBefore = game.state.gold;
+  const beatBoss = (game: Game) => {
     const combat = game.startBossCombat();
     combat.enemies[0].hp = 1;
     for (let r = 0; r < 5 && !combat.outcome; r++) combat.resolveRound(attackAll(combat));
     expect(combat.outcome).toBe('victory');
     game.finishCombat(combat);
+  };
+
+  it('beating the Elder pays out and opens the way down, but the game goes on', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(2, true);
+    const goldBefore = game.state.gold;
+    beatBoss(game);
     expect(game.state.gold).toBe(goldBefore + ENEMIES.blightedElder.gold);
+    expect(game.progress.bossDefeated).toBe(true);
+    expect(game.state.cleared).toBe(false);
+  });
+
+  it('beating the final boss clears the game', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(FLOORS.length - 1, true);
+    beatBoss(game);
     expect(game.state.cleared).toBe(true);
   });
 });
@@ -335,6 +347,51 @@ describe('prowlers', () => {
     FLOORS[2].prowlers = [{ enemies: ['rootDraugr'], route: [[10, 15], [14, 15]], hunt: 5 }];
   });
   afterEach(() => FLOORS.forEach((f, i) => (f.prowlers = saved[i])));
+
+  it('every prowler floor has a way to the stairs or boss that stays clear of all prowlers', () => {
+    saved.forEach((prowlers, f) => {
+      if (prowlers.length === 0) return;
+      const def = { ...FLOORS[f], prowlers };
+      const map = parseFloor(def);
+      const key = (x: number, y: number) => y * map.width + x;
+      // Every cell a prowler can walk on its route, widened by its hunting range (+1 for safety).
+      const danger = new Set<number>();
+      for (const p of prowlers) {
+        const walked: { x: number; y: number }[] = [];
+        p.route.forEach(([x, y], i) => {
+          const [tx, ty] = p.route[(i + 1) % p.route.length];
+          let c = { x, y };
+          walked.push(c);
+          for (let guard = 0; guard < 200 && (c.x !== tx || c.y !== ty); guard++) {
+            c = nextStep(map, c, { x: tx, y: ty }, new Set())!;
+            walked.push(c);
+          }
+        });
+        for (const c of walked) {
+          for (let i = 0; i < map.tiles.length; i++) {
+            const x = i % map.width;
+            const y = Math.floor(i / map.width);
+            if (Math.abs(x - c.x) + Math.abs(y - c.y) <= p.hunt + 1) danger.add(key(x, y));
+          }
+        }
+      }
+      const goal = map.tiles.indexOf(def.boss ? 'boss' : 'stairs');
+      const seen = new Set([key(map.start.x, map.start.y)]);
+      const queue = [map.start];
+      while (queue.length) {
+        const c = queue.shift()!;
+        for (let d = 0; d < 4; d++) {
+          const nx = c.x + DX[d];
+          const ny = c.y + DY[d];
+          const k = key(nx, ny);
+          if (seen.has(k) || !isPassable(map, nx, ny) || (danger.has(k) && k !== goal)) continue;
+          seen.add(k);
+          queue.push({ x: nx, y: ny, dir: 0 });
+        }
+      }
+      expect(seen.has(goal), `${def.name}: safe route around the prowlers`).toBe(true);
+    });
+  });
 
   it(`no prowlers before floor ${FIRST_PROWLER_FLOOR + 1}`, () => {
     saved.slice(0, FIRST_PROWLER_FLOOR).forEach((prowlers) => expect(prowlers).toEqual([]));

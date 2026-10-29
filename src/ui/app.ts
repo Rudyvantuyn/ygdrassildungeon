@@ -5,7 +5,7 @@ import { EQUIPMENT } from '../core/data/equipment';
 import { ITEMS } from '../core/data/items';
 import { DIR_NAMES } from '../core/dungeon';
 import { Game, type StepEvent } from '../core/game';
-import { healAmount, healMember, isAlive, knownSkills, memberStats, restoreSp, xpForLevel } from '../core/party';
+import { healAmount, healMember, isAlive, knownSkills, memberStats, restoreSp, revive, xpForLevel } from '../core/party';
 import { randomSeed } from '../core/rng';
 import type { ItemId, Loot } from '../core/types';
 import { CLASSES } from '../core/data/classes';
@@ -450,6 +450,7 @@ export class App implements CombatHost, TownHost {
       this.closeOverlay();
       if (this.game.state.cleared && combat.boss) return this.showCleared();
       this.enterExplore();
+      if (combat.boss) this.toast(`${combat.enemies[0].def.name} has fallen. The way down lies open.`);
     };
     const menu = new ListMenu([{ label: 'Continue', onSelect: done }], { onCancel: done });
     this.openOverlay(
@@ -490,7 +491,7 @@ export class App implements CombatHost, TownHost {
     this.openOverlay(
       el('div', { className: 'panel dialog' }, [
         el('h2', { text: 'The Rootdeep is cleansed!' }),
-        el('p', { text: `The Blighted Elder has fallen. Its rot no longer creeps up the roots of the Great Tree.` }),
+        el('p', { text: 'The Rootgnawer lies still. Its teeth will gnaw at the roots of the Great Tree no more.' }),
         el('p', { text: `Steps: ${s.steps} · Battles: ${s.battles} · Gold: ${s.gold} G` }),
         menu.el,
       ]),
@@ -548,7 +549,7 @@ export class App implements CombatHost, TownHost {
               m.sp -= skill.sp;
               const amount = healAmount(m, skill.power);
               for (const t of targets) {
-                const healed = healMember(party[t], amount);
+                const healed = skill.kind === 'revive' ? revive(party[t], skill.power) : healMember(party[t], amount);
                 const a = this.party.anchor(t);
                 floater(this.floaters, a.x, a.y, `+${healed}`, 'heal');
               }
@@ -556,7 +557,7 @@ export class App implements CombatHost, TownHost {
               this.packSkills();
             };
             if (skill.target === 'allAllies') cast(party.flatMap((p, i) => (isAlive(p) ? [i] : [])));
-            else this.pickAlly(`${skill.name} on whom?`, (t) => cast([t]), () => this.packSkills());
+            else this.pickAlly(`${skill.name} on whom?`, (t) => cast([t]), () => this.packSkills(), skill.kind === 'revive');
           },
         });
       }
@@ -577,13 +578,14 @@ export class App implements CombatHost, TownHost {
       onSelect: () =>
         this.pickAlly(`Use ${ITEMS[id].name} on whom?`, (t) => {
           const def = ITEMS[id];
-          const amount = def.effect === 'hp' ? healMember(party[t], def.amount) : restoreSp(party[t], def.amount);
+          const amount =
+            def.effect === 'revive' ? revive(party[t], def.amount) : def.effect === 'hp' ? healMember(party[t], def.amount) : restoreSp(party[t], def.amount);
           inv[id] -= 1;
           const a = this.party.anchor(t);
           floater(this.floaters, a.x, a.y, `+${amount}${def.effect === 'sp' ? ' SP' : ''}`, 'heal');
           this.updateHud();
           this.packItems();
-        }, () => this.packItems()),
+        }, () => this.packItems(), ITEMS[id].effect === 'revive'),
     }));
     this.subMenu('Items', items, () => this.openPack());
   }
@@ -601,11 +603,12 @@ export class App implements CombatHost, TownHost {
     this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Party' }), table, menu.el]), menu);
   }
 
-  private pickAlly(title: string, pick: (i: number) => void, back: () => void): void {
+  /** `fallen`: pick among the fallen (for reviving) instead of the living. */
+  private pickAlly(title: string, pick: (i: number) => void, back: () => void, fallen = false): void {
     const items = this.game.state.party.map((m, i) => ({
       label: m.name,
-      detail: `${m.hp}/${memberStats(m).hp} HP · ${m.sp} SP`,
-      disabled: !isAlive(m),
+      detail: isAlive(m) ? `${m.hp}/${memberStats(m).hp} HP · ${m.sp} SP` : 'fallen',
+      disabled: isAlive(m) === fallen,
       onSelect: () => pick(i),
     }));
     this.subMenu(title, items, back);

@@ -85,6 +85,7 @@ export class Game {
     // Fill in fields that saves from earlier builds don't have yet.
     state.chartMode ??= 'assisted';
     state.reserve ??= [];
+    state.inventory.kindlingMoss ??= 0;
     state.progress.forEach((p, i) => {
       p.prowlers ??= initProwlers(FLOORS[i]);
       p.chart ??= emptyChart(p.explored.length);
@@ -117,7 +118,7 @@ export class Game {
       party: createStartingParty(),
       reserve: [],
       gold: 150,
-      inventory: { sapTonic: 3, spiritDew: 1, homingFeather: 1 },
+      inventory: { sapTonic: 3, spiritDew: 1, kindlingMoss: 1, homingFeather: 1 },
       danger: 0,
       encounterAt: 0,
       progress,
