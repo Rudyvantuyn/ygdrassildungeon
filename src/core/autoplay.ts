@@ -139,8 +139,8 @@ export function autoplay(seed: number, opts: { grindBattles?: number; town?: boo
     for (const dir of path(game.map, game.state, target)) {
       game.state.dir = dir;
       for (const ev of game.step(1, 0)) {
-        if (ev.type === 'encounter') {
-          fight(game, game.startCombat(ev.enemies));
+        if (ev.type === 'encounter' || ev.type === 'prowler') {
+          fight(game, ev.type === 'prowler' ? game.startProwlerCombat(ev.index) : game.startCombat(ev.enemies));
           if (!game.partyAlive) return false;
           healBetweenFights(game);
         }

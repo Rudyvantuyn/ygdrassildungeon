@@ -110,6 +110,41 @@ const list: EnemyDef[] = [
     drop: { item: 'sapTonic', chance: 0.25 },
     art: { shape: 'golem', color: '#6e5a44', accent: '#7fe0c0', size: 1.1 },
   },
+  // ── Prowlers: strong monsters that roam the map ────────────────────────────
+  {
+    id: 'grimtusk',
+    name: 'Grimtusk',
+    hp: 170, atk: 21, def: 9, mag: 4, res: 6, spd: 9,
+    xp: 60, gold: 45,
+    weak: ['fire'], resist: [],
+    skills: [{ name: 'Gore', chance: 0.35, kind: 'phys', element: 'phys', power: 175, target: 'one' }],
+    drop: { item: 'sapTonic', chance: 0.6 },
+    art: { shape: 'beast', color: '#6a3a2a', accent: '#ff6a3a', size: 1.2 },
+  },
+  {
+    id: 'fenwraith',
+    name: 'Fenwraith',
+    hp: 230, atk: 22, def: 10, mag: 29, res: 16, spd: 18,
+    xp: 110, gold: 75,
+    weak: ['frost'], resist: ['storm'],
+    ranged: true,
+    skills: [{ name: 'Wailing Gust', chance: 0.35, kind: 'magic', element: 'storm', power: 85, target: 'all' }],
+    drop: { item: 'spiritDew', chance: 0.5 },
+    art: { shape: 'moth', color: '#3a5a5a', accent: '#a0fff0', size: 1.15 },
+  },
+  {
+    id: 'rootDraugr',
+    name: 'Root Draugr',
+    hp: 400, atk: 35, def: 22, mag: 10, res: 12, spd: 8,
+    xp: 200, gold: 130,
+    weak: ['fire'], resist: ['frost'],
+    skills: [
+      { name: 'Grave Grip', chance: 0.3, kind: 'phys', element: 'phys', power: 185, target: 'one' },
+      { name: 'Barrow Chill', chance: 0.2, kind: 'magic', element: 'frost', power: 80, target: 'all' },
+    ],
+    drop: { item: 'sapTonic', chance: 0.8 },
+    art: { shape: 'golem', color: '#3e4a3a', accent: '#d0f0ff', size: 1.2 },
+  },
   // ── Boss ───────────────────────────────────────────────────────────────────
   {
     id: 'blightedElder',

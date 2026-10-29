@@ -7,6 +7,7 @@ import { CLASSES } from './data/classes';
 import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir } from './dungeon';
 import { Game, SaveVersionError, type GameState } from './game';
 import { buyEquipment, buyItem, equipmentForSale, innCost, netPrice, restAtInn } from './town';
+import { moveProwlers, nextStep, prowlerCanEnter } from './prowlers';
 import { createStartingParty, grantXp, memberStats, xpForLevel } from './party';
 import { Rng } from './rng';
 import type { ItemId } from './types';
@@ -308,5 +309,87 @@ describe('town', () => {
     const state = JSON.parse(Game.newGame(1).serialize()) as GameState;
     state.version = 2;
     expect(() => Game.load(JSON.stringify(state))).toThrow(SaveVersionError);
+  });
+});
+
+describe('prowlers', () => {
+  FLOORS.forEach((def, f) => {
+    it(`${def.name}: prowler routes are valid`, () => {
+      const map = parseFloor(def);
+      for (const p of def.prowlers) {
+        for (const id of p.enemies) expect(ENEMIES[id], id).toBeDefined();
+        for (const [x, y] of p.route) expect(prowlerCanEnter(map, x, y), `${x},${y} is plain floor`).toBe(true);
+        p.route.forEach(([x, y], i) => {
+          const [nx, ny] = p.route[(i + 1) % p.route.length];
+          expect(nextStep(map, { x, y }, { x: nx, y: ny }, new Set()), `route leg ${i} on floor ${f}`).not.toBeNull();
+        });
+        // Never right next to the entrance: the party always gets a moment to look around.
+        const [sx, sy] = p.route[0];
+        expect(Math.abs(sx - map.start.x) + Math.abs(sy - map.start.y)).toBeGreaterThan(3);
+      }
+    });
+  });
+
+  it('patrols back and forth along the route, only on plain floor', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(0);
+    const p = game.progress.prowlers[0];
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i++) {
+      moveProwlers(game.map, game.floorDef, game.progress.prowlers, { x: 1, y: 1 });
+      expect(prowlerCanEnter(game.map, p.x, p.y)).toBe(true);
+      seen.add(`${p.x},${p.y}`);
+    }
+    for (const [x, y] of game.floorDef.prowlers[0].route) expect(seen.has(`${x},${y}`)).toBe(true);
+  });
+
+  it('a hunter chases the party once it is in range', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(2, true);
+    const hunter = game.progress.prowlers[0];
+    const party = { x: hunter.x + 3, y: hunter.y }; // same corridor, towards the boss
+    const before = nextStep(game.map, hunter, party, new Set())!.distance;
+    const alerts = moveProwlers(game.map, game.floorDef, game.progress.prowlers, party);
+    expect(alerts).toContain(0);
+    expect(nextStep(game.map, hunter, party, new Set())!.distance).toBe(before - 1);
+  });
+
+  it('walking into a prowler starts a fight; winning removes it until the party returns to town', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(0);
+    game.state.encounterAt = 999;
+    const p = game.progress.prowlers[0];
+    game.state.x = p.x - 1;
+    game.state.y = p.y;
+    game.state.dir = 1;
+    p.stun = 1; // keep it in place for this step
+    const events = game.step(1, 0);
+    const ev = events.find((e) => e.type === 'prowler');
+    expect(ev).toEqual({ type: 'prowler', index: 0 });
+
+    const combat = game.startProwlerCombat(0);
+    expect(combat.canFlee).toBe(true);
+    combat.enemies.forEach((e) => (e.hp = 1));
+    for (let r = 0; r < 5 && !combat.outcome; r++) combat.resolveRound(game.state.party.map(() => ({ kind: 'attack', target: 0 })));
+    game.finishCombat(combat);
+    expect(p.defeated).toBe(true);
+    expect(game.prowlerAt(p.x, p.y)).toBe(-1);
+
+    game.returnToTown();
+    expect(game.progress.prowlers[0].defeated).toBe(false);
+  });
+
+  it('after fleeing, the prowler is dazed for 3 steps', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(0);
+    const combat = game.startProwlerCombat(0);
+    combat.outcome = 'fled';
+    game.finishCombat(combat);
+    const p = game.progress.prowlers[0];
+    const at = { x: p.x, y: p.y };
+    for (let i = 0; i < 3; i++) moveProwlers(game.map, game.floorDef, game.progress.prowlers, { x: 1, y: 1 });
+    expect({ x: p.x, y: p.y }).toEqual(at);
+    moveProwlers(game.map, game.floorDef, game.progress.prowlers, { x: 1, y: 1 });
+    expect({ x: p.x, y: p.y }).not.toEqual(at);
   });
 });

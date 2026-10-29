@@ -50,6 +50,7 @@ export type CombatEvent =
 
 export interface CombatOptions {
   boss?: boolean;
+  prowler?: boolean;
 }
 
 const WEAK_MULT = 1.5;
@@ -59,6 +60,7 @@ export class Combat {
   readonly enemies: EnemyUnit[];
   readonly status: PartyStatus[];
   readonly boss: boolean;
+  readonly prowler: boolean;
   round = 1;
   outcome: Outcome | null = null;
   rewards: Rewards | null = null;
@@ -71,6 +73,7 @@ export class Combat {
     opts: CombatOptions = {},
   ) {
     this.boss = !!opts.boss;
+    this.prowler = !!opts.prowler;
     this.enemies = enemyIds.map((id) => {
       const def = ENEMIES[id];
       if (!def) throw new Error(`Unknown enemy "${id}"`);

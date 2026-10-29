@@ -48,6 +48,12 @@ export function drawMinimap(ctx: CanvasRenderingContext2D, size: number, game: G
     }
   }
 
+  // Prowlers, shown on cells the party has mapped
+  game.progress.prowlers.forEach((p) => {
+    if (p.defeated || !game.isExplored(p.x, p.y)) return;
+    icon(ctx, ox + p.x * cell + cell / 2, oy + p.y * cell + cell / 2, cell, p.chasing ? '#e8402a' : '#e08a1a', '◆');
+  });
+
   // Party arrow
   const { x, y, dir } = game.state;
   const cx = ox + x * cell + cell / 2;

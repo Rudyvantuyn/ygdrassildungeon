@@ -2,6 +2,7 @@ import { Combat } from './combat';
 import { FLOORS, type FloorDef } from './data/floors';
 import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
 import { createStartingParty, fullRestore, isAlive } from './party';
+import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
 import { Rng } from './rng';
 import type { Dir, ItemId, Loot, Member } from './types';
 
@@ -14,6 +15,7 @@ export interface FloorProgress {
   openedChests: number[];
   springUsed: boolean;
   bossDefeated: boolean;
+  prowlers: ProwlerState[];
 }
 
 export type Location = 'town' | 'dungeon';
@@ -49,7 +51,11 @@ export type StepEvent =
   | { type: 'upstairs' }
   | { type: 'spring'; used: boolean }
   | { type: 'boss' }
-  | { type: 'encounter'; enemies: string[] };
+  | { type: 'encounter'; enemies: string[] }
+  /** A prowler and the party ran into each other. */
+  | { type: 'prowler'; index: number }
+  /** A hunting prowler has noticed the party. */
+  | { type: 'prowlerAlert'; index: number };
 
 export class SaveVersionError extends Error {
   constructor(readonly found: number) {
@@ -60,16 +66,26 @@ export class SaveVersionError extends Error {
 export class Game {
   map: FloorMap;
   private rng: Rng;
+  /** Prowler the current combat is against, if any. */
+  private activeProwler: number | null = null;
 
   private constructor(public state: GameState) {
     this.rng = new Rng(state.rng);
     this.map = parseFloor(this.floorDef);
+    // Saves from before prowlers existed have none yet.
+    state.progress.forEach((p, i) => (p.prowlers ??= initProwlers(FLOORS[i])));
   }
 
   static newGame(seed: number): Game {
     const progress = FLOORS.map((def) => {
       const map = parseFloor(def);
-      return { explored: '0'.repeat(map.width * map.height), openedChests: [], springUsed: false, bossDefeated: false };
+      return {
+        explored: '0'.repeat(map.width * map.height),
+        openedChests: [],
+        springUsed: false,
+        bossDefeated: false,
+        prowlers: initProwlers(def),
+      };
     });
     const start = parseFloor(FLOORS[0]).start;
     const game = new Game({
@@ -155,6 +171,20 @@ export class Game {
     this.markExplored();
 
     const events: StepEvent[] = [{ type: 'moved' }];
+
+    // Prowlers: walking into one, or one walking into the party, starts a fight.
+    let hit = this.prowlerAt(this.state.x, this.state.y);
+    if (hit < 0) {
+      for (const index of moveProwlers(this.map, this.floorDef, this.progress.prowlers, this.state)) {
+        events.push({ type: 'prowlerAlert', index });
+      }
+      hit = this.prowlerAt(this.state.x, this.state.y);
+    }
+    if (hit >= 0) {
+      events.push({ type: 'prowler', index: hit });
+      return events;
+    }
+
     const tile = this.tileHere();
     if (tile === 'chest') {
       events.push(this.openChest());
@@ -227,10 +257,13 @@ export class Game {
     this.markExplored();
   }
 
-  /** Back to town. Springs refill while the party is away. */
+  /** Back to town. Springs refill and prowlers return while the party is away. */
   returnToTown(): void {
     this.state.location = 'town';
-    for (const p of this.state.progress) p.springUsed = false;
+    this.state.progress.forEach((p, i) => {
+      p.springUsed = false;
+      p.prowlers = initProwlers(FLOORS[i]);
+    });
   }
 
   useFeather(): boolean {
@@ -244,6 +277,16 @@ export class Game {
     return new Combat(this.state.party, enemies, this.state.inventory, this.rng);
   }
 
+  /** Index of the active prowler standing on (x, y), or -1. */
+  prowlerAt(x: number, y: number): number {
+    return this.progress.prowlers.findIndex((p) => !p.defeated && p.x === x && p.y === y);
+  }
+
+  startProwlerCombat(index: number): Combat {
+    this.activeProwler = index;
+    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true });
+  }
+
   startBossCombat(): Combat {
     return new Combat(this.state.party, this.floorDef.boss ?? [], this.state.inventory, this.rng, { boss: true });
   }
@@ -253,6 +296,13 @@ export class Game {
     this.state.battles += 1;
     this.state.danger = 0;
     this.rollEncounterAt();
+    if (this.activeProwler !== null) {
+      const prowler = this.progress.prowlers[this.activeProwler];
+      if (combat.outcome === 'victory') prowler.defeated = true;
+      // After a successful escape the prowler is dazed for a few steps.
+      if (combat.outcome === 'fled') prowler.stun = 3;
+      this.activeProwler = null;
+    }
     if (combat.outcome === 'victory' && combat.rewards) {
       this.state.gold += combat.rewards.gold;
       if (combat.boss) {

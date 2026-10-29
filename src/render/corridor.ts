@@ -1,7 +1,9 @@
+import { ENEMIES } from '../core/data/enemies';
 import type { Palette } from '../core/data/floors';
 import { relCell, tileAt } from '../core/dungeon';
 import type { Game } from '../core/game';
 import { mix, shade } from './color';
+import { drawMonster } from './monsters';
 
 /**
  * First-person grid view, drawn with the painter's algorithm.
@@ -70,6 +72,11 @@ export class CorridorRenderer {
           if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y));
           if (tile === 'spring') this.spring(s, d, time, game.progress.springUsed);
           if (tile === 'boss' && !game.progress.bossDefeated) this.bossSigil(s, d, time);
+          const prowler = d > 0 ? game.prowlerAt(cell.x, cell.y) : -1;
+          if (prowler >= 0) {
+            const art = ENEMIES[game.floorDef.prowlers[prowler].enemies[0]].art;
+            this.prowler(s, d, art, time + prowler * 911, game.progress.prowlers[prowler].chasing);
+          }
         }
       }
     }
@@ -343,6 +350,48 @@ export class CorridorRenderer {
       ctx.fillStyle = glow;
       ctx.fillRect(cx - rx * 1.4, cy - ry - rx * 1.4, rx * 2.8, rx * 2.8);
     }
+  }
+
+  /** A prowler: the monster's dark silhouette wrapped in a smouldering aura. */
+  private prowler(s: number, d: number, art: (typeof ENEMIES)[string]['art'], time: number, chasing: boolean): void {
+    const ctx = this.ctx;
+    const z = d + 0.5;
+    const f = this.fog(z);
+    const [gx, gy] = this.project([s, 0.5, z]);
+    const u = (this.sx / (z + EYE)) * 0.5;
+    const pulse = 0.5 + 0.5 * Math.sin(time / (chasing ? 120 : 380));
+
+    // Aura
+    const aura = ctx.createRadialGradient(gx, gy - u * 0.5, 0, gx, gy - u * 0.5, u * 1.1);
+    const glow = chasing ? '255,60,30' : '255,140,40';
+    aura.addColorStop(0, `rgba(${glow},${(0.35 + 0.25 * pulse) * (1 - f)})`);
+    aura.addColorStop(1, `rgba(${glow},0)`);
+    ctx.fillStyle = aura;
+    ctx.fillRect(gx - u * 1.1, gy - u * 1.6, u * 2.2, u * 2.2);
+
+    // Silhouette, drawn off-screen so it can be filled with a single dark tone
+    const size = Math.ceil(u * 2.6);
+    if (size < 4) return;
+    const off = this.scratch(size);
+    const octx = off.getContext('2d')!;
+    octx.clearRect(0, 0, size, size);
+    drawMonster(octx, art, size / 2, size * 0.92, u, time);
+    octx.globalCompositeOperation = 'source-atop';
+    octx.fillStyle = `rgba(12,6,16,${0.88 - 0.3 * f})`;
+    octx.fillRect(0, 0, size, size);
+    octx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(off, 0, 0, size, size, gx - size / 2, gy - size * 0.92, size, size);
+  }
+
+  private scratchCanvas: HTMLCanvasElement | null = null;
+
+  private scratch(size: number): HTMLCanvasElement {
+    if (!this.scratchCanvas) this.scratchCanvas = document.createElement('canvas');
+    if (this.scratchCanvas.width < size) {
+      this.scratchCanvas.width = size;
+      this.scratchCanvas.height = size;
+    }
+    return this.scratchCanvas;
   }
 
   private bossSigil(s: number, d: number, time: number): void {

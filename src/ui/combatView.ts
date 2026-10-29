@@ -56,7 +56,14 @@ export class CombatView {
     this.syncParty();
     this.renderParty();
     const names = this.combat.enemies.map((e) => e.name).join(', ');
-    this.say(this.combat.boss ? `${names} blocks the way!` : `${names} ${this.combat.enemies.length > 1 ? 'appear' : 'appears'}!`);
+    const plural = this.combat.enemies.length > 1;
+    this.say(
+      this.combat.boss
+        ? `${names} blocks the way!`
+        : this.combat.prowler
+          ? `${names} ${plural ? 'lunge' : 'lunges'} out of the dark!`
+          : `${names} ${plural ? 'appear' : 'appears'}!`,
+    );
     this.showPanel('', null, 'Get ready...');
     await this.wait(900);
     this.beginRound();
@@ -67,7 +74,7 @@ export class CombatView {
   draw(ctx: CanvasRenderingContext2D, w: number, h: number, time: number): void {
     this.time = time;
     this.host.corridor.draw(this.host.game, time);
-    ctx.fillStyle = this.combat.boss ? 'rgba(40,0,0,0.5)' : 'rgba(0,0,0,0.45)';
+    ctx.fillStyle = this.combat.boss ? 'rgba(40,0,0,0.5)' : this.combat.prowler ? 'rgba(40,16,0,0.5)' : 'rgba(0,0,0,0.45)';
     ctx.fillRect(0, 0, w, h);
 
     this.combat.enemies.forEach((enemy, i) => {

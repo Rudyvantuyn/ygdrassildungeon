@@ -45,6 +45,9 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Beurtgevechten** met een party van 4 (Bastion, Strider, Mender, Runecaller): aanvallen, skills (kosten SP), verdedigen, items, vluchten.
   Voorste en achterste rij, zwaktes en resistenties (vuur/vorst/storm), kritieke treffers, Challenge en Iron Formation.
 - **Ervaring en levels**: nieuwe skills op level 3 en 4.
+- **Prowlers**: sterke monsters die je ziet in de gang en op de kaart (◆). Ze zetten één stap per stap die jij zet.
+  Patrouilleurs lopen een vaste route, jagers komen op je af als je te dichtbij komt (rood). Vluchten kan: de Prowler is
+  dan een paar stappen verdoofd. Verslagen Prowlers komen terug als je in de stad bent geweest.
 - **3 verdiepingen** met kisten, een genezende bron (eenmalig, slaat ook op) en een **eindbaas** op de derde verdieping.
 - **Opslaan** in de browser: in de stad (herberg of menu), en automatisch bij elke trap en bij de bron.
   In de dungeon kun je niet zomaar opslaan: wie valt, begint weer bij de laatste save.
@@ -67,6 +70,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Items | Sap Tonic (HP), Spirit Dew (SP), Homing Feather (terug naar de stad) |
 | Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe |
 | Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, eindbaas **The Blighted Elder** |
+| Prowlers | Sterke monsters die zichtbaar over de kaart lopen: Grimtusk, Fenwraith, Root Draugr |
 | Menu's | Pack (rugzak-menu in de dungeon), Danger-bol |
 
 ## Projectstructuur

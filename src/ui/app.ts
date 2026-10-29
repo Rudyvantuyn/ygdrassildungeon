@@ -1,5 +1,6 @@
 import type { Combat } from '../core/combat';
 import { FLOORS } from '../core/data/floors';
+import { ENEMIES } from '../core/data/enemies';
 import { EQUIPMENT } from '../core/data/equipment';
 import { ITEMS } from '../core/data/items';
 import { DIR_NAMES } from '../core/dungeon';
@@ -380,6 +381,15 @@ export class App implements CombatHost, TownHost {
         this.toast('A terrible presence stirs...');
         window.setTimeout(() => this.startCombat(this.game.startBossCombat()), 1100);
         return;
+      case 'prowlerAlert':
+        this.toast(`${this.prowlerName(ev.index)} has caught your scent!`);
+        this.shakeView();
+        return;
+      case 'prowler':
+        this.mode = 'busy';
+        this.fx = { kind: 'encounter', start: this.now };
+        window.setTimeout(() => this.startCombat(this.game.startProwlerCombat(ev.index)), 700);
+        return;
       case 'encounter':
         this.mode = 'busy';
         this.fx = { kind: 'encounter', start: this.now };
@@ -407,7 +417,7 @@ export class App implements CombatHost, TownHost {
     if (combat.outcome === 'defeat') return this.showGameOver();
     if (combat.outcome === 'fled') {
       this.enterExplore();
-      this.toast('The party got away.');
+      this.toast(combat.prowler ? `You slipped away! The ${combat.enemies[0].def.name} is dazed for a few steps.` : 'The party got away.');
       return;
     }
     const r = combat.rewards!;
@@ -640,6 +650,10 @@ export class App implements CombatHost, TownHost {
     this.toastEl.classList.remove('hidden');
     window.clearTimeout(this.toastTimer);
     this.toastTimer = window.setTimeout(() => this.toastEl.classList.add('hidden'), 2400);
+  }
+
+  private prowlerName(index: number): string {
+    return ENEMIES[this.game.floorDef.prowlers[index].enemies[0]].name;
   }
 
   /** Test/debug hook: force a random encounter on the current floor. */
