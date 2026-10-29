@@ -54,6 +54,8 @@ export interface CombatOptions {
 }
 
 const WEAK_MULT = 1.5;
+/** Prowlers are hard to shake off, whatever the party's speed. */
+export const PROWLER_FLEE_CHANCE = 0.3;
 const RESIST_MULT = 0.5;
 
 export class Combat {
@@ -241,6 +243,7 @@ export class Combat {
   }
 
   fleeChance(): number {
+    if (this.prowler) return PROWLER_FLEE_CHANCE;
     const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
     const partySpd = avg(this.livingParty().map((i) => memberStats(this.party[i]).spd));
     const enemySpd = avg(this.livingEnemies().map((i) => this.enemies[i].def.spd));

@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest';
-import { Combat, type Command } from './combat';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { Combat, PROWLER_FLEE_CHANCE, type Command } from './combat';
 import { ENEMIES } from './data/enemies';
-import { FLOORS } from './data/floors';
+import { FIRST_PROWLER_FLOOR, FLOORS } from './data/floors';
 import { SKILLS } from './data/skills';
 import { CLASSES } from './data/classes';
 import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir } from './dungeon';
@@ -313,6 +313,26 @@ describe('town', () => {
 });
 
 describe('prowlers', () => {
+  // The current floors are too shallow for prowlers, so most tests below place some on purpose.
+  const saved = FLOORS.map((f) => f.prowlers);
+  beforeEach(() => {
+    FLOORS[0].prowlers = [{ enemies: ['grimtusk'], route: [[3, 11], [11, 11]], hunt: 0 }];
+    FLOORS[2].prowlers = [{ enemies: ['rootDraugr'], route: [[10, 15], [14, 15]], hunt: 5 }];
+  });
+  afterEach(() => FLOORS.forEach((f, i) => (f.prowlers = saved[i])));
+
+  it(`no prowlers before floor ${FIRST_PROWLER_FLOOR + 1}`, () => {
+    saved.slice(0, FIRST_PROWLER_FLOOR).forEach((prowlers) => expect(prowlers).toEqual([]));
+  });
+
+  it('fleeing from a prowler is a flat 30%', () => {
+    const game = Game.newGame(1);
+    game.state.party.forEach((m) => (m.level = 20));
+    const combat = game.startProwlerCombat(0);
+    expect(combat.fleeChance()).toBe(PROWLER_FLEE_CHANCE);
+    expect(PROWLER_FLEE_CHANCE).toBe(0.3);
+  });
+
   FLOORS.forEach((def, f) => {
     it(`${def.name}: prowler routes are valid`, () => {
       const map = parseFloor(def);

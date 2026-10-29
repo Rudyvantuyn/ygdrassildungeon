@@ -110,12 +110,14 @@ const list: EnemyDef[] = [
     drop: { item: 'sapTonic', chance: 0.25 },
     art: { shape: 'golem', color: '#6e5a44', accent: '#7fe0c0', size: 1.1 },
   },
-  // ── Prowlers: strong monsters that roam the map ────────────────────────────
+  // ── Prowlers: strong monsters that roam the map (floor 5 and deeper) ───────
+  // Tuned so a geared party needs about level 10 to win, and only sometimes.
+  // The balance test checks this; keep it in sync when stats change.
   {
     id: 'grimtusk',
     name: 'Grimtusk',
-    hp: 170, atk: 21, def: 9, mag: 4, res: 6, spd: 9,
-    xp: 60, gold: 45,
+    hp: 2700, atk: 67, def: 30, mag: 10, res: 22, spd: 18,
+    xp: 520, gold: 300,
     weak: ['fire'], resist: [],
     skills: [{ name: 'Gore', chance: 0.35, kind: 'phys', element: 'phys', power: 175, target: 'one' }],
     drop: { item: 'sapTonic', chance: 0.6 },
@@ -124,8 +126,8 @@ const list: EnemyDef[] = [
   {
     id: 'fenwraith',
     name: 'Fenwraith',
-    hp: 230, atk: 22, def: 10, mag: 29, res: 16, spd: 18,
-    xp: 110, gold: 75,
+    hp: 1950, atk: 45, def: 25, mag: 50, res: 35, spd: 24,
+    xp: 580, gold: 340,
     weak: ['frost'], resist: ['storm'],
     ranged: true,
     skills: [{ name: 'Wailing Gust', chance: 0.35, kind: 'magic', element: 'storm', power: 85, target: 'all' }],
@@ -135,8 +137,8 @@ const list: EnemyDef[] = [
   {
     id: 'rootDraugr',
     name: 'Root Draugr',
-    hp: 400, atk: 35, def: 22, mag: 10, res: 12, spd: 8,
-    xp: 200, gold: 130,
+    hp: 2700, atk: 70, def: 38, mag: 30, res: 24, spd: 14,
+    xp: 650, gold: 380,
     weak: ['fire'], resist: ['frost'],
     skills: [
       { name: 'Grave Grip', chance: 0.3, kind: 'phys', element: 'phys', power: 185, target: 'one' },

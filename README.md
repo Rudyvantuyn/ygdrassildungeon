@@ -45,9 +45,11 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Beurtgevechten** met een party van 4 (Bastion, Strider, Mender, Runecaller): aanvallen, skills (kosten SP), verdedigen, items, vluchten.
   Voorste en achterste rij, zwaktes en resistenties (vuur/vorst/storm), kritieke treffers, Challenge en Iron Formation.
 - **Ervaring en levels**: nieuwe skills op level 3 en 4.
-- **Prowlers**: sterke monsters die je ziet in de gang en op de kaart (◆). Ze zetten één stap per stap die jij zet.
-  Patrouilleurs lopen een vaste route, jagers komen op je af als je te dichtbij komt (rood). Vluchten kan: de Prowler is
-  dan een paar stappen verdoofd. Verslagen Prowlers komen terug als je in de stad bent geweest.
+- **Prowlers** (klaar, maar pas vanaf verdieping 5, die er nog niet is): sterke monsters die je ziet in de gang en op de
+  kaart (◆). Ze zetten één stap per stap die jij zet. Patrouilleurs lopen een vaste route, jagers komen op je af als je
+  te dichtbij komt (rood). Je moet ze ontwijken of eerst trainen: pas rond level 10 heb je een kleine kans.
+  Vluchten lukt in 30% van de gevallen; daarna is de Prowler een paar stappen verdoofd.
+  Verslagen Prowlers komen terug als je in de stad bent geweest.
 - **3 verdiepingen** met kisten, een genezende bron (eenmalig, slaat ook op) en een **eindbaas** op de derde verdieping.
 - **Opslaan** in de browser: in de stad (herberg of menu), en automatisch bij elke trap en bij de bron.
   In de dungeon kun je niet zomaar opslaan: wie valt, begint weer bij de laatste save.

@@ -27,6 +27,17 @@ Decided by the owner (don't raise again):
 The game's own vocabulary lives in `src/core/data/` and is listed in the README glossary.
 Add new names there and keep the glossary in sync.
 
+## Design decisions (from the owner)
+
+- **Prowlers** (visible roaming monsters) only appear from **floor 5** onward. A party should not survive a
+  prowler fight before about **level 10**, and even then only barely: they are meant to be avoided, or beaten
+  after training. Every prowler floor must have a route around them. Fleeing from a prowler is a fixed **30%**.
+
+## Working with the owner
+
+- Don't ask the owner to test after every update. Work in larger chunks and announce a **test phase** only after
+  big changes (with a short list of what to try). Keep momentum: after finishing something, pick up the next item.
+
 ## Working on the code
 
 - `npm run typecheck`, `npm test` (logic + balance, uses a computer player) and `npm run build` must pass before pushing.

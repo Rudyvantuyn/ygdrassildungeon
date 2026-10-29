@@ -21,6 +21,9 @@ export interface ProwlerDef {
   hunt: number;
 }
 
+/** Prowlers only appear from this floor index on (floor 5). */
+export const FIRST_PROWLER_FLOOR = 4;
+
 export interface FloorDef {
   name: string;
   /**
@@ -71,8 +74,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['briarGnawer', 'duskwing', 'bogling'], weight: 1 },
     ],
     chests: [{ item: 'sapTonic', qty: 2 }, { gold: 60 }],
-    // Paces the long corridor in front of the stairs: time your crossing.
-    prowlers: [{ enemies: ['grimtusk'], route: [[3, 11], [11, 11]], hunt: 0 }],
+    prowlers: [],
     palette: {
       wall: '#4f5d3f',
       wallEdge: '#2b3322',
@@ -112,10 +114,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['shellbark'], weight: 1 },
     ],
     chests: [{ item: 'spiritDew', qty: 2 }, { item: 'sapTonic', qty: 3 }],
-    prowlers: [
-      { enemies: ['fenwraith'], route: [[16, 2], [16, 10]], hunt: 0 },
-      { enemies: ['hollowHound', 'grimtusk'], route: [[7, 4], [10, 4]], hunt: 4 },
-    ],
+    prowlers: [],
     palette: {
       wall: '#5a4a38',
       wallEdge: '#2e251b',
@@ -156,10 +155,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['gloamMoth', 'gloamMoth'], weight: 1 },
     ],
     chests: [{ item: 'sapTonic', qty: 3 }, { gold: 200 }],
-    prowlers: [
-      { enemies: ['rootDraugr'], route: [[10, 15], [14, 15]], hunt: 5 },
-      { enemies: ['fenwraith', 'gloamMoth'], route: [[8, 13], [11, 13]], hunt: 3 },
-    ],
+    prowlers: [],
     boss: ['blightedElder'],
     palette: {
       wall: '#3e4a52',
