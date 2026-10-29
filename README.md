@@ -31,6 +31,8 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ### De stad Lindholm (mijlpaal 2)
 
+- **Oath Hall**: meld nieuwe avonturiers aan (eigen naam, klasse naar keuze) en stel je party samen: maximaal 4 leden,
+  volgorde en rij (voor/achter) kies je zelf, en tot 12 avonturiers in totaal. Reserveleden krijgen geen XP.
 - **Herberg**: uitrusten voor goud. Herstelt HP en SP, wekt gevallen leden weer tot leven en slaat op.
 - **Winkel**: items (Sap Tonic, Spirit Dew, Homing Feather) en **uitrusting** per klasse.
   Nieuwe wapens en harnassen verschijnen zodra je een diepere verdieping hebt bereikt; je oude stuk ruil je in voor de halve prijs.
@@ -66,7 +68,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 |---|---|
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
 | Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III |
-| Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel) |
+| Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
 | Party | Bram, Sela, Wren, Orrin |
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |

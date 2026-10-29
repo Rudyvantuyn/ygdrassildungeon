@@ -13,7 +13,8 @@ import {
   restAtInn,
   statDelta,
 } from '../core/town';
-import type { ItemId, Stats } from '../core/types';
+import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow } from '../core/guild';
+import type { ClassId, ItemId, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
@@ -33,11 +34,11 @@ export interface TownHost {
 
 const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', sp: 'SP', atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES', spd: 'SPD' };
 
-/** Town menu (side panel) plus the Inn, Shop and Rootdeep dialogs. */
+/** Town menu (side panel) plus the Inn, Oath Hall, Shop and Rootdeep dialogs. */
 export class TownView {
   focus: TownSpot | null = 'rootdeep';
   menu: ListMenu | null = null;
-  private lastIndex = 2;
+  private lastIndex = 3;
 
   constructor(
     private readonly host: TownHost,
@@ -50,18 +51,22 @@ export class TownView {
 
   /** Builds the side-panel menu. */
   show(): void {
-    const spot = (s: TownSpot, i: number) => () => {
-      this.focus = s;
-      this.lastIndex = i;
-    };
-    const items: MenuItem[] = [
-      { label: 'Inn', detail: `${innCost(this.game)} G`, description: 'Rest to restore HP and SP, revive fallen members, and save.', onFocus: spot('inn', 0), onSelect: () => this.inn() },
-      { label: 'Shop', description: 'Buy items and equipment. Better gear appears as you go deeper.', onFocus: spot('shop', 1), onSelect: () => this.shop() },
-      { label: 'Rootdeep', description: 'Enter the Rootdeep at any floor you have reached.', onFocus: spot('rootdeep', 2), onSelect: () => this.rootdeep() },
-      { label: 'Party', description: 'View stats and equipment.', onFocus: () => { this.focus = null; this.lastIndex = 3; }, onSelect: () => this.host.partyStatus(() => this.back()) },
-      { label: 'Save', description: 'Save your progress.', onFocus: () => { this.focus = null; this.lastIndex = 4; }, onSelect: () => { this.host.save(); this.host.toast('Game saved.'); } },
-      { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onFocus: () => { this.focus = null; this.lastIndex = 5; }, onSelect: () => this.host.showTitle() },
+    const entries: (Omit<MenuItem, 'onFocus'> & { spot: TownSpot | null })[] = [
+      { label: 'Inn', detail: `${innCost(this.game)} G`, description: 'Rest to restore HP and SP, revive fallen members, and save.', spot: 'inn', onSelect: () => this.inn() },
+      { label: 'Oath Hall', description: 'Register new adventurers and choose who joins the party.', spot: 'hall', onSelect: () => this.hall() },
+      { label: 'Shop', description: 'Buy items and equipment. Better gear appears as you go deeper.', spot: 'shop', onSelect: () => this.shop() },
+      { label: 'Rootdeep', description: 'Enter the Rootdeep at any floor you have reached.', spot: 'rootdeep', onSelect: () => this.rootdeep() },
+      { label: 'Party', description: 'View stats and equipment.', spot: null, onSelect: () => this.host.partyStatus(() => this.back()) },
+      { label: 'Save', description: 'Save your progress.', spot: null, onSelect: () => { this.host.save(); this.host.toast('Game saved.'); } },
+      { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', spot: null, onSelect: () => this.host.showTitle() },
     ];
+    const items: MenuItem[] = entries.map(({ spot, ...item }, i) => ({
+      ...item,
+      onFocus: () => {
+        this.focus = spot;
+        this.lastIndex = i;
+      },
+    }));
     this.menu = new ListMenu(items, { startIndex: this.lastIndex });
     const desc = el('div', { className: 'menu-desc' });
     this.panel.innerHTML = '';
@@ -97,6 +102,145 @@ export class TownView {
       { onCancel: back },
     );
     this.dialog('The Sleeping Stag', [el('p', { text: `"Welcome, explorers! A warm bed and a hot meal for ${cost} gold."` })], menu);
+  }
+
+  // ── Oath Hall ──────────────────────────────────────────────────────────────
+
+  private hall(start = 0): void {
+    const back = () => this.back();
+    const s = this.game.state;
+    const menu = new ListMenu(
+      [
+        {
+          label: 'Register an adventurer',
+          detail: `${rosterSize(this.game)}/${MAX_ROSTER}`,
+          description: 'Swear in a new adventurer at level 1.',
+          disabled: rosterSize(this.game) >= MAX_ROSTER,
+          onSelect: () => this.chooseClass(),
+        },
+        { label: 'Form the party', description: `Choose up to ${MAX_PARTY} members, their order and their rows.`, onSelect: () => this.formParty() },
+        { label: 'Dismiss', description: 'Release an adventurer from the reserve for good.', disabled: s.reserve.length === 0, onSelect: () => this.dismiss() },
+        { label: 'Leave', onSelect: back },
+      ],
+      { onCancel: back, startIndex: start },
+    );
+    this.dialog('The Oath Hall', [el('p', { text: '"Speak your oath, and the Great Tree will remember your name."' })], menu, true);
+  }
+
+  private chooseClass(): void {
+    const items: MenuItem[] = (Object.keys(CLASSES) as ClassId[]).map((id) => ({
+      label: CLASSES[id].name,
+      detail: CLASSES[id].row === 'front' ? 'front row' : 'back row',
+      description: CLASSES[id].description,
+      onSelect: () => this.chooseName(id),
+    }));
+    const menu = new ListMenu(items, { onCancel: () => this.hall(0) });
+    this.dialog('Choose a class', [], menu, true);
+  }
+
+  private chooseName(classId: ClassId): void {
+    const input = el('input', { className: 'name-input' });
+    input.maxLength = NAME_MAX_LENGTH;
+    input.placeholder = 'Name';
+    const error = el('p', { className: 'form-error' });
+    const submit = () => {
+      const problem = registerMember(this.game, input.value, classId);
+      if (problem) {
+        error.textContent = problem;
+        input.focus();
+        return;
+      }
+      this.host.updateHud();
+      this.host.toast(`${input.value.trim()} the ${CLASSES[classId].name} has sworn the oath.`);
+      this.hall(0);
+    };
+    input.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Enter') submit();
+      if (e.key === 'Escape') this.chooseClass();
+    });
+    const menu = new ListMenu(
+      [
+        { label: 'Swear the oath', onSelect: submit },
+        { label: 'Back', onSelect: () => this.chooseClass() },
+      ],
+      { onCancel: () => this.chooseClass() },
+    );
+    this.dialog(`A new ${CLASSES[classId].name}`, [el('p', { text: 'What is your name, adventurer?' }), input, error], menu);
+    input.focus();
+  }
+
+  private formParty(start = 0): void {
+    const s = this.game.state;
+    const items: MenuItem[] = [
+      ...s.party.map((m, i) => ({
+        label: `${i + 1}. ${m.name}`,
+        detail: `${CLASSES[m.classId].name} Lv ${m.level} · ${m.row}`,
+        description: 'In the party. Select to move, change row or send to the reserve.',
+        onSelect: () => this.editMember(i),
+      })),
+      ...s.reserve.map((m, i) => ({
+        label: `   ${m.name}`,
+        detail: `${CLASSES[m.classId].name} Lv ${m.level} · reserve`,
+        description: s.party.length >= MAX_PARTY ? `The party is full (${MAX_PARTY}). Send someone to the reserve first.` : 'Waiting in the hall. Select to join the party.',
+        disabled: s.party.length >= MAX_PARTY,
+        onSelect: () => {
+          moveToParty(this.game, i);
+          this.host.updateHud();
+          this.formParty(s.party.length - 1);
+        },
+      })),
+    ];
+    const menu = new ListMenu(items, { onCancel: () => this.hall(1), startIndex: start });
+    this.dialog('Form the party', [el('p', { className: 'gold-line', text: `Party ${s.party.length}/${MAX_PARTY} · Reserve ${s.reserve.length}` })], menu, true);
+  }
+
+  private editMember(i: number): void {
+    const s = this.game.state;
+    const m = s.party[i];
+    const after = (fn: () => boolean, next: number) => () => {
+      fn();
+      this.host.updateHud();
+      this.formParty(next);
+    };
+    const menu = new ListMenu(
+      [
+        { label: 'Move left', disabled: i === 0, onSelect: after(() => shiftMember(this.game, i, -1), i - 1) },
+        { label: 'Move right', disabled: i === s.party.length - 1, onSelect: after(() => shiftMember(this.game, i, 1), i + 1) },
+        { label: m.row === 'front' ? 'Move to the back row' : 'Move to the front row', onSelect: after(() => toggleRow(this.game, i), i) },
+        { label: 'Send to the reserve', disabled: s.party.length <= 1, onSelect: after(() => moveToReserve(this.game, i), 0) },
+        { label: 'Back', onSelect: () => this.formParty(i) },
+      ],
+      { onCancel: () => this.formParty(i) },
+    );
+    this.dialog(`${m.name} the ${CLASSES[m.classId].name}`, [el('p', { text: 'Back-row fighters deal and take less melee damage (archers aim fine from anywhere).' })], menu);
+  }
+
+  private dismiss(): void {
+    const s = this.game.state;
+    const items: MenuItem[] = s.reserve.map((m, i) => ({
+      label: m.name,
+      detail: `${CLASSES[m.classId].name} Lv ${m.level}`,
+      onSelect: () => {
+        const menu = new ListMenu(
+          [
+            {
+              label: `Dismiss ${m.name}`,
+              onSelect: () => {
+                dismissMember(this.game, i);
+                this.host.toast(`${m.name} leaves Lindholm.`);
+                this.hall(0);
+              },
+            },
+            { label: 'Keep', onSelect: () => this.dismiss() },
+          ],
+          { onCancel: () => this.dismiss(), startIndex: 1 },
+        );
+        this.dialog(`Dismiss ${m.name}?`, [el('p', { text: 'They leave for good, together with their equipment.' })], menu);
+      },
+    }));
+    const menu = new ListMenu(items, { onCancel: () => this.hall(2) });
+    this.dialog('Dismiss whom?', [], menu);
   }
 
   // ── Shop ───────────────────────────────────────────────────────────────────

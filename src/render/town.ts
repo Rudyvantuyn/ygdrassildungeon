@@ -2,12 +2,13 @@
  * The town of Lindholm at dusk, at the roots of the Great Tree.
  * `focus` lights up the building that matches the selected town menu entry.
  */
-export type TownSpot = 'inn' | 'shop' | 'rootdeep';
+export type TownSpot = 'inn' | 'hall' | 'shop' | 'rootdeep';
 
 const SPOTS: Record<TownSpot, { x: number; label: string }> = {
-  inn: { x: 170, label: 'Inn' },
-  shop: { x: 420, label: 'Shop' },
-  rootdeep: { x: 690, label: 'Rootdeep' },
+  inn: { x: 105, label: 'Inn' },
+  hall: { x: 285, label: 'Oath Hall' },
+  shop: { x: 465, label: 'Shop' },
+  rootdeep: { x: 700, label: 'Rootdeep' },
 };
 
 export function drawTown(ctx: CanvasRenderingContext2D, w: number, h: number, time: number, focus: TownSpot | null): void {
@@ -143,7 +144,7 @@ function drawWorldTree(ctx: CanvasRenderingContext2D, w: number, h: number, time
 
 function drawSign(ctx: CanvasRenderingContext2D, x: number, ground: number, label: string, lit: boolean, time: number, spot: TownSpot): void {
   // Building front
-  const bw = spot === 'rootdeep' ? 150 : 170;
+  const bw = spot === 'rootdeep' ? 150 : spot === 'hall' ? 160 : 140;
   const bh = spot === 'rootdeep' ? 120 : 130;
   const top = ground - bh;
   ctx.save();
@@ -179,6 +180,17 @@ function drawSign(ctx: CanvasRenderingContext2D, x: number, ground: number, labe
     ctx.lineTo(x + bw / 2 + 12, top);
     ctx.fillStyle = lit ? '#6a3a32' : '#3e2226';
     ctx.fill();
+    if (spot === 'hall') {
+      // Crossed gable beams, carved like dragon heads
+      ctx.strokeStyle = lit ? '#c89a5a' : '#6a4a2a';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(x - 22, top - 56);
+      ctx.quadraticCurveTo(x - 8, top - 40, x + 6, top - 40);
+      ctx.moveTo(x + 22, top - 56);
+      ctx.quadraticCurveTo(x + 8, top - 40, x - 6, top - 40);
+      ctx.stroke();
+    }
     // Door and windows
     ctx.fillStyle = lit ? '#ffcf7a' : '#c08a4a';
     ctx.fillRect(x - 18, ground - 52, 36, 52);

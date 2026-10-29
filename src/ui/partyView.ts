@@ -21,18 +21,24 @@ interface Card {
 
 export class PartyView {
   private cards: Card[] = [];
+  /** Who the cards were built for; rebuilt when the line-up, order or rows change. */
+  private lineup = '';
 
   constructor(private readonly container: HTMLElement) {}
 
   render(party: Member[], display: PartyDisplay = {}): void {
-    if (this.cards.length !== party.length) this.build(party);
+    const lineup = party.map((m) => `${m.name}|${m.classId}|${m.row}`).join(',');
+    if (lineup !== this.lineup) {
+      this.lineup = lineup;
+      this.build(party);
+    }
     party.forEach((m, i) => {
       const card = this.cards[i];
       const stats = memberStats(m);
       const hp = display.hp?.[i] ?? m.hp;
       const sp = display.sp?.[i] ?? m.sp;
       const ratio = hp / stats.hp;
-      card.level.textContent = `${CLASSES[m.classId].name} Lv ${m.level}`;
+      card.level.textContent = `Lv ${m.level} ${CLASSES[m.classId].name}`;
       card.hpFill.style.width = `${Math.max(0, ratio) * 100}%`;
       card.hpBar.classList.toggle('low', ratio <= 0.5 && ratio > 0.25);
       card.hpBar.classList.toggle('crit', ratio <= 0.25);

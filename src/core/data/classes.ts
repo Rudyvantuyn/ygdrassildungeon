@@ -10,6 +10,7 @@ export interface ClassDef {
   growth: Stats;
   skills: { skill: SkillId; level: number }[];
   color: string;
+  description: string;
 }
 
 export const CLASSES: Record<ClassId, ClassDef> = {
@@ -26,6 +27,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'ironFormation', level: 3 },
     ],
     color: '#d9a441',
+    description: 'Shield-bearer of the front line. Draws enemy attacks and shields the party.',
   },
   strider: {
     id: 'strider',
@@ -39,6 +41,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'scatterVolley', level: 3 },
     ],
     color: '#6fbf73',
+    description: 'Swift archer. Fights well from either row and strikes several foes at once.',
   },
   mender: {
     id: 'mender',
@@ -52,6 +55,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'verdantChorus', level: 3 },
     ],
     color: '#8fd3e8',
+    description: 'Healer of the back row. Keeps the party standing with mending songs.',
   },
   runecaller: {
     id: 'runecaller',
@@ -67,5 +71,6 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'wildfire', level: 4 },
     ],
     color: '#c58af0',
+    description: 'Carver of elemental runes. Fragile, but hits enemy weaknesses hard.',
   },
 };

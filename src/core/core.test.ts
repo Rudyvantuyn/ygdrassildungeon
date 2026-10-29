@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { chooseCommands } from './autoplay';
+import { MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow } from './guild';
 import { NOTE_MAX_LENGTH, emptyChart, eraseCell, setMark, setNote, setTerrain, terrainAt } from './chart';
 import { Combat, PROWLER_FLEE_CHANCE, type Command } from './combat';
 import { ENEMIES } from './data/enemies';
@@ -473,5 +475,61 @@ describe('chart (player-drawn map)', () => {
     const game = Game.load(JSON.stringify(state));
     expect(game.state.chartMode).toBe('assisted');
     expect(game.chart.terrain.length).toBe(game.map.width * game.map.height);
+  });
+});
+
+describe('Oath Hall (party management)', () => {
+  it('registers adventurers: party first, then the reserve', () => {
+    const game = Game.newGame(1);
+    game.state.party.pop();
+    expect(registerMember(game, '  Astrid  ', 'bastion')).toBeNull();
+    expect(game.state.party.at(-1)!.name).toBe('Astrid');
+    expect(registerMember(game, 'Leif', 'mender')).toBeNull();
+    expect(game.state.reserve.map((m) => m.name)).toEqual(['Leif']);
+    expect(game.state.reserve[0].level).toBe(1);
+  });
+
+  it('rejects empty, too long and duplicate names, and a full roster', () => {
+    const game = Game.newGame(1);
+    expect(registerMember(game, '   ', 'bastion')).toMatch(/name/);
+    expect(registerMember(game, 'x'.repeat(NAME_MAX_LENGTH + 1), 'bastion')).toMatch(/at most/);
+    expect(registerMember(game, 'bram', 'strider')).toMatch(/already/);
+    for (let i = 0; rosterSize(game) < MAX_ROSTER; i++) expect(registerMember(game, `Hero${i}`, 'strider')).toBeNull();
+    expect(registerMember(game, 'OneTooMany', 'strider')).toMatch(/at most/);
+  });
+
+  it('swaps members between party and reserve, keeping at least one in the party', () => {
+    const game = Game.newGame(1);
+    registerMember(game, 'Sigrun', 'runecaller');
+    expect(moveToParty(game, 0)).toBe(false); // party is full
+    expect(moveToReserve(game, 0)).toBe(true);
+    expect(game.state.reserve.map((m) => m.name)).toEqual(['Sigrun', 'Bram']);
+    expect(moveToParty(game, 0)).toBe(true);
+    expect(game.state.party.map((m) => m.name)).toEqual(['Sela', 'Wren', 'Orrin', 'Sigrun']);
+    while (game.state.party.length > 1) moveToReserve(game, 0);
+    expect(moveToReserve(game, 0)).toBe(false);
+  });
+
+  it('changes marching order and rows, and dismisses reserve members', () => {
+    const game = Game.newGame(1);
+    expect(shiftMember(game, 0, 1)).toBe(true);
+    expect(game.state.party[1].name).toBe('Bram');
+    expect(shiftMember(game, 0, -1)).toBe(false);
+    expect(toggleRow(game, 1)).toBe(true);
+    expect(game.state.party[1].row).toBe('back');
+    registerMember(game, 'Ulf', 'strider');
+    expect(dismissMember(game, 0)).toBe(true);
+    expect(game.state.reserve).toEqual([]);
+  });
+
+  it('a smaller party still fights, and the reserve survives a save', () => {
+    const game = Game.newGame(1);
+    moveToReserve(game, 3);
+    moveToReserve(game, 2);
+    const combat = game.startCombat(['bogling']);
+    for (let r = 0; r < 30 && !combat.outcome; r++) combat.resolveRound(chooseCommands(combat));
+    expect(combat.outcome).toBe('victory');
+    const copy = Game.load(game.serialize());
+    expect(copy.state.reserve.map((m) => m.name)).toEqual(['Orrin', 'Wren']);
   });
 });

@@ -260,6 +260,8 @@ button:active {
   display: flex;
   align-items: baseline;
   gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .member-name {
@@ -270,6 +272,9 @@ button:active {
 .member-class {
   color: var(--muted);
   font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .member-row {
@@ -679,6 +684,30 @@ table.stats th.gear {
 
 .map-close {
   margin-top: auto;
+}
+
+.name-input {
+  align-self: center;
+  width: 280px;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 20px;
+  text-align: center;
+  padding: 8px 10px;
+  color: var(--text);
+  background: #0a1013;
+  border: 1px solid var(--border-hi);
+  border-radius: 4px;
+}
+
+.name-input:focus {
+  outline: none;
+}
+
+.form-error {
+  color: #f07060 !important;
+  min-height: 22px;
+  font-size: 15px !important;
 }
 
 .title-notice {

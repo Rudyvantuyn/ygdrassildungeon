@@ -35,6 +35,8 @@ export interface GameState {
   y: number;
   dir: Dir;
   party: Member[];
+  /** Registered adventurers who are not in the party. */
+  reserve: Member[];
   gold: number;
   inventory: Record<ItemId, number>;
   /** Steps taken since the last encounter, compared against `encounterAt`. */
@@ -78,6 +80,7 @@ export class Game {
     this.map = parseFloor(this.floorDef);
     // Fill in fields that saves from earlier builds don't have yet.
     state.chartMode ??= 'assisted';
+    state.reserve ??= [];
     state.progress.forEach((p, i) => {
       p.prowlers ??= initProwlers(FLOORS[i]);
       p.chart ??= emptyChart(p.explored.length);
@@ -108,6 +111,7 @@ export class Game {
       y: start.y,
       dir: start.dir,
       party: createStartingParty(),
+      reserve: [],
       gold: 150,
       inventory: { sapTonic: 3, spiritDew: 1, homingFeather: 1 },
       danger: 0,
