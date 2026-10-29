@@ -1,12 +1,12 @@
 export type Dir = 0 | 1 | 2 | 3; // N, E, S, W
 
-export type Element = 'phys' | 'fire' | 'ice' | 'volt';
+export type Element = 'phys' | 'fire' | 'frost' | 'storm';
 
 export type Row = 'front' | 'back';
 
 export interface Stats {
   hp: number;
-  tp: number;
+  sp: number;
   atk: number;
   def: number;
   mag: number;
@@ -14,22 +14,22 @@ export interface Stats {
   spd: number;
 }
 
-export type ClassId = 'guardian' | 'ranger' | 'mystic' | 'arcanist';
+export type ClassId = 'bastion' | 'strider' | 'mender' | 'runecaller';
 
-export type ItemId = 'medica' | 'amrita' | 'thread';
+export type ItemId = 'sapTonic' | 'spiritDew' | 'homingFeather';
 
 export type SkillId =
-  | 'provoke'
-  | 'shieldSmite'
-  | 'shieldWall'
-  | 'doubleShot'
-  | 'arrowRain'
-  | 'heal'
-  | 'healCircle'
-  | 'fire'
-  | 'ice'
-  | 'volt'
-  | 'flameWave';
+  | 'challenge'
+  | 'bulwarkBash'
+  | 'ironFormation'
+  | 'twinFang'
+  | 'scatterVolley'
+  | 'mend'
+  | 'verdantChorus'
+  | 'emberRune'
+  | 'frostRune'
+  | 'stormRune'
+  | 'wildfire';
 
 export interface Member {
   name: string;
@@ -38,7 +38,7 @@ export interface Member {
   level: number;
   xp: number;
   hp: number;
-  tp: number;
+  sp: number;
   weapon?: string;
   armor?: string;
 }

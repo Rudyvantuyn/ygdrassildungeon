@@ -10,7 +10,7 @@
   --hp: #6fcf5a;
   --hp-low: #e0a030;
   --hp-crit: #e0483a;
-  --tp: #4aa8e8;
+  --sp: #4aa8e8;
   --danger: #e0483a;
   --font-title: 'Cinzel', Georgia, serif;
   --font-ui: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
@@ -308,8 +308,8 @@ button:active {
   background: linear-gradient(#f07060, var(--hp-crit));
 }
 
-.bar.tp > i {
-  background: linear-gradient(#7ac4f0, var(--tp));
+.bar.sp > i {
+  background: linear-gradient(#7ac4f0, var(--sp));
 }
 
 .bar > span {
@@ -580,6 +580,14 @@ table.stats th.gear {
 
 .title-screen .menu {
   min-width: 280px;
+}
+
+.title-notice {
+  max-width: 520px;
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 15px;
+  color: #f0c060;
 }
 
 .title-foot {

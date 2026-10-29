@@ -1,13 +1,13 @@
 /**
- * The town of Lindholm at dusk, at the roots of the World Tree.
+ * The town of Lindholm at dusk, at the roots of the Great Tree.
  * `focus` lights up the building that matches the selected town menu entry.
  */
-export type TownSpot = 'inn' | 'shop' | 'labyrinth';
+export type TownSpot = 'inn' | 'shop' | 'rootdeep';
 
 const SPOTS: Record<TownSpot, { x: number; label: string }> = {
   inn: { x: 170, label: 'Inn' },
   shop: { x: 420, label: 'Shop' },
-  labyrinth: { x: 690, label: 'Labyrinth' },
+  rootdeep: { x: 690, label: 'Rootdeep' },
 };
 
 export function drawTown(ctx: CanvasRenderingContext2D, w: number, h: number, time: number, focus: TownSpot | null): void {
@@ -143,11 +143,11 @@ function drawWorldTree(ctx: CanvasRenderingContext2D, w: number, h: number, time
 
 function drawSign(ctx: CanvasRenderingContext2D, x: number, ground: number, label: string, lit: boolean, time: number, spot: TownSpot): void {
   // Building front
-  const bw = spot === 'labyrinth' ? 150 : 170;
-  const bh = spot === 'labyrinth' ? 120 : 130;
+  const bw = spot === 'rootdeep' ? 150 : 170;
+  const bh = spot === 'rootdeep' ? 120 : 130;
   const top = ground - bh;
   ctx.save();
-  if (spot === 'labyrinth') {
+  if (spot === 'rootdeep') {
     // A stone gate into the roots
     ctx.fillStyle = lit ? '#5a5070' : '#3a3450';
     ctx.beginPath();
@@ -193,7 +193,7 @@ function drawSign(ctx: CanvasRenderingContext2D, x: number, ground: number, labe
     }
   }
   // Hanging sign
-  const sy = top - (spot === 'labyrinth' ? 50 : 70);
+  const sy = top - (spot === 'rootdeep' ? 50 : 70);
   ctx.font = '800 22px Cinzel, Georgia, serif';
   const tw = ctx.measureText(label).width + 28;
   ctx.fillStyle = lit ? '#f0cf6a' : '#8a7444';

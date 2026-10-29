@@ -5,7 +5,8 @@ import { createStartingParty, fullRestore, isAlive } from './party';
 import { Rng } from './rng';
 import type { Dir, ItemId, Loot, Member } from './types';
 
-export const SAVE_VERSION = 2;
+/** Bump when the save format changes incompatibly; older saves are then discarded. */
+export const SAVE_VERSION = 3;
 
 export interface FloorProgress {
   /** One character per cell: '1' = mapped. */
@@ -50,6 +51,12 @@ export type StepEvent =
   | { type: 'boss' }
   | { type: 'encounter'; enemies: string[] };
 
+export class SaveVersionError extends Error {
+  constructor(readonly found: number) {
+    super(`Save version ${found} is not supported (expected ${SAVE_VERSION})`);
+  }
+}
+
 export class Game {
   map: FloorMap;
   private rng: Rng;
@@ -76,7 +83,7 @@ export class Game {
       dir: start.dir,
       party: createStartingParty(),
       gold: 150,
-      inventory: { medica: 3, amrita: 1, thread: 1 },
+      inventory: { sapTonic: 3, spiritDew: 1, homingFeather: 1 },
       danger: 0,
       encounterAt: 0,
       progress,
@@ -91,14 +98,7 @@ export class Game {
 
   static load(json: string): Game {
     const state = JSON.parse(json) as GameState;
-    if (state.version === 1) {
-      // v1 had no town: the party was always in the dungeon.
-      state.location = 'dungeon';
-      state.deepest = state.floor;
-      state.inventory.thread ??= 0;
-      state.version = 2;
-    }
-    if (state.version !== SAVE_VERSION) throw new Error(`Unsupported save version ${state.version}`);
+    if (state.version !== SAVE_VERSION) throw new SaveVersionError(state.version);
     return new Game(state);
   }
 
@@ -196,7 +196,7 @@ export class Game {
     this.enterFloor(this.state.floor + 1, true);
   }
 
-  /** Climb the stairs up: to the previous floor's stairs down, or out to town from B1F. */
+  /** Climb the stairs up: to the previous floor's stairs down, or out to town from the first floor. */
   ascend(): void {
     if (this.tileHere() !== 'up') return;
     if (this.state.floor === 0) {
@@ -211,7 +211,7 @@ export class Game {
     this.markExplored();
   }
 
-  /** Enter the labyrinth at the start of a floor the party has already reached. */
+  /** Enter the Rootdeep at the start of a floor the party has already reached. */
   enterFloor(floor: number, unlock = false): void {
     if (floor < 0 || floor >= FLOORS.length) return;
     if (!unlock && floor > this.state.deepest) return;
@@ -233,9 +233,9 @@ export class Game {
     for (const p of this.state.progress) p.springUsed = false;
   }
 
-  useThread(): boolean {
-    if (this.state.location !== 'dungeon' || (this.state.inventory.thread ?? 0) <= 0) return false;
-    this.state.inventory.thread -= 1;
+  useFeather(): boolean {
+    if (this.state.location !== 'dungeon' || (this.state.inventory.homingFeather ?? 0) <= 0) return false;
+    this.state.inventory.homingFeather -= 1;
     this.returnToTown();
     return true;
   }

@@ -28,14 +28,14 @@ export interface TownHost {
   enterTown(): void;
   enterDungeon(): void;
   showTitle(): void;
-  campStatus(back: () => void): void;
+  partyStatus(back: () => void): void;
 }
 
-const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', tp: 'TP', atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES', spd: 'SPD' };
+const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', sp: 'SP', atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES', spd: 'SPD' };
 
-/** Town menu (side panel) plus the Inn, Shop and Labyrinth dialogs. */
+/** Town menu (side panel) plus the Inn, Shop and Rootdeep dialogs. */
 export class TownView {
-  focus: TownSpot | null = 'labyrinth';
+  focus: TownSpot | null = 'rootdeep';
   menu: ListMenu | null = null;
   private lastIndex = 2;
 
@@ -55,10 +55,10 @@ export class TownView {
       this.lastIndex = i;
     };
     const items: MenuItem[] = [
-      { label: 'Inn', detail: `${innCost(this.game)} G`, description: 'Rest to restore HP and TP, revive fallen members, and save.', onFocus: spot('inn', 0), onSelect: () => this.inn() },
+      { label: 'Inn', detail: `${innCost(this.game)} G`, description: 'Rest to restore HP and SP, revive fallen members, and save.', onFocus: spot('inn', 0), onSelect: () => this.inn() },
       { label: 'Shop', description: 'Buy items and equipment. Better gear appears as you go deeper.', onFocus: spot('shop', 1), onSelect: () => this.shop() },
-      { label: 'Labyrinth', description: 'Enter the labyrinth at any floor you have reached.', onFocus: spot('labyrinth', 2), onSelect: () => this.labyrinth() },
-      { label: 'Party', description: 'View stats and equipment.', onFocus: () => { this.focus = null; this.lastIndex = 3; }, onSelect: () => this.host.campStatus(() => this.back()) },
+      { label: 'Rootdeep', description: 'Enter the Rootdeep at any floor you have reached.', onFocus: spot('rootdeep', 2), onSelect: () => this.rootdeep() },
+      { label: 'Party', description: 'View stats and equipment.', onFocus: () => { this.focus = null; this.lastIndex = 3; }, onSelect: () => this.host.partyStatus(() => this.back()) },
       { label: 'Save', description: 'Save your progress.', onFocus: () => { this.focus = null; this.lastIndex = 4; }, onSelect: () => { this.host.save(); this.host.toast('Game saved.'); } },
       { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onFocus: () => { this.focus = null; this.lastIndex = 5; }, onSelect: () => this.host.showTitle() },
     ];
@@ -111,7 +111,7 @@ export class TownView {
       ],
       { onCancel: back, startIndex: start },
     );
-    this.dialog("Hilde's Supplies", [el('p', { text: '"Take a look. Everything here was made to survive the labyrinth."' })], menu);
+    this.dialog("Hilde's Supplies", [el('p', { text: '"Take a look. Everything here was made to survive the Rootdeep."' })], menu);
   }
 
   private shopItems(start = 0): void {
@@ -173,9 +173,9 @@ export class TownView {
     this.dialog(e.name, [el('p', { text: bonusText(e) }), this.goldLine()], menu, true);
   }
 
-  // ── Labyrinth ──────────────────────────────────────────────────────────────
+  // ── Rootdeep ──────────────────────────────────────────────────────────────
 
-  private labyrinth(): void {
+  private rootdeep(): void {
     const back = () => this.back();
     const items: MenuItem[] = FLOORS.slice(0, this.game.state.deepest + 1).map((f, i) => ({
       label: f.name,
@@ -189,7 +189,7 @@ export class TownView {
     }));
     items.push({ label: 'Not yet', onSelect: back });
     const menu = new ListMenu(items, { onCancel: back, startIndex: this.game.state.deepest });
-    this.dialog('The Labyrinth', [el('p', { text: 'Which floor will you start from?' })], menu);
+    this.dialog('The Rootdeep', [el('p', { text: 'Which floor will you start from?' })], menu);
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

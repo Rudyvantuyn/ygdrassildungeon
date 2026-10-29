@@ -2,7 +2,7 @@ import { CLASSES } from './data/classes';
 import { ENEMIES, type EnemyDef, type EnemySkill } from './data/enemies';
 import { ITEMS } from './data/items';
 import { SKILLS } from './data/skills';
-import { grantXp, healAmount, healMember, isAlive, memberStats, restoreTp } from './party';
+import { grantXp, healAmount, healMember, isAlive, memberStats, restoreSp } from './party';
 import type { Rng } from './rng';
 import type { Element, ItemId, Member, SkillId } from './types';
 
@@ -16,7 +16,7 @@ export interface EnemyUnit {
 export interface PartyStatus {
   defending: boolean;
   /** Rounds left in which enemies prefer to attack this member. */
-  provoke: number;
+  taunt: number;
   /** Rounds left of reduced incoming damage. */
   guard: number;
 }
@@ -42,7 +42,7 @@ export type CombatEvent =
   | { type: 'act'; side: Side; actor: number; text: string }
   | { type: 'damage'; side: Side; target: number; amount: number; hp: number; crit: boolean; weak: boolean; resist: boolean }
   | { type: 'heal'; target: number; amount: number; hp: number }
-  | { type: 'tp'; target: number; tp: number }
+  | { type: 'sp'; target: number; sp: number }
   | { type: 'miss'; side: Side; target: number }
   | { type: 'down'; side: Side; target: number; text: string }
   | { type: 'info'; text: string }
@@ -76,12 +76,12 @@ export class Combat {
       if (!def) throw new Error(`Unknown enemy "${id}"`);
       return { def, name: def.name, hp: def.hp, maxHp: def.hp };
     });
-    // "Moss Slime A", "Moss Slime B" when an enemy appears more than once.
+    // "Bogling A", "Bogling B" when an enemy appears more than once.
     for (const e of this.enemies) {
       const same = this.enemies.filter((o) => o.def.id === e.def.id);
       if (same.length > 1) e.name = `${e.def.name} ${String.fromCharCode(65 + same.indexOf(e))}`;
     }
-    this.status = party.map(() => ({ defending: false, provoke: 0, guard: 0 }));
+    this.status = party.map(() => ({ defending: false, taunt: 0, guard: 0 }));
   }
 
   get canFlee(): boolean {
@@ -133,7 +133,7 @@ export class Combat {
 
     for (const s of this.status) {
       s.defending = false;
-      s.provoke = Math.max(0, s.provoke - 1);
+      s.taunt = Math.max(0, s.taunt - 1);
       s.guard = Math.max(0, s.guard - 1);
     }
     if (!this.outcome) this.round += 1;
@@ -160,12 +160,12 @@ export class Combat {
 
       case 'skill': {
         const skill = SKILLS[cmd.skill];
-        if (m.tp < skill.tp) {
-          events.push({ type: 'info', text: `${m.name} doesn't have enough TP.` });
+        if (m.sp < skill.sp) {
+          events.push({ type: 'info', text: `${m.name} doesn't have enough SP.` });
           return;
         }
-        m.tp -= skill.tp;
-        events.push({ type: 'tp', target: i, tp: m.tp });
+        m.sp -= skill.sp;
+        events.push({ type: 'sp', target: i, sp: m.sp });
         events.push({ type: 'act', side: 'party', actor: i, text: `${m.name} uses ${skill.name}!` });
 
         if (skill.kind === 'phys' || skill.kind === 'magic') {
@@ -184,8 +184,8 @@ export class Combat {
             const healed = healMember(this.party[t], amount);
             events.push({ type: 'heal', target: t, amount: healed, hp: this.party[t].hp });
           }
-        } else if (skill.kind === 'provoke') {
-          this.status[i].provoke = 2;
+        } else if (skill.kind === 'challenge') {
+          this.status[i].taunt = 2;
           events.push({ type: 'info', text: `The enemies glare at ${m.name}.` });
         } else if (skill.kind === 'guard') {
           for (const s of this.status) s.guard = 3;
@@ -213,8 +213,8 @@ export class Combat {
           const healed = healMember(target, item.amount);
           events.push({ type: 'heal', target: cmd.target, amount: healed, hp: target.hp });
         } else {
-          restoreTp(target, item.amount);
-          events.push({ type: 'tp', target: cmd.target, tp: target.tp });
+          restoreSp(target, item.amount);
+          events.push({ type: 'sp', target: cmd.target, sp: target.sp });
         }
         return;
       }
@@ -301,8 +301,8 @@ export class Combat {
 
   private pickPartyTarget(): number {
     const living = this.livingParty();
-    const provoker = living.find((i) => this.status[i].provoke > 0);
-    if (provoker !== undefined && this.rng.chance(0.85)) return provoker;
+    const taunter = living.find((i) => this.status[i].taunt > 0);
+    if (taunter !== undefined && this.rng.chance(0.85)) return taunter;
     return this.rng.weighted(living.map((i) => ({ i, weight: this.party[i].row === 'front' ? 2 : 1 }))).i;
   }
 

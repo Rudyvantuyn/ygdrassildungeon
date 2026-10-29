@@ -23,30 +23,32 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
   const living = combat.livingEnemies();
   const weakest = living.reduce((a, b) => (combat.enemies[a].hp <= combat.enemies[b].hp ? a : b));
   const knows = (i: number, id: SkillId) => knownSkills(party[i]).some((s) => s.id === id);
-  const canUse = (i: number, id: SkillId) => knows(i, id) && party[i].tp >= SKILLS[id].tp;
+  const canUse = (i: number, id: SkillId) => knows(i, id) && party[i].sp >= SKILLS[id].sp;
   const hurt = party.flatMap((m, i) => (isAlive(m) && m.hp < memberStats(m).hp * 0.45 ? [i] : []));
 
   return party.map((m, i): Command | null => {
     if (!isAlive(m)) return null;
     switch (m.classId) {
-      case 'mystic':
-        if (hurt.length >= 2 && canUse(i, 'healCircle')) return { kind: 'skill', skill: 'healCircle', target: -1 };
-        if (hurt.length >= 1 && canUse(i, 'heal')) return { kind: 'skill', skill: 'heal', target: hurt[0] };
-        if (hurt.length >= 1 && combat.inventory.medica > 0) return { kind: 'item', item: 'medica', target: hurt[0] };
+      case 'mender':
+        if (hurt.length >= 2 && canUse(i, 'verdantChorus')) return { kind: 'skill', skill: 'verdantChorus', target: -1 };
+        if (hurt.length >= 1 && canUse(i, 'mend')) return { kind: 'skill', skill: 'mend', target: hurt[0] };
+        if (hurt.length >= 1 && combat.inventory.sapTonic > 0) return { kind: 'item', item: 'sapTonic', target: hurt[0] };
         break;
-      case 'arcanist': {
-        if (living.length >= 2 && canUse(i, 'flameWave')) return { kind: 'skill', skill: 'flameWave', target: -1 };
+      case 'runecaller': {
+        if (living.length >= 2 && canUse(i, 'wildfire')) return { kind: 'skill', skill: 'wildfire', target: -1 };
         const weak = combat.enemies[weakest].def.weak;
-        const spell = (['fire', 'ice', 'volt'] as const).find((e) => weak.includes(e)) ?? 'fire';
+        const runes = { fire: 'emberRune', frost: 'frostRune', storm: 'stormRune' } as const;
+        const element = (['fire', 'frost', 'storm'] as const).find((e) => weak.includes(e)) ?? 'fire';
+        const spell = runes[element];
         if (canUse(i, spell)) return { kind: 'skill', skill: spell, target: weakest };
         break;
       }
-      case 'ranger':
-        if (living.length >= 3 && canUse(i, 'arrowRain')) return { kind: 'skill', skill: 'arrowRain', target: -1 };
-        if (combat.boss && canUse(i, 'doubleShot')) return { kind: 'skill', skill: 'doubleShot', target: weakest };
+      case 'strider':
+        if (living.length >= 3 && canUse(i, 'scatterVolley')) return { kind: 'skill', skill: 'scatterVolley', target: -1 };
+        if (combat.boss && canUse(i, 'twinFang')) return { kind: 'skill', skill: 'twinFang', target: weakest };
         break;
-      case 'guardian':
-        if (combat.boss && canUse(i, 'shieldWall') && combat.status[i].guard === 0) return { kind: 'skill', skill: 'shieldWall', target: -1 };
+      case 'bastion':
+        if (combat.boss && canUse(i, 'ironFormation') && combat.status[i].guard === 0) return { kind: 'skill', skill: 'ironFormation', target: -1 };
         break;
     }
     return { kind: 'attack', target: weakest };
@@ -64,17 +66,17 @@ function fight(game: Game, combat: Combat): number {
 }
 
 /** Heal up between fights the way a careful player would. */
-function campHeal(game: Game): void {
+function healBetweenFights(game: Game): void {
   const party = game.state.party;
-  const mira = party.find((m) => m.classId === 'mystic');
+  const wren = party.find((m) => m.classId === 'mender');
   for (const m of party) {
     if (!isAlive(m)) continue;
     while (m.hp < memberStats(m).hp * 0.7) {
-      if (mira && isAlive(mira) && mira.tp >= SKILLS.heal.tp) {
-        mira.tp -= SKILLS.heal.tp;
-        healMember(m, healAmount(mira, 100));
-      } else if (game.state.inventory.medica > 0) {
-        game.state.inventory.medica -= 1;
+      if (wren && isAlive(wren) && wren.sp >= SKILLS.mend.sp) {
+        wren.sp -= SKILLS.mend.sp;
+        healMember(m, healAmount(wren, 100));
+      } else if (game.state.inventory.sapTonic > 0) {
+        game.state.inventory.sapTonic -= 1;
         healMember(m, 60);
       } else break;
     }
@@ -113,7 +115,7 @@ function find(map: FloorMap, tile: string): { x: number; y: number }[] {
   return map.tiles.flatMap((t, i) => (t === tile ? [{ x: i % map.width, y: Math.floor(i / map.width) }] : []));
 }
 
-/** A town visit: buy the best gear that fits the budget, top up Medica, sleep at the inn. */
+/** A town visit: buy the best gear that fits the budget, top up Sap Tonic, sleep at the inn. */
 function visitTown(game: Game): void {
   game.returnToTown();
   restAtInn(game);
@@ -125,7 +127,7 @@ function visitTown(game: Game): void {
       if (best && (!current || best.price > current.price)) buyEquipment(game, best.id, i);
     });
   }
-  while ((game.state.inventory.medica ?? 0) < 5 && buyItem(game, 'medica'));
+  while ((game.state.inventory.sapTonic ?? 0) < 5 && buyItem(game, 'sapTonic'));
 }
 
 export function autoplay(seed: number, opts: { grindBattles?: number; town?: boolean } = {}): AutoplayResult {
@@ -140,7 +142,7 @@ export function autoplay(seed: number, opts: { grindBattles?: number; town?: boo
         if (ev.type === 'encounter') {
           fight(game, game.startCombat(ev.enemies));
           if (!game.partyAlive) return false;
-          campHeal(game);
+          healBetweenFights(game);
         }
       }
     }
@@ -175,7 +177,7 @@ export function autoplay(seed: number, opts: { grindBattles?: number; town?: boo
       // Stop one step short to heal up, then enter the boss tile.
       const before = { x: boss.x - DX[approach[approach.length - 1]], y: boss.y - DY[approach[approach.length - 1]] };
       if (!walkTo(before)) return result(game, floor, bossRounds);
-      campHeal(game);
+      healBetweenFights(game);
       game.state.dir = approach[approach.length - 1];
       game.step(1, 0);
       bossRounds = fight(game, game.startBossCombat());

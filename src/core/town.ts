@@ -9,7 +9,7 @@ export function innCost(game: Game): number {
   return 10 + game.state.party.reduce((sum, m) => sum + m.level * 3, 0);
 }
 
-/** Rest at the inn: full HP/TP for everyone, fallen members included. */
+/** Rest at the inn: full HP/SP for everyone, fallen members included. */
 export function restAtInn(game: Game): boolean {
   const cost = innCost(game);
   if (game.state.gold < cost) return false;
@@ -53,10 +53,10 @@ export function buyEquipment(game: Game, equipId: string, memberIndex: number): 
   if (game.state.gold < cost) return false;
   game.state.gold -= cost;
   m[e.slot] = e.id;
-  // Keep HP/TP within the (possibly changed) maximum.
+  // Keep HP/SP within the (possibly changed) maximum.
   const after = memberStats(m);
   m.hp = Math.min(m.hp, after.hp);
-  m.tp = Math.min(m.tp, after.tp);
+  m.sp = Math.min(m.sp, after.sp);
   return true;
 }
 

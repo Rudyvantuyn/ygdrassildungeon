@@ -5,7 +5,7 @@ import { FLOORS } from './data/floors';
 import { SKILLS } from './data/skills';
 import { CLASSES } from './data/classes';
 import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir } from './dungeon';
-import { Game, type GameState } from './game';
+import { Game, SaveVersionError, type GameState } from './game';
 import { buyEquipment, buyItem, equipmentForSale, innCost, netPrice, restAtInn } from './town';
 import { createStartingParty, grantXp, memberStats, xpForLevel } from './party';
 import { Rng } from './rng';
@@ -96,9 +96,9 @@ describe('dungeon movement', () => {
     game.state.x = chest.x - 1;
     game.state.y = chest.y;
     game.state.dir = 1;
-    const before = game.state.inventory.medica;
+    const before = game.state.inventory.sapTonic;
     expect(game.step(1, 0).some((e) => e.type === 'chest')).toBe(true);
-    expect(game.state.inventory.medica).toBe(before + 2);
+    expect(game.state.inventory.sapTonic).toBe(before + 2);
     game.step(-1, 0);
     expect(game.step(1, 0).some((e) => e.type === 'emptyChest')).toBe(true);
   });
@@ -124,58 +124,58 @@ describe('dungeon movement', () => {
 
 describe('party', () => {
   it('levels up and gains stats', () => {
-    const [lief] = createStartingParty();
-    const before = memberStats(lief);
-    expect(grantXp(lief, xpForLevel(3))).toBe(2);
-    expect(lief.level).toBe(3);
-    expect(memberStats(lief).hp).toBeGreaterThan(before.hp);
-    expect(lief.hp).toBe(memberStats(lief).hp);
+    const [bram] = createStartingParty();
+    const before = memberStats(bram);
+    expect(grantXp(bram, xpForLevel(3))).toBe(2);
+    expect(bram.level).toBe(3);
+    expect(memberStats(bram).hp).toBeGreaterThan(before.hp);
+    expect(bram.hp).toBe(memberStats(bram).hp);
   });
 });
 
 describe('combat', () => {
-  const inventory = (): Record<ItemId, number> => ({ medica: 2, amrita: 0, thread: 0 });
+  const inventory = (): Record<ItemId, number> => ({ sapTonic: 2, spiritDew: 0, homingFeather: 0 });
   const attackAll = (combat: Combat): Command[] => combat.party.map(() => ({ kind: 'attack', target: 0 }));
 
   it('a fresh party beats two slimes', () => {
     const party = createStartingParty();
-    const combat = new Combat(party, ['mossSlime', 'mossSlime'], inventory(), new Rng(5));
-    expect(combat.enemies.map((e) => e.name)).toEqual(['Moss Slime A', 'Moss Slime B']);
+    const combat = new Combat(party, ['bogling', 'bogling'], inventory(), new Rng(5));
+    expect(combat.enemies.map((e) => e.name)).toEqual(['Bogling A', 'Bogling B']);
     for (let round = 0; round < 20 && !combat.outcome; round++) combat.resolveRound(attackAll(combat));
     expect(combat.outcome).toBe('victory');
-    expect(combat.rewards!.xp).toBe(ENEMIES.mossSlime.xp * 2);
-    expect(party.every((m) => m.xp === ENEMIES.mossSlime.xp * 2)).toBe(true);
+    expect(combat.rewards!.xp).toBe(ENEMIES.bogling.xp * 2);
+    expect(party.every((m) => m.xp === ENEMIES.bogling.xp * 2)).toBe(true);
   });
 
   it('weakness boosts elemental damage', () => {
-    const run = (skill: 'fire' | 'ice') => {
+    const run = (skill: 'emberRune' | 'frostRune') => {
       const party = createStartingParty();
-      const combat = new Combat(party, ['mossSlime'], inventory(), new Rng(11));
+      const combat = new Combat(party, ['bogling'], inventory(), new Rng(11));
       combat.enemies[0].hp = combat.enemies[0].maxHp = 9999;
       const commands: (Command | null)[] = [null, null, null, { kind: 'skill', skill, target: 0 }];
       const events = combat.resolveRound(commands);
       const hit = events.find((e) => e.type === 'damage' && e.side === 'enemy');
       return hit && hit.type === 'damage' ? hit : null;
     };
-    const fire = run('fire')!;
-    const ice = run('ice')!;
+    const fire = run('emberRune')!;
+    const ice = run('frostRune')!;
     expect(fire.weak).toBe(true);
     expect(ice.weak).toBe(false);
     expect(fire.amount).toBeGreaterThan(ice.amount);
   });
 
-  it('spends TP and heals with skills and items', () => {
+  it('spends SP and heals with skills and items', () => {
     const party = createStartingParty();
     const inv = inventory();
-    const combat = new Combat(party, ['mossSlime'], inv, new Rng(2));
+    const combat = new Combat(party, ['bogling'], inv, new Rng(2));
     combat.enemies[0].hp = combat.enemies[0].maxHp = 9999;
     party[0].hp = 10;
     party[1].hp = 10;
-    const mira = party[2];
-    const tpBefore = mira.tp;
-    combat.resolveRound([null, { kind: 'item', item: 'medica', target: 1 }, { kind: 'skill', skill: 'heal', target: 0 }, null]);
-    expect(mira.tp).toBe(tpBefore - SKILLS.heal.tp);
-    expect(inv.medica).toBe(1);
+    const wren = party[2];
+    const spBefore = wren.sp;
+    combat.resolveRound([null, { kind: 'item', item: 'sapTonic', target: 1 }, { kind: 'skill', skill: 'mend', target: 0 }, null]);
+    expect(wren.sp).toBe(spBefore - SKILLS.mend.sp);
+    expect(inv.sapTonic).toBe(1);
     expect(party[0].hp).toBeGreaterThan(10);
   });
 
@@ -184,9 +184,9 @@ describe('combat', () => {
       let total = 0;
       for (let seed = 1; seed <= 40; seed++) {
         const party = createStartingParty();
-        const combat = new Combat(party, ['thornRat'], inventory(), new Rng(seed));
+        const combat = new Combat(party, ['briarGnawer'], inventory(), new Rng(seed));
         combat.enemies[0].def = { ...combat.enemies[0].def, skills: [] };
-        for (const m of party.slice(1)) m.hp = 0; // only Lief can be hit
+        for (const m of party.slice(1)) m.hp = 0; // only Bram can be hit
         const events = combat.resolveRound([defend ? { kind: 'defend' } : null, null, null, null]);
         for (const e of events) if (e.type === 'damage' && e.side === 'party') total += e.amount;
       }
@@ -197,14 +197,14 @@ describe('combat', () => {
 
   it('cannot flee from a boss', () => {
     const party = createStartingParty();
-    const combat = new Combat(party, ['witheredWarden'], inventory(), new Rng(1), { boss: true });
+    const combat = new Combat(party, ['blightedElder'], inventory(), new Rng(1), { boss: true });
     combat.resolveRound(party.map(() => ({ kind: 'flee' })));
     expect(combat.outcome).not.toBe('fled');
   });
 
   it('a party that does nothing is eventually defeated', () => {
     const party = createStartingParty();
-    const combat = new Combat(party, ['witheredWarden'], inventory(), new Rng(9), { boss: true });
+    const combat = new Combat(party, ['blightedElder'], inventory(), new Rng(9), { boss: true });
     for (let round = 0; round < 100 && !combat.outcome; round++) combat.resolveRound(party.map(() => ({ kind: 'defend' })));
     expect(combat.outcome).toBe('defeat');
   });
@@ -218,7 +218,7 @@ describe('combat', () => {
     for (let r = 0; r < 5 && !combat.outcome; r++) combat.resolveRound(attackAll(combat));
     expect(combat.outcome).toBe('victory');
     game.finishCombat(combat);
-    expect(game.state.gold).toBe(goldBefore + ENEMIES.witheredWarden.gold);
+    expect(game.state.gold).toBe(goldBefore + ENEMIES.blightedElder.gold);
     expect(game.state.cleared).toBe(true);
   });
 });
@@ -232,15 +232,15 @@ describe('town', () => {
 
   it('the inn restores everyone, including fallen members, for gold', () => {
     const game = Game.newGame(1);
-    const [lief, ayla] = game.state.party;
-    lief.hp = 0;
-    ayla.tp = 0;
+    const [bram, sela] = game.state.party;
+    bram.hp = 0;
+    sela.sp = 0;
     const cost = innCost(game);
     const gold = game.state.gold;
     expect(restAtInn(game)).toBe(true);
     expect(game.state.gold).toBe(gold - cost);
-    expect(lief.hp).toBe(memberStats(lief).hp);
-    expect(ayla.tp).toBe(memberStats(ayla).tp);
+    expect(bram.hp).toBe(memberStats(bram).hp);
+    expect(sela.sp).toBe(memberStats(sela).sp);
     game.state.gold = 0;
     expect(restAtInn(game)).toBe(false);
   });
@@ -248,22 +248,22 @@ describe('town', () => {
   it('buys items and equipment, trading in the old piece', () => {
     const game = Game.newGame(1);
     game.state.gold = 1000;
-    expect(buyItem(game, 'medica')).toBe(true);
-    expect(game.state.inventory.medica).toBe(4);
+    expect(buyItem(game, 'sapTonic')).toBe(true);
+    expect(game.state.inventory.sapTonic).toBe(4);
 
-    const lief = game.state.party[0];
-    const atk = memberStats(lief).atk;
-    expect(buyEquipment(game, 'bronzeSword', 0)).toBe(true);
-    expect(memberStats(lief).atk).toBe(atk + 5);
-    expect(buyEquipment(game, 'bronzeSword', 1)).toBe(false); // a Ranger can't use swords
+    const bram = game.state.party[0];
+    const atk = memberStats(bram).atk;
+    expect(buyEquipment(game, 'copperEdge', 0)).toBe(true);
+    expect(memberStats(bram).atk).toBe(atk + 5);
+    expect(buyEquipment(game, 'copperEdge', 1)).toBe(false); // a Strider can't use swords
 
     game.state.deepest = 1;
-    const iron = equipmentForSale(game).find((e) => e.id === 'ironSword')!;
-    expect(netPrice(lief, iron)).toBe(260 - 40);
+    const iron = equipmentForSale(game).find((e) => e.id === 'ironbarkBlade')!;
+    expect(netPrice(bram, iron)).toBe(260 - 40);
     const before = game.state.gold;
-    expect(buyEquipment(game, 'ironSword', 0)).toBe(true);
+    expect(buyEquipment(game, 'ironbarkBlade', 0)).toBe(true);
     expect(game.state.gold).toBe(before - 220);
-    expect(memberStats(lief).atk).toBe(atk + 10);
+    expect(memberStats(bram).atk).toBe(atk + 10);
   });
 
   it('only sells gear for floors the party has reached', () => {
@@ -284,7 +284,7 @@ describe('town', () => {
     expect(game.state.location).toBe('town');
   });
 
-  it('stairs up from B2F lead to the stairs down on B1F', () => {
+  it('stairs up from the second floor lead to the stairs down on the first', () => {
     const game = Game.newGame(1);
     game.enterFloor(1, true);
     game.ascend();
@@ -293,27 +293,20 @@ describe('town', () => {
     expect(game.state.deepest).toBe(1);
   });
 
-  it('an Ariadne Thread returns the party to town and refills springs', () => {
+  it('an Homing Feather returns the party to town and refills springs', () => {
     const game = Game.newGame(1);
     game.enterFloor(0);
     game.state.progress[0].springUsed = true;
-    expect(game.useThread()).toBe(true);
+    expect(game.useFeather()).toBe(true);
     expect(game.state.location).toBe('town');
-    expect(game.state.inventory.thread).toBe(0);
+    expect(game.state.inventory.homingFeather).toBe(0);
     expect(game.state.progress[0].springUsed).toBe(false);
-    expect(game.useThread()).toBe(false);
+    expect(game.useFeather()).toBe(false);
   });
 
-  it('loads a version 1 save', () => {
-    const state = JSON.parse(Game.newGame(1).serialize()) as Partial<GameState> & Record<string, unknown>;
-    delete state.location;
-    delete state.deepest;
-    state.version = 1;
-    state.floor = 1;
-    state.inventory = { medica: 1, amrita: 0 } as GameState['inventory'];
-    const game = Game.load(JSON.stringify(state));
-    expect(game.state.location).toBe('dungeon');
-    expect(game.state.deepest).toBe(1);
-    expect(game.state.inventory.thread).toBe(0);
+  it('rejects saves from an older version', () => {
+    const state = JSON.parse(Game.newGame(1).serialize()) as GameState;
+    state.version = 2;
+    expect(() => Game.load(JSON.stringify(state))).toThrow(SaveVersionError);
   });
 });

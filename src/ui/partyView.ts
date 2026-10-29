@@ -3,9 +3,9 @@ import { memberStats } from '../core/party';
 import type { Member } from '../core/types';
 
 export interface PartyDisplay {
-  /** Overrides for shown HP/TP (used to animate combat playback). */
+  /** Overrides for shown HP/SP (used to animate combat playback). */
   hp?: number[];
-  tp?: number[];
+  sp?: number[];
   active?: number | null;
 }
 
@@ -15,8 +15,8 @@ interface Card {
   hpBar: HTMLElement;
   hpFill: HTMLElement;
   hpText: HTMLElement;
-  tpFill: HTMLElement;
-  tpText: HTMLElement;
+  spFill: HTMLElement;
+  spText: HTMLElement;
 }
 
 export class PartyView {
@@ -30,15 +30,15 @@ export class PartyView {
       const card = this.cards[i];
       const stats = memberStats(m);
       const hp = display.hp?.[i] ?? m.hp;
-      const tp = display.tp?.[i] ?? m.tp;
+      const sp = display.sp?.[i] ?? m.sp;
       const ratio = hp / stats.hp;
       card.level.textContent = `${CLASSES[m.classId].name} Lv ${m.level}`;
       card.hpFill.style.width = `${Math.max(0, ratio) * 100}%`;
       card.hpBar.classList.toggle('low', ratio <= 0.5 && ratio > 0.25);
       card.hpBar.classList.toggle('crit', ratio <= 0.25);
       card.hpText.textContent = `${hp} / ${stats.hp}`;
-      card.tpFill.style.width = `${(tp / stats.tp) * 100}%`;
-      card.tpText.textContent = `${tp} / ${stats.tp}`;
+      card.spFill.style.width = `${(sp / stats.sp) * 100}%`;
+      card.spText.textContent = `${sp} / ${stats.sp}`;
       card.root.classList.toggle('ko', hp <= 0);
       card.root.classList.toggle('active', display.active === i);
     });
@@ -70,19 +70,19 @@ export class PartyView {
         <div class="portrait" style="background: radial-gradient(circle at 35% 30%, #fff8, ${def.color} 45%, #0006)">${m.name[0]}</div>
         <div class="member-head"><span class="member-name"></span><span class="member-class"></span><span class="member-row">${m.row}</span></div>
         <div class="bar hp"><i></i><span><b>HP</b><b class="v"></b></span></div>
-        <div class="bar tp"><i></i><span><b>TP</b><b class="v"></b></span></div>`;
+        <div class="bar sp"><i></i><span><b>SP</b><b class="v"></b></span></div>`;
       root.querySelector('.member-name')!.textContent = m.name;
       this.container.appendChild(root);
       const hpBar = root.querySelector<HTMLElement>('.bar.hp')!;
-      const tpBar = root.querySelector<HTMLElement>('.bar.tp')!;
+      const spBar = root.querySelector<HTMLElement>('.bar.sp')!;
       return {
         root,
         level: root.querySelector<HTMLElement>('.member-class')!,
         hpBar,
         hpFill: hpBar.querySelector('i')!,
         hpText: hpBar.querySelector('.v')!,
-        tpFill: tpBar.querySelector('i')!,
-        tpText: tpBar.querySelector('.v')!,
+        spFill: spBar.querySelector('i')!,
+        spText: spBar.querySelector('.v')!,
       };
     });
   }

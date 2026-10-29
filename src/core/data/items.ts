@@ -3,23 +3,23 @@ import type { ItemId } from '../types';
 export interface ItemDef {
   id: ItemId;
   name: string;
-  /** hp/tp restore an ally; warp returns the party to town (outside combat only). */
-  effect: 'hp' | 'tp' | 'warp';
+  /** hp/sp restore an ally; warp returns the party to town (outside combat only). */
+  effect: 'hp' | 'sp' | 'warp';
   amount: number;
   price: number;
   description: string;
 }
 
 export const ITEMS: Record<ItemId, ItemDef> = {
-  medica: { id: 'medica', name: 'Medica', effect: 'hp', amount: 60, price: 30, description: 'Restores 60 HP.' },
-  amrita: { id: 'amrita', name: 'Amrita', effect: 'tp', amount: 25, price: 70, description: 'Restores 25 TP.' },
-  thread: {
-    id: 'thread',
-    name: 'Ariadne Thread',
+  sapTonic: { id: 'sapTonic', name: 'Sap Tonic', effect: 'hp', amount: 60, price: 30, description: 'A bitter tonic brewed from tree sap. Restores 60 HP.' },
+  spiritDew: { id: 'spiritDew', name: 'Spirit Dew', effect: 'sp', amount: 25, price: 70, description: 'Morning dew gathered from the Great Tree. Restores 25 SP.' },
+  homingFeather: {
+    id: 'homingFeather',
+    name: 'Homing Feather',
     effect: 'warp',
     amount: 0,
     price: 120,
-    description: 'Follow the thread back to town. Use it from the camp menu.',
+    description: 'Toss it into the air and the wind carries you home to Lindholm. Use it from the pack menu.',
   },
 };
 

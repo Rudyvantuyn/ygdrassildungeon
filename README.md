@@ -1,7 +1,10 @@
 # Ygdrassil Dungeon
 
-Een first-person dungeon crawler in de stijl van Etrian Odyssey, gebouwd als webgame in TypeScript.
-Alles (gangen, monsters, interface) wordt in code getekend, dus er zijn geen losse afbeeldingen nodig.
+Een first-person dungeon crawler met de gameplay van klassieke grid-crawlers (zoals Etrian Odyssey),
+maar met een eigen wereld, eigen namen en eigen ontwerp. Gebouwd als webgame in TypeScript.
+Alles (gangen, monsters, stad, interface) wordt in code getekend, dus er zijn geen losse afbeeldingen nodig.
+
+Online spelen: **https://ygdrassil-dungeon.vercel.app**
 
 ## Spelen
 
@@ -19,33 +22,52 @@ npm run dev        # open de URL die Vite toont (meestal http://localhost:5173)
 | ← / A, → / D | draai links / rechts | doelwit wisselen |
 | Q / E | zijstap links / rechts | |
 | Enter / Spatie | | bevestigen (tijdens een ronde: versnellen) |
-| Esc | kamp-menu | terug |
-| C / M | kamp-menu / grote kaart | |
+| Esc | rugzak-menu (Pack) | terug |
+| C / M | rugzak-menu / grote kaart | |
 
 De knoppen rechts op het scherm werken ook met muis of touch.
-
-Online spelen: **https://ygdrassil-dungeon.vercel.app**
 
 ## Wat zit erin
 
 ### De stad Lindholm (mijlpaal 2)
 
-- **Herberg**: uitrusten voor goud. Herstelt HP en TP, wekt gevallen leden weer tot leven en slaat op.
-- **Winkel**: items (Medica, Amrita, Ariadne-draad) en **uitrusting** per klasse.
+- **Herberg**: uitrusten voor goud. Herstelt HP en SP, wekt gevallen leden weer tot leven en slaat op.
+- **Winkel**: items (Sap Tonic, Spirit Dew, Homing Feather) en **uitrusting** per klasse.
   Nieuwe wapens en harnassen verschijnen zodra je een diepere verdieping hebt bereikt; je oude stuk ruil je in voor de halve prijs.
-- **Labyrint**: ga naar binnen op elke verdieping die je al hebt bereikt.
-- Terug naar de stad via de **trap omhoog** op B1F, of overal met een **Ariadne-draad** (kamp-menu). Bronnen vullen zich weer bij als je in de stad bent geweest.
+- **Rootdeep**: daal af in de dungeon, op elke verdieping die je al hebt bereikt.
+- Terug naar de stad via de **trap omhoog** op de eerste verdieping, of overal met een **Homing Feather** (rugzak-menu).
+  Bronnen vullen zich weer bij als je in de stad bent geweest.
 
 ### De dungeon (mijlpaal 1)
 
 - **Verkennen** op een grid in first-person, met een automatische kaart die alleen laat zien waar je bent geweest.
 - **Willekeurige gevechten**: de "Danger"-bol kleurt van blauw via geel naar rood naarmate het volgende gevecht dichterbij komt.
-- **Beurtgevechten** met een party van 4 (Guardian, Ranger, Mystic, Arcanist): aanvallen, skills (kosten TP), verdedigen, items, vluchten.
-  Voorste en achterste rij, zwaktes en resistenties (vuur/ijs/bliksem), kritieke treffers, provoke en schildmuur.
+- **Beurtgevechten** met een party van 4 (Bastion, Strider, Mender, Runecaller): aanvallen, skills (kosten SP), verdedigen, items, vluchten.
+  Voorste en achterste rij, zwaktes en resistenties (vuur/vorst/storm), kritieke treffers, Challenge en Iron Formation.
 - **Ervaring en levels**: nieuwe skills op level 3 en 4.
-- **3 verdiepingen** met kisten, een genezende bron (eenmalig, slaat ook op) en een **eindbaas** op B3F.
+- **3 verdiepingen** met kisten, een genezende bron (eenmalig, slaat ook op) en een **eindbaas** op de derde verdieping.
 - **Opslaan** in de browser: in de stad (herberg of menu), en automatisch bij elke trap en bij de bron.
   In de dungeon kun je niet zomaar opslaan: wie valt, begint weer bij de laatste save.
+
+## Woordenlijst
+
+Alle namen in het spel zijn eigen verzinsels. Nieuwe namen voeg je toe in `src/core/data/` en hier.
+Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md`).
+
+| Onderwerp | Namen |
+|---|---|
+| Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
+| Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III |
+| Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel) |
+| Party | Bram, Sela, Wren, Orrin |
+| Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie) |
+| Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |
+| Elementen | fysiek, vuur (fire), vorst (frost), storm |
+| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Scatter Volley, Mend, Verdant Chorus, Ember/Frost/Storm Rune, Wildfire |
+| Items | Sap Tonic (HP), Spirit Dew (SP), Homing Feather (terug naar de stad) |
+| Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe |
+| Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, eindbaas **The Blighted Elder** |
+| Menu's | Pack (rugzak-menu in de dungeon), Danger-bol |
 
 ## Projectstructuur
 

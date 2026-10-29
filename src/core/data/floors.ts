@@ -30,7 +30,7 @@ export interface FloorDef {
 
 export const FLOORS: FloorDef[] = [
   {
-    name: 'Mossy Hollow B1F',
+    name: 'Mossy Hollow I',
     rows: [
       '################',
       '#S....#.......T#',
@@ -51,13 +51,13 @@ export const FLOORS: FloorDef[] = [
     startDir: 1,
     encounterSteps: 16,
     encounters: [
-      { enemies: ['mossSlime', 'mossSlime'], weight: 3 },
-      { enemies: ['forestBat'], weight: 2 },
-      { enemies: ['forestBat', 'mossSlime'], weight: 3 },
-      { enemies: ['thornRat'], weight: 2 },
-      { enemies: ['thornRat', 'forestBat', 'mossSlime'], weight: 1 },
+      { enemies: ['bogling', 'bogling'], weight: 3 },
+      { enemies: ['duskwing'], weight: 2 },
+      { enemies: ['duskwing', 'bogling'], weight: 3 },
+      { enemies: ['briarGnawer'], weight: 2 },
+      { enemies: ['briarGnawer', 'duskwing', 'bogling'], weight: 1 },
     ],
-    chests: [{ item: 'medica', qty: 2 }, { gold: 60 }],
+    chests: [{ item: 'sapTonic', qty: 2 }, { gold: 60 }],
     palette: {
       wall: '#4f5d3f',
       wallEdge: '#2b3322',
@@ -68,7 +68,7 @@ export const FLOORS: FloorDef[] = [
     },
   },
   {
-    name: 'Rootway B2F',
+    name: 'Rootway II',
     rows: [
       '##################',
       '#S.......#.......#',
@@ -90,13 +90,13 @@ export const FLOORS: FloorDef[] = [
     startDir: 1,
     encounterSteps: 15,
     encounters: [
-      { enemies: ['woodfang'], weight: 3 },
-      { enemies: ['sporeCap', 'sporeCap'], weight: 2 },
-      { enemies: ['barkBeetle', 'sporeCap'], weight: 2 },
-      { enemies: ['woodfang', 'forestBat', 'forestBat'], weight: 2 },
-      { enemies: ['barkBeetle'], weight: 1 },
+      { enemies: ['hollowHound'], weight: 3 },
+      { enemies: ['puffcap', 'puffcap'], weight: 2 },
+      { enemies: ['shellbark', 'puffcap'], weight: 2 },
+      { enemies: ['hollowHound', 'duskwing', 'duskwing'], weight: 2 },
+      { enemies: ['shellbark'], weight: 1 },
     ],
-    chests: [{ item: 'amrita', qty: 2 }, { item: 'medica', qty: 3 }],
+    chests: [{ item: 'spiritDew', qty: 2 }, { item: 'sapTonic', qty: 3 }],
     palette: {
       wall: '#5a4a38',
       wallEdge: '#2e251b',
@@ -107,7 +107,7 @@ export const FLOORS: FloorDef[] = [
     },
   },
   {
-    name: 'Heartwood B3F',
+    name: 'Heartwood III',
     rows: [
       '##################',
       '#S..#......#.....#',
@@ -130,14 +130,14 @@ export const FLOORS: FloorDef[] = [
     startDir: 1,
     encounterSteps: 14,
     encounters: [
-      { enemies: ['duskMoth'], weight: 2 },
-      { enemies: ['rootGolem'], weight: 2 },
-      { enemies: ['duskMoth', 'woodfang'], weight: 2 },
-      { enemies: ['rootGolem', 'sporeCap'], weight: 1 },
-      { enemies: ['duskMoth', 'duskMoth'], weight: 1 },
+      { enemies: ['gloamMoth'], weight: 2 },
+      { enemies: ['rootColossus'], weight: 2 },
+      { enemies: ['gloamMoth', 'hollowHound'], weight: 2 },
+      { enemies: ['rootColossus', 'puffcap'], weight: 1 },
+      { enemies: ['gloamMoth', 'gloamMoth'], weight: 1 },
     ],
-    chests: [{ item: 'medica', qty: 3 }, { gold: 200 }],
-    boss: ['witheredWarden'],
+    chests: [{ item: 'sapTonic', qty: 3 }, { gold: 200 }],
+    boss: ['blightedElder'],
     palette: {
       wall: '#3e4a52',
       wallEdge: '#1c2328',

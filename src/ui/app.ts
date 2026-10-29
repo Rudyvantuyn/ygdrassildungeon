@@ -4,7 +4,7 @@ import { EQUIPMENT } from '../core/data/equipment';
 import { ITEMS } from '../core/data/items';
 import { DIR_NAMES } from '../core/dungeon';
 import { Game, type StepEvent } from '../core/game';
-import { healAmount, healMember, isAlive, knownSkills, memberStats, restoreTp, xpForLevel } from '../core/party';
+import { healAmount, healMember, isAlive, knownSkills, memberStats, restoreSp, xpForLevel } from '../core/party';
 import { randomSeed } from '../core/rng';
 import type { ItemId, Loot } from '../core/types';
 import { CLASSES } from '../core/data/classes';
@@ -82,7 +82,7 @@ export class App implements CombatHost, TownHost {
     ]);
     const controls = el('div', { id: 'controls', className: 'panel' });
     const buttons: [string, string][] = [
-      ['↶', 'q'], ['▲', 'ArrowUp'], ['↷', 'e'], ['Camp', 'c'],
+      ['↶', 'q'], ['▲', 'ArrowUp'], ['↷', 'e'], ['Pack', 'c'],
       ['◀', 'ArrowLeft'], ['▼', 'ArrowDown'], ['▶', 'ArrowRight'], ['Map', 'm'],
     ];
     for (const [label, key] of buttons) {
@@ -212,7 +212,7 @@ export class App implements CombatHost, TownHost {
         return move(() => this.step(0, 1));
       case 'c':
       case 'Escape':
-        this.openCamp();
+        this.openPack();
         return true;
       case 'm':
         this.showMapOverlay();
@@ -223,7 +223,7 @@ export class App implements CombatHost, TownHost {
 
   // ── Title & game flow ──────────────────────────────────────────────────────
 
-  showTitle(): void {
+  showTitle(notice?: string): void {
     this.game = Game.newGame(1); // background scenery only
     this.showSide('town');
     this.town.show();
@@ -239,8 +239,9 @@ export class App implements CombatHost, TownHost {
     );
     const screen = el('div', { className: 'title-screen' }, [
       el('div', { className: 'logo', text: 'YGDRASSIL' }),
-      el('div', { className: 'tagline', text: 'Labyrinth of the World Tree' }),
+      el('div', { className: 'tagline', text: 'Descent beneath the Great Tree' }),
       el('div', { className: 'panel dialog' }, [menu.el]),
+      ...(notice ? [el('div', { className: 'title-notice panel', text: notice })] : []),
       el('div', { className: 'title-foot', text: 'Arrow keys / WASD to move · Enter to confirm · Esc to go back' }),
     ]);
     this.openOverlay(screen, menu, 'title');
@@ -251,7 +252,7 @@ export class App implements CombatHost, TownHost {
     this.save();
     this.closeOverlay();
     this.enterTown();
-    this.toast('Welcome to Lindholm. Gear up, then enter the Labyrinth.');
+    this.toast('Welcome to Lindholm. Gear up, then enter the Rootdeep.');
   }
 
   private loadSave(): void {
@@ -261,7 +262,7 @@ export class App implements CombatHost, TownHost {
       this.game = Game.load(data);
     } catch {
       clearSave();
-      this.showTitle();
+      this.showTitle('Your save was made with an older version of the game and could not be loaded. Please start a new game.');
       return;
     }
     this.closeOverlay();
@@ -353,7 +354,7 @@ export class App implements CombatHost, TownHost {
         return;
       case 'upstairs': {
         const leaving = this.game.state.floor === 0;
-        const text = leaving ? 'Leave the labyrinth and return to Lindholm?' : `Climb up to ${FLOORS[this.game.state.floor - 1].name}?`;
+        const text = leaving ? 'Leave the Rootdeep and return to Lindholm?' : `Climb up to ${FLOORS[this.game.state.floor - 1].name}?`;
         this.confirm('Stairs up', text, () => {
           this.game.ascend();
           this.save();
@@ -445,7 +446,7 @@ export class App implements CombatHost, TownHost {
     this.openOverlay(
       el('div', { className: 'panel dialog' }, [
         el('h2', { text: 'Your party has fallen' }),
-        el('p', { text: 'The labyrinth claims another expedition. Your last save is waiting.' }),
+        el('p', { text: 'The Rootdeep claims another expedition. Your last save is waiting.' }),
         menu.el,
       ]),
       menu,
@@ -461,8 +462,8 @@ export class App implements CombatHost, TownHost {
     this.save();
     this.openOverlay(
       el('div', { className: 'panel dialog' }, [
-        el('h2', { text: 'Stratum cleared!' }),
-        el('p', { text: `The Withered Warden has fallen. The way to the World Tree lies open.` }),
+        el('h2', { text: 'The Rootdeep is cleansed!' }),
+        el('p', { text: `The Blighted Elder has fallen. Its rot no longer creeps up the roots of the Great Tree.` }),
         el('p', { text: `Steps: ${s.steps} · Battles: ${s.battles} · Gold: ${s.gold} G` }),
         menu.el,
       ]),
@@ -470,29 +471,29 @@ export class App implements CombatHost, TownHost {
     );
   }
 
-  // ── Camp ───────────────────────────────────────────────────────────────────
+  // ── Pack ───────────────────────────────────────────────────────────────────
 
-  private openCamp(): void {
+  private openPack(): void {
     const close = () => {
       this.closeOverlay();
       this.enterExplore();
     };
     const menu = new ListMenu(
       [
-        { label: 'Skills', description: 'Use a healing skill.', onSelect: () => this.campSkills() },
-        { label: 'Items', description: 'Use an item.', onSelect: () => this.campItems() },
-        { label: 'Party', description: 'View stats and equipment.', onSelect: () => this.campStatus(() => this.openCamp()) },
+        { label: 'Skills', description: 'Use a healing skill.', onSelect: () => this.packSkills() },
+        { label: 'Items', description: 'Use an item.', onSelect: () => this.packItems() },
+        { label: 'Party', description: 'View stats and equipment.', onSelect: () => this.partyStatus(() => this.openPack()) },
         {
-          label: 'Ariadne Thread',
-          detail: `×${this.game.state.inventory.thread ?? 0}`,
+          label: 'Homing Feather',
+          detail: `×${this.game.state.inventory.homingFeather ?? 0}`,
           description: 'Return to Lindholm right away. Saves on arrival.',
-          disabled: (this.game.state.inventory.thread ?? 0) <= 0,
+          disabled: (this.game.state.inventory.homingFeather ?? 0) <= 0,
           onSelect: () =>
-            this.confirm('Ariadne Thread', 'Follow the thread back to Lindholm?', () => {
-              this.game.useThread();
+            this.confirm('Homing Feather', 'Follow the homingFeather back to Lindholm?', () => {
+              this.game.useFeather();
               this.save();
               this.enterTown();
-              this.toast('The thread leads you home. Game saved.');
+              this.toast('The homingFeather leads you home. Game saved.');
             }),
         },
         { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.showTitle() },
@@ -502,22 +503,22 @@ export class App implements CombatHost, TownHost {
     );
     const desc = el('div', { className: 'menu-desc' });
     menu.describeInto(desc);
-    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Camp' }), menu.el, desc]), menu);
+    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Pack' }), menu.el, desc]), menu);
   }
 
-  private campSkills(): void {
+  private packSkills(): void {
     const party = this.game.state.party;
     const items: MenuItem[] = [];
     party.forEach((m) => {
       for (const skill of knownSkills(m).filter((s) => s.field)) {
         items.push({
           label: `${m.name}: ${skill.name}`,
-          detail: `${skill.tp} TP`,
+          detail: `${skill.sp} SP`,
           description: skill.description,
-          disabled: !isAlive(m) || m.tp < skill.tp,
+          disabled: !isAlive(m) || m.sp < skill.sp,
           onSelect: () => {
             const cast = (targets: number[]) => {
-              m.tp -= skill.tp;
+              m.sp -= skill.sp;
               const amount = healAmount(m, skill.power);
               for (const t of targets) {
                 const healed = healMember(party[t], amount);
@@ -525,19 +526,19 @@ export class App implements CombatHost, TownHost {
                 floater(this.floaters, a.x, a.y, `+${healed}`, 'heal');
               }
               this.updateHud();
-              this.campSkills();
+              this.packSkills();
             };
             if (skill.target === 'allAllies') cast(party.flatMap((p, i) => (isAlive(p) ? [i] : [])));
-            else this.pickAlly(`${skill.name} on whom?`, (t) => cast([t]), () => this.campSkills());
+            else this.pickAlly(`${skill.name} on whom?`, (t) => cast([t]), () => this.packSkills());
           },
         });
       }
     });
     if (items.length === 0) items.push({ label: 'No usable skills', disabled: true, onSelect: () => {} });
-    this.subMenu('Skills', items, () => this.openCamp());
+    this.subMenu('Skills', items, () => this.openPack());
   }
 
-  private campItems(): void {
+  private packItems(): void {
     const party = this.game.state.party;
     const inv = this.game.state.inventory;
     const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].effect !== 'warp');
@@ -549,26 +550,26 @@ export class App implements CombatHost, TownHost {
       onSelect: () =>
         this.pickAlly(`Use ${ITEMS[id].name} on whom?`, (t) => {
           const def = ITEMS[id];
-          const amount = def.effect === 'hp' ? healMember(party[t], def.amount) : restoreTp(party[t], def.amount);
+          const amount = def.effect === 'hp' ? healMember(party[t], def.amount) : restoreSp(party[t], def.amount);
           inv[id] -= 1;
           const a = this.party.anchor(t);
-          floater(this.floaters, a.x, a.y, `+${amount}${def.effect === 'tp' ? ' TP' : ''}`, 'heal');
+          floater(this.floaters, a.x, a.y, `+${amount}${def.effect === 'sp' ? ' SP' : ''}`, 'heal');
           this.updateHud();
-          this.campItems();
-        }, () => this.campItems()),
+          this.packItems();
+        }, () => this.packItems()),
     }));
-    this.subMenu('Items', items, () => this.openCamp());
+    this.subMenu('Items', items, () => this.openPack());
   }
 
-  campStatus(back: () => void): void {
+  partyStatus(back: () => void): void {
     const gear = (id?: string) => (id ? EQUIPMENT[id]?.name ?? '—' : '—');
     const rows = this.game.state.party.map((m) => {
       const s = memberStats(m);
       const next = xpForLevel(m.level + 1) - m.xp;
-      return `<tr><td>${m.name}</td><td>${CLASSES[m.classId].name}</td><td>${m.level}</td><td>${m.hp}/${s.hp}</td><td>${m.tp}/${s.tp}</td><td>${s.atk}</td><td>${s.def}</td><td>${s.mag}</td><td>${s.res}</td><td>${s.spd}</td><td>${next}</td><td class="gear">${gear(m.weapon)}<br>${gear(m.armor)}</td></tr>`;
+      return `<tr><td>${m.name}</td><td>${CLASSES[m.classId].name}</td><td>${m.level}</td><td>${m.hp}/${s.hp}</td><td>${m.sp}/${s.sp}</td><td>${s.atk}</td><td>${s.def}</td><td>${s.mag}</td><td>${s.res}</td><td>${s.spd}</td><td>${next}</td><td class="gear">${gear(m.weapon)}<br>${gear(m.armor)}</td></tr>`;
     });
     const table = el('table', { className: 'stats' });
-    table.innerHTML = `<thead><tr><th>Name</th><th>Class</th><th>Lv</th><th>HP</th><th>TP</th><th>ATK</th><th>DEF</th><th>MAG</th><th>RES</th><th>SPD</th><th>Next</th><th class="gear">Gear</th></tr></thead><tbody>${rows.join('')}</tbody>`;
+    table.innerHTML = `<thead><tr><th>Name</th><th>Class</th><th>Lv</th><th>HP</th><th>SP</th><th>ATK</th><th>DEF</th><th>MAG</th><th>RES</th><th>SPD</th><th>Next</th><th class="gear">Gear</th></tr></thead><tbody>${rows.join('')}</tbody>`;
     const menu = new ListMenu([{ label: 'Back', onSelect: back }], { onCancel: back });
     this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Party' }), table, menu.el]), menu);
   }
@@ -576,7 +577,7 @@ export class App implements CombatHost, TownHost {
   private pickAlly(title: string, pick: (i: number) => void, back: () => void): void {
     const items = this.game.state.party.map((m, i) => ({
       label: m.name,
-      detail: `${m.hp}/${memberStats(m).hp} HP · ${m.tp} TP`,
+      detail: `${m.hp}/${memberStats(m).hp} HP · ${m.sp} SP`,
       disabled: !isAlive(m),
       onSelect: () => pick(i),
     }));

@@ -34,7 +34,7 @@ export class CombatView {
   private fx: EnemyFx[];
   private enemyHp: number[];
   private partyHp: number[] = [];
-  private partyTp: number[] = [];
+  private partySp: number[] = [];
   private commands: (Command | null)[] = [];
   private current = -1;
   private menu: ListMenu | null = null;
@@ -197,7 +197,7 @@ export class CombatView {
     this.say(`What will ${m.name} do?`);
     const items: MenuItem[] = [
       { label: 'Attack', description: 'A basic attack on one enemy.', onSelect: () => this.chooseEnemy((t) => this.setCommand({ kind: 'attack', target: t }), () => this.showCommandMenu()) },
-      { label: 'Skills', detail: '▸', description: 'Use a class skill (costs TP).', onSelect: () => this.showSkillMenu() },
+      { label: 'Skills', detail: '▸', description: 'Use a class skill (costs SP).', onSelect: () => this.showSkillMenu() },
       { label: 'Defend', description: 'Halve damage taken this turn. Acts first.', onSelect: () => this.setCommand({ kind: 'defend' }) },
       { label: 'Items', detail: '▸', description: 'Use an item from the bag.', onSelect: () => this.showItemMenu() },
       {
@@ -214,9 +214,9 @@ export class CombatView {
     const m = this.combat.party[this.current];
     const items: MenuItem[] = knownSkills(m).map((skill) => ({
       label: skill.name,
-      detail: `${skill.tp} TP`,
+      detail: `${skill.sp} SP`,
       description: skill.description,
-      disabled: m.tp < skill.tp,
+      disabled: m.sp < skill.sp,
       onSelect: () => this.chooseSkillTarget(skill),
     }));
     this.showPanel(`${m.name} · Skills`, new ListMenu(items, { onCancel: () => this.showCommandMenu() }), 'Esc back');
@@ -327,8 +327,8 @@ export class CombatView {
         await this.wait(300);
         return;
       }
-      case 'tp':
-        this.partyTp[ev.target] = ev.tp;
+      case 'sp':
+        this.partySp[ev.target] = ev.sp;
         this.renderParty();
         return;
       case 'miss': {
@@ -355,11 +355,11 @@ export class CombatView {
 
   private syncParty(): void {
     this.partyHp = this.combat.party.map((m) => m.hp);
-    this.partyTp = this.combat.party.map((m) => m.tp);
+    this.partySp = this.combat.party.map((m) => m.sp);
   }
 
   private renderParty(): void {
-    this.host.party.render(this.combat.party, { hp: this.partyHp, tp: this.partyTp, active: this.current >= 0 ? this.current : null });
+    this.host.party.render(this.combat.party, { hp: this.partyHp, sp: this.partySp, active: this.current >= 0 ? this.current : null });
   }
 
   private say(text: string): void {

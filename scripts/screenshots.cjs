@@ -43,13 +43,13 @@ const out = 'screenshots';
   await shot('02b-shop-equipment');
   await press('Enter'); // Bronze Sword -> choose wearer
   await shot('02c-shop-wearer');
-  await press('Enter'); // Lief buys it
+  await press('Enter'); // Bram buys it
   await press('Escape');
   await press('Escape');
   await press('Escape');
-  await press('ArrowDown'); // Labyrinth
+  await press('ArrowDown'); // Rootdeep
   await press('Enter');
-  await press('Enter'); // B1F
+  await press('Enter'); // first floor
   await page.evaluate(() => (window.ygg.game.state.encounterAt = 999));
   await shot('02d-explore-start');
   await press('ArrowUp', 4);
@@ -77,7 +77,7 @@ const out = 'screenshots';
   await press('Enter');
 
   await press('c');
-  await shot('08-camp');
+  await shot('08-pack');
   await press('Escape');
   await press('Escape');
   await press('m');

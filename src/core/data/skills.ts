@@ -5,14 +5,14 @@ export type SkillTarget = 'enemy' | 'allEnemies' | 'ally' | 'allAllies' | 'self'
 export interface SkillDef {
   id: SkillId;
   name: string;
-  tp: number;
+  sp: number;
   target: SkillTarget;
-  kind: 'phys' | 'magic' | 'heal' | 'provoke' | 'guard';
+  kind: 'phys' | 'magic' | 'heal' | 'challenge' | 'guard';
   element: Element;
   /** Percent of a normal attack (damage) or of the heal formula. */
   power: number;
   hits: number;
-  /** Usable outside combat from the camp menu. */
+  /** Usable outside combat from the pack menu. */
   field: boolean;
   description: string;
 }
@@ -22,106 +22,106 @@ function skill(def: Omit<SkillDef, 'element' | 'hits' | 'field'> & Partial<Skill
 }
 
 export const SKILLS: Record<SkillId, SkillDef> = {
-  provoke: skill({
-    id: 'provoke',
-    name: 'Provoke',
-    tp: 3,
+  challenge: skill({
+    id: 'challenge',
+    name: 'Challenge',
+    sp: 3,
     target: 'self',
-    kind: 'provoke',
+    kind: 'challenge',
     power: 0,
-    description: 'Draws enemy attacks to yourself for 2 turns.',
+    description: 'Bang your shield and dare the enemy to strike you for 2 turns.',
   }),
-  shieldSmite: skill({
-    id: 'shieldSmite',
-    name: 'Shield Smite',
-    tp: 4,
+  bulwarkBash: skill({
+    id: 'bulwarkBash',
+    name: 'Bulwark Bash',
+    sp: 4,
     target: 'enemy',
     kind: 'phys',
     power: 160,
-    description: 'A heavy blow with the shield.',
+    description: 'Drive the full weight of your shield into one enemy.',
   }),
-  shieldWall: skill({
-    id: 'shieldWall',
-    name: 'Shield Wall',
-    tp: 6,
+  ironFormation: skill({
+    id: 'ironFormation',
+    name: 'Iron Formation',
+    sp: 6,
     target: 'allAllies',
     kind: 'guard',
     power: 0,
-    description: 'The whole party takes 30% less damage for 3 turns.',
+    description: 'Rally the party into a tight formation: 30% less damage for 3 turns.',
   }),
-  doubleShot: skill({
-    id: 'doubleShot',
-    name: 'Double Shot',
-    tp: 4,
+  twinFang: skill({
+    id: 'twinFang',
+    name: 'Twin Fang',
+    sp: 4,
     target: 'enemy',
     kind: 'phys',
     power: 85,
     hits: 2,
-    description: 'Fires two arrows at one enemy.',
+    description: 'Loose two arrows at once at a single enemy.',
   }),
-  arrowRain: skill({
-    id: 'arrowRain',
-    name: 'Arrow Rain',
-    tp: 8,
+  scatterVolley: skill({
+    id: 'scatterVolley',
+    name: 'Scatter Volley',
+    sp: 8,
     target: 'allEnemies',
     kind: 'phys',
     power: 80,
-    description: 'Rains arrows on every enemy.',
+    description: 'A wide spray of arrows that strikes every enemy.',
   }),
-  heal: skill({
-    id: 'heal',
-    name: 'Heal',
-    tp: 3,
+  mend: skill({
+    id: 'mend',
+    name: 'Mend',
+    sp: 3,
     target: 'ally',
     kind: 'heal',
     power: 100,
     field: true,
-    description: 'Restores HP to one ally.',
+    description: 'Knit the wounds of one ally.',
   }),
-  healCircle: skill({
-    id: 'healCircle',
-    name: 'Heal Circle',
-    tp: 9,
+  verdantChorus: skill({
+    id: 'verdantChorus',
+    name: 'Verdant Chorus',
+    sp: 9,
     target: 'allAllies',
     kind: 'heal',
     power: 70,
     field: true,
-    description: 'Restores HP to the whole party.',
+    description: 'A soothing hymn that restores HP to the whole party.',
   }),
-  fire: skill({
-    id: 'fire',
-    name: 'Fire',
-    tp: 4,
+  emberRune: skill({
+    id: 'emberRune',
+    name: 'Ember Rune',
+    sp: 4,
     target: 'enemy',
     kind: 'magic',
     element: 'fire',
     power: 150,
     description: 'Fire damage to one enemy.',
   }),
-  ice: skill({
-    id: 'ice',
-    name: 'Ice',
-    tp: 4,
+  frostRune: skill({
+    id: 'frostRune',
+    name: 'Frost Rune',
+    sp: 4,
     target: 'enemy',
     kind: 'magic',
-    element: 'ice',
+    element: 'frost',
     power: 150,
-    description: 'Ice damage to one enemy.',
+    description: 'Frost damage to one enemy.',
   }),
-  volt: skill({
-    id: 'volt',
-    name: 'Volt',
-    tp: 4,
+  stormRune: skill({
+    id: 'stormRune',
+    name: 'Storm Rune',
+    sp: 4,
     target: 'enemy',
     kind: 'magic',
-    element: 'volt',
+    element: 'storm',
     power: 150,
-    description: 'Volt damage to one enemy.',
+    description: 'Storm damage to one enemy.',
   }),
-  flameWave: skill({
-    id: 'flameWave',
-    name: 'Flame Wave',
-    tp: 10,
+  wildfire: skill({
+    id: 'wildfire',
+    name: 'Wildfire',
+    sp: 10,
     target: 'allEnemies',
     kind: 'magic',
     element: 'fire',
