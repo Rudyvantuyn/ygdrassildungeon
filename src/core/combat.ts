@@ -207,7 +207,9 @@ export class Combat {
           return;
         }
         this.inventory[cmd.item] -= 1;
-        if (item.restores === 'hp') {
+        if (item.effect === 'warp') {
+          events.push({ type: 'info', text: 'It has no effect here.' });
+        } else if (item.effect === 'hp') {
           const healed = healMember(target, item.amount);
           events.push({ type: 'heal', target: cmd.target, amount: healed, hp: target.hp });
         } else {

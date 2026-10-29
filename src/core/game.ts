@@ -5,7 +5,7 @@ import { createStartingParty, fullRestore, isAlive } from './party';
 import { Rng } from './rng';
 import type { Dir, ItemId, Loot, Member } from './types';
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 export interface FloorProgress {
   /** One character per cell: '1' = mapped. */
@@ -15,9 +15,14 @@ export interface FloorProgress {
   bossDefeated: boolean;
 }
 
+export type Location = 'town' | 'dungeon';
+
 export interface GameState {
   version: number;
   rng: number;
+  location: Location;
+  /** Deepest floor index the party has reached (unlocks shop stock and floor entry). */
+  deepest: number;
   floor: number;
   x: number;
   y: number;
@@ -40,6 +45,7 @@ export type StepEvent =
   | { type: 'chest'; loot: Loot }
   | { type: 'emptyChest' }
   | { type: 'stairs' }
+  | { type: 'upstairs' }
   | { type: 'spring'; used: boolean }
   | { type: 'boss' }
   | { type: 'encounter'; enemies: string[] };
@@ -62,13 +68,15 @@ export class Game {
     const game = new Game({
       version: SAVE_VERSION,
       rng: seed,
+      location: 'town',
+      deepest: 0,
       floor: 0,
       x: start.x,
       y: start.y,
       dir: start.dir,
       party: createStartingParty(),
-      gold: 0,
-      inventory: { medica: 3, amrita: 1 },
+      gold: 150,
+      inventory: { medica: 3, amrita: 1, thread: 1 },
       danger: 0,
       encounterAt: 0,
       progress,
@@ -83,6 +91,13 @@ export class Game {
 
   static load(json: string): Game {
     const state = JSON.parse(json) as GameState;
+    if (state.version === 1) {
+      // v1 had no town: the party was always in the dungeon.
+      state.location = 'dungeon';
+      state.deepest = state.floor;
+      state.inventory.thread ??= 0;
+      state.version = 2;
+    }
     if (state.version !== SAVE_VERSION) throw new Error(`Unsupported save version ${state.version}`);
     return new Game(state);
   }
@@ -149,6 +164,10 @@ export class Game {
       events.push({ type: 'stairs' });
       return events;
     }
+    if (tile === 'up') {
+      events.push({ type: 'upstairs' });
+      return events;
+    }
     if (tile === 'spring') {
       events.push({ type: 'spring', used: this.progress.springUsed });
       return events;
@@ -174,7 +193,31 @@ export class Game {
 
   descend(): void {
     if (this.tileHere() !== 'stairs' || this.isLastFloor) return;
-    this.state.floor += 1;
+    this.enterFloor(this.state.floor + 1, true);
+  }
+
+  /** Climb the stairs up: to the previous floor's stairs down, or out to town from B1F. */
+  ascend(): void {
+    if (this.tileHere() !== 'up') return;
+    if (this.state.floor === 0) {
+      this.returnToTown();
+      return;
+    }
+    this.state.floor -= 1;
+    this.map = parseFloor(this.floorDef);
+    const i = this.map.tiles.indexOf('stairs');
+    this.state.x = i % this.map.width;
+    this.state.y = Math.floor(i / this.map.width);
+    this.markExplored();
+  }
+
+  /** Enter the labyrinth at the start of a floor the party has already reached. */
+  enterFloor(floor: number, unlock = false): void {
+    if (floor < 0 || floor >= FLOORS.length) return;
+    if (!unlock && floor > this.state.deepest) return;
+    this.state.location = 'dungeon';
+    this.state.floor = floor;
+    this.state.deepest = Math.max(this.state.deepest, floor);
     this.map = parseFloor(this.floorDef);
     this.state.x = this.map.start.x;
     this.state.y = this.map.start.y;
@@ -182,6 +225,19 @@ export class Game {
     this.state.danger = 0;
     this.rollEncounterAt();
     this.markExplored();
+  }
+
+  /** Back to town. Springs refill while the party is away. */
+  returnToTown(): void {
+    this.state.location = 'town';
+    for (const p of this.state.progress) p.springUsed = false;
+  }
+
+  useThread(): boolean {
+    if (this.state.location !== 'dungeon' || (this.state.inventory.thread ?? 0) <= 0) return false;
+    this.state.inventory.thread -= 1;
+    this.returnToTown();
+    return true;
   }
 
   startCombat(enemies: string[]): Combat {

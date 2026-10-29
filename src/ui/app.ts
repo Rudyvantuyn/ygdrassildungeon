@@ -1,5 +1,6 @@
 import type { Combat } from '../core/combat';
 import { FLOORS } from '../core/data/floors';
+import { EQUIPMENT } from '../core/data/equipment';
 import { ITEMS } from '../core/data/items';
 import { DIR_NAMES } from '../core/dungeon';
 import { Game, type StepEvent } from '../core/game';
@@ -9,21 +10,24 @@ import type { ItemId, Loot } from '../core/types';
 import { CLASSES } from '../core/data/classes';
 import { CorridorRenderer } from '../render/corridor';
 import { drawMinimap } from '../render/minimap';
+import { drawTown } from '../render/town';
 import { CombatView, type CombatHost } from './combatView';
 import { el, floater } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import { PartyView } from './partyView';
 import { clearSave, readSave, writeSave } from './storage';
+import { TownView, type TownHost } from './townView';
 
 const VIEW_W = 860;
 const VIEW_H = 520;
 const MAP_SIZE = 270;
 const MOVE_COOLDOWN = 150;
 
-type Mode = 'title' | 'explore' | 'combat' | 'overlay' | 'busy';
+type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'busy';
+type SidePanel = 'explore' | 'combat' | 'town';
 type ViewFx = { kind: 'step' | 'turn' | 'bump' | 'encounter' | 'shake'; start: number };
 
-export class App implements CombatHost {
+export class App implements CombatHost, TownHost {
   game!: Game;
   readonly party: PartyView;
   readonly corridor: CorridorRenderer;
@@ -42,6 +46,8 @@ export class App implements CombatHost {
   private readonly dangerOrb: HTMLElement;
   private readonly goldEl: HTMLElement;
   private readonly explorePanels: HTMLElement[];
+  private readonly townPanel: HTMLElement;
+  private readonly town: TownView;
 
   private mode: Mode = 'title';
   private overlayMenu: ListMenu | null = null;
@@ -85,6 +91,7 @@ export class App implements CombatHost {
       controls.appendChild(b);
     }
     this.commandPanel = el('div', { id: 'command-panel', className: 'panel hidden' });
+    this.townPanel = el('div', { id: 'town-panel', className: 'panel hidden' });
     this.explorePanels = [mapPanel, statusRow, controls];
     const side = el('aside', { id: 'side' }, [
       el('div', { id: 'floor-panel', className: 'panel' }, [this.floorName, this.compass]),
@@ -92,6 +99,7 @@ export class App implements CombatHost {
       statusRow,
       controls,
       this.commandPanel,
+      this.townPanel,
     ]);
 
     const partyEl = el('div', { id: 'party' });
@@ -103,6 +111,7 @@ export class App implements CombatHost {
     this.minimap = minimapCanvas.getContext('2d')!;
     this.corridor = new CorridorRenderer(this.view, VIEW_W, VIEW_H);
     this.party = new PartyView(partyEl);
+    this.town = new TownView(this, this.townPanel);
 
     window.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -123,12 +132,14 @@ export class App implements CombatHost {
     }
     if (this.mode === 'combat' && this.combatView) {
       this.combatView.draw(ctx, VIEW_W, VIEW_H, time);
+    } else if (this.game?.state.location === 'town') {
+      drawTown(ctx, VIEW_W, VIEW_H, time, this.mode === 'title' ? null : this.town.focus);
     } else if (this.game) {
       this.corridor.draw(this.game, time);
     }
     ctx.restore();
     this.drawFx(time);
-    if (this.game && this.mode !== 'combat') drawMinimap(this.minimap, MAP_SIZE, this.game, time);
+    if (this.game && this.mode !== 'combat' && this.game.state.location === 'dungeon') drawMinimap(this.minimap, MAP_SIZE, this.game, time);
   }
 
   private drawFx(time: number): void {
@@ -165,6 +176,8 @@ export class App implements CombatHost {
         return this.overlayMenu?.handleKey(key) ?? false;
       case 'combat':
         return this.combatView?.handleKey(key) ?? false;
+      case 'town':
+        return this.town.menu?.handleKey(key) ?? false;
       case 'explore':
         return this.exploreKey(key);
       case 'busy':
@@ -210,9 +223,10 @@ export class App implements CombatHost {
 
   // ── Title & game flow ──────────────────────────────────────────────────────
 
-  private showTitle(): void {
+  showTitle(): void {
     this.game = Game.newGame(1); // background scenery only
-    this.hideSideForCombat(false);
+    this.showSide('town');
+    this.town.show();
     this.updateHud();
     this.party.render(this.game.state.party);
     const hasSave = readSave() !== null;
@@ -236,8 +250,8 @@ export class App implements CombatHost {
     this.game = Game.newGame(randomSeed());
     this.save();
     this.closeOverlay();
-    this.enterExplore();
-    this.toast(`${this.game.floorDef.name} — find the stairs down.`);
+    this.enterTown();
+    this.toast('Welcome to Lindholm. Gear up, then enter the Labyrinth.');
   }
 
   private loadSave(): void {
@@ -251,25 +265,47 @@ export class App implements CombatHost {
       return;
     }
     this.closeOverlay();
-    this.enterExplore();
+    this.resume();
     this.toast('Game loaded.');
   }
 
-  private save(): void {
+  save(): void {
     writeSave(this.game.serialize());
+  }
+
+  /** Back to the town menu or the dungeon, wherever the party is. */
+  private resume(): void {
+    if (this.game.state.location === 'town') this.enterTown();
+    else this.enterExplore();
+  }
+
+  enterTown(): void {
+    this.mode = 'town';
+    this.showSide('town');
+    this.message.classList.add('hidden');
+    this.town.show();
+    this.updateHud();
+  }
+
+  enterDungeon(): void {
+    this.enterExplore();
   }
 
   private enterExplore(): void {
     this.mode = 'explore';
-    this.hideSideForCombat(false);
+    this.showSide('explore');
     this.message.classList.add('hidden');
     this.updateHud();
   }
 
-  private updateHud(): void {
+  updateHud(): void {
     const g = this.game;
-    this.floorName.textContent = g.floorDef.name;
+    const inTown = g.state.location === 'town';
+    this.floorName.textContent = inTown ? 'Lindholm' : g.floorDef.name;
+    this.compass.classList.toggle('hidden', inTown);
     this.compass.textContent = DIR_NAMES[g.state.dir];
+    const gold = this.townPanel.querySelector('.town-gold');
+    if (gold) gold.textContent = `${g.state.gold} G`;
     const level = g.dangerLevel;
     const color = level < 0.45 ? '#3fb6e8' : level < 0.75 ? '#e8c43f' : '#e8483f';
     this.dangerOrb.style.background = `radial-gradient(circle at 35% 30%, #fff, ${color} 55%, #000 120%)`;
@@ -315,6 +351,17 @@ export class App implements CombatHost {
           this.toast(`${this.game.floorDef.name} — game saved.`);
         });
         return;
+      case 'upstairs': {
+        const leaving = this.game.state.floor === 0;
+        const text = leaving ? 'Leave the labyrinth and return to Lindholm?' : `Climb up to ${FLOORS[this.game.state.floor - 1].name}?`;
+        this.confirm('Stairs up', text, () => {
+          this.game.ascend();
+          this.save();
+          this.resume();
+          this.toast(leaving ? 'Back in Lindholm. Game saved.' : `${this.game.floorDef.name}`);
+        });
+        return;
+      }
       case 'spring':
         if (ev.used) {
           this.toast('The spring has run dry.');
@@ -345,7 +392,7 @@ export class App implements CombatHost {
   private startCombat(combat: Combat): void {
     this.mode = 'combat';
     this.toastEl.classList.add('hidden');
-    this.hideSideForCombat(true);
+    this.showSide('combat');
     this.combatView = new CombatView(this, combat, (c) => this.endCombat(c));
     void this.combatView.start();
   }
@@ -353,7 +400,7 @@ export class App implements CombatHost {
   private endCombat(combat: Combat): void {
     this.game.finishCombat(combat);
     this.combatView = null;
-    this.hideSideForCombat(false);
+    this.showSide('explore');
     this.updateHud();
 
     if (combat.outcome === 'defeat') return this.showGameOver();
@@ -383,9 +430,10 @@ export class App implements CombatHost {
     );
   }
 
-  private hideSideForCombat(combat: boolean): void {
-    for (const p of this.explorePanels) p.classList.toggle('hidden', combat);
-    this.commandPanel.classList.toggle('hidden', !combat);
+  private showSide(panel: SidePanel): void {
+    for (const p of this.explorePanels) p.classList.toggle('hidden', panel !== 'explore');
+    this.commandPanel.classList.toggle('hidden', panel !== 'combat');
+    this.townPanel.classList.toggle('hidden', panel !== 'town');
   }
 
   private showGameOver(): void {
@@ -407,8 +455,8 @@ export class App implements CombatHost {
   private showCleared(): void {
     const s = this.game.state;
     const menu = new ListMenu([
+      { label: 'Return to Lindholm', onSelect: () => { this.closeOverlay(); this.game.returnToTown(); this.save(); this.enterTown(); } },
       { label: 'Keep exploring', onSelect: () => { this.closeOverlay(); this.enterExplore(); } },
-      { label: 'Return to title', onSelect: () => this.showTitle() },
     ]);
     this.save();
     this.openOverlay(
@@ -433,9 +481,21 @@ export class App implements CombatHost {
       [
         { label: 'Skills', description: 'Use a healing skill.', onSelect: () => this.campSkills() },
         { label: 'Items', description: 'Use an item.', onSelect: () => this.campItems() },
-        { label: 'Party', description: 'View stats.', onSelect: () => this.campStatus() },
-        { label: 'Save', description: 'Save your progress.', onSelect: () => { this.save(); close(); this.toast('Game saved.'); } },
-        { label: 'Quit to title', onSelect: () => this.showTitle() },
+        { label: 'Party', description: 'View stats and equipment.', onSelect: () => this.campStatus(() => this.openCamp()) },
+        {
+          label: 'Ariadne Thread',
+          detail: `×${this.game.state.inventory.thread ?? 0}`,
+          description: 'Return to Lindholm right away. Saves on arrival.',
+          disabled: (this.game.state.inventory.thread ?? 0) <= 0,
+          onSelect: () =>
+            this.confirm('Ariadne Thread', 'Follow the thread back to Lindholm?', () => {
+              this.game.useThread();
+              this.save();
+              this.enterTown();
+              this.toast('The thread leads you home. Game saved.');
+            }),
+        },
+        { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.showTitle() },
         { label: 'Close', onSelect: close },
       ],
       { onCancel: close },
@@ -480,7 +540,8 @@ export class App implements CombatHost {
   private campItems(): void {
     const party = this.game.state.party;
     const inv = this.game.state.inventory;
-    const items: MenuItem[] = (Object.keys(ITEMS) as ItemId[]).map((id) => ({
+    const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].effect !== 'warp');
+    const items: MenuItem[] = usable.map((id) => ({
       label: ITEMS[id].name,
       detail: `×${inv[id] ?? 0}`,
       description: ITEMS[id].description,
@@ -488,10 +549,10 @@ export class App implements CombatHost {
       onSelect: () =>
         this.pickAlly(`Use ${ITEMS[id].name} on whom?`, (t) => {
           const def = ITEMS[id];
-          const amount = def.restores === 'hp' ? healMember(party[t], def.amount) : restoreTp(party[t], def.amount);
+          const amount = def.effect === 'hp' ? healMember(party[t], def.amount) : restoreTp(party[t], def.amount);
           inv[id] -= 1;
           const a = this.party.anchor(t);
-          floater(this.floaters, a.x, a.y, `+${amount}${def.restores === 'tp' ? ' TP' : ''}`, 'heal');
+          floater(this.floaters, a.x, a.y, `+${amount}${def.effect === 'tp' ? ' TP' : ''}`, 'heal');
           this.updateHud();
           this.campItems();
         }, () => this.campItems()),
@@ -499,16 +560,17 @@ export class App implements CombatHost {
     this.subMenu('Items', items, () => this.openCamp());
   }
 
-  private campStatus(): void {
+  campStatus(back: () => void): void {
+    const gear = (id?: string) => (id ? EQUIPMENT[id]?.name ?? '—' : '—');
     const rows = this.game.state.party.map((m) => {
       const s = memberStats(m);
       const next = xpForLevel(m.level + 1) - m.xp;
-      return `<tr><td>${m.name}</td><td>${CLASSES[m.classId].name}</td><td>${m.level}</td><td>${m.hp}/${s.hp}</td><td>${m.tp}/${s.tp}</td><td>${s.atk}</td><td>${s.def}</td><td>${s.mag}</td><td>${s.res}</td><td>${s.spd}</td><td>${next}</td></tr>`;
+      return `<tr><td>${m.name}</td><td>${CLASSES[m.classId].name}</td><td>${m.level}</td><td>${m.hp}/${s.hp}</td><td>${m.tp}/${s.tp}</td><td>${s.atk}</td><td>${s.def}</td><td>${s.mag}</td><td>${s.res}</td><td>${s.spd}</td><td>${next}</td><td class="gear">${gear(m.weapon)}<br>${gear(m.armor)}</td></tr>`;
     });
     const table = el('table', { className: 'stats' });
-    table.innerHTML = `<thead><tr><th>Name</th><th>Class</th><th>Lv</th><th>HP</th><th>TP</th><th>ATK</th><th>DEF</th><th>MAG</th><th>RES</th><th>SPD</th><th>Next</th></tr></thead><tbody>${rows.join('')}</tbody>`;
-    const menu = new ListMenu([{ label: 'Back', onSelect: () => this.openCamp() }], { onCancel: () => this.openCamp() });
-    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Party' }), table, menu.el]), menu);
+    table.innerHTML = `<thead><tr><th>Name</th><th>Class</th><th>Lv</th><th>HP</th><th>TP</th><th>ATK</th><th>DEF</th><th>MAG</th><th>RES</th><th>SPD</th><th>Next</th><th class="gear">Gear</th></tr></thead><tbody>${rows.join('')}</tbody>`;
+    const menu = new ListMenu([{ label: 'Back', onSelect: back }], { onCancel: back });
+    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Party' }), table, menu.el]), menu);
   }
 
   private pickAlly(title: string, pick: (i: number) => void, back: () => void): void {
@@ -558,7 +620,7 @@ export class App implements CombatHost {
     this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: title }), el('p', { text }), menu.el]), menu);
   }
 
-  private openOverlay(content: HTMLElement, menu: ListMenu, mode: Mode = 'overlay'): void {
+  openOverlay(content: HTMLElement, menu: ListMenu, mode: Mode = 'overlay'): void {
     this.overlay.innerHTML = '';
     this.overlay.appendChild(content);
     this.overlay.classList.remove('hidden');
@@ -566,13 +628,13 @@ export class App implements CombatHost {
     this.mode = mode;
   }
 
-  private closeOverlay(): void {
+  closeOverlay(): void {
     this.overlay.classList.add('hidden');
     this.overlay.innerHTML = '';
     this.overlayMenu = null;
   }
 
-  private toast(text: string): void {
+  toast(text: string): void {
     this.toastEl.textContent = text;
     this.toastEl.classList.remove('hidden');
     window.clearTimeout(this.toastTimer);

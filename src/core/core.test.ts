@@ -5,7 +5,8 @@ import { FLOORS } from './data/floors';
 import { SKILLS } from './data/skills';
 import { CLASSES } from './data/classes';
 import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir } from './dungeon';
-import { Game } from './game';
+import { Game, type GameState } from './game';
+import { buyEquipment, buyItem, equipmentForSale, innCost, netPrice, restAtInn } from './town';
 import { createStartingParty, grantXp, memberStats, xpForLevel } from './party';
 import { Rng } from './rng';
 import type { ItemId } from './types';
@@ -133,7 +134,7 @@ describe('party', () => {
 });
 
 describe('combat', () => {
-  const inventory = (): Record<ItemId, number> => ({ medica: 2, amrita: 0 });
+  const inventory = (): Record<ItemId, number> => ({ medica: 2, amrita: 0, thread: 0 });
   const attackAll = (combat: Combat): Command[] => combat.party.map(() => ({ kind: 'attack', target: 0 }));
 
   it('a fresh party beats two slimes', () => {
@@ -211,12 +212,108 @@ describe('combat', () => {
   it('game applies gold after victory and marks the boss defeated', () => {
     const game = Game.newGame(1);
     game.state.floor = 2;
+    const goldBefore = game.state.gold;
     const combat = game.startBossCombat();
     combat.enemies[0].hp = 1;
     for (let r = 0; r < 5 && !combat.outcome; r++) combat.resolveRound(attackAll(combat));
     expect(combat.outcome).toBe('victory');
     game.finishCombat(combat);
-    expect(game.state.gold).toBe(ENEMIES.witheredWarden.gold);
+    expect(game.state.gold).toBe(goldBefore + ENEMIES.witheredWarden.gold);
     expect(game.state.cleared).toBe(true);
+  });
+});
+
+describe('town', () => {
+  it('a new game starts in town with a little money', () => {
+    const game = Game.newGame(1);
+    expect(game.state.location).toBe('town');
+    expect(game.state.gold).toBeGreaterThan(0);
+  });
+
+  it('the inn restores everyone, including fallen members, for gold', () => {
+    const game = Game.newGame(1);
+    const [lief, ayla] = game.state.party;
+    lief.hp = 0;
+    ayla.tp = 0;
+    const cost = innCost(game);
+    const gold = game.state.gold;
+    expect(restAtInn(game)).toBe(true);
+    expect(game.state.gold).toBe(gold - cost);
+    expect(lief.hp).toBe(memberStats(lief).hp);
+    expect(ayla.tp).toBe(memberStats(ayla).tp);
+    game.state.gold = 0;
+    expect(restAtInn(game)).toBe(false);
+  });
+
+  it('buys items and equipment, trading in the old piece', () => {
+    const game = Game.newGame(1);
+    game.state.gold = 1000;
+    expect(buyItem(game, 'medica')).toBe(true);
+    expect(game.state.inventory.medica).toBe(4);
+
+    const lief = game.state.party[0];
+    const atk = memberStats(lief).atk;
+    expect(buyEquipment(game, 'bronzeSword', 0)).toBe(true);
+    expect(memberStats(lief).atk).toBe(atk + 5);
+    expect(buyEquipment(game, 'bronzeSword', 1)).toBe(false); // a Ranger can't use swords
+
+    game.state.deepest = 1;
+    const iron = equipmentForSale(game).find((e) => e.id === 'ironSword')!;
+    expect(netPrice(lief, iron)).toBe(260 - 40);
+    const before = game.state.gold;
+    expect(buyEquipment(game, 'ironSword', 0)).toBe(true);
+    expect(game.state.gold).toBe(before - 220);
+    expect(memberStats(lief).atk).toBe(atk + 10);
+  });
+
+  it('only sells gear for floors the party has reached', () => {
+    const game = Game.newGame(1);
+    expect(equipmentForSale(game).every((e) => e.tier === 0)).toBe(true);
+    game.state.deepest = 2;
+    expect(equipmentForSale(game).some((e) => e.tier === 2)).toBe(true);
+  });
+
+  it('enters only floors already reached, and climbs back to town', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(2);
+    expect(game.state.location).toBe('town');
+    game.enterFloor(0);
+    expect(game.state.location).toBe('dungeon');
+    expect(game.tileHere()).toBe('up');
+    game.ascend();
+    expect(game.state.location).toBe('town');
+  });
+
+  it('stairs up from B2F lead to the stairs down on B1F', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(1, true);
+    game.ascend();
+    expect(game.state.floor).toBe(0);
+    expect(game.tileHere()).toBe('stairs');
+    expect(game.state.deepest).toBe(1);
+  });
+
+  it('an Ariadne Thread returns the party to town and refills springs', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(0);
+    game.state.progress[0].springUsed = true;
+    expect(game.useThread()).toBe(true);
+    expect(game.state.location).toBe('town');
+    expect(game.state.inventory.thread).toBe(0);
+    expect(game.state.progress[0].springUsed).toBe(false);
+    expect(game.useThread()).toBe(false);
+  });
+
+  it('loads a version 1 save', () => {
+    const state = JSON.parse(Game.newGame(1).serialize()) as Partial<GameState> & Record<string, unknown>;
+    delete state.location;
+    delete state.deepest;
+    state.version = 1;
+    state.floor = 1;
+    state.inventory = { medica: 1, amrita: 0 } as GameState['inventory'];
+    const game = Game.load(JSON.stringify(state));
+    expect(game.state.location).toBe('dungeon');
+    expect(game.state.deepest).toBe(1);
+    expect(game.state.inventory.thread).toBe(0);
   });
 });

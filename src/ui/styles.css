@@ -325,6 +325,43 @@ button:active {
 
 /* ── Combat ─────────────────────────────────────────────────────────────── */
 
+#town-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 8px;
+}
+
+.town-gold {
+  margin-top: auto;
+  align-self: flex-end;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--gold);
+}
+
+.gold-line {
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.dialog.wide {
+  min-width: 560px;
+  max-width: 900px;
+}
+
+.dialog.wide .menu {
+  min-width: 460px;
+}
+
+table.stats td.gear,
+table.stats th.gear {
+  text-align: left;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 #command-panel {
   flex: 1;
   display: flex;

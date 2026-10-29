@@ -1,4 +1,5 @@
 import { CLASSES } from './data/classes';
+import { EQUIPMENT } from './data/equipment';
 import { SKILLS, type SkillDef } from './data/skills';
 import type { ClassId, Member, Stats } from './types';
 
@@ -18,10 +19,21 @@ export function createStartingParty(): Member[] {
   ];
 }
 
-export function memberStats(m: Member): Stats {
+/** Stats from class and level alone, without equipment. */
+export function baseStats(m: Member): Stats {
   const { base, growth } = CLASSES[m.classId];
   const at = (key: keyof Stats) => Math.round(base[key] + growth[key] * (m.level - 1));
   return { hp: at('hp'), tp: at('tp'), atk: at('atk'), def: at('def'), mag: at('mag'), res: at('res'), spd: at('spd') };
+}
+
+export function memberStats(m: Member): Stats {
+  const stats = baseStats(m);
+  for (const id of [m.weapon, m.armor]) {
+    const bonus = id ? EQUIPMENT[id]?.bonus : undefined;
+    if (!bonus) continue;
+    for (const key of Object.keys(bonus) as (keyof Stats)[]) stats[key] += bonus[key] ?? 0;
+  }
+  return stats;
 }
 
 /** Total XP needed to reach `level`. */

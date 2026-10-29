@@ -1,7 +1,7 @@
 import type { FloorDef } from './data/floors';
 import type { Dir } from './types';
 
-export type Tile = 'wall' | 'floor' | 'stairs' | 'chest' | 'spring' | 'boss';
+export type Tile = 'wall' | 'floor' | 'up' | 'stairs' | 'chest' | 'spring' | 'boss';
 
 export interface FloorMap {
   width: number;
@@ -19,7 +19,7 @@ export const DIR_NAMES = ['N', 'E', 'S', 'W'] as const;
 const LEGEND: Record<string, Tile> = {
   '#': 'wall',
   '.': 'floor',
-  S: 'floor',
+  S: 'up',
   '>': 'stairs',
   T: 'chest',
   '~': 'spring',

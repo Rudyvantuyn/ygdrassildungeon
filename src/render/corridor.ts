@@ -66,6 +66,7 @@ export class CorridorRenderer {
         } else {
           this.floorCell(s, d, pal);
           if (tile === 'stairs') this.stairs(s, d, pal, time);
+          if (tile === 'up') this.upStairs(s, d, pal, time);
           if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y));
           if (tile === 'spring') this.spring(s, d, time, game.progress.springUsed);
           if (tile === 'boss' && !game.progress.bossDefeated) this.bossSigil(s, d, time);
@@ -243,6 +244,33 @@ export class CorridorRenderer {
     const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
     glow.addColorStop(0, `rgba(255,220,140,${pulse * (1 - f)})`);
     glow.addColorStop(1, 'rgba(255,220,140,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
+  }
+
+  /** Stairs going up: a few steps rising towards a soft light from above. */
+  private upStairs(s: number, d: number, pal: Palette, time: number): void {
+    if (d === 0) return; // standing on it: nothing to see
+    const ctx = this.ctx;
+    const z = d + 0.5;
+    const f = this.fog(z);
+    const steps = 4;
+    for (let i = 0; i < steps; i++) {
+      const z0 = z - 0.35 + i * 0.17;
+      const top = 0.5 - (i + 1) * 0.09;
+      this.poly([[s - 0.3, top, z0], [s + 0.3, top, z0], [s + 0.3, top + 0.09, z0], [s - 0.3, top + 0.09, z0]]);
+      ctx.fillStyle = mix(shade(pal.wall, 0.1 - i * 0.05), pal.fog, f);
+      ctx.fill();
+      this.poly([[s - 0.3, top, z0], [s + 0.3, top, z0], [s + 0.3, top, z0 + 0.17], [s - 0.3, top, z0 + 0.17]]);
+      ctx.fillStyle = mix(shade(pal.wall, 0.25), pal.fog, f);
+      ctx.fill();
+    }
+    const [gx, gy] = this.project([s, -0.3, z + 0.3]);
+    const r = 90 / (z + EYE);
+    const pulse = 0.4 + 0.2 * Math.sin(time / 500);
+    const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
+    glow.addColorStop(0, `rgba(200,255,210,${pulse * (1 - f)})`);
+    glow.addColorStop(1, 'rgba(200,255,210,0)');
     ctx.fillStyle = glow;
     ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
   }

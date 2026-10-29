@@ -16,7 +16,7 @@ export interface Stats {
 
 export type ClassId = 'guardian' | 'ranger' | 'mystic' | 'arcanist';
 
-export type ItemId = 'medica' | 'amrita';
+export type ItemId = 'medica' | 'amrita' | 'thread';
 
 export type SkillId =
   | 'provoke'
@@ -39,6 +39,8 @@ export interface Member {
   xp: number;
   hp: number;
   tp: number;
+  weapon?: string;
+  armor?: string;
 }
 
 export type Loot = { gold: number } | { item: ItemId; qty: number };

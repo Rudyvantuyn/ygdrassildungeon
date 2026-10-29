@@ -6,6 +6,7 @@ import type { Combat, Command } from './combat';
 import { SKILLS } from './data/skills';
 import { DX, DY, isPassable, type FloorMap } from './dungeon';
 import { Game } from './game';
+import { buyEquipment, buyItem, canEquip, equipmentForSale, innCost, netPrice, restAtInn } from './town';
 import { healAmount, healMember, isAlive, knownSkills, memberStats } from './party';
 import type { Dir, SkillId } from './types';
 
@@ -112,8 +113,24 @@ function find(map: FloorMap, tile: string): { x: number; y: number }[] {
   return map.tiles.flatMap((t, i) => (t === tile ? [{ x: i % map.width, y: Math.floor(i / map.width) }] : []));
 }
 
-export function autoplay(seed: number, opts: { grindBattles?: number } = {}): AutoplayResult {
+/** A town visit: buy the best gear that fits the budget, top up Medica, sleep at the inn. */
+function visitTown(game: Game): void {
+  game.returnToTown();
+  restAtInn(game);
+  const forSale = equipmentForSale(game).sort((a, b) => b.price - a.price);
+  for (const slot of ['weapon', 'armor'] as const) {
+    game.state.party.forEach((m, i) => {
+      const best = forSale.find((e) => e.slot === slot && canEquip(m, e) && m[slot] !== e.id && netPrice(m, e) > 0 && netPrice(m, e) <= game.state.gold - innCost(game));
+      const current = m[slot] ? forSale.find((e) => e.id === m[slot]) : undefined;
+      if (best && (!current || best.price > current.price)) buyEquipment(game, best.id, i);
+    });
+  }
+  while ((game.state.inventory.medica ?? 0) < 5 && buyItem(game, 'medica'));
+}
+
+export function autoplay(seed: number, opts: { grindBattles?: number; town?: boolean } = {}): AutoplayResult {
   const game = Game.newGame(seed);
+  game.enterFloor(0);
   let bossRounds = 0;
 
   const walkTo = (target: { x: number; y: number }): boolean => {
@@ -131,6 +148,10 @@ export function autoplay(seed: number, opts: { grindBattles?: number } = {}): Au
   };
 
   for (let floor = 0; floor < 3; floor++) {
+    if (opts.town) {
+      visitTown(game);
+      game.enterFloor(floor);
+    }
     // Optional grinding first: pace back and forth.
     for (let i = 0; i < (opts.grindBattles ?? 0); i++) {
       const before = game.state.battles;

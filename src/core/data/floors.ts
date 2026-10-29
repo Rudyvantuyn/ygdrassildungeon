@@ -13,7 +13,7 @@ export interface FloorDef {
   name: string;
   /**
    * Map legend:
-   *   #  wall          .  floor       S  start
+   *   #  wall          .  floor       S  start (stairs up / exit to town)
    *   >  stairs down   T  chest       ~  healing spring
    *   B  boss
    */

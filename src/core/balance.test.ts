@@ -11,6 +11,13 @@ describe('balance (computer player)', () => {
     expect(results.filter((r) => r.cleared).length).toBeGreaterThanOrEqual(16);
   });
 
+  it('shopping in town between floors helps', () => {
+    const plain = seeds.filter((s) => autoplay(s, { grindBattles: 5 }).cleared).length;
+    const town = seeds.filter((s) => autoplay(s, { grindBattles: 5, town: true }).cleared).length;
+    expect(town).toBeGreaterThanOrEqual(plain);
+    expect(town).toBeGreaterThanOrEqual(18);
+  });
+
   it('the boss is a real threat without grinding', () => {
     const results = seeds.map((s) => autoplay(s));
     const cleared = results.filter((r) => r.cleared).length;

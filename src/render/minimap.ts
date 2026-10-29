@@ -41,6 +41,7 @@ export function drawMinimap(ctx: CanvasRenderingContext2D, size: number, game: G
       ctx.fillRect(px + 1, py + 1, cell - 2, cell - 2);
       const mid = cell / 2;
       if (tile === 'stairs') icon(ctx, px + mid, py + mid, cell, '#d08a1a', '▼');
+      if (tile === 'up') icon(ctx, px + mid, py + mid, cell, '#2a9a5a', '▲');
       if (tile === 'chest') icon(ctx, px + mid, py + mid, cell, game.isChestOpened(x, y) ? '#9a9a9a' : '#c27a12', '■');
       if (tile === 'spring') icon(ctx, px + mid, py + mid, cell, game.progress.springUsed ? '#7a9aa8' : '#1d8ec2', '●');
       if (tile === 'boss' && !game.progress.bossDefeated) icon(ctx, px + mid, py + mid, cell, '#d0302a', '✸');

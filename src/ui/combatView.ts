@@ -1,5 +1,5 @@
 import type { Combat, CombatEvent, Command } from '../core/combat';
-import { ITEMS } from '../core/data/items';
+import { ITEMS, usableInCombat } from '../core/data/items';
 import type { SkillDef } from '../core/data/skills';
 import type { Game } from '../core/game';
 import { isAlive, knownSkills, memberStats } from '../core/party';
@@ -232,7 +232,7 @@ export class CombatView {
 
   private showItemMenu(): void {
     const reserved = (id: ItemId) => this.commands.filter((c) => c?.kind === 'item' && c.item === id).length;
-    const items: MenuItem[] = (Object.keys(ITEMS) as ItemId[]).map((id) => {
+    const items: MenuItem[] = (Object.keys(ITEMS) as ItemId[]).filter(usableInCombat).map((id) => {
       const left = (this.combat.inventory[id] ?? 0) - reserved(id);
       return {
         label: ITEMS[id].name,

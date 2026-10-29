@@ -34,9 +34,24 @@ const out = 'screenshots';
   await page.waitForTimeout(800);
   await shot('01-title');
 
-  await press('Enter'); // New Game
+  await press('Enter'); // New Game -> town
+  await shot('02-town');
+  await press('ArrowUp'); // Shop
+  await press('Enter');
+  await press('ArrowDown'); // Equipment
+  await press('Enter');
+  await shot('02b-shop-equipment');
+  await press('Enter'); // Bronze Sword -> choose wearer
+  await shot('02c-shop-wearer');
+  await press('Enter'); // Lief buys it
+  await press('Escape');
+  await press('Escape');
+  await press('Escape');
+  await press('ArrowDown'); // Labyrinth
+  await press('Enter');
+  await press('Enter'); // B1F
   await page.evaluate(() => (window.ygg.game.state.encounterAt = 999));
-  await shot('02-explore-start');
+  await shot('02d-explore-start');
   await press('ArrowUp', 4);
   await shot('03-explore-walk');
   await press('ArrowRight');
@@ -63,6 +78,7 @@ const out = 'screenshots';
 
   await press('c');
   await shot('08-camp');
+  await press('Escape');
   await press('Escape');
   await press('m');
   await shot('09-map');
