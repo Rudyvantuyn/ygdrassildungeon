@@ -40,7 +40,7 @@ export interface Rewards {
 
 export type CombatEvent =
   | { type: 'act'; side: Side; actor: number; text: string }
-  | { type: 'damage'; side: Side; target: number; amount: number; hp: number; crit: boolean; weak: boolean; resist: boolean }
+  | { type: 'damage'; side: Side; target: number; amount: number; hp: number; crit: boolean; weak: boolean; resist: boolean; element: Element }
   | { type: 'heal'; target: number; amount: number; hp: number }
   | { type: 'sp'; target: number; sp: number }
   | { type: 'miss'; side: Side; target: number }
@@ -287,7 +287,7 @@ export class Combat {
 
     const { damage, crit, weak, resist } = this.roll(base, power, element, enemy.def.weak, enemy.def.resist, kind === 'phys');
     enemy.hp = Math.max(0, enemy.hp - damage);
-    events.push({ type: 'damage', side: 'enemy', target: enemyIndex, amount: damage, hp: enemy.hp, crit, weak, resist });
+    events.push({ type: 'damage', side: 'enemy', target: enemyIndex, amount: damage, hp: enemy.hp, crit, weak, resist, element });
     if (enemy.hp === 0) {
       events.push({ type: 'down', side: 'enemy', target: enemyIndex, text: `${enemy.name} is defeated!` });
     }
@@ -345,7 +345,7 @@ export class Combat {
 
     const { damage, crit } = this.roll(base, action.power, action.element, [], [], action.kind === 'phys');
     m.hp = Math.max(0, m.hp - damage);
-    events.push({ type: 'damage', side: 'party', target: memberIndex, amount: damage, hp: m.hp, crit, weak: false, resist: false });
+    events.push({ type: 'damage', side: 'party', target: memberIndex, amount: damage, hp: m.hp, crit, weak: false, resist: false, element: action.element });
     if (m.hp === 0) {
       events.push({ type: 'down', side: 'party', target: memberIndex, text: `${m.name} falls!` });
     }

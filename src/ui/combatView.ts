@@ -6,6 +6,8 @@ import { isAlive, knownSkills, memberStats } from '../core/party';
 import type { ItemId } from '../core/types';
 import type { CorridorRenderer } from '../render/corridor';
 import { drawMonster } from '../render/monsters';
+import { audio, type Sfx } from '../audio/audio';
+import type { Element } from '../core/types';
 import { el, floater } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import type { PartyView } from './partyView';
@@ -25,6 +27,8 @@ interface EnemyFx {
   lungeUntil: number;
   dyingSince: number | null;
 }
+
+const HIT_SOUND: Record<Element, Sfx> = { phys: 'hitPhys', fire: 'hitFire', frost: 'hitFrost', storm: 'hitStorm' };
 
 /** View offset of the corridor canvas inside the stage. */
 const VIEW_X = 20;
@@ -311,6 +315,7 @@ export class CombatView {
         return;
       case 'damage': {
         if (ev.side === 'enemy') {
+          audio.play(ev.crit ? 'crit' : HIT_SOUND[ev.element]);
           this.enemyHp[ev.target] = ev.hp;
           this.fx[ev.target].flashUntil = this.time + 300;
           const { x, y } = this.enemyAnchor(ev.target);
@@ -318,6 +323,7 @@ export class CombatView {
           floater(this.host.floaters, x, y, `${ev.amount}${ev.crit ? '!' : ''}`, cls);
           if (ev.weak) floater(this.host.floaters, x, y - 46, 'WEAK', 'weak small');
         } else {
+          audio.play(ev.crit ? 'crit' : 'hurt');
           this.partyHp[ev.target] = ev.hp;
           this.host.party.flash(ev.target, 'hit');
           this.renderParty();
@@ -329,6 +335,7 @@ export class CombatView {
         return;
       }
       case 'heal': {
+        audio.play(this.partyHp[ev.target] <= 0 ? 'revive' : 'heal');
         this.partyHp[ev.target] = ev.hp;
         this.host.party.flash(ev.target, 'healed');
         this.renderParty();
@@ -342,12 +349,14 @@ export class CombatView {
         this.renderParty();
         return;
       case 'miss': {
+        audio.play('miss');
         const { x, y } = ev.side === 'enemy' ? this.enemyAnchor(ev.target) : this.host.party.anchor(ev.target);
         floater(this.host.floaters, x, y, 'Miss', 'resist small');
         await this.wait(300);
         return;
       }
       case 'down':
+        audio.play(ev.side === 'enemy' ? 'enemyDown' : 'allyDown');
         this.say(ev.text);
         if (ev.side === 'enemy') this.fx[ev.target].dyingSince = this.time;
         await this.wait(520);

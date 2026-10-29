@@ -12,6 +12,8 @@ import { CLASSES } from '../core/data/classes';
 import { CorridorRenderer } from '../render/corridor';
 import { drawMinimap } from '../render/minimap';
 import { drawTown } from '../render/town';
+import { audio } from '../audio/audio';
+import { themeFor } from '../audio/compose';
 import { CombatView, type CombatHost } from './combatView';
 import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
@@ -237,6 +239,7 @@ export class App implements CombatHost, TownHost {
   // ── Title & game flow ──────────────────────────────────────────────────────
 
   showTitle(notice?: string): void {
+    audio.music(themeFor({ location: 'title' }));
     this.game = Game.newGame(1); // background scenery only
     this.showSide('town');
     this.town.show();
@@ -294,6 +297,7 @@ export class App implements CombatHost, TownHost {
   }
 
   enterTown(): void {
+    audio.music(themeFor({ location: 'town' }));
     this.mode = 'town';
     this.showSide('town');
     this.message.classList.add('hidden');
@@ -306,6 +310,7 @@ export class App implements CombatHost, TownHost {
   }
 
   private enterExplore(): void {
+    audio.music(themeFor({ location: 'dungeon', floor: this.game.state.floor }));
     this.mode = 'explore';
     this.showSide('explore');
     this.message.classList.add('hidden');
@@ -331,6 +336,7 @@ export class App implements CombatHost, TownHost {
   // ── Exploration ────────────────────────────────────────────────────────────
 
   private turn(delta: -1 | 1): void {
+    audio.play('turn');
     this.game.turn(delta);
     this.fx = { kind: 'turn', start: this.now };
     this.updateHud();
@@ -345,17 +351,21 @@ export class App implements CombatHost, TownHost {
   private handleStep(ev: StepEvent): void {
     switch (ev.type) {
       case 'bump':
+        audio.play('bump');
         this.fx = { kind: 'bump', start: this.now };
         return;
       case 'chestAhead':
+        audio.play('bump');
         this.toast(ev.opened ? 'An empty chest.' : 'A chest! Press Space or Act to open it.');
         return;
       case 'nothing':
         return;
       case 'moved':
+        audio.play('step');
         this.fx = { kind: 'step', start: this.now };
         return;
       case 'chest':
+        audio.play('chest');
         this.toast(`Found ${describeLoot(ev.loot)} in the chest!`);
         return;
       case 'emptyChest':
@@ -364,6 +374,7 @@ export class App implements CombatHost, TownHost {
       case 'stairs':
         if (this.game.isLastFloor) return;
         this.confirm('Stairs down', `Descend to ${FLOORS[this.game.state.floor + 1].name}?`, () => {
+          audio.play('stairs');
           this.game.descend();
           this.save();
           this.enterExplore();
@@ -374,6 +385,7 @@ export class App implements CombatHost, TownHost {
         const leaving = this.game.state.floor === 0;
         const text = leaving ? 'Leave the Rootdeep and return to Lindholm?' : `Climb up to ${FLOORS[this.game.state.floor - 1].name}?`;
         this.confirm('Stairs up', text, () => {
+          audio.play('stairs');
           this.game.ascend();
           this.save();
           this.resume();
@@ -387,6 +399,7 @@ export class App implements CombatHost, TownHost {
           return;
         }
         this.confirm('Healing spring', 'Drink from the spring? It fully restores the party and saves your game. It only works once.', () => {
+          audio.play('spring');
           this.game.drinkSpring();
           this.save();
           this.enterExplore();
@@ -394,20 +407,25 @@ export class App implements CombatHost, TownHost {
         });
         return;
       case 'boss':
+        audio.music(null);
+        audio.play('bossIntro');
         this.mode = 'busy';
         this.toast('A terrible presence stirs...');
         window.setTimeout(() => this.startCombat(this.game.startBossCombat()), 1100);
         return;
       case 'prowlerAlert':
+        audio.play('prowlerAlert');
         this.toast(`${this.prowlerName(ev.index)} has caught your scent!`);
         this.shakeView();
         return;
       case 'prowler':
+        audio.play('encounter');
         this.mode = 'busy';
         this.fx = { kind: 'encounter', start: this.now };
         window.setTimeout(() => this.startCombat(this.game.startProwlerCombat(ev.index)), 700);
         return;
       case 'encounter':
+        audio.play('encounter');
         this.mode = 'busy';
         this.fx = { kind: 'encounter', start: this.now };
         window.setTimeout(() => this.startCombat(this.game.startCombat(ev.enemies)), 700);
@@ -421,6 +439,7 @@ export class App implements CombatHost, TownHost {
     this.mode = 'combat';
     this.toastEl.classList.add('hidden');
     this.showSide('combat');
+    audio.music(themeFor({ location: 'dungeon', combat: combat.boss ? 'boss' : combat.prowler ? 'prowler' : 'normal' }));
     this.combatView = new CombatView(this, combat, (c) => this.endCombat(c));
     void this.combatView.start();
   }
@@ -431,13 +450,20 @@ export class App implements CombatHost, TownHost {
     this.showSide('explore');
     this.updateHud();
 
-    if (combat.outcome === 'defeat') return this.showGameOver();
+    if (combat.outcome === 'defeat') {
+      audio.music(null);
+      audio.play('defeat');
+      return this.showGameOver();
+    }
     if (combat.outcome === 'fled') {
       this.enterExplore();
       this.toast(combat.prowler ? `You slipped away! The ${combat.enemies[0].def.name} is dazed for a few steps.` : 'The party got away.');
       return;
     }
     const r = combat.rewards!;
+    audio.music(null);
+    audio.play('victory');
+    if (r.levelUps.length) window.setTimeout(() => audio.play('levelUp'), 900);
     const lines = el('div', { className: 'rewards' }, [
       el('span', { text: 'Experience' }), el('span', { className: 'v', text: `+${r.xp}` }),
       el('span', { text: 'Gold' }), el('span', { className: 'v', text: `+${r.gold} G` }),
@@ -518,12 +544,14 @@ export class App implements CombatHost, TownHost {
           disabled: (this.game.state.inventory.homingFeather ?? 0) <= 0,
           onSelect: () =>
             this.confirm('Homing Feather', 'Follow the homingFeather back to Lindholm?', () => {
+              audio.play('spring');
               this.game.useFeather();
               this.save();
               this.enterTown();
               this.toast('The homingFeather leads you home. Game saved.');
             }),
         },
+        { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.soundOptions(() => this.openPack()) },
         { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.showTitle() },
         { label: 'Close', onSelect: close },
       ],
@@ -550,6 +578,7 @@ export class App implements CombatHost, TownHost {
               const amount = healAmount(m, skill.power);
               for (const t of targets) {
                 const healed = skill.kind === 'revive' ? revive(party[t], skill.power) : healMember(party[t], amount);
+                audio.play(skill.kind === 'revive' ? 'revive' : 'heal');
                 const a = this.party.anchor(t);
                 floater(this.floaters, a.x, a.y, `+${healed}`, 'heal');
               }
@@ -578,6 +607,7 @@ export class App implements CombatHost, TownHost {
       onSelect: () =>
         this.pickAlly(`Use ${ITEMS[id].name} on whom?`, (t) => {
           const def = ITEMS[id];
+          audio.play(def.effect === 'revive' ? 'revive' : 'heal');
           const amount =
             def.effect === 'revive' ? revive(party[t], def.amount) : def.effect === 'hp' ? healMember(party[t], def.amount) : restoreSp(party[t], def.amount);
           inv[id] -= 1;
@@ -588,6 +618,42 @@ export class App implements CombatHost, TownHost {
         }, () => this.packItems(), ITEMS[id].effect === 'revive'),
     }));
     this.subMenu('Items', items, () => this.openPack());
+  }
+
+  /** Music and effect volume, each cycling through five steps. */
+  soundOptions(back: () => void, start = 0): void {
+    const steps = [0, 0.25, 0.5, 0.75, 1];
+    const names = ['Off', 'Low', 'Medium', 'High', 'Full'];
+    const label = (v: number) => names[steps.reduce((best, s, i) => (Math.abs(s - v) < Math.abs(steps[best] - v) ? i : best), 0)];
+    const next = (v: number) => steps[(steps.findIndex((s) => Math.abs(s - v) < 0.01) + 1) % steps.length];
+    const menu = new ListMenu(
+      [
+        {
+          label: 'Music',
+          detail: label(audio.settings.music),
+          description: 'Press Enter to change.',
+          onSelect: () => {
+            audio.setVolume('music', next(audio.settings.music));
+            this.soundOptions(back, 0);
+          },
+        },
+        {
+          label: 'Effects',
+          detail: label(audio.settings.sfx),
+          description: 'Press Enter to change.',
+          onSelect: () => {
+            audio.setVolume('sfx', next(audio.settings.sfx));
+            audio.play('chest');
+            this.soundOptions(back, 1);
+          },
+        },
+        { label: 'Back', onSelect: back },
+      ],
+      { onCancel: back, startIndex: start },
+    );
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Sound' }), menu.el, desc]), menu);
   }
 
   partyStatus(back: () => void): void {

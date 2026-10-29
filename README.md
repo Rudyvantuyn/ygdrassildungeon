@@ -62,6 +62,15 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Opslaan** in de browser: in de stad (herberg of menu), en automatisch bij elke trap en bij de bron.
   In de dungeon kun je niet zomaar opslaan: wie valt, begint weer bij de laatste save.
 
+### Geluid en muziek (mijlpaal 3)
+
+- Alle muziek en geluidseffecten worden in code gemaakt (Web Audio), er zijn geen geluidsbestanden.
+- Elke situatie heeft een eigen, procedureel gecomponeerd muziekthema: titel, stad, elke verdieping, gevecht,
+  Prowler-gevecht en eindbaas. Thema's vloeien in elkaar over.
+- Effecten voor lopen, draaien, muren, menu's, kisten, trappen, bronnen, treffers per element, genezen, opwekken,
+  overwinning, nederlaag en level-up.
+- Volume voor muziek en effecten apart: menu **Sound** in de stad of in het Pack-menu.
+
 ## Woordenlijst
 
 Alle namen in het spel zijn eigen verzinsels. Nieuwe namen voeg je toe in `src/core/data/` en hier.
@@ -94,6 +103,7 @@ src/
     town.ts     Herberg en winkel
     autoplay.ts Computer-speler die het spel uitspeelt (gebruikt voor balanstests)
   render/       Canvas-tekenwerk: gang, monsters, minikaart, stad
+  audio/        Muziek (compose.ts: componeert de loops, getest) en geluid (audio.ts: Web Audio)
   ui/           Schermen, menu's, gevechtsweergave
 scripts/
   screenshots.cjs  Speelt het spel automatisch in een browser en maakt screenshots

@@ -1,3 +1,4 @@
+import { audio } from './audio/audio';
 import { App } from './ui/app';
 import './ui/styles.css';
 
@@ -19,4 +20,5 @@ function loop(time: number): void {
 }
 requestAnimationFrame(loop);
 
-(window as unknown as { ygg: App }).ygg = app;
+(window as unknown as { ygg: App; yggAudio: typeof audio }).ygg = app;
+(window as unknown as { yggAudio: typeof audio }).yggAudio = audio;

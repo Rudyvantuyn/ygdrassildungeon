@@ -1,3 +1,5 @@
+import { audio } from '../audio/audio';
+
 export interface MenuItem {
   label: string;
   detail?: string;
@@ -63,7 +65,13 @@ export class ListMenu {
 
   select(): void {
     const item = this.items[this.index];
-    if (item && !item.disabled) item.onSelect();
+    if (!item) return;
+    if (item.disabled) {
+      audio.play('menuBack');
+      return;
+    }
+    audio.play('menuSelect');
+    item.onSelect();
   }
 
   /** Returns true when the key was handled. */
@@ -73,11 +81,13 @@ export class ListMenu {
       case 'w':
       case 'W':
         this.focus(this.index - 1);
+        audio.play('menuMove');
         return true;
       case 'ArrowDown':
       case 's':
       case 'S':
         this.focus(this.index + 1);
+        audio.play('menuMove');
         return true;
       case 'Enter':
       case ' ':
@@ -90,6 +100,7 @@ export class ListMenu {
       case 'x':
       case 'X':
         if (this.opts.onCancel) {
+          audio.play('menuBack');
           this.opts.onCancel();
           return true;
         }

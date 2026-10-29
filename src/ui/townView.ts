@@ -1,3 +1,4 @@
+import { audio } from '../audio/audio';
 import { CLASSES } from '../core/data/classes';
 import { EQUIPMENT, type EquipDef } from '../core/data/equipment';
 import { FLOORS } from '../core/data/floors';
@@ -30,6 +31,7 @@ export interface TownHost {
   enterDungeon(): void;
   showTitle(): void;
   partyStatus(back: () => void): void;
+  soundOptions(back: () => void): void;
 }
 
 const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', sp: 'SP', atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES', spd: 'SPD' };
@@ -57,6 +59,7 @@ export class TownView {
       { label: 'Shop', description: 'Buy items and equipment. Better gear appears as you go deeper.', spot: 'shop', onSelect: () => this.shop() },
       { label: 'Rootdeep', description: 'Enter the Rootdeep at any floor you have reached.', spot: 'rootdeep', onSelect: () => this.rootdeep() },
       { label: 'Party', description: 'View stats and equipment.', spot: null, onSelect: () => this.host.partyStatus(() => this.back()) },
+      { label: 'Sound', description: 'Music and effect volume.', spot: null, onSelect: () => this.host.soundOptions(() => this.back()) },
       { label: 'Save', description: 'Save your progress.', spot: null, onSelect: () => { this.host.save(); this.host.toast('Game saved.'); } },
       { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', spot: null, onSelect: () => this.host.showTitle() },
     ];
@@ -92,6 +95,7 @@ export class TownView {
           disabled: this.game.state.gold < cost,
           onSelect: () => {
             restAtInn(this.game);
+            audio.play('heal');
             this.host.save();
             this.back();
             this.host.toast('The party rests well. Game saved.');
@@ -267,6 +271,7 @@ export class TownView {
       disabled: this.game.state.gold < ITEMS[id].price,
       onSelect: () => {
         buyItem(this.game, id);
+        audio.play('coin');
         this.host.updateHud();
         this.shopItems(i);
       },
@@ -307,6 +312,7 @@ export class TownView {
         disabled: !fits || owned || this.game.state.gold < cost,
         onSelect: () => {
           buyEquipment(this.game, e.id, i);
+          audio.play('coin');
           this.host.updateHud();
           this.host.toast(`${m.name} equips the ${e.name}.`);
           this.shopEquipment(listIndex);
