@@ -1,0 +1,129 @@
+import type { Element, ItemId } from '../types';
+
+export type MonsterShape = 'slime' | 'bat' | 'beast' | 'shroom' | 'beetle' | 'moth' | 'golem' | 'treant';
+
+export interface EnemySkill {
+  name: string;
+  chance: number;
+  kind: 'phys' | 'magic';
+  element: Element;
+  power: number;
+  target: 'one' | 'all';
+}
+
+export interface EnemyDef {
+  id: string;
+  name: string;
+  hp: number;
+  atk: number;
+  def: number;
+  mag: number;
+  res: number;
+  spd: number;
+  xp: number;
+  gold: number;
+  weak: Element[];
+  resist: Element[];
+  /** Ranged enemies hit the back row at full strength. */
+  ranged?: boolean;
+  skills?: EnemySkill[];
+  drop?: { item: ItemId; chance: number };
+  art: { shape: MonsterShape; color: string; accent: string; size: number };
+}
+
+const list: EnemyDef[] = [
+  // ── Stratum 1: Mossy Hollow ────────────────────────────────────────────────
+  {
+    id: 'mossSlime',
+    name: 'Moss Slime',
+    hp: 30, atk: 10, def: 4, mag: 4, res: 3, spd: 5,
+    xp: 7, gold: 4,
+    weak: ['fire'], resist: [],
+    drop: { item: 'medica', chance: 0.12 },
+    art: { shape: 'slime', color: '#5e9e4a', accent: '#c7f08a', size: 0.8 },
+  },
+  {
+    id: 'forestBat',
+    name: 'Forest Bat',
+    hp: 24, atk: 11, def: 3, mag: 3, res: 4, spd: 14,
+    xp: 8, gold: 5,
+    weak: ['volt'], resist: [],
+    ranged: true,
+    art: { shape: 'bat', color: '#5b4a7a', accent: '#f2c14e', size: 0.8 },
+  },
+  {
+    id: 'thornRat',
+    name: 'Thorn Rat',
+    hp: 36, atk: 13, def: 5, mag: 2, res: 3, spd: 10,
+    xp: 10, gold: 6,
+    weak: ['ice'], resist: [],
+    skills: [{ name: 'Gnaw', chance: 0.25, kind: 'phys', element: 'phys', power: 150, target: 'one' }],
+    art: { shape: 'beast', color: '#8a6a4a', accent: '#e05a4a', size: 0.85 },
+  },
+  // ── Stratum 2: Rootway ─────────────────────────────────────────────────────
+  {
+    id: 'woodfang',
+    name: 'Woodfang',
+    hp: 62, atk: 21, def: 8, mag: 4, res: 5, spd: 15,
+    xp: 18, gold: 10,
+    weak: ['fire'], resist: [],
+    skills: [{ name: 'Rending Bite', chance: 0.3, kind: 'phys', element: 'phys', power: 160, target: 'one' }],
+    art: { shape: 'beast', color: '#4b5a6e', accent: '#f2e14e', size: 1.0 },
+  },
+  {
+    id: 'sporeCap',
+    name: 'Spore Cap',
+    hp: 50, atk: 12, def: 7, mag: 15, res: 9, spd: 6,
+    xp: 16, gold: 9,
+    weak: ['fire'], resist: ['ice'],
+    ranged: true,
+    skills: [{ name: 'Spore Cloud', chance: 0.4, kind: 'magic', element: 'phys', power: 70, target: 'all' }],
+    drop: { item: 'amrita', chance: 0.12 },
+    art: { shape: 'shroom', color: '#b8473f', accent: '#f6e7c8', size: 0.9 },
+  },
+  {
+    id: 'barkBeetle',
+    name: 'Bark Beetle',
+    hp: 58, atk: 16, def: 18, mag: 3, res: 6, spd: 7,
+    xp: 17, gold: 12,
+    weak: ['fire', 'volt'], resist: ['phys'],
+    art: { shape: 'beetle', color: '#3f5a3a', accent: '#a7d36b', size: 0.95 },
+  },
+  // ── Stratum 3: Heartwood ───────────────────────────────────────────────────
+  {
+    id: 'duskMoth',
+    name: 'Dusk Moth',
+    hp: 70, atk: 18, def: 9, mag: 25, res: 14, spd: 19,
+    xp: 28, gold: 14,
+    weak: ['ice'], resist: ['volt'],
+    ranged: true,
+    skills: [{ name: 'Scale Storm', chance: 0.35, kind: 'magic', element: 'volt', power: 75, target: 'all' }],
+    art: { shape: 'moth', color: '#6a4e8a', accent: '#f0d070', size: 1.0 },
+  },
+  {
+    id: 'rootGolem',
+    name: 'Root Golem',
+    hp: 120, atk: 28, def: 20, mag: 5, res: 8, spd: 5,
+    xp: 34, gold: 20,
+    weak: ['fire'], resist: ['phys'],
+    skills: [{ name: 'Crushing Fist', chance: 0.3, kind: 'phys', element: 'phys', power: 170, target: 'one' }],
+    drop: { item: 'medica', chance: 0.25 },
+    art: { shape: 'golem', color: '#6e5a44', accent: '#7fe0c0', size: 1.1 },
+  },
+  // ── Boss ───────────────────────────────────────────────────────────────────
+  {
+    id: 'witheredWarden',
+    name: 'Withered Warden',
+    hp: 1050, atk: 38, def: 17, mag: 34, res: 15, spd: 12,
+    xp: 300, gold: 250,
+    weak: ['fire'], resist: ['ice'],
+    skills: [
+      { name: 'Root Lash', chance: 0.3, kind: 'phys', element: 'phys', power: 85, target: 'all' },
+      { name: 'Withering Breath', chance: 0.2, kind: 'magic', element: 'ice', power: 90, target: 'all' },
+      { name: 'Trunk Slam', chance: 0.2, kind: 'phys', element: 'phys', power: 190, target: 'one' },
+    ],
+    art: { shape: 'treant', color: '#5a4636', accent: '#c4ff6a', size: 1.6 },
+  },
+];
+
+export const ENEMIES: Record<string, EnemyDef> = Object.fromEntries(list.map((e) => [e.id, e]));

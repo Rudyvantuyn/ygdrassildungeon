@@ -1,82 +1,69 @@
-# Ygdrassil Dungeon (Co-op Dungeon Crawler MVP)
+# Ygdrassil Dungeon
 
-Browser-based co-op turn-based dungeon crawler inspired by Etrian-style party runs.
+Een first-person dungeon crawler in de stijl van Etrian Odyssey, gebouwd als webgame in TypeScript.
+Alles (gangen, monsters, interface) wordt in code getekend, dus er zijn geen losse afbeeldingen nodig.
 
-## MVP Features
+## Spelen
 
-- Room-based co-op (create/join, ready check, host starts run)
-- 4 classes (`Guardian`, `Ranger`, `Mystic`, `Rogue`)
-- Server-authoritative turn-based combat over Socket.IO
-- Dungeon run with 5 floors and 2 boss encounters
-- Reward + profile progression loop (currency, XP, unlocks)
-- Reconnect-friendly sessions via `playerId` persistence
+```bash
+npm install
+npm run dev        # open de URL die Vite toont (meestal http://localhost:5173)
+```
 
-## Tech Stack
+### Besturing
 
-- `client/`: Phaser + Vite + Socket.IO client
-- `server/`: Express + Socket.IO + TypeScript
-- `shared/`: shared domain/protocol/combat types
-- Optional PostgreSQL (`server/src/db/schema.sql`) for persistence
+| Toets | Verkennen | Menu's / gevecht |
+|---|---|---|
+| ↑ / W | stap vooruit | omhoog |
+| ↓ / S | stap achteruit | omlaag |
+| ← / A, → / D | draai links / rechts | doelwit wisselen |
+| Q / E | zijstap links / rechts | |
+| Enter / Spatie | | bevestigen (tijdens een ronde: versnellen) |
+| Esc | kamp-menu | terug |
+| C / M | kamp-menu / grote kaart | |
 
-## Local Development
+De knoppen rechts op het scherm werken ook met muis of touch.
 
-1. Install dependencies:
-   - `npm install`
-2. Start server:
-   - `npm run dev:server`
-3. Start client:
-   - `npm run dev:client`
-4. Open the client URL shown by Vite.
+## Wat zit erin (mijlpaal 1: kernlus in de dungeon)
 
-Copy environment templates if needed:
+- **Verkennen** op een grid in first-person, met een automatische kaart die alleen laat zien waar je bent geweest.
+- **Willekeurige gevechten**: de "Danger"-bol kleurt van blauw via geel naar rood naarmate het volgende gevecht dichterbij komt.
+- **Beurtgevechten** met een party van 4 (Guardian, Ranger, Mystic, Arcanist): aanvallen, skills (kosten TP), verdedigen, items, vluchten.
+  Voorste en achterste rij, zwaktes en resistenties (vuur/ijs/bliksem), kritieke treffers, provoke en schildmuur.
+- **Ervaring en levels**: nieuwe skills op level 3 en 4.
+- **3 verdiepingen** met kisten, een genezende bron (eenmalig, slaat ook op) en een **eindbaas** op B3F.
+- **Opslaan** in de browser: automatisch bij elke nieuwe verdieping en bij de bron, en handmatig via het kamp-menu.
 
-- `server/.env.example` -> `server/.env`
-- `client/.env.example` -> `client/.env`
+## Projectstructuur
 
-## Controls (Current Client)
+```
+src/
+  core/         Spellogica zonder scherm (volledig getest)
+    data/       Klassen, skills, items, vijanden en verdiepingen: hier pas je de balans en kaarten aan
+    combat.ts   Gevechtssysteem
+    game.ts     Spelstatus: bewegen, vijanden, kisten, trappen, opslaan
+    autoplay.ts Computer-speler die het spel uitspeelt (gebruikt voor balanstests)
+  render/       Canvas-tekenwerk: gang, monsters, minikaart
+  ui/           Schermen, menu's, gevechtsweergave
+scripts/
+  screenshots.cjs  Speelt het spel automatisch in een browser en maakt screenshots
+```
 
-- Login scene:
-  - `N` choose display name
-  - `Enter` continue
-- Party setup:
-  - `1/2/3/4` select class
-  - `Enter` continue
-- Lobby:
-  - `C` create room
-  - `J` join room by ID
-  - `R` toggle ready
-  - `S` start run (host)
-- Combat:
-  - `A` submit basic attack
+### Kaarten maken
 
-## Quality Checks
+Verdiepingen staan als tekst in `src/core/data/floors.ts`:
 
-- `npm run typecheck`
-- `npm run lint`
-- `npm run test`
+```
+#  muur      .  vloer     S  start
+>  trap      T  kist      ~  bron      B  eindbaas
+```
 
-## Online Deployment
+De tests controleren automatisch dat elke kaart klopt: alles bereikbaar, randen dicht, en een trap of eindbaas aanwezig.
 
-### Option A: Docker Compose (single host)
+## Controles
 
-- `docker compose up --build`
-- Client: `http://localhost:8080`
-- Server: `http://localhost:3000`
-
-### Option B: Managed cloud split
-
-- Deploy `server/` container to Railway/Render/Fly with env vars:
-  - `PORT`
-  - `CORS_ORIGIN`
-  - `DATABASE_URL` (optional but recommended)
-- Deploy `client/` static bundle to Netlify/Vercel/Cloudflare Pages with:
-  - `VITE_SERVER_URL=https://<your-server-domain>`
-
-## Important Code Locations
-
-- Shared protocol: `shared/src/protocol.ts`
-- Combat model helpers: `shared/src/combat.ts`
-- Combat engine: `server/src/game/combatEngine.ts`
-- Dungeon generation: `server/src/game/dungeonGenerator.ts`
-- Room lifecycle: `server/src/net/roomManager.ts`
-- Socket gateway: `server/src/net/socketGateway.ts`
+```bash
+npm run typecheck
+npm test           # logica + balans (een computer-speler speelt het spel uit op 20 seeds)
+npm run build      # productieversie in dist/
+```
