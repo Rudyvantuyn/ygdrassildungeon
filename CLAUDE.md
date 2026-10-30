@@ -35,7 +35,11 @@ Add new names there and keep the glossary in sync.
   Deeper chapters scale this up: chapter II prowlers are hopeless at level 20 and risky at about 24.
 - The dungeon is told in **chapters of five floors**, each with its own theme and matching monsters, always ending
   with a boss. Chapter I is forest (floors 1–5), chapter II ocean (floors 6–10). The owner wants to draw dungeons
-  themselves later (a dungeon editor).
+  themselves later (a dungeon editor). The editor (the Drafting Table) is a maker tool, not a player feature: it only
+  shows with `?maker` in the address.
+- **Character growth is dynamic**: skill points per level, spent in a skill tree per class; skills have ranks 1–10.
+  There are also gathering skills (e.g. foraging, mining) used at gathering spots in the dungeon. More classes are
+  welcome; invent them freely (own names).
 
 - **Multiplayer** means going into the dungeon together: each player brings one of their own adventurers into a
   party of up to four (an "expedition"). No shared town. Trading may come later (low priority). Leaderboards and
