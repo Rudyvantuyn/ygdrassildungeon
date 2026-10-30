@@ -24,7 +24,7 @@ export interface Stats {
 
 export type ClassId = 'bastion' | 'strider' | 'mender' | 'runecaller';
 
-export type ItemId = 'sapTonic' | 'spiritDew' | 'clearwater' | 'kindlingMoss' | 'homingFeather';
+export type ItemId = 'sapTonic' | 'tideDraught' | 'spiritDew' | 'clearwater' | 'kindlingMoss' | 'homingFeather';
 
 export type SkillId =
   | 'challenge'
@@ -41,7 +41,11 @@ export type SkillId =
   | 'rekindle'
   | 'cleanse'
   | 'venomArrow'
-  | 'slumberRune';
+  | 'slumberRune'
+  | 'rampartCrash'
+  | 'galePiercer'
+  | 'wellspring'
+  | 'thunderhead';
 
 export interface Member {
   name: string;

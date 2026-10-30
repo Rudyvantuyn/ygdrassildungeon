@@ -28,12 +28,16 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
         // Sleep and paralysis cost turns: wash them off once nobody is in danger.
         const held = party.findIndex((p, j) => isAlive(p) && j !== i && (combat.status[j].ailment === 'sleep' || combat.status[j].ailment === 'paralysis'));
         if (held >= 0 && hurt.length === 0 && canUse(i, 'cleanse')) return { kind: 'skill', skill: 'cleanse', target: held };
+        if (hurt.length >= 2 && canUse(i, 'wellspring')) return { kind: 'skill', skill: 'wellspring', target: -1 };
         if (hurt.length >= 2 && canUse(i, 'verdantChorus')) return { kind: 'skill', skill: 'verdantChorus', target: -1 };
         if (hurt.length >= 1 && canUse(i, 'mend')) return { kind: 'skill', skill: 'mend', target: hurt[0] };
+        if (hurt.length >= 1 && combat.inventory.tideDraught > 0) return { kind: 'item', item: 'tideDraught', target: hurt[0] };
         if (hurt.length >= 1 && combat.inventory.sapTonic > 0) return { kind: 'item', item: 'sapTonic', target: hurt[0] };
         break;
       }
       case 'runecaller': {
+        const stormWeak = living.filter((e) => combat.enemies[e].def.weak.includes('storm')).length;
+        if (living.length >= 2 && stormWeak >= 1 && canUse(i, 'thunderhead')) return { kind: 'skill', skill: 'thunderhead', target: -1 };
         if (living.length >= 2 && canUse(i, 'wildfire')) return { kind: 'skill', skill: 'wildfire', target: -1 };
         const weak = combat.enemies[weakest].def.weak;
         const runes = { fire: 'emberRune', frost: 'frostRune', storm: 'stormRune' } as const;
@@ -44,10 +48,12 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
       }
       case 'strider':
         if (living.length >= 3 && canUse(i, 'scatterVolley')) return { kind: 'skill', skill: 'scatterVolley', target: -1 };
+        if ((combat.boss || combat.enemies[weakest].def.weak.includes('storm')) && canUse(i, 'galePiercer')) return { kind: 'skill', skill: 'galePiercer', target: weakest };
         if (combat.boss && canUse(i, 'twinFang')) return { kind: 'skill', skill: 'twinFang', target: weakest };
         break;
       case 'bastion':
         if (combat.boss && canUse(i, 'ironFormation') && combat.status[i].guard === 0) return { kind: 'skill', skill: 'ironFormation', target: -1 };
+        if (living.length >= 2 && canUse(i, 'rampartCrash')) return { kind: 'skill', skill: 'rampartCrash', target: -1 };
         break;
     }
     return { kind: 'attack', target: weakest };

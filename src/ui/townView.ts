@@ -1,6 +1,7 @@
 import { audio } from '../audio/audio';
 import { CLASSES } from '../core/data/classes';
 import { EQUIPMENT, type EquipDef } from '../core/data/equipment';
+import { chapterOf } from '../core/data/chapters';
 import { FLOORS } from '../core/data/floors';
 import { ITEMS } from '../core/data/items';
 import type { Game } from '../core/game';
@@ -12,6 +13,7 @@ import {
   unlocksFrom,
   buyEquipment,
   buyItem,
+  itemsForSale,
   canEquip,
   equipmentForSale,
   innCost,
@@ -20,7 +22,7 @@ import {
   statDelta,
 } from '../core/town';
 import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow } from '../core/guild';
-import type { ClassId, ItemId, Stats } from '../core/types';
+import type { ClassId, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
@@ -380,7 +382,7 @@ export class TownView {
 
   private shopItems(start = 0): void {
     const inv = this.game.state.inventory;
-    const items: MenuItem[] = (Object.keys(ITEMS) as ItemId[]).map((id, i) => ({
+    const items: MenuItem[] = itemsForSale(this.game).map((id, i) => ({
       label: `${ITEMS[id].name}  (have ${inv[id] ?? 0})`,
       detail: `${ITEMS[id].price} G`,
       description: ITEMS[id].description,
@@ -488,17 +490,19 @@ export class TownView {
     const back = () => this.back();
     const items: MenuItem[] = FLOORS.slice(0, this.game.state.deepest + 1).map((f, i) => ({
       label: f.name,
+      detail: `Chapter ${chapterOf(i).numeral}`,
+      description: chapterOf(i).name,
       onSelect: () => {
         this.host.closeOverlay();
         this.game.enterFloor(i);
         this.host.save();
         this.host.enterDungeon();
-        this.host.toast(`${f.name} — find the stairs down.`);
+        this.host.toast(i === FLOORS.length - 1 ? `${f.name}: the deepest floor.` : `${f.name}: find the stairs down.`);
       },
     }));
     items.push({ label: 'Not yet', onSelect: back });
     const menu = new ListMenu(items, { onCancel: back, startIndex: this.game.state.deepest });
-    this.dialog('The Rootdeep', [el('p', { text: 'Which floor will you start from?' })], menu);
+    this.dialog('The Rootdeep', [el('p', { text: 'Which floor will you start from?' })], menu, true);
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

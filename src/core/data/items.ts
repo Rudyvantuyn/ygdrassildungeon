@@ -11,10 +11,13 @@ export interface ItemDef {
   amount: number;
   price: number;
   description: string;
+  /** Sold in the shop once the party has reached this floor index (default: from the start). */
+  minFloor?: number;
 }
 
 export const ITEMS: Record<ItemId, ItemDef> = {
   sapTonic: { id: 'sapTonic', name: 'Sap Tonic', effect: 'hp', amount: 60, price: 30, description: 'A bitter tonic brewed from tree sap. Restores 60 HP.' },
+  tideDraught: { id: 'tideDraught', name: 'Tide Draught', effect: 'hp', amount: 200, price: 110, minFloor: 5, description: 'Kelp and salt boiled into a strong draught. Restores 200 HP.' },
   spiritDew: { id: 'spiritDew', name: 'Spirit Dew', effect: 'sp', amount: 25, price: 70, description: 'Morning dew gathered from the Great Tree. Restores 25 SP.' },
   clearwater: { id: 'clearwater', name: 'Clearwater', effect: 'cure', amount: 0, price: 40, description: 'Spring water blessed at the roots. Cures poison, sleep and paralysis.' },
   kindlingMoss: {

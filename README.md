@@ -29,6 +29,19 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Hoofdstukken (mijlpaal 7)
+
+- De Rootdeep is verdeeld in **hoofdstukken van vijf verdiepingen**, elk met een eigen thema, eigen monsters en een
+  baas op de laatste verdieping (`src/core/data/chapters.ts`).
+- **Hoofdstuk I, The Greenwood Roots** (verdieping 1–5): bos, ijs en gloed, eindigt met **The Rootgnawer**. Achter
+  zijn hol gaat nu een trap verder naar beneden.
+- **Hoofdstuk II, The Drowned Roots** (verdieping 6–10): een zee onder de wereld. 15 nieuwe monsters, de prowlers
+  Skerryjaw, Brine Draugr en Tidecoil, de tussenbaas **The Drowned Jarl** (verdieping 8) en de eindbaas
+  **The Hafgufa** (verdieping 10). Gemaakt voor een groep rond level 18–30; het maximumlevel is nu 40.
+- Nieuw: uitrusting in drie niveaus plus speciale uitrusting, de **Tide Draught** (200 HP), een skill per klasse
+  (Rampart Crash, Gale Piercer, Wellspring, Thunderhead), acht quests, verhaalscènes en vijf muziekthema's.
+- Oude saves krijgen de nieuwe verdiepingen er vanzelf bij.
+
 ### Geschilderde wereld (mijlpaal 6)
 
 - **Lindholm** is geschilderd: het stadsbeeld toont de plek die je in het menu kiest (herberg, Oath Hall, winkel,
@@ -121,21 +134,22 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Onderwerp | Namen |
 |---|---|
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
-| Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimewood IV, Wyrmroot V |
+| Hoofdstukken | I: The Greenwood Roots, II: The Drowned Roots |
+| Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimewood IV, Wyrmroot V, Saltmarsh VI, Kelpwood VII, Coral Vault VIII, Ran's Reach IX, Aegir's Hall X |
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
 | Personages | Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder) |
 | Party | Bram, Sela, Wren, Orrin |
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |
 | Elementen | fysiek, vuur (fire), vorst (frost), storm |
-| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune |
+| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead |
 | Statuseffecten | Poison, Sleep, Paralysis |
-| Items | Sap Tonic (HP), Spirit Dew (SP), Clearwater (statuseffecten), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
-| Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe, Runehewn Axe, Hrimstring Bow, Frostbirch Rod, Scalehide Mail, Rimeweave Robe, Wyrmtooth Blade, Embersong Bow, Ashroot Rod, Emberscale Plate, Starveil Robe |
-| Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, Hrimwolf, Frostcap, Rimeshell, Snowveil Moth, Cinderwing, Emberling, Rootfiend, Ashen Colossus; bazen **The Blighted Elder** en **The Rootgnawer** |
-| Prowlers | Sterke monsters die zichtbaar over de kaart lopen: Grimtusk, Fenwraith, Root Draugr |
-| Materialen | Bog Jelly, Dusk Membrane, Briar Quill, Hollow Fang, Puffcap Spores, Bark Shell, Gloam Scale, Heartwood Knot, Rime Pelt, Frost Gill, Ice Carapace, Snowveil Wing, Cinder Feather, Ember Core, Fiend Root, Ash Slab, Grim Tusk, Wraith Silk, Draugr Bone, Blighted Heartwood, Gnawer Fang |
-| Speciale uitrusting | Briarthorn Spear, Duskweave Cloak, Barkshell Mail, Gloamscale Robe, Heartknot Staff, Elderheart Mail, Rimefang Blade, Snowveil Bow, Embercore Rod, Grimtusk Cleaver, Draugrbone Bow, Wraithsilk Robe |
+| Items | Sap Tonic (HP), Tide Draught (veel HP), Spirit Dew (SP), Clearwater (statuseffecten), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
+| Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe, Runehewn Axe, Hrimstring Bow, Frostbirch Rod, Scalehide Mail, Rimeweave Robe, Wyrmtooth Blade, Embersong Bow, Ashroot Rod, Emberscale Plate, Starveil Robe, Saltsteel Blade, Gullwind Bow, Driftwood Rod, Sharkhide Mail, Kelpweave Robe, Tidebreaker Axe, Stormgull Bow, Coralheart Rod, Anchor Plate, Deepscale Mail, Seafoam Robe, Fathom Edge, Wavecaller Bow, Abyss Rod, Leviathan Mail, Tidesong Robe |
+| Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, Hrimwolf, Frostcap, Rimeshell, Snowveil Moth, Cinderwing, Emberling, Rootfiend, Ashen Colossus, Brineling, Skerrywing, Reefclaw, Kelp Strangler, Brinecap, Seahound, Pearlmoth, Coralback, Tidecaller, Nykur, Saltwight, Gloom Eel, Deepmaw, Wavemaid, Fathomstone; bazen **The Blighted Elder**, **The Rootgnawer**, **The Drowned Jarl** en **The Hafgufa** |
+| Prowlers | Sterke monsters die zichtbaar over de kaart lopen: Grimtusk, Fenwraith, Root Draugr, Skerryjaw, Brine Draugr, Tidecoil |
+| Materialen | Bog Jelly, Dusk Membrane, Briar Quill, Hollow Fang, Puffcap Spores, Bark Shell, Gloam Scale, Heartwood Knot, Rime Pelt, Frost Gill, Ice Carapace, Snowveil Wing, Cinder Feather, Ember Core, Fiend Root, Ash Slab, Grim Tusk, Wraith Silk, Draugr Bone, Blighted Heartwood, Gnawer Fang, Brine Gel, Skerry Plume, Reef Shell, Kelp Cord, Salt Spores, Seahound Fang, Pearl Dust, Coral Chunk, Tideglass, Nykur Mane, Salt Bone, Eel Lantern, Deepmaw Tooth, Foam Silk, Fathom Core, Skerryjaw Fin, Brine Crown, Coil Scale, Jarl's Crown, Hafgufa Pearl |
+| Speciale uitrusting | Briarthorn Spear, Duskweave Cloak, Barkshell Mail, Gloamscale Robe, Heartknot Staff, Elderheart Mail, Rimefang Blade, Snowveil Bow, Embercore Rod, Grimtusk Cleaver, Draugrbone Bow, Wraithsilk Robe, Reefshell Mail, Nacre Robe, Eel Lantern Rod, Skerryjaw Saber, Brinecrown Bow, Coilscale Robe, Jarlguard Plate |
 | Samen spelen | **Hornstone** (ontmoetingssteen), expeditie, Sound the Horn, Answer a Horn, gathering (lobby), share (je deel van de buit) |
 | Menu's | Pack (rugzak-menu in de dungeon), Map (kaarteditor), Notice Board (quests), System, Danger-bol |
 

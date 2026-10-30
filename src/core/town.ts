@@ -19,9 +19,13 @@ export function restAtInn(game: Game): boolean {
   return true;
 }
 
+export function itemsForSale(game: Game): ItemId[] {
+  return (Object.keys(ITEMS) as ItemId[]).filter((id) => (ITEMS[id].minFloor ?? 0) <= game.state.deepest);
+}
+
 export function buyItem(game: Game, id: ItemId): boolean {
   const price = ITEMS[id].price;
-  if (game.state.gold < price) return false;
+  if (game.state.gold < price || !itemsForSale(game).includes(id)) return false;
   game.state.gold -= price;
   game.state.inventory[id] = (game.state.inventory[id] ?? 0) + 1;
   return true;

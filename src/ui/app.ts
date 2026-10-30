@@ -388,7 +388,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.message.classList.add('hidden');
     this.town.show();
     this.updateHud();
-    this.playStory('town', (id) => (id === 'epilogue' ? this.showCredits() : (this.mode = 'town')));
+    this.playStory('town', (id) => (id === 'chapterTwoEnd' ? this.showCredits() : (this.mode = 'town')));
   }
 
   enterDungeon(): void {
@@ -812,9 +812,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const done = () => {
       this.closeOverlay();
       if (this.coop) return this.coop.combatOver();
-      if (this.game.state.cleared && combat.boss) return this.playStory('victory', () => this.showCleared());
-      this.enterExplore();
-      if (combat.boss) this.toast(`${combat.enemies[0].def.name} has fallen. The way down lies open.`);
+      if (!combat.boss) return this.enterExplore();
+      this.playStory('victory', () => {
+        if (this.game.state.cleared) return this.showCleared();
+        this.enterExplore();
+        this.toast(`${combat.enemies[0].def.name} has fallen. The way down lies open.`);
+      });
     };
     const menu = new ListMenu([{ label: 'Continue', onSelect: done }], { onCancel: done });
     this.openOverlay(
@@ -854,8 +857,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.save();
     this.openOverlay(
       el('div', { className: 'panel dialog' }, [
-        el('h2', { text: 'The Rootdeep is cleansed!' }),
-        el('p', { text: 'The Rootgnawer lies still. Its teeth will gnaw at the roots of the Great Tree no more.' }),
+        el('h2', { text: 'The deep water is calm!' }),
+        el('p', { text: 'The Hafgufa has sunk into the dark, and the Great Tree drinks sweet water again.' }),
         el('p', { text: `Steps: ${s.steps} · Battles: ${s.battles} · Gold: ${s.gold} G` }),
         menu.el,
       ]),

@@ -32,6 +32,10 @@ Add new names there and keep the glossary in sync.
 - **Prowlers** (visible roaming monsters) only appear from **floor 5** onward. A party should not survive a
   prowler fight before about **level 10**, and even then only barely: they are meant to be avoided, or beaten
   after training. Every prowler floor must have a route around them. Fleeing from a prowler is a fixed **30%**.
+  Deeper chapters scale this up: chapter II prowlers are hopeless at level 20 and risky at about 24.
+- The dungeon is told in **chapters of five floors**, each with its own theme and matching monsters, always ending
+  with a boss. Chapter I is forest (floors 1–5), chapter II ocean (floors 6–10). The owner wants to draw dungeons
+  themselves later (a dungeon editor).
 
 - **Multiplayer** means going into the dungeon together: each player brings one of their own adventurers into a
   party of up to four (an "expedition"). No shared town. Trading may come later (low priority). Leaderboards and

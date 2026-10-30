@@ -63,6 +63,14 @@ function healBetweenFights(game: Game): void {
   }
 }
 
+/** The Mender can barely heal any more and the party is worn down. */
+function outOfSteam(game: Game): boolean {
+  const party = game.state.party;
+  const wren = party.find((m) => m.classId === 'mender');
+  const hp = party.reduce((sum, m) => sum + m.hp, 0) / party.reduce((sum, m) => sum + memberStats(m).hp, 0);
+  return !!wren && wren.sp < SKILLS.mend.sp * 3 && hp < 0.6;
+}
+
 /** Shortest walk from `from` to `to`; cells in `avoid` are only entered if they are the goal. */
 function path(map: FloorMap, from: { x: number; y: number }, to: { x: number; y: number }, avoid?: Set<number>): Dir[] {
   const key = (x: number, y: number) => y * map.width + x;
@@ -150,8 +158,9 @@ export function autoplay(seed: number, opts: AutoplayOptions = {}): AutoplayResu
         fight(game, ev.type === 'prowler' ? game.startProwlerCombat(ev.index) : game.startCombat(ev.enemies));
         if (!game.partyAlive) return false;
         healBetweenFights(game);
-        // Someone is still down and can't be woken here: go back to the inn, then return to this floor.
-        if (opts.town && !game.state.party.every(isAlive)) {
+        // Someone is still down and can't be woken here, or the healer has run dry:
+        // go back to the inn, then return to this floor.
+        if (opts.town && (!game.state.party.every(isAlive) || outOfSteam(game))) {
           const floor = game.state.floor;
           visitTown(game);
           game.enterFloor(floor);

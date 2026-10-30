@@ -3,7 +3,7 @@ import { EQUIPMENT } from './data/equipment';
 import { SKILLS, type SkillDef } from './data/skills';
 import type { ClassId, Member, Stats } from './types';
 
-export const MAX_LEVEL = 20;
+export const MAX_LEVEL = 40;
 
 export function createMember(name: string, classId: ClassId): Member {
   const def = CLASSES[classId];

@@ -55,6 +55,12 @@ export const THEMES: Record<string, Theme> = {
   floor2: { id: 'floor2', bpm: 70, root: 48, mode: m(MODES.phrygian), progression: [0, 1, 0, 6], lead: 'sine', density: 0.3, bass: 'drone', drums: 'none', pad: true, seed: 41 },
   floor3: { id: 'floor3', bpm: 64, root: 47, mode: m(MODES.lydian), progression: [0, 1, 5, 4], lead: 'sine', density: 0.25, bass: 'drone', drums: 'none', pad: true, seed: 43 },
   floor4: { id: 'floor4', bpm: 86, root: 50, mode: m(MODES.harmonicMinor), progression: [0, 5, 1, 4], lead: 'sawtooth', density: 0.4, bass: 'pulse', drums: 'soft', pad: true, seed: 47 },
+  // Chapter II: the Drowned Roots. Slow, rolling, lots of space, like water moving in the dark.
+  floor5: { id: 'floor5', bpm: 72, root: 50, mode: m(MODES.mixolydian), progression: [0, 6, 3, 0], lead: 'sine', density: 0.35, bass: 'drone', drums: 'none', pad: true, seed: 67 },
+  floor6: { id: 'floor6', bpm: 78, root: 47, mode: m(MODES.dorian), progression: [0, 4, 3, 6], lead: 'triangle', density: 0.4, bass: 'pulse', drums: 'none', pad: true, seed: 71 },
+  floor7: { id: 'floor7', bpm: 68, root: 52, mode: m(MODES.lydian), progression: [0, 1, 0, 4], lead: 'sine', density: 0.3, bass: 'drone', drums: 'none', pad: true, seed: 73 },
+  floor8: { id: 'floor8', bpm: 74, root: 45, mode: m(MODES.aeolian), progression: [0, 6, 5, 6], lead: 'triangle', density: 0.35, bass: 'drone', drums: 'soft', pad: true, seed: 79 },
+  floor9: { id: 'floor9', bpm: 60, root: 43, mode: m(MODES.phrygian), progression: [0, 1, 6, 0], lead: 'sine', density: 0.25, bass: 'drone', drums: 'none', pad: true, seed: 83 },
   battle: { id: 'battle', bpm: 140, root: 52, mode: m(MODES.aeolian), progression: [0, 5, 6, 4], lead: 'square', density: 0.7, bass: 'pulse', drums: 'battle', pad: false, seed: 53 },
   prowler: { id: 'prowler', bpm: 152, root: 54, mode: m(MODES.phrygian), progression: [0, 1, 0, 6, 0, 1, 5, 4], lead: 'sawtooth', density: 0.75, bass: 'pulse', drums: 'battle', pad: true, seed: 59 },
   boss: { id: 'boss', bpm: 132, root: 48, mode: m(MODES.harmonicMinor), progression: [0, 5, 3, 4, 0, 5, 1, 4], lead: 'sawtooth', density: 0.65, bass: 'pulse', drums: 'battle', pad: true, seed: 61 },

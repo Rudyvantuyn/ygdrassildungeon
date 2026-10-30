@@ -108,20 +108,14 @@ export class Game {
       p.prowlers ??= initProwlers(FLOORS[i]);
       p.chart ??= emptyChart(p.explored.length);
     });
+    // New chapters add floors; saves from before them get fresh progress for those.
+    for (let i = state.progress.length; i < FLOORS.length; i++) state.progress.push(newProgress(FLOORS[i]));
+    // "Cleared" means the last floor's boss has fallen (it meant floor 5 before chapter II).
+    state.cleared = state.progress[FLOORS.length - 1].bossDefeated;
   }
 
   static newGame(seed: number): Game {
-    const progress = FLOORS.map((def) => {
-      const map = parseFloor(def);
-      return {
-        explored: '0'.repeat(map.width * map.height),
-        openedChests: [],
-        springUsed: false,
-        bossDefeated: false,
-        prowlers: initProwlers(def),
-        chart: emptyChart(map.width * map.height),
-      };
-    });
+    const progress = FLOORS.map(newProgress);
     const start = parseFloor(FLOORS[0]).start;
     const game = new Game({
       version: SAVE_VERSION,
@@ -421,4 +415,16 @@ export class Game {
     }
     this.progress.explored = cells.join('');
   }
+}
+
+function newProgress(def: FloorDef): FloorProgress {
+  const map = parseFloor(def);
+  return {
+    explored: '0'.repeat(map.width * map.height),
+    openedChests: [],
+    springUsed: false,
+    bossDefeated: false,
+    prowlers: initProwlers(def),
+    chart: emptyChart(map.width * map.height),
+  };
 }

@@ -46,6 +46,25 @@ const list: EquipDef[] = [
   { id: 'ashrootRod', name: 'Ashroot Rod', slot: 'weapon', classes: CASTERS, tier: 4, price: 2400, bonus: { mag: 25 } },
   { id: 'emberscalePlate', name: 'Emberscale Plate', slot: 'armor', classes: ['bastion'], tier: 4, price: 2700, bonus: { def: 24, spd: -1 } },
   { id: 'starveilRobe', name: 'Starveil Robe', slot: 'armor', classes: CASTERS, tier: 4, price: 2300, bonus: { def: 14, res: 19 } },
+  // Tier 5 — after reaching the sixth floor (Chapter II)
+  { id: 'saltsteelBlade', name: 'Saltsteel Blade', slot: 'weapon', classes: ['bastion'], tier: 5, price: 2600, bonus: { atk: 37 } },
+  { id: 'gullwindBow', name: 'Gullwind Bow', slot: 'weapon', classes: ['strider'], tier: 5, price: 2500, bonus: { atk: 35, spd: 3 } },
+  { id: 'driftwoodRod', name: 'Driftwood Rod', slot: 'weapon', classes: CASTERS, tier: 5, price: 2500, bonus: { mag: 31 } },
+  { id: 'sharkhideMail', name: 'Sharkhide Mail', slot: 'armor', classes: ['bastion', 'strider'], tier: 5, price: 2700, bonus: { def: 29 } },
+  { id: 'kelpweaveRobe', name: 'Kelpweave Robe', slot: 'armor', classes: CASTERS, tier: 5, price: 2400, bonus: { def: 17, res: 24 } },
+  // Tier 7 — after reaching the eighth floor
+  { id: 'tidebreakerAxe', name: 'Tidebreaker Axe', slot: 'weapon', classes: ['bastion'], tier: 7, price: 4500, bonus: { atk: 45 } },
+  { id: 'stormgullBow', name: 'Stormgull Bow', slot: 'weapon', classes: ['strider'], tier: 7, price: 4300, bonus: { atk: 42, spd: 4 } },
+  { id: 'coralheartRod', name: 'Coralheart Rod', slot: 'weapon', classes: CASTERS, tier: 7, price: 4200, bonus: { mag: 38 } },
+  { id: 'anchorPlate', name: 'Anchor Plate', slot: 'armor', classes: ['bastion'], tier: 7, price: 4600, bonus: { def: 36, spd: -1 } },
+  { id: 'deepscaleMail', name: 'Deepscale Mail', slot: 'armor', classes: ['strider'], tier: 7, price: 4300, bonus: { def: 33, spd: 1 } },
+  { id: 'seafoamRobe', name: 'Seafoam Robe', slot: 'armor', classes: CASTERS, tier: 7, price: 4100, bonus: { def: 21, res: 29 } },
+  // Tier 9 — after reaching the tenth floor
+  { id: 'fathomEdge', name: 'Fathom Edge', slot: 'weapon', classes: ['bastion'], tier: 9, price: 6800, bonus: { atk: 54 } },
+  { id: 'wavecallerBow', name: 'Wavecaller Bow', slot: 'weapon', classes: ['strider'], tier: 9, price: 6700, bonus: { atk: 51, spd: 5 } },
+  { id: 'abyssRod', name: 'Abyss Rod', slot: 'weapon', classes: CASTERS, tier: 9, price: 6500, bonus: { mag: 46 } },
+  { id: 'leviathanMail', name: 'Leviathan Mail', slot: 'armor', classes: ['bastion', 'strider'], tier: 9, price: 6900, bonus: { def: 43 } },
+  { id: 'tidesongRobe', name: 'Tidesong Robe', slot: 'armor', classes: CASTERS, tier: 9, price: 6300, bonus: { def: 26, res: 35 } },
   // Special gear, unlocked by selling materials
   { id: 'briarthornSpear', name: 'Briarthorn Spear', slot: 'weapon', classes: ['bastion'], tier: 0, price: 220, bonus: { atk: 8 }, requires: { material: 'briarQuill', qty: 5 } },
   { id: 'duskweaveCloak', name: 'Duskweave Cloak', slot: 'armor', classes: ALL, tier: 0, price: 200, bonus: { def: 5, res: 4 }, requires: { material: 'duskMembrane', qty: 6 } },
@@ -59,6 +78,13 @@ const list: EquipDef[] = [
   { id: 'grimtuskCleaver', name: 'Grimtusk Cleaver', slot: 'weapon', classes: ['bastion'], tier: 4, price: 3200, bonus: { atk: 34 }, requires: { material: 'grimTusk', qty: 1 } },
   { id: 'draugrboneBow', name: 'Draugrbone Bow', slot: 'weapon', classes: ['strider'], tier: 4, price: 3200, bonus: { atk: 32, spd: 4 }, requires: { material: 'draugrBone', qty: 1 } },
   { id: 'wraithsilkRobe', name: 'Wraithsilk Robe', slot: 'armor', classes: CASTERS, tier: 4, price: 3000, bonus: { def: 15, res: 22 }, requires: { material: 'wraithSilk', qty: 1 } },
+  { id: 'reefshellMail', name: 'Reefshell Mail', slot: 'armor', classes: ['bastion', 'strider'], tier: 5, price: 2400, bonus: { def: 31 }, requires: { material: 'reefShell', qty: 6 } },
+  { id: 'nacreRobe', name: 'Nacre Robe', slot: 'armor', classes: CASTERS, tier: 7, price: 3700, bonus: { def: 20, res: 30, spd: 1 }, requires: { material: 'pearlDust', qty: 6 } },
+  { id: 'eelLanternRod', name: 'Eel Lantern Rod', slot: 'weapon', classes: CASTERS, tier: 8, price: 4800, bonus: { mag: 41 }, requires: { material: 'eelLantern', qty: 5 } },
+  { id: 'skerryjawSaber', name: 'Skerryjaw Saber', slot: 'weapon', classes: ['bastion'], tier: 6, price: 5500, bonus: { atk: 50 }, requires: { material: 'skerryjawFin', qty: 1 } },
+  { id: 'brinecrownBow', name: 'Brinecrown Bow', slot: 'weapon', classes: ['strider'], tier: 8, price: 6100, bonus: { atk: 50, spd: 6 }, requires: { material: 'brineCrown', qty: 1 } },
+  { id: 'coilscaleRobe', name: 'Coilscale Robe', slot: 'armor', classes: CASTERS, tier: 8, price: 5800, bonus: { def: 25, res: 36 }, requires: { material: 'coilScale', qty: 1 } },
+  { id: 'jarlguardPlate', name: 'Jarlguard Plate', slot: 'armor', classes: ['bastion'], tier: 7, price: 5600, bonus: { def: 42 }, requires: { material: 'jarlsCrown', qty: 1 } },
 ];
 
 export const EQUIPMENT: Record<string, EquipDef> = Object.fromEntries(list.map((e) => [e.id, e]));
