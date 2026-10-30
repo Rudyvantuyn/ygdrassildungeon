@@ -1,4 +1,4 @@
-import type { Element, Inflict, SkillId } from '../types';
+import type { Element, Inflict, SkillId, Stats } from '../types';
 
 export type SkillTarget = 'enemy' | 'allEnemies' | 'ally' | 'allAllies' | 'self';
 
@@ -7,7 +7,7 @@ export interface SkillDef {
   name: string;
   sp: number;
   target: SkillTarget;
-  kind: 'phys' | 'magic' | 'heal' | 'revive' | 'cure' | 'ailment' | 'challenge' | 'guard';
+  kind: 'phys' | 'magic' | 'heal' | 'revive' | 'cure' | 'ailment' | 'challenge' | 'guard' | 'passive';
   element: Element;
   /** Percent of a normal attack (damage) or of the heal formula. */
   power: number;
@@ -16,6 +16,10 @@ export interface SkillDef {
   field: boolean;
   /** Chance to inflict an ailment on each enemy hit (or, for kind 'ailment', on each target). */
   inflict?: Inflict;
+  /** Challenge and guard: how many turns the effect lasts. */
+  turns?: number;
+  /** Passive skills: a stat raised by this many percent per rank. */
+  passive?: { stat: keyof Stats; perRank: number };
   description: string;
 }
 
@@ -31,7 +35,8 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     target: 'self',
     kind: 'challenge',
     power: 0,
-    description: 'Bang your shield and dare the enemy to strike you for 2 turns.',
+    turns: 2,
+    description: 'Bang your shield and dare the enemy to strike you.',
   }),
   bulwarkBash: skill({
     id: 'bulwarkBash',
@@ -49,7 +54,8 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     target: 'allAllies',
     kind: 'guard',
     power: 0,
-    description: 'Rally the party into a tight formation: 30% less damage for 3 turns.',
+    turns: 3,
+    description: 'Rally the party into a tight formation: 30% less damage for a few turns.',
   }),
   twinFang: skill({
     id: 'twinFang',
@@ -206,5 +212,75 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     element: 'storm',
     power: 135,
     description: 'Carve a rune of rolling thunder. Strikes every enemy with storm.',
+  }),
+  stoutHeart: skill({
+    id: 'stoutHeart',
+    name: 'Stout Heart',
+    sp: 0,
+    target: 'self',
+    kind: 'passive',
+    power: 0,
+    passive: { stat: 'hp', perRank: 4 },
+    description: 'A tough frame and a stubborn will. Raises max HP.',
+  }),
+  ironSkin: skill({
+    id: 'ironSkin',
+    name: 'Iron Skin',
+    sp: 0,
+    target: 'self',
+    kind: 'passive',
+    power: 0,
+    passive: { stat: 'def', perRank: 3 },
+    description: 'Years behind the shield harden the body. Raises defence.',
+  }),
+  keenEye: skill({
+    id: 'keenEye',
+    name: 'Keen Eye',
+    sp: 0,
+    target: 'self',
+    kind: 'passive',
+    power: 0,
+    passive: { stat: 'atk', perRank: 3 },
+    description: 'Spot the gap in any armour. Raises attack.',
+  }),
+  fleetFoot: skill({
+    id: 'fleetFoot',
+    name: 'Fleet Foot',
+    sp: 0,
+    target: 'self',
+    kind: 'passive',
+    power: 0,
+    passive: { stat: 'spd', perRank: 4 },
+    description: 'Light on your feet, first to act. Raises speed.',
+  }),
+  gentleHands: skill({
+    id: 'gentleHands',
+    name: 'Gentle Hands',
+    sp: 0,
+    target: 'self',
+    kind: 'passive',
+    power: 0,
+    passive: { stat: 'mag', perRank: 3 },
+    description: 'Steady hands for mending. Raises magic, and so all healing.',
+  }),
+  runeLore: skill({
+    id: 'runeLore',
+    name: 'Rune Lore',
+    sp: 0,
+    target: 'self',
+    kind: 'passive',
+    power: 0,
+    passive: { stat: 'mag', perRank: 3 },
+    description: 'Older, deeper runes. Raises magic.',
+  }),
+  deepWell: skill({
+    id: 'deepWell',
+    name: 'Deep Well',
+    sp: 0,
+    target: 'self',
+    kind: 'passive',
+    power: 0,
+    passive: { stat: 'sp', perRank: 5 },
+    description: 'A calm mind holds more power. Raises max SP.',
   }),
 };

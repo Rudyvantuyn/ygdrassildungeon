@@ -23,6 +23,8 @@ import { online, type ExpeditionRow } from '../net/online';
 import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
 import { Designer, isMaker, loadDraft } from './designer';
+import { memberPicker, showSkillTree } from './skillsView';
+import { unspentPoints } from '../core/skilltree';
 import { toFloorDef, type FloorDesign } from '../core/designer';
 import { markSeen, pendingScene, type StoryLine } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
@@ -818,7 +820,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       ...r.materials.flatMap((id) => [el('span', { text: 'Material' }), el('span', { className: 'v', text: MATERIALS[id].name })]),
     ]);
     const levelUps = r.levelUps.map((l) =>
-      el('div', { className: 'levelup', text: `${this.game.state.party[l.member].name} reached level ${l.level}!` }),
+      el('div', { className: 'levelup', text: `${this.game.state.party[l.member].name} reached level ${l.level}! A new skill point to spend.` }),
     );
     const done = () => {
       this.closeOverlay();
@@ -912,6 +914,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
               this.enterTown();
               this.toast('The feather carries you home. Game saved.');
             }),
+        },
+        {
+          label: 'Skill tree',
+          detail: this.game.state.party.some((m) => unspentPoints(m) > 0) ? 'points to spend' : undefined,
+          description: 'Spend skill points. Every level brings one; each skill goes up to rank 10.',
+          onSelect: () => this.packSkillTree(),
         },
         { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.soundOptions(() => this.openPack()) },
         this.trial
@@ -1074,6 +1082,25 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.overlay.classList.remove('hidden');
     this.overlayMenu = null;
     this.mode = 'editor';
+  }
+
+  private packSkillTree(): void {
+    const host = {
+      dialog: (title: string, body: HTMLElement[], menu: ListMenu) => {
+        const desc = el('div', { className: 'menu-desc' });
+        menu.describeInto(desc);
+        this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: title }), ...body, menu.el, desc]), menu);
+      },
+      changed: () => {
+        this.save();
+        this.updateHud();
+      },
+    };
+    const pick = () => {
+      const menu = new ListMenu(memberPicker(this.game.state.party, (m) => showSkillTree(host, m, pick), () => this.openPack()), { onCancel: () => this.openPack() });
+      host.dialog('Skill tree', [], menu);
+    };
+    pick();
   }
 
   // ── Drafting table ─────────────────────────────────────────────────────────

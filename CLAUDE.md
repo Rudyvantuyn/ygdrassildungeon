@@ -62,7 +62,8 @@ Add new names there and keep the glossary in sync.
 - Balance changes: run the balance tests and look at the numbers on purpose; don't just loosen the bounds.
 - The live site (Vercel project `ygdrassil-dungeon`) deploys production from `main`.
 - Online features use the Supabase project `ygdrassil` (`src/net/online.ts`). The `expedition` Edge Function runs
-  `server/expedition.ts`, which uses the same rules as the client (`src/core/expedition.ts`). Deploy it after pushing,
-  by pinning it to the pushed commit: an `index.ts` that imports
-  `https://esm.sh/gh/rudyvantuyn/ygdrassildungeon@<commit>/es2022/server/expedition.ts.bundle.mjs` (verify_jwt off;
+  `server/expedition.ts`, which uses the same rules as the client (`src/core/expedition.ts`). `npm run build` also
+  bundles it into `server/build/expedition.js`; commit that file whenever it changes. Deploy the function after pushing,
+  pinned to the pushed commit: an `index.ts` that imports
+  `https://cdn.jsdelivr.net/gh/rudyvantuyn/ygdrassildungeon@<commit>/server/build/expedition.js` (verify_jwt off;
   the function checks tokens itself). Only that function writes the `expeditions` table.

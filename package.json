@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "screenshots": "node scripts/screenshots.cjs",
-    "build:server": "esbuild server/expedition.ts --bundle --format=esm --platform=neutral --target=es2022 --minify --entry-names=[name]-[hash] --outdir=dist/server"
+    "build:server": "esbuild server/expedition.ts --bundle --format=esm --platform=neutral --target=es2022 --minify --legal-comments=none --outfile=server/build/expedition.js"
   },
   "devDependencies": {
     "esbuild": "^0.25.12",

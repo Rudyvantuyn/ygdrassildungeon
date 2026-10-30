@@ -543,6 +543,7 @@ table.stats th.gear {
 }
 
 .menu-desc {
+  white-space: pre-line;
   min-height: 38px;
   font-size: 13px;
   color: var(--muted);

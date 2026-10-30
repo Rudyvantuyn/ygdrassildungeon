@@ -6,12 +6,12 @@ import type { Combat } from './combat';
 import { chooseCommands } from './tactics';
 
 export { chooseCommands };
-import { SKILLS } from './data/skills';
 import { DX, DY, isPassable, type FloorMap } from './dungeon';
 import { FLOORS } from './data/floors';
 import { Game, type StepEvent } from './game';
 import { buyEquipment, buyItem, canEquip, equipmentForSale, innCost, netPrice, restAtInn, sellMaterial } from './town';
-import { healAmount, healMember, isAlive, knownSkills, memberStats, revive } from './party';
+import { healAmount, healMember, isAlive, memberStats, revive } from './party';
+import { autoSpend, skillFor } from './skilltree';
 import { ITEMS } from './data/items';
 import type { Dir } from './types';
 
@@ -41,9 +41,10 @@ function healBetweenFights(game: Game): void {
   const wren = party.find((m) => m.classId === 'mender');
   for (const m of party) {
     if (isAlive(m)) continue;
-    if (wren && isAlive(wren) && knownSkills(wren).some((s) => s.id === 'rekindle') && wren.sp >= SKILLS.rekindle.sp) {
-      wren.sp -= SKILLS.rekindle.sp;
-      revive(m, SKILLS.rekindle.power);
+    const rekindle = wren && skillFor(wren, 'rekindle');
+    if (wren && rekindle && isAlive(wren) && wren.sp >= rekindle.sp) {
+      wren.sp -= rekindle.sp;
+      revive(m, rekindle.power);
     } else if ((game.state.inventory.kindlingMoss ?? 0) > 0) {
       game.state.inventory.kindlingMoss -= 1;
       revive(m, ITEMS.kindlingMoss.amount);
@@ -52,9 +53,10 @@ function healBetweenFights(game: Game): void {
   for (const m of party) {
     if (!isAlive(m)) continue;
     while (m.hp < memberStats(m).hp * 0.7) {
-      if (wren && isAlive(wren) && wren.sp >= SKILLS.mend.sp) {
-        wren.sp -= SKILLS.mend.sp;
-        healMember(m, healAmount(wren, 100));
+      const mend = wren && skillFor(wren, 'mend');
+      if (wren && mend && isAlive(wren) && wren.sp >= mend.sp) {
+        wren.sp -= mend.sp;
+        healMember(m, healAmount(wren, mend.power));
       } else if (game.state.inventory.sapTonic > 0) {
         game.state.inventory.sapTonic -= 1;
         healMember(m, 60);
@@ -68,7 +70,7 @@ function outOfSteam(game: Game): boolean {
   const party = game.state.party;
   const wren = party.find((m) => m.classId === 'mender');
   const hp = party.reduce((sum, m) => sum + m.hp, 0) / party.reduce((sum, m) => sum + memberStats(m).hp, 0);
-  return !!wren && wren.sp < SKILLS.mend.sp * 3 && hp < 0.6;
+  return !!wren && wren.sp < (skillFor(wren, 'mend')?.sp ?? 3) * 3 && hp < 0.6;
 }
 
 /** Shortest walk from `from` to `to`; cells in `avoid` are only entered if they are the goal. */
@@ -157,6 +159,8 @@ export function autoplay(seed: number, opts: AutoplayOptions = {}): AutoplayResu
       if (ev.type === 'encounter' || ev.type === 'prowler') {
         fight(game, ev.type === 'prowler' ? game.startProwlerCombat(ev.index) : game.startCombat(ev.enemies));
         if (!game.partyAlive) return false;
+        // A player spends new skill points; the computer follows the recommended build.
+        for (const m of game.state.party) autoSpend(m);
         healBetweenFights(game);
         // Someone is still down and can't be woken here, or the healer has run dry:
         // go back to the inn, then return to this floor.

@@ -1,13 +1,16 @@
 import { CLASSES } from './data/classes';
 import { EQUIPMENT } from './data/equipment';
-import { SKILLS, type SkillDef } from './data/skills';
+import type { SkillDef } from './data/skills';
+import { autoSpend, passiveBonus, skillFor } from './skilltree';
 import type { ClassId, Member, Stats } from './types';
 
 export const MAX_LEVEL = 40;
 
 export function createMember(name: string, classId: ClassId): Member {
   const def = CLASSES[classId];
-  return { name, classId, row: def.row, level: 1, xp: 0, hp: def.base.hp, sp: def.base.sp };
+  const m: Member = { name, classId, row: def.row, level: 1, xp: 0, hp: def.base.hp, sp: def.base.sp, skills: {} };
+  autoSpend(m);
+  return m;
 }
 
 export function createStartingParty(): Member[] {
@@ -33,6 +36,8 @@ export function memberStats(m: Member): Stats {
     if (!bonus) continue;
     for (const key of Object.keys(bonus) as (keyof Stats)[]) stats[key] += bonus[key] ?? 0;
   }
+  const passive = passiveBonus(m);
+  for (const key of Object.keys(passive) as (keyof Stats)[]) stats[key] = Math.round(stats[key] * (1 + (passive[key] ?? 0) / 100));
   return stats;
 }
 
@@ -41,8 +46,12 @@ export function xpForLevel(level: number): number {
   return Math.round(18 * Math.pow(level - 1, 2.3));
 }
 
+/** The skills this adventurer can use (passives work on their own and are left out), at their ranks. */
 export function knownSkills(m: Member): SkillDef[] {
-  return CLASSES[m.classId].skills.filter((s) => s.level <= m.level).map((s) => SKILLS[s.skill]);
+  return CLASSES[m.classId].skills.flatMap((e) => {
+    const skill = skillFor(m, e.skill);
+    return skill && skill.kind !== 'passive' ? [skill] : [];
+  });
 }
 
 export function isAlive(m: Member): boolean {

@@ -1,5 +1,6 @@
 import { CLASSES } from '../core/data/classes';
 import { memberStats } from '../core/party';
+import { unspentPoints } from '../core/skilltree';
 import type { Ailment, Member } from '../core/types';
 import { AILMENT_BADGE } from './combatView';
 import { drawPortrait } from '../render/portraits';
@@ -45,7 +46,9 @@ export class PartyView {
       const hp = display.hp?.[i] ?? m.hp;
       const sp = display.sp?.[i] ?? m.sp;
       const ratio = hp / stats.hp;
-      card.level.textContent = `Lv ${m.level} ${CLASSES[m.classId].name}`;
+      const points = unspentPoints(m);
+      card.level.textContent = `${points > 0 ? '✦ ' : ''}Lv ${m.level} ${CLASSES[m.classId].name}`;
+      card.level.title = points > 0 ? `${points} skill point${points === 1 ? '' : 's'} to spend` : '';
       card.hpFill.style.width = `${Math.max(0, ratio) * 100}%`;
       card.hpBar.classList.toggle('low', ratio <= 0.5 && ratio > 0.25);
       card.hpBar.classList.toggle('crit', ratio <= 0.25);

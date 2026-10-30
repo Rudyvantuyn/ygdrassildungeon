@@ -1,7 +1,7 @@
 import { CLASSES } from './data/classes';
 import { ENEMIES, type EnemyDef, type EnemySkill } from './data/enemies';
 import { ITEMS } from './data/items';
-import { SKILLS } from './data/skills';
+import { skillFor } from './skilltree';
 import { grantXp, healAmount, healMember, isAlive, memberStats, restoreSp, revive } from './party';
 import type { Rng } from './rng';
 import type { Ailment, Element, Inflict, ItemId, Member, SkillId } from './types';
@@ -227,7 +227,11 @@ export class Combat {
       }
 
       case 'skill': {
-        const skill = SKILLS[cmd.skill];
+        const skill = skillFor(m, cmd.skill);
+        if (!skill || skill.kind === 'passive') {
+          events.push({ type: 'info', text: `${m.name} doesn't know that skill.` });
+          return;
+        }
         if (m.sp < skill.sp) {
           events.push({ type: 'info', text: `${m.name} doesn't have enough SP.` });
           return;
@@ -273,10 +277,10 @@ export class Combat {
             events.push({ type: 'info', text: `${target.name} is back on their feet!` });
           }
         } else if (skill.kind === 'challenge') {
-          this.status[i].taunt = 2;
+          this.status[i].taunt = skill.turns ?? 2;
           events.push({ type: 'info', text: `The enemies glare at ${m.name}.` });
         } else if (skill.kind === 'guard') {
-          for (const s of this.status) s.guard = 3;
+          for (const s of this.status) s.guard = skill.turns ?? 3;
           events.push({ type: 'info', text: 'The party braces behind a wall of shields.' });
         }
         return;

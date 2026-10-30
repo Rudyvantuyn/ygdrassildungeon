@@ -2,6 +2,8 @@ import { audio } from '../audio/audio';
 import { CLASSES } from '../core/data/classes';
 import { EQUIPMENT, type EquipDef } from '../core/data/equipment';
 import { chapterOf } from '../core/data/chapters';
+import { resetSkills, spentPoints, unspentPoints } from '../core/skilltree';
+import { memberPicker, showSkillTree } from './skillsView';
 import { FLOORS } from '../core/data/floors';
 import { ITEMS } from '../core/data/items';
 import type { Game } from '../core/game';
@@ -22,7 +24,7 @@ import {
   statDelta,
 } from '../core/town';
 import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow } from '../core/guild';
-import type { ClassId, Stats } from '../core/types';
+import type { ClassId, Member, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
@@ -42,6 +44,7 @@ export interface TownHost {
   soundOptions(back: () => void): void;
   showHelp(back: () => void): void;
   openHornstone(): void;
+  confirm(title: string, text: string, yes: () => void): void;
 }
 
 const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', sp: 'SP', atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES', spd: 'SPD' };
@@ -240,12 +243,56 @@ export class TownView {
           onSelect: () => this.chooseClass(),
         },
         { label: 'Form the party', description: `Choose up to ${MAX_PARTY} members, their order and their rows.`, onSelect: () => this.formParty() },
+        {
+          label: 'Skills',
+          detail: [...s.party, ...s.reserve].some((m) => unspentPoints(m) > 0) ? 'points to spend' : undefined,
+          description: 'Spend skill points. Every level brings one; each skill goes up to rank 10.',
+          onSelect: () => this.skills(),
+        },
+        { label: 'Unlearn skills', description: 'Take back all skill points of one adventurer, for a fee.', onSelect: () => this.unlearn() },
         { label: 'Dismiss', description: 'Release an adventurer from the reserve for good.', disabled: s.reserve.length === 0, onSelect: () => this.dismiss() },
         { label: 'Leave', onSelect: back },
       ],
       { onCancel: back, startIndex: start },
     );
     this.dialog('The Oath Hall', [npcSays('brynja', '"Speak your oath, and the Great Tree will remember your name."')], menu, true);
+  }
+
+  private skills(): void {
+    const all = [...this.game.state.party, ...this.game.state.reserve];
+    const host = {
+      dialog: (title: string, body: HTMLElement[], menu: ListMenu) => this.dialog(title, body, menu, true),
+      changed: () => {
+        this.host.save();
+        this.host.updateHud();
+      },
+    };
+    const pick = () => this.dialog('Skills', [npcSays('brynja', '"Choose what to learn with care. Unlearning has its price."')], new ListMenu(memberPicker(all, (m) => showSkillTree(host, m, pick), () => this.hall(2)), { onCancel: () => this.hall(2) }), true);
+    pick();
+  }
+
+  private unlearn(): void {
+    const all = [...this.game.state.party, ...this.game.state.reserve];
+    const back = () => this.hall(3);
+    const items: MenuItem[] = all.map((m) => {
+      const fee = unlearnFee(m);
+      return {
+        label: m.name,
+        detail: `${fee} G`,
+        description: `Return all of ${m.name}'s skill points for ${fee} G.`,
+        disabled: this.game.state.gold < fee || spentPoints(m) === 0,
+        onSelect: () =>
+          this.host.confirm('Unlearn skills', `${m.name} forgets every skill and gets all points back to spend again. Pay ${fee} G?`, () => {
+            this.game.state.gold -= fee;
+            resetSkills(m);
+            this.host.save();
+            this.host.updateHud();
+            this.unlearn();
+          }),
+      };
+    });
+    items.push({ label: 'Back', onSelect: back });
+    this.dialog('Unlearn skills', [this.goldLine()], new ListMenu(items, { onCancel: back }), true);
   }
 
   private chooseClass(): void {
@@ -360,7 +407,7 @@ export class TownView {
         this.dialog(`Dismiss ${m.name}?`, [el('p', { text: 'They leave for good, together with their equipment.' })], menu);
       },
     }));
-    const menu = new ListMenu(items, { onCancel: () => this.hall(2) });
+    const menu = new ListMenu(items, { onCancel: () => this.hall(4) });
     this.dialog('Dismiss whom?', [], menu);
   }
 
@@ -525,6 +572,11 @@ export class TownView {
     }
     this.host.openOverlay(el('div', { className: 'panel dialog wide' }, children), menu);
   }
+}
+
+/** The Oath Hall's fee for unlearning: a little more for every level. */
+function unlearnFee(m: Member): number {
+  return 50 + m.level * 40;
 }
 
 function bonusText(e: EquipDef): string {

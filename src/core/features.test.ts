@@ -58,6 +58,7 @@ describe('ailments', () => {
     for (let seed = 1; seed <= 30; seed++) {
       const party = createStartingParty();
       party[3].level = 5;
+      party[3].skills = { ...party[3].skills, frostRune: 2, slumberRune: 1 };
       const c = new Combat(party, ['bogling', 'bogling'], makeInventory(), new Rng(seed));
       c.resolveRound([null, null, null, { kind: 'skill', skill: 'slumberRune', target: -1 }]);
       slept += c.enemies.filter((e) => e.ailment === 'sleep').length;
@@ -73,6 +74,7 @@ describe('ailments', () => {
     combat.enemies[0].def = { ...combat.enemies[0].def, atk: 0, skills: [] };
     combat.enemies[0].hp = combat.enemies[0].maxHp = 9999;
     combat.party[2].level = 2;
+    combat.party[2].skills = { ...combat.party[2].skills, mend: 1, cleanse: 1 };
     combat.status[0].ailment = 'paralysis';
     combat.status[0].ailmentTurns = 3;
     combat.status[1].ailment = 'poison';

@@ -6,6 +6,7 @@ import type { QuestState } from './quests';
 import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
 import { createStartingParty, fullRestore, isAlive, xpForLevel } from './party';
 import { EQUIPMENT_LIST } from './data/equipment';
+import { autoSpend } from './skilltree';
 import { STORY } from './data/story';
 import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
 import { Rng } from './rng';
@@ -110,6 +111,8 @@ export class Game {
     state.kills ??= {};
     state.quests ??= {};
     state.story ??= [];
+    // Saves from before skill points: give everyone the recommended build for their level.
+    for (const m of [...state.party, ...state.reserve]) if (!m.skills) autoSpend(m);
     state.progress.forEach((p, i) => {
       p.prowlers ??= initProwlers(this.floors[i]);
       p.chart ??= emptyChart(p.explored.length);
@@ -134,6 +137,8 @@ export class Game {
     for (const m of s.party) {
       m.level = level;
       m.xp = xpForLevel(level);
+      m.skills = {};
+      autoSpend(m);
       for (const slot of ['weapon', 'armor'] as const) {
         const best = EQUIPMENT_LIST.filter((e) => e.slot === slot && e.tier <= tier && !e.requires && e.classes.includes(m.classId)).sort((a, b) => b.price - a.price)[0];
         m[slot] = best?.id;

@@ -16,6 +16,7 @@ import { SKILLS } from './data/skills';
 import { Game, type GameState, type StepEvent } from './game';
 import { NAME_MAX_LENGTH } from './guild';
 import { fullRestore, isAlive, knownSkills, MAX_LEVEL, memberStats, xpForLevel } from './party';
+import { validSkills } from './skilltree';
 import { chooseCommands } from './tactics';
 import type { ClassId, ItemId, Member } from './types';
 
@@ -119,7 +120,9 @@ export function validMember(raw: unknown): Member | null {
   const weapon = gear(m.weapon, 'weapon');
   const armor = gear(m.armor, 'armor');
   if (weapon === false || armor === false) return null;
-  const member: Member = { name, classId, row: m.row === 'back' ? 'back' : 'front', level, xp, hp: 1, sp: 0 };
+  const skills = m.skills ?? {};
+  if (!validSkills(classId, level, skills)) return null;
+  const member: Member = { name, classId, row: m.row === 'back' ? 'back' : 'front', level, xp, hp: 1, sp: 0, skills: { ...skills } };
   if (weapon) member.weapon = weapon;
   if (armor) member.armor = armor;
   fullRestore([member]);

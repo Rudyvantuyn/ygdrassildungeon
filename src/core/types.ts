@@ -45,7 +45,14 @@ export type SkillId =
   | 'rampartCrash'
   | 'galePiercer'
   | 'wellspring'
-  | 'thunderhead';
+  | 'thunderhead'
+  | 'stoutHeart'
+  | 'ironSkin'
+  | 'keenEye'
+  | 'fleetFoot'
+  | 'gentleHands'
+  | 'runeLore'
+  | 'deepWell';
 
 export interface Member {
   name: string;
@@ -57,6 +64,8 @@ export interface Member {
   sp: number;
   weapon?: string;
   armor?: string;
+  /** Ranks bought with skill points (1–10). Saves from before skill points get a recommended build. */
+  skills?: Partial<Record<SkillId, number>>;
 }
 
 export type Loot = { gold: number } | { item: ItemId; qty: number };

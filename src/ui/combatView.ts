@@ -3,6 +3,7 @@ import { ITEMS, usableInCombat } from '../core/data/items';
 import type { SkillDef } from '../core/data/skills';
 import type { Game } from '../core/game';
 import { isAlive, knownSkills, memberStats } from '../core/party';
+import { rankOf } from '../core/skilltree';
 import type { ItemId } from '../core/types';
 import type { CorridorRenderer } from '../render/corridor';
 import { drawMonster } from '../render/monsters';
@@ -279,7 +280,7 @@ export class CombatView {
     const m = this.combat.party[this.current];
     const items: MenuItem[] = knownSkills(m).map((skill) => ({
       label: skill.name,
-      detail: `${skill.sp} SP`,
+      detail: `Rk ${rankOf(m, skill.id)} · ${skill.sp} SP`,
       description: skill.description,
       disabled: m.sp < skill.sp,
       onSelect: () => this.chooseSkillTarget(skill),

@@ -1,7 +1,7 @@
 /** How computer-controlled party members pick their commands (autoplay, idle co-op players). */
 import type { Combat, Command } from './combat';
-import { SKILLS } from './data/skills';
-import { isAlive, knownSkills, memberStats } from './party';
+import { isAlive, memberStats } from './party';
+import { skillFor } from './skilltree';
 import type { SkillId } from './types';
 
 /** A sensible command for every living party member (null for the fallen). */
@@ -9,8 +9,10 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
   const party = combat.party;
   const living = combat.livingEnemies();
   const weakest = living.reduce((a, b) => (combat.enemies[a].hp <= combat.enemies[b].hp ? a : b));
-  const knows = (i: number, id: SkillId) => knownSkills(party[i]).some((s) => s.id === id);
-  const canUse = (i: number, id: SkillId) => knows(i, id) && party[i].sp >= SKILLS[id].sp;
+  const canUse = (i: number, id: SkillId) => {
+    const skill = skillFor(party[i], id);
+    return !!skill && party[i].sp >= skill.sp;
+  };
   const hurt = party.flatMap((m, i) => (isAlive(m) && m.hp < memberStats(m).hp * 0.45 ? [i] : []));
   const fallen = party.flatMap((m, i) => (isAlive(m) ? [] : [i]));
   let mossLeft = combat.inventory.kindlingMoss ?? 0;

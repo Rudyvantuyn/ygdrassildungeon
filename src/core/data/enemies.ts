@@ -214,7 +214,7 @@ const list: EnemyDef[] = [
   {
     id: 'grimtusk',
     name: 'Grimtusk',
-    hp: 3900, atk: 88, def: 42, mag: 10, res: 28, spd: 22,
+    hp: 4700, atk: 95, def: 42, mag: 10, res: 28, spd: 22,
     xp: 520, gold: 300,
     weak: ['fire'], resist: [],
     skills: [{ name: 'Gore', chance: 0.35, kind: 'phys', element: 'phys', power: 175, target: 'one' }],
@@ -225,7 +225,7 @@ const list: EnemyDef[] = [
   {
     id: 'fenwraith',
     name: 'Fenwraith',
-    hp: 3200, atk: 44, def: 32, mag: 56, res: 30, spd: 24,
+    hp: 3250, atk: 44, def: 32, mag: 59, res: 30, spd: 24,
     xp: 580, gold: 340,
     weak: ['frost'], resist: ['storm'],
     ranged: true,
@@ -237,7 +237,7 @@ const list: EnemyDef[] = [
   {
     id: 'rootDraugr',
     name: 'Root Draugr',
-    hp: 3900, atk: 90, def: 50, mag: 36, res: 30, spd: 16,
+    hp: 4700, atk: 97, def: 50, mag: 38, res: 30, spd: 16,
     xp: 650, gold: 380,
     weak: ['fire'], resist: ['frost'],
     skills: [
@@ -439,7 +439,7 @@ const list: EnemyDef[] = [
   {
     id: 'skerryjaw',
     name: 'Skerryjaw',
-    hp: 12500, atk: 144, def: 72, mag: 20, res: 44, spd: 34,
+    hp: 15500, atk: 154, def: 72, mag: 20, res: 44, spd: 34,
     xp: 1400, gold: 1200,
     weak: ['storm'], resist: [],
     skills: [{ name: 'Frenzied Bite', chance: 0.35, kind: 'phys', element: 'phys', power: 180, target: 'one' }],
@@ -450,7 +450,7 @@ const list: EnemyDef[] = [
   {
     id: 'brineDraugr',
     name: 'Brine Draugr',
-    hp: 12000, atk: 136, def: 78, mag: 70, res: 50, spd: 22,
+    hp: 15000, atk: 148, def: 78, mag: 70, res: 50, spd: 22,
     xp: 1550, gold: 1400,
     weak: ['fire'], resist: ['frost'],
     skills: [
@@ -464,7 +464,7 @@ const list: EnemyDef[] = [
   {
     id: 'tidecoil',
     name: 'Tidecoil',
-    hp: 6400, atk: 80, def: 62, mag: 98, res: 56, spd: 32,
+    hp: 6000, atk: 80, def: 62, mag: 100, res: 56, spd: 32,
     xp: 1700, gold: 1500,
     weak: ['frost'], resist: ['storm'],
     ranged: true,

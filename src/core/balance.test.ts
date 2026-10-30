@@ -4,6 +4,7 @@ import { Combat } from './combat';
 import { EQUIPMENT_LIST } from './data/equipment';
 import { createStartingParty, fullRestore, xpForLevel } from './party';
 import { Rng } from './rng';
+import { autoSpend } from './skilltree';
 import { makeInventory } from './data/items';
 
 /** A party at `level` wearing the best gear the shop sells by floor index `tier`. */
@@ -12,6 +13,8 @@ function trainedParty(level: number, tier: number) {
   for (const m of party) {
     m.level = level;
     m.xp = xpForLevel(level);
+    m.skills = {};
+    autoSpend(m);
     for (const slot of ['weapon', 'armor'] as const) {
       m[slot] = EQUIPMENT_LIST.filter((e) => e.slot === slot && e.tier <= tier && e.classes.includes(m.classId)).sort((a, b) => b.price - a.price)[0]?.id;
     }

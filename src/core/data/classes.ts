@@ -1,5 +1,11 @@
 import type { ClassId, Row, SkillId, Stats } from '../types';
 
+export interface TreeEntry {
+  skill: SkillId;
+  level: number;
+  requires?: [SkillId, number];
+}
+
 export interface ClassDef {
   id: ClassId;
   name: string;
@@ -8,7 +14,11 @@ export interface ClassDef {
   ranged: boolean;
   base: Stats;
   growth: Stats;
-  skills: { skill: SkillId; level: number }[];
+  /**
+   * The class's skill tree. Each skill can be raised to rank 10 with skill points, once the
+   * adventurer has reached `level` and has `requires` (another skill at some rank).
+   */
+  skills: TreeEntry[];
   color: string;
   description: string;
 }
@@ -24,8 +34,10 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     skills: [
       { skill: 'challenge', level: 1 },
       { skill: 'bulwarkBash', level: 1 },
-      { skill: 'ironFormation', level: 3 },
-      { skill: 'rampartCrash', level: 16 },
+      { skill: 'stoutHeart', level: 1 },
+      { skill: 'ironFormation', level: 3, requires: ['challenge', 2] },
+      { skill: 'ironSkin', level: 5, requires: ['stoutHeart', 2] },
+      { skill: 'rampartCrash', level: 16, requires: ['bulwarkBash', 5] },
     ],
     color: '#d9a441',
     description: 'Shield-bearer of the front line. Draws enemy attacks and shields the party.',
@@ -39,9 +51,11 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     growth: { hp: 8, sp: 2.5, atk: 1.9, def: 1.1, mag: 0.5, res: 0.9, spd: 1.6 },
     skills: [
       { skill: 'twinFang', level: 1 },
-      { skill: 'venomArrow', level: 2 },
-      { skill: 'scatterVolley', level: 3 },
-      { skill: 'galePiercer', level: 18 },
+      { skill: 'keenEye', level: 1 },
+      { skill: 'venomArrow', level: 2, requires: ['twinFang', 1] },
+      { skill: 'scatterVolley', level: 3, requires: ['twinFang', 2] },
+      { skill: 'fleetFoot', level: 5, requires: ['keenEye', 2] },
+      { skill: 'galePiercer', level: 18, requires: ['scatterVolley', 5] },
     ],
     color: '#6fbf73',
     description: 'Swift archer. Fights well from either row and strikes several foes at once.',
@@ -55,10 +69,12 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     growth: { hp: 6.5, sp: 4, atk: 0.8, def: 0.9, mag: 1.7, res: 1.6, spd: 1.0 },
     skills: [
       { skill: 'mend', level: 1 },
-      { skill: 'cleanse', level: 2 },
-      { skill: 'verdantChorus', level: 3 },
-      { skill: 'rekindle', level: 6 },
-      { skill: 'wellspring', level: 18 },
+      { skill: 'gentleHands', level: 1 },
+      { skill: 'cleanse', level: 2, requires: ['mend', 1] },
+      { skill: 'verdantChorus', level: 3, requires: ['mend', 2] },
+      { skill: 'deepWell', level: 4 },
+      { skill: 'rekindle', level: 6, requires: ['cleanse', 2] },
+      { skill: 'wellspring', level: 18, requires: ['verdantChorus', 5] },
     ],
     color: '#8fd3e8',
     description: 'Healer of the back row. Keeps the party standing with mending songs.',
@@ -74,9 +90,11 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'emberRune', level: 1 },
       { skill: 'frostRune', level: 1 },
       { skill: 'stormRune', level: 1 },
-      { skill: 'wildfire', level: 4 },
-      { skill: 'slumberRune', level: 5 },
-      { skill: 'thunderhead', level: 20 },
+      { skill: 'runeLore', level: 1 },
+      { skill: 'deepWell', level: 4 },
+      { skill: 'wildfire', level: 4, requires: ['emberRune', 3] },
+      { skill: 'slumberRune', level: 5, requires: ['frostRune', 2] },
+      { skill: 'thunderhead', level: 20, requires: ['stormRune', 5] },
     ],
     color: '#c58af0',
     description: 'Carver of elemental runes. Fragile, but hits enemy weaknesses hard.',

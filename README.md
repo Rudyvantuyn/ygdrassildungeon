@@ -29,6 +29,15 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Skillpunten (mijlpaal 9)
+
+- Elk level geeft een **skillpunt** (3 op level 1). Punten gaan in de **skillboom** van de klasse; elke skill heeft
+  rank 1 t/m 10. Hogere ranks: meer kracht of genezing, grotere kans op statuseffecten, langere effecten, iets meer SP.
+- Sommige skills vragen een level en een andere skill op een bepaalde rank. **Passieve skills** (◇) verhogen een stat.
+- Punten verdelen in de Oath Hall (**Skills**) of in de dungeon via Pack → **Skill tree**. In de Oath Hall kun je
+  tegen betaling alles **afleren** en opnieuw verdelen. Kaarten met ongebruikte punten tonen een ✦.
+- Oude saves en de computerspeler gebruiken een aanbevolen build (`src/core/skilltree.ts`).
+
 ### De Drafting Table (mijlpaal 8)
 
 - Een **makersgereedschap**, geen spelersfunctie: de knop **Drafting Table** staat alleen op het titelscherm van een
@@ -156,7 +165,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |
 | Elementen | fysiek, vuur (fire), vorst (frost), storm |
-| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead |
+| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead; passief: Stout Heart, Iron Skin, Keen Eye, Fleet Foot, Gentle Hands, Rune Lore, Deep Well |
 | Statuseffecten | Poison, Sleep, Paralysis |
 | Items | Sap Tonic (HP), Tide Draught (veel HP), Spirit Dew (SP), Clearwater (statuseffecten), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
 | Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe, Runehewn Axe, Hrimstring Bow, Frostbirch Rod, Scalehide Mail, Rimeweave Robe, Wyrmtooth Blade, Embersong Bow, Ashroot Rod, Emberscale Plate, Starveil Robe, Saltsteel Blade, Gullwind Bow, Driftwood Rod, Sharkhide Mail, Kelpweave Robe, Tidebreaker Axe, Stormgull Bow, Coralheart Rod, Anchor Plate, Deepscale Mail, Seafoam Robe, Fathom Edge, Wavecaller Bow, Abyss Rod, Leviathan Mail, Tidesong Robe |
