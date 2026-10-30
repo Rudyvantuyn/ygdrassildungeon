@@ -1803,3 +1803,90 @@ table.stats thead th {
   height: 22px;
   vertical-align: middle;
 }
+
+/* ── Fixes from the test round ───────────────────────────────────────────── */
+
+/* Party cards: the name and row on the first line, level and class on their own line below, nothing cut off. */
+.member-head {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+.member-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 17px;
+  line-height: 1.15;
+}
+
+.member-row {
+  order: 2;
+}
+
+.member-head .ailment {
+  order: 3;
+}
+
+.member-class {
+  order: 4;
+  flex: 1 0 100%;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+/* Party status: room for the whole table, gear on one line per slot. */
+.dialog.party-status {
+  width: 1180px;
+}
+
+.stats-wrap {
+  overflow-x: auto;
+}
+
+table.stats td.gear,
+table.stats th.gear {
+  white-space: nowrap;
+}
+
+table.stats tr.reserve td {
+  color: var(--muted);
+}
+
+table.stats tr.divider td {
+  padding-top: 10px;
+  font-family: var(--font-title);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  text-align: left;
+}
+
+/* Story: a Skip button in the corner of the text box. */
+.story-box .story-skip {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 12px;
+  padding: 3px 10px;
+  opacity: 0.75;
+}
+
+/* Map editor: a fixed height, so the drawing area never moves under the pointer. */
+.dialog.map-editor {
+  height: 620px;
+}
+
+/* Phones: text in dialogs large enough to read at half scale. */
+@media (pointer: coarse) {
+  .dialog p,
+  .dialog .menu-desc,
+  .npc-line p,
+  .town-desc,
+  .story-text p {
+    font-size: 19px;
+  }
+  #controls button {
+    font-size: 20px;
+  }
+}

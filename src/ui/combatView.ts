@@ -5,6 +5,7 @@ import type { Game } from '../core/game';
 import { isAlive, knownSkills, memberStats } from '../core/party';
 import { rankOf, skillFor } from '../core/skilltree';
 import { chooseCommands } from '../core/tactics';
+import { pluralName } from '../core/quests';
 import type { Mods } from '../core/combat';
 import type { ModStat } from '../core/types';
 import type { ItemId } from '../core/types';
@@ -100,7 +101,11 @@ export class CombatView {
   async start(): Promise<void> {
     this.syncParty();
     this.renderParty();
-    const names = this.combat.enemies.map((e) => e.name).join(', ');
+    // "2 Boglings and a Duskwing" rather than "Bogling A, Bogling B, Duskwing".
+    const counts = new Map<string, number>();
+    for (const e of this.combat.enemies) counts.set(e.def.name, (counts.get(e.def.name) ?? 0) + 1);
+    const parts = [...counts].map(([name, n]) => (n > 1 ? `${n} ${pluralName(name)}` : name));
+    const names = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}` : parts[0];
     const plural = this.combat.enemies.length > 1;
     this.say(
       this.combat.boss
@@ -354,7 +359,7 @@ export class CombatView {
         onSelect: () => this.setCommand({ kind: 'flee' }),
       },
     ];
-    this.showPanel(`${m.name}`, new ListMenu(items, { onCancel: () => this.previousMember() }), '↑↓ choose · Enter confirm · Esc back');
+    this.showPanel(`${m.name}`, new ListMenu(items, { onCancel: () => this.previousMember(), backRow: false }), '↑↓ choose · Enter confirm · Esc back');
   }
 
   private showSkillMenu(): void {
@@ -550,7 +555,7 @@ export class CombatView {
       ailments: this.partyAilment,
       mods: this.combat.status.map((s) => {
         if (s.mods && Object.keys(s.mods).length) this.host.noticeTip?.('buffs');
-        return modText(s.mods);
+        return modText(s.mods, s.guard > 0);
       }),
       active: this.current >= 0 ? this.current : null,
       owners: this.host.partyOwners,
@@ -584,8 +589,10 @@ export class CombatView {
 }
 
 /** "ATK▲ DEF▼" for the buffs and debuffs on a fighter. */
-function modText(mods: Mods | undefined): string {
-  if (!mods) return '';
+function modText(mods: Mods | undefined, guarded = false): string {
   const names: Record<ModStat, string> = { atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES' };
-  return (Object.keys(mods) as ModStat[]).map((k) => `${names[k]}${mods[k]!.amount > 0 ? '▲' : '▼'}`).join(' ');
+  const parts = (Object.keys(mods ?? {}) as ModStat[]).map((k) => `${names[k]}${mods![k]!.amount > 0 ? '▲' : '▼'}`);
+  // A guard skill (the Bastion's formation, the wolf's guard) shows too.
+  if (guarded) parts.unshift('GUARD');
+  return parts.join(' ');
 }

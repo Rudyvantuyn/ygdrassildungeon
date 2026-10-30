@@ -6,9 +6,9 @@ import { ITEMS } from '../core/data/items';
 import { MATERIALS } from '../core/data/materials';
 import { DIR_NAMES } from '../core/dungeon';
 import { Game, type StepEvent } from '../core/game';
-import { healAmount, healMember, isAlive, knownSkills, memberStats, restoreSp, revive, xpForLevel } from '../core/party';
+import { MAX_LEVEL, healAmount, healMember, isAlive, knownSkills, memberStats, restoreSp, revive, xpForLevel } from '../core/party';
 import { randomSeed } from '../core/rng';
-import type { ItemId, Loot } from '../core/types';
+import type { ItemId, Loot, Member } from '../core/types';
 import { CLASSES } from '../core/data/classes';
 import { CorridorRenderer } from '../render/corridor';
 import { drawMinimap } from '../render/minimap';
@@ -129,11 +129,14 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const controls = el('div', { id: 'controls', className: 'panel' });
     // Act spans both rows; the grid places the rest around it.
     const buttons: [string, string, string?][] = [
-      ['↶', 'q'], ['▲', 'ArrowUp'], ['↷', 'e'], ['Act', ' ', 'act'], ['Pack', 'c'],
-      ['◀', 'ArrowLeft'], ['▼', 'ArrowDown'], ['▶', 'ArrowRight'], ['Map', 'm'],
+      // Top row: side-step, forward, side-step. Bottom row: turn, back, turn.
+      ['⇠', 'q'], ['▲', 'ArrowUp'], ['⇢', 'e'], ['Act', ' ', 'act'], ['Pack', 'c'],
+      ['↶', 'ArrowLeft'], ['▼', 'ArrowDown'], ['↷', 'ArrowRight'], ['Map', 'm'],
     ];
+    const tips: Record<string, string> = { q: 'Step left', e: 'Step right', ArrowUp: 'Forward', ArrowDown: 'Back', ArrowLeft: 'Turn left', ArrowRight: 'Turn right' };
     for (const [label, key, className] of buttons) {
       const b = el('button', { text: label, className });
+      if (tips[key]) b.title = tips[key];
       b.addEventListener('click', () => this.onKey(key));
       controls.appendChild(b);
     }
@@ -163,11 +166,16 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
     window.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      // Text fields keep their keys; sliders and buttons leave them to the menus.
+      if ((e.target instanceof HTMLInputElement && e.target.type !== 'range') || e.target instanceof HTMLTextAreaElement) return;
       if (this.onKey(e.key)) e.preventDefault();
     });
 
     this.swipeControls();
+    // During a story scene a tap anywhere on the picture moves the story on, not just on the text box.
+    this.viewWrap.addEventListener('click', (e) => {
+      if (this.mode === 'story' && this.story && !this.story.box.contains(e.target as Node)) this.storyKey('Enter');
+    });
 
     // Town paintings and portraits are small; fetch them right away.
     preloadTownScenes();
@@ -543,7 +551,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     if (live) {
       items.push({
         label: 'No more tips',
-        description: 'Stop showing tips. You can read them all in the Guidebook, and switch them back on in the options.',
+        description: 'Stop showing tips. You can read them all in the Guidebook, and switch them back on in Settings.',
         onSelect: () => {
           this.game.state.tipsOff = true;
           this.save();
@@ -840,6 +848,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private playLines(lines: StoryLine[], then: () => void): void {
     const box = el('div', { className: 'story-box panel' });
     box.addEventListener('click', () => this.storyKey('Enter'));
+
     this.viewWrap.appendChild(box);
     this.story = { lines, index: 0, shown: 0, then, box };
     this.mode = 'story';
@@ -909,6 +918,13 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     if (line.speaker) text.append(el('div', { className: 'story-speaker', text: line.speaker }));
     text.append(body, el('div', { className: 'story-more', text: st.index < st.lines.length - 1 ? '▼' : '■' }));
     st.box.append(text);
+    // A Skip button ends the scene (Escape does the same on a keyboard).
+    const skip = el('button', { className: 'story-skip', text: 'Skip ▸▸' });
+    skip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.storyKey('Escape');
+    });
+    st.box.append(skip);
     // Typewriter: reveal the line a few letters at a time.
     st.shown = 0;
     const step = () => {
@@ -953,8 +969,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.floorName.textContent = inTown ? 'Lindholm' : g.floorDef.name;
     this.compass.classList.toggle('hidden', inTown);
     this.compass.textContent = DIR_NAMES[g.state.dir];
-    const gold = this.townPanel.querySelector('.town-gold');
-    if (gold) gold.textContent = `${g.state.gold} G`;
+    for (const gold of this.townGrid.querySelectorAll('.town-gold')) gold.textContent = `${g.state.gold} G`;
     const level = g.dangerLevel;
     const color = level < 0.45 ? '#3fb6e8' : level < 0.75 ? '#e8c43f' : '#e8483f';
     this.dangerOrb.style.background = `radial-gradient(circle at 35% 30%, #fff, ${color} 55%, #000 120%)`;
@@ -1053,7 +1068,11 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           this.toast(`Found ${describeFinds(found.finds)}!`);
           if (found.ambush) {
             const ambush = found.ambush;
+            const where = { floor: this.game.state.floor, game: this.game };
             window.setTimeout(() => {
+              // Only if the party is still standing there (not back in town, on another floor, or in a menu).
+              const s = this.game.state;
+              if (this.game !== where.game || s.location !== 'dungeon' || s.floor !== where.floor || this.mode !== 'explore') return;
               this.toast('The noise has drawn monsters!');
               this.handleStep({ type: 'encounter', enemies: ambush });
             }, 900);
@@ -1134,8 +1153,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const lines = el('div', { className: 'rewards' }, [
       el('span', { text: 'Experience' }), el('span', { className: 'v', text: `+${r.xp}` }),
       el('span', { text: 'Gold' }), el('span', { className: 'v', text: `+${r.gold} G` }),
-      ...r.drops.flatMap((id) => [el('span', { text: 'Found' }), el('span', { className: 'v', text: ITEMS[id].name })]),
-      ...r.materials.flatMap((id) => [el('span', { text: 'Material' }), el('span', { className: 'v', text: MATERIALS[id].name })]),
+      ...tally(r.drops).flatMap(([id, n]) => [el('span', { text: 'Found' }), el('span', { className: 'v', text: `${ITEMS[id as ItemId].name}${n > 1 ? ` ×${n}` : ''}` })]),
+      ...tally(r.materials).flatMap(([id, n]) => [el('span', { text: 'Material' }), el('span', { className: 'v', text: `${MATERIALS[id].name}${n > 1 ? ` ×${n}` : ''}` })]),
     ]);
     const levelUps = r.levelUps.map((l) =>
       el('div', { className: 'levelup', text: `${this.game.state.party[l.member].name} reached level ${l.level}! A new skill point to spend.` }),
@@ -1233,7 +1252,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
               this.save();
               this.enterTown();
               this.toast('The feather carries you home. Game saved.');
-            }),
+            }, () => this.openPack()),
         },
         {
           label: 'Skill tree',
@@ -1247,7 +1266,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'Settings', description: 'Sound, battle and text speed, tips.', onSelect: () => this.settings(() => this.openPack()) },
         this.trial
           ? { label: 'End the test', description: 'Back to the drafting table.', onSelect: () => this.endTrial() }
-          : { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.showTitle() },
+          : { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.confirm('Quit to title', 'Return to the title screen? Anything since your last save is lost.', () => this.showTitle(), () => this.openPack()) },
         { label: 'Close', onSelect: close },
       ],
       { onCancel: close },
@@ -1281,7 +1300,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
               this.packSkills();
             };
             if (skill.target === 'allAllies') cast(party.flatMap((p, i) => (isAlive(p) ? [i] : [])));
-            else this.pickAlly(`${skill.name} on whom?`, (t) => cast([t]), () => this.packSkills(), skill.kind === 'revive');
+            else this.pickAlly(`${skill.name} on whom?`, (t) => cast([t]), () => this.packSkills(), skill.kind === 'revive', skill.kind === 'revive' ? undefined : 'hp');
           },
         });
       }
@@ -1293,7 +1312,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private packItems(): void {
     const party = this.game.state.party;
     const inv = this.game.state.inventory;
-    const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].effect !== 'warp' && ITEMS[id].effect !== 'token');
+    // Ailments only exist in a fight, so cures are left out here; feathers and tokens have their own uses.
+    const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => !['warp', 'token', 'cure'].includes(ITEMS[id].effect));
     const items: MenuItem[] = usable.map((id) => ({
       label: ITEMS[id].name,
       detail: `×${inv[id] ?? 0}`,
@@ -1310,7 +1330,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           floater(this.floaters, a.x, a.y, `+${amount}${def.effect === 'sp' ? ' SP' : ''}`, 'heal');
           this.updateHud();
           this.packItems();
-        }, () => this.packItems(), ITEMS[id].effect === 'revive'),
+        }, () => this.packItems(), ITEMS[id].effect === 'revive', ITEMS[id].effect === 'sp' ? 'sp' : ITEMS[id].effect === 'hp' ? 'hp' : undefined),
     }));
     this.subMenu('Items', items, () => this.openPack());
   }
@@ -1351,7 +1371,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       input.style.setProperty('--fill', `${input.value}%`);
       input.addEventListener('input', () => set(Number(input.value)));
       input.addEventListener('change', () => kind === 'sfx' && audio.play('chest'));
-      input.addEventListener('keydown', (e) => e.stopPropagation());
+      // After a drag the slider gives the keyboard back to the menu.
+      input.addEventListener('change', () => input.blur());
       return {
         control: el('div', { className: 'slider-wrap' }, [input, value]),
         onAdjust: (step: -1 | 1) => {
@@ -1414,30 +1435,41 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
   partyStatus(back: () => void): void {
     const gear = (id?: string) => (id ? EQUIPMENT[id]?.name ?? '—' : '—');
-    const rows = this.game.state.party.map((m) => {
+    const row = (m: Member, reserve = false) => {
       const s = memberStats(m);
-      const next = xpForLevel(m.level + 1) - m.xp;
-      return `<tr><td>${m.name}</td><td>${CLASSES[m.classId].name}</td><td>${m.level}</td><td>${m.hp}/${s.hp}</td><td>${m.sp}/${s.sp}</td><td>${s.atk}</td><td>${s.def}</td><td>${s.mag}</td><td>${s.res}</td><td>${s.spd}</td><td>${next}</td><td class="gear">${gear(m.weapon)}<br>${gear(m.armor)}</td></tr>`;
-    });
+      const next = m.level >= MAX_LEVEL ? '—' : String(xpForLevel(m.level + 1) - m.xp);
+      return `<tr class="${reserve ? 'reserve' : ''}"><td class="name">${escapeHtml(m.name)}</td><td>${CLASSES[m.classId].name}</td><td>${m.level}</td><td>${m.hp}/${s.hp}</td><td>${m.sp}/${s.sp}</td><td>${s.atk}</td><td>${s.def}</td><td>${s.mag}</td><td>${s.res}</td><td>${s.spd}</td><td>${next}</td><td class="gear">${gear(m.weapon)}</td><td class="gear">${gear(m.armor)}</td></tr>`;
+    };
+    const st = this.game.state;
     const table = el('table', { className: 'stats' });
-    table.innerHTML = `<thead><tr><th>Name</th><th>Class</th><th>Lv</th><th>HP</th><th>SP</th><th>ATK</th><th>DEF</th><th>MAG</th><th>RES</th><th>SPD</th><th>Next</th><th class="gear">Gear</th></tr></thead><tbody>${rows.join('')}</tbody>`;
+    table.innerHTML =
+      '<thead><tr><th>Name</th><th>Class</th><th>Lv</th><th>HP</th><th>SP</th><th>ATK</th><th>DEF</th><th>MAG</th><th>RES</th><th>SPD</th><th title="Experience needed for the next level">XP to next</th><th class="gear">Weapon</th><th class="gear">Armour</th></tr></thead>' +
+      `<tbody>${st.party.map((m) => row(m)).join('')}${st.reserve.length ? `<tr class="divider"><td colspan="13">In the Oath Hall (reserve)</td></tr>${st.reserve.map((m) => row(m, true)).join('')}` : ''}</tbody>`;
     const menu = new ListMenu([{ label: 'Back', onSelect: back }], { onCancel: back });
-    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Party' }), table, menu.el]), menu);
+    this.openOverlay(el('div', { className: 'panel dialog party-status' }, [el('h2', { text: 'Party' }), el('div', { className: 'stats-wrap' }, [table]), menu.el]), menu);
   }
 
   /** `fallen`: pick among the fallen (for reviving) instead of the living. */
-  private pickAlly(title: string, pick: (i: number) => void, back: () => void, fallen = false): void {
-    const items = this.game.state.party.map((m, i) => ({
+  /**
+   * Choose a party member. `fallen`: pick among the fallen (for reviving). `needs`: only those missing HP or SP,
+   * so a heal is never wasted on someone who is already full.
+   */
+  private pickAlly(title: string, pick: (i: number) => void, back: () => void, fallen = false, needs?: 'hp' | 'sp'): void {
+    const party = this.game.state.party;
+    const full = (m: Member) => (needs === 'hp' ? m.hp >= memberStats(m).hp : needs === 'sp' ? m.sp >= memberStats(m).sp : false);
+    const eligible = (m: Member) => isAlive(m) !== fallen && !full(m);
+    const items = party.map((m, i) => ({
       label: m.name,
       detail: isAlive(m) ? `${m.hp}/${memberStats(m).hp} HP · ${m.sp} SP` : 'fallen',
-      disabled: isAlive(m) === fallen,
+      description: !isAlive(m) && !fallen ? 'Fallen: wake them first.' : full(m) ? `Already at full ${needs === 'sp' ? 'SP' : 'HP'}.` : '',
+      disabled: !eligible(m),
       onSelect: () => pick(i),
     }));
-    this.subMenu(title, items, back);
+    this.subMenu(title, items, back, Math.max(0, party.findIndex(eligible)));
   }
 
-  private subMenu(title: string, items: MenuItem[], back: () => void): void {
-    const menu = new ListMenu(items, { onCancel: back });
+  private subMenu(title: string, items: MenuItem[], back: () => void, start = 0): void {
+    const menu = new ListMenu(items, { onCancel: back, startIndex: start });
     const desc = el('div', { className: 'menu-desc' });
     menu.describeInto(desc);
     this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: title }), menu.el, desc]), menu);
@@ -1571,4 +1603,16 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 function describeLoot(loot: Loot): string {
   if ('gold' in loot) return `${loot.gold} gold`;
   return `${loot.qty}× ${ITEMS[loot.item].name}`;
+}
+
+/** Text made safe to put inside HTML (player-chosen names). */
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+}
+
+/** [id, count] pairs for a list with repeats, in order of first appearance. */
+function tally(ids: string[]): [string, number][] {
+  const counts = new Map<string, number>();
+  for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
+  return [...counts];
 }

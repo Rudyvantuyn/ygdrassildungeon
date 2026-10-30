@@ -284,6 +284,8 @@ export class Hornstone {
 
   private signIn(): void {
     this.form('Sign in', '', [{ label: 'E-mail', type: 'email' }, { label: 'Password', type: 'password' }], 'Sign in', ([email, password], fail) => {
+      if (!/^\S+@\S+\.\S+$/.test(email.trim())) return fail('Please fill in your e-mail address.');
+      if (!password) return fail('Please fill in your password.');
       void online
         .signIn(email, password)
         .then(() => this.main())
@@ -294,11 +296,13 @@ export class Hornstone {
   private signUp(): void {
     this.form(
       'Create an account',
-      'Your player name is what others see at the Hornstone. By creating an account you agree to the privacy and terms page (title screen).',
+      'Your player name is what others see at the Hornstone. By creating an account you agree to Privacy & Terms (on the title screen and under System).',
       [{ label: 'Player name', max: 16 }, { label: 'E-mail', type: 'email' }, { label: 'Password (6+ characters)', type: 'password' }],
       'Create',
       ([name, email, password], fail) => {
         if (!name.trim()) return fail('Choose a player name.');
+        if (!/^\S+@\S+\.\S+$/.test(email.trim())) return fail('Please fill in a valid e-mail address.');
+        if (password.length < 6) return fail('The password needs at least 6 characters.');
         void online
           .signUp(email, password, name)
           .then((confirm) =>

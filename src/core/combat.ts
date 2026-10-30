@@ -280,6 +280,11 @@ export class Combat {
           events.push({ type: 'info', text: `${m.name} doesn't have enough SP.` });
           return;
         }
+        if (skill.kind === 'revive' && this.party[cmd.target] && isAlive(this.party[cmd.target])) {
+          // Someone else got them up first: no SP is spent on a wake-up that isn't needed.
+          events.push({ type: 'info', text: `${this.party[cmd.target].name} is already back on their feet.` });
+          return;
+        }
         m.sp -= skill.sp;
         events.push({ type: 'sp', target: i, sp: m.sp });
         if (skill.hpCost) {

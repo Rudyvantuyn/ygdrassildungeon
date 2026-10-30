@@ -23,12 +23,13 @@ import {
   restAtInn,
   statDelta,
 } from '../core/town';
-import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow, oathCost, FOUNDING_OATHS } from '../core/guild';
+import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow, oathCost, FOUNDING_OATHS, cleanName } from '../core/guild';
 import type { ClassId, Member, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import { npcFromName, npcSays } from './npc';
+import { bindNameField, suggestName } from './founding';
 
 export interface TownHost {
   game: Game;
@@ -187,7 +188,7 @@ export class TownView {
         { label: 'How to Play', description: 'Controls and tips.', onSelect: () => this.host.showHelp(() => this.system()) },
         { label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.host.showFeedback(() => this.system()) },
         { label: 'Privacy & Terms', description: 'What the game stores about you, and the rules of play (opens a new page).', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
-        { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onSelect: () => this.host.showTitle() },
+        { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onSelect: () => this.host.confirm('Quit to title', 'Return to the title screen? Anything since your last save is lost.', () => this.host.showTitle(), () => this.system()) },
         { label: 'Back', onSelect: back },
       ],
       { onCancel: back },
@@ -367,21 +368,19 @@ export class TownView {
         return;
       }
       this.host.updateHud();
-      this.host.toast(`${input.value.trim()} the ${CLASSES[classId].name} has sworn the oath.`);
+      this.host.toast(`${cleanName(input.value)} the ${CLASSES[classId].name} has sworn the oath.`);
       this.hall(0);
     };
-    input.addEventListener('keydown', (e) => {
-      e.stopPropagation();
-      if (e.key === 'Enter') submit();
-      if (e.key === 'Escape') this.chooseClass();
-    });
+    const taken = [...this.game.state.party, ...this.game.state.reserve].map((m) => m.name);
     const menu = new ListMenu(
       [
         { label: 'Swear the oath', onSelect: submit },
+        { label: 'Suggest a name', onSelect: () => { suggestName(input, taken); error.textContent = ''; } },
         { label: 'Back', onSelect: () => this.chooseClass() },
       ],
       { onCancel: () => this.chooseClass() },
     );
+    bindNameField(input, menu, submit, () => this.chooseClass());
     this.dialog(`A new ${CLASSES[classId].name}`, [el('p', { text: 'What is your name, adventurer?' }), el('p', { className: 'gold-line', text: `The oath costs ${oathText(this.game)}.` }), input, error], menu);
     input.focus();
   }
@@ -543,7 +542,7 @@ export class TownView {
     const menu = new ListMenu(
       [
         { label: 'Sell one', detail: `${price} G`, onSelect: sell(1) },
-        { label: `Sell all ${n}`, detail: `${price * n} G`, onSelect: sell(n) },
+        ...(n > 1 ? [{ label: `Sell all ${n}`, detail: `${price * n} G`, onSelect: sell(n) }] : []),
         { label: 'Back', onSelect: () => this.shopSell(listIndex) },
       ],
       { onCancel: () => this.shopSell(listIndex) },

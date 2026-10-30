@@ -227,7 +227,10 @@ function friendly(message: string): string {
   if (/password/i.test(message) && /6|characters|short/i.test(message)) return 'The password needs at least 6 characters.';
   if (/email not confirmed/i.test(message)) return 'Please confirm your e-mail first (check your inbox).';
   if (/rate limit/i.test(message)) return 'Too many attempts. Please wait a few minutes.';
-  return message;
+  if (/failed to fetch|network|load failed/i.test(message)) return 'Could not reach the Hornstone. Check your connection and try again.';
+  if (/missing email|email.*required|validate email|invalid.*email/i.test(message)) return 'Please fill in a valid e-mail address.';
+  if (/password.*(required|missing)|missing password/i.test(message)) return 'Please fill in your password.';
+  return 'Something went wrong at the Hornstone. Please try again in a moment.';
 }
 
 export const online = new Online();

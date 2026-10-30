@@ -23,6 +23,30 @@ const NAMES = [
   'Nanna', 'Orm', 'Ragna', 'Sigurd', 'Solvei', 'Tove', 'Ulf', 'Vigdis', 'Yngvar', 'Hakon', 'Ingrid', 'Leif',
 ];
 
+/** Fills `input` with a free suggested name (not taken by anyone in `taken`). */
+export function suggestName(input: HTMLInputElement, taken: string[]): void {
+  const free = NAMES.filter((n) => !taken.some((t) => t.toLowerCase() === n.toLowerCase()));
+  input.value = free[Math.floor(Math.random() * free.length)] ?? '';
+  input.focus();
+}
+
+/**
+ * Keys in a name field: Enter swears the oath, Escape goes back, ↑/↓ leave the field for the menu below
+ * (and come back to it at the top), so every option stays reachable from the keyboard.
+ */
+export function bindNameField(input: HTMLInputElement, menu: ListMenu, submit: () => void, back: () => void): void {
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') submit();
+    else if (e.key === 'Escape') back();
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      input.blur();
+      menu.focus(e.key === 'ArrowDown' ? 1 : -1);
+    }
+  });
+}
+
 export class Founding {
   private members: Member[] = [];
 
@@ -77,10 +101,16 @@ export class Founding {
         disabled: n === 0,
         onSelect: () => this.finish(),
       },
-      { label: 'Back to the title', onSelect: () => this.cancel() },
+      { label: 'Back to the title', onSelect: () => this.leave() },
     ];
-    const menu = new ListMenu(items, { onCancel: () => this.cancel(), startIndex: start || (n < FOUNDING_OATHS ? n : n + 1) });
+    const menu = new ListMenu(items, { onCancel: () => this.leave(), startIndex: start || (n < FOUNDING_OATHS ? n : n + 1) });
     this.dialog('The Oath Hall', [npcSays('brynja', say)], menu);
+  }
+
+  /** Back to the title; asks first when adventurers have already sworn. */
+  private leave(): void {
+    if (!this.members.length) return this.cancel();
+    this.host.confirm('Back to the title', `Leave the Oath Hall? The ${this.members.length} sworn so far will not be kept.`, () => this.cancel(), () => this.hall());
   }
 
   private release(i: number): void {
@@ -97,8 +127,8 @@ export class Founding {
       const c = CLASSES[id];
       return {
         label: c.name,
-        detail: c.row === 'front' ? 'front row' : 'back row',
-        description: `${c.description}\n${c.row === 'front' ? 'Fights in the front row: takes the hits.' : 'Works from the back row: safer, but weaker with weapons.'}`,
+        detail: c.row === 'front' ? 'starts in front' : 'starts in back',
+        description: `${c.description}\n${c.row === 'front' ? 'Starts in the front row, where the blows land.' : 'Starts in the back row: safer, but weapons hit weaker there (bows excepted).'} The row can be changed in the Oath Hall.`,
         onSelect: () => this.chooseName(id),
       };
     });
@@ -121,15 +151,9 @@ export class Founding {
       this.hall();
     };
     const suggest = () => {
-      const free = NAMES.filter((n) => !this.members.some((m) => m.name === n));
-      input.value = free[Math.floor(Math.random() * free.length)] ?? '';
+      suggestName(input, this.members.map((m) => m.name));
       error.textContent = '';
     };
-    input.addEventListener('keydown', (e) => {
-      e.stopPropagation();
-      if (e.key === 'Enter') submit();
-      if (e.key === 'Escape') this.chooseClass();
-    });
     const menu = new ListMenu(
       [
         { label: 'Swear the oath', onSelect: submit },
@@ -138,6 +162,7 @@ export class Founding {
       ],
       { onCancel: () => this.chooseClass() },
     );
+    bindNameField(input, menu, submit, () => this.chooseClass());
     this.dialog(`A new ${CLASSES[classId].name}`, [el('p', { text: 'What is your name, adventurer?' }), input, error], menu, false);
     input.focus();
   }

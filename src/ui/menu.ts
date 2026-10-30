@@ -15,6 +15,8 @@ export interface MenuItem {
 
 export interface MenuOptions {
   onCancel?: () => void;
+  /** Set false where a visible Back row would be in the way (the fight's command menus). */
+  backRow?: boolean;
   /** Element that shows the focused item's description. */
   descriptionEl?: HTMLElement;
   startIndex?: number;
@@ -23,16 +25,24 @@ export interface MenuOptions {
 /** Vertical list menu driven by arrow keys / Enter / Escape, or by pointer. */
 export class ListMenu {
   readonly el: HTMLElement;
+  private readonly items: MenuItem[];
   private index = 0;
 
   constructor(
-    private readonly items: MenuItem[],
+    items: MenuItem[],
     private opts: MenuOptions = {},
   ) {
+    // A menu that can be left with Escape also gets a Back row, unless it already has a way out.
+    const exits = /^(back|leave|close|done|not yet|cancel|no|keep|got it)\b/i;
+    if (opts.onCancel && opts.backRow !== false && !items.some((it) => exits.test(it.label))) {
+      const cancel = opts.onCancel;
+      items = [...items, { label: 'Back', onSelect: cancel }];
+    }
+    this.items = items;
     this.el = document.createElement('div');
     this.el.className = 'menu';
-    this.index = Math.min(opts.startIndex ?? 0, Math.max(0, items.length - 1));
-    items.forEach((item, i) => {
+    this.index = Math.min(opts.startIndex ?? 0, Math.max(0, this.items.length - 1));
+    this.items.forEach((item, i) => {
       const row = document.createElement('div');
       row.className = 'menu-item' + (item.disabled ? ' disabled' : '');
       row.innerHTML = `<span></span>${item.detail && !item.control ? '<span class="detail"></span>' : ''}`;

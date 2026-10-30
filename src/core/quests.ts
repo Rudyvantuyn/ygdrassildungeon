@@ -74,14 +74,21 @@ export function turnInQuest(game: Game, id: string): boolean {
 export function questGoal(def: QuestDef): string {
   switch (def.kind) {
     case 'hunt':
-      return `Defeat ${def.qty} ${ENEMIES[def.target as string].name}`;
+      return def.qty > 1 ? `Defeat ${def.qty} ${pluralName(ENEMIES[def.target as string].name)}` : `Defeat a ${ENEMIES[def.target as string].name}`;
     case 'gather':
-      return `Bring ${def.qty} ${MATERIALS[def.target as string].name}`;
+      return def.qty > 1 ? `Bring ${def.qty} ${pluralName(MATERIALS[def.target as string].name)}` : `Bring a ${MATERIALS[def.target as string].name}`;
     case 'reach':
       return `Reach ${FLOORS[def.target as number].name}`;
     case 'boss':
-      return `Defeat ${ENEMIES[def.target as string].name}`;
+      return `Defeat ${ENEMIES[def.target as string].name.replace(/^The /, 'the ')}`;
   }
+}
+
+/** English plural of a name ("Bogling" → "Boglings", "Briar Quill" → "Briar Quills"); names already plural stay. */
+export function pluralName(name: string): string {
+  if (/(s|x|ch|sh)$/i.test(name)) return /ss$/i.test(name) ? `${name}es` : name;
+  if (/[^aeiou]y$/i.test(name)) return `${name.slice(0, -1)}ies`;
+  return `${name}s`;
 }
 
 export function rewardText(def: QuestDef): string {

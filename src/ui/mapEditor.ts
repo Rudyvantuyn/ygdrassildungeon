@@ -8,7 +8,7 @@ type Tool = 'floor' | 'wall' | 'erase' | MarkId;
 
 const TOOLS: { id: Tool; label: string; glyph: string; color: string }[] = [
   { id: 'floor', label: 'Floor', glyph: '■', color: '#d8c9a4' },
-  { id: 'wall', label: 'Wall', glyph: '■', color: '#5a7684' },
+  { id: 'wall', label: 'Wall', glyph: '■', color: '#8a6a44' },
   { id: 'erase', label: 'Erase', glyph: '⌫', color: '#e8e2d0' },
   ...(Object.keys(MARKS) as MarkId[]).map((id) => ({ id, label: MARKS[id].label, glyph: MARKS[id].glyph, color: MARKS[id].color })),
 ];
@@ -57,7 +57,7 @@ export class MapEditor {
     const tools = el('div', { className: 'map-tools' });
     TOOLS.forEach((t, i) => {
       const b = el('button', { className: 'map-tool' });
-      b.innerHTML = `<span class="glyph"></span><span class="name"></span><span class="key">${i + 1}</span>`;
+      b.innerHTML = `<span class="glyph"></span><span class="name"></span><span class="key">${(i + 1) % 10}</span>`;
       const glyph = b.querySelector('.glyph') as HTMLElement;
       if (t.id in MARK_ICONS) {
         // Marks show the same painted icon as on the map.
@@ -106,7 +106,7 @@ export class MapEditor {
       this.noteInput,
       el('div', {
         className: 'cmd-hint',
-        text: 'Click or drag to draw · Click a mark again to remove it · Arrows move the cursor · Space draws · 1–9 pick a tool · N writes a note',
+        text: 'Click or drag to draw · Click a mark again to remove it · Arrows move the cursor · Space draws · 1–9 and 0 pick a tool · N writes a note',
       }),
       close,
     ]);
@@ -155,7 +155,8 @@ export class MapEditor {
         this.onClose();
         return true;
     }
-    const n = Number(k);
+    // Keys 1–9 and 0 (the tenth tool).
+    const n = k === '0' ? 10 : Number(k);
     if (Number.isInteger(n) && n >= 1 && n <= TOOLS.length) {
       this.selectTool(TOOLS[n - 1].id);
       return true;
