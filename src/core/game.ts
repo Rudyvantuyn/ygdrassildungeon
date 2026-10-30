@@ -1,4 +1,3 @@
-import type { Difficulty } from './difficulty';
 import { emptyChart, setTerrain, type Chart, type ChartMode } from './chart';
 import { Combat, type CombatSnapshot } from './combat';
 import { FLOORS, type FloorDef } from './data/floors';
@@ -9,7 +8,7 @@ import { createStartingParty, fullRestore, isAlive, xpForLevel } from './party';
 import { EQUIPMENT_LIST } from './data/equipment';
 import { autoSpend, rankOf } from './skilltree';
 import { GATHER_AMBUSH, GATHER_KINDS, GATHER_TABLES, GATHER_USES, type GatherKind } from './data/gathering';
-import { FLOORS_PER_CHAPTER } from './data/chapters';
+import { FLOORS_PER_CHAPTER, startFloors } from './data/chapters';
 import { STORY } from './data/story';
 import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
 import { Rng } from './rng';
@@ -58,8 +57,6 @@ export interface GameState {
   quests: Record<string, QuestState>;
   /** Story scenes already shown. */
   story: string[];
-  /** How hard fights are (standard when missing). */
-  difficulty?: Difficulty;
   /** Choices made at the end of story scenes: scene id → option id. */
   choices?: Record<string, string>;
   /** Adventurers ever sworn in at the Oath Hall (the first few are free). */
@@ -137,6 +134,8 @@ export class Game {
     state.quests ??= {};
     state.story ??= [];
     state.choices ??= {};
+    // Difficulty settings existed briefly; everyone plays by the same rules (fair for expeditions).
+    delete (state as { difficulty?: unknown }).difficulty;
     state.oaths ??= state.party.length + state.reserve.length;
     state.tips ??= [];
     // Saves from before skill points: give everyone the recommended build for their level.
@@ -358,9 +357,13 @@ export class Game {
     this.markExplored();
   }
 
-  /** Enter the Rootdeep at the start of a floor the party has already reached. */
+  /**
+   * Enter the Rootdeep at the start of a floor. From town (`unlock` false) only the first floor of a chapter the
+   * party has reached is allowed; the stairs (`unlock` true) lead anywhere.
+   */
   enterFloor(floor: number, unlock = false): void {
     if (floor < 0 || floor >= this.floors.length) return;
+    if (!unlock && this.floors === FLOORS && !startFloors(this.state.deepest).includes(floor)) return;
     if (!unlock && floor > this.state.deepest) return;
     this.state.location = 'dungeon';
     this.state.floor = floor;
@@ -392,7 +395,7 @@ export class Game {
   }
 
   startCombat(enemies: string[]): Combat {
-    return new Combat(this.state.party, enemies, this.state.inventory, this.rng, { difficulty: this.state.difficulty });
+    return new Combat(this.state.party, enemies, this.state.inventory, this.rng);
   }
 
   /** Index of the active prowler standing on (x, y), or -1. */
@@ -407,11 +410,11 @@ export class Game {
 
   startProwlerCombat(index: number): Combat {
     this.state.fighting = index;
-    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true, difficulty: this.state.difficulty });
+    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true });
   }
 
   startBossCombat(): Combat {
-    return new Combat(this.state.party, this.floorDef.boss ?? [], this.state.inventory, this.rng, { boss: true, difficulty: this.state.difficulty });
+    return new Combat(this.state.party, this.floorDef.boss ?? [], this.state.inventory, this.rng, { boss: true });
   }
 
   /** Call after a combat is over, with the finished combat. */

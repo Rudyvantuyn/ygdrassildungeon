@@ -7,6 +7,10 @@ export interface MenuItem {
   disabled?: boolean;
   onSelect: () => void;
   onFocus?: () => void;
+  /** A control shown at the right of the row (a slider, a set of choices) instead of `detail`. */
+  control?: HTMLElement;
+  /** Left/right on this row: change its value. */
+  onAdjust?: (step: -1 | 1) => void;
 }
 
 export interface MenuOptions {
@@ -31,17 +35,32 @@ export class ListMenu {
     items.forEach((item, i) => {
       const row = document.createElement('div');
       row.className = 'menu-item' + (item.disabled ? ' disabled' : '');
-      row.innerHTML = `<span></span>${item.detail ? '<span class="detail"></span>' : ''}`;
+      row.innerHTML = `<span></span>${item.detail && !item.control ? '<span class="detail"></span>' : ''}`;
       row.children[0].textContent = item.label;
-      if (item.detail) row.children[1].textContent = item.detail;
+      if (item.control) {
+        row.classList.add('has-control');
+        row.append(item.control);
+      } else if (item.detail) row.children[1].textContent = item.detail;
       row.addEventListener('pointerenter', () => this.focus(i));
-      row.addEventListener('click', () => {
+      row.addEventListener('click', (e) => {
         this.focus(i);
+        // Clicks on a row's own control (a slider) only change that control.
+        if (item.control?.contains(e.target as Node)) return;
         this.select();
       });
       this.el.appendChild(row);
     });
     this.focus(this.index);
+    this.el.addEventListener('scroll', () => this.markOverflow(), { passive: true });
+    // Sizes are only known once the menu is on screen.
+    requestAnimationFrame(() => this.markOverflow());
+  }
+
+  /** Fades the top or bottom edge of a scrolling menu when there is more to see there. */
+  private markOverflow(): void {
+    const el = this.el;
+    el.classList.toggle('more-above', el.scrollTop > 2);
+    el.classList.toggle('more-below', el.scrollTop + el.clientHeight < el.scrollHeight - 2);
   }
 
   /** Shows the focused item's description in `target` from now on. */
@@ -58,6 +77,13 @@ export class ListMenu {
     if (this.items.length === 0) return;
     this.index = (i + this.items.length) % this.items.length;
     [...this.el.children].forEach((row, j) => row.classList.toggle('selected', j === this.index));
+    // Long menus scroll inside their dialog: keep the chosen row in view.
+    const row = this.el.children[this.index] as HTMLElement | undefined;
+    if (row && this.el.scrollHeight > this.el.clientHeight) {
+      if (row.offsetTop < this.el.scrollTop) this.el.scrollTop = row.offsetTop;
+      else if (row.offsetTop + row.offsetHeight > this.el.scrollTop + this.el.clientHeight) this.el.scrollTop = row.offsetTop + row.offsetHeight - this.el.clientHeight;
+    }
+    this.markOverflow();
     const item = this.items[this.index];
     if (this.opts.descriptionEl) this.opts.descriptionEl.textContent = item.description ?? '';
     item.onFocus?.();
@@ -89,6 +115,17 @@ export class ListMenu {
         this.focus(this.index + 1);
         audio.play('menuMove');
         return true;
+      case 'ArrowLeft':
+      case 'ArrowRight':
+      case 'a':
+      case 'A':
+      case 'd':
+      case 'D': {
+        const adjust = this.items[this.index]?.onAdjust;
+        if (!adjust) return false;
+        adjust(key === 'ArrowLeft' || key === 'a' || key === 'A' ? -1 : 1);
+        return true;
+      }
       case 'Enter':
       case ' ':
       case 'z':

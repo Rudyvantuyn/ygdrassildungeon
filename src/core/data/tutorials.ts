@@ -31,6 +31,7 @@ export const TIPS: TipDef[] = [
       'Move with the arrow keys or the buttons. On a phone you can also swipe the view: up to walk, sideways to turn.',
       'The danger orb grows brighter as you walk. When it burns, a fight is close.',
       'The roots of the Great Tree always lead home: the stairs up take you back toward Lindholm. Turning back in time is no shame.',
+      'But every descent starts at the beginning of a chapter. Only when its guardian falls can you begin from the next one.',
       'Use Act to open chests, drink from springs and gather. Pack holds your items, skills and options.',
     ],
   },

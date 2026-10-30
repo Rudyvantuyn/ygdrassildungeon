@@ -43,6 +43,10 @@ Add new names there and keep the glossary in sync.
 - **A new game starts by founding the party**: the player swears in their own adventurers (up to four, free) with
   Brynja's guidance. After that every new adventurer costs rising gold **and an Oath Token** (found on bosses,
   prowlers and in a few chests), so the roster cannot grow endlessly.
+- **Descents start at a chapter's first floor** (floor 1, 6, 11, …), never mid-chapter. The next chapter opens once
+  the previous chapter's final boss is beaten (its stairs are behind the boss). Expeditions follow the same rule
+  (`startFloors` / `startFloorFor` in `src/core/data/chapters.ts`). The word "stratum" is an EO term: say "chapter".
+- **No difficulty setting**: everyone plays by the same rules, so expeditions stay fair.
 - **The game is meant to be grindy and challenging**: XP and gold come slowly (`XP_RATE`, `GOLD_RATE` in combat.ts);
   the balance tests check that rushing fails and steady training wins.
 - **Lots of tutorials**: short tips by the townsfolk the first time something comes up (`src/core/data/tutorials.ts`),

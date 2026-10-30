@@ -31,8 +31,7 @@ import { GATHER_KINDS } from '../core/data/gathering';
 import { describeFinds } from '../core/expedition';
 import { unspentPoints } from '../core/skilltree';
 import { toFloorDef, type FloorDesign } from '../core/designer';
-import { DIFFICULTIES, DIFFICULTY_IDS } from '../core/difficulty';
-import { BATTLE_SPEED_NAMES, prefs, setPref, TEXT_SPEED_NAMES, TEXT_SPEED_STEP, type BattleSpeed, type TextSpeed } from './prefs';
+import { prefs, setPref, TEXT_SPEED_NAMES, TEXT_SPEED_STEP, type BattleSpeed, type TextSpeed } from './prefs';
 import { sendReport, type ReportKind } from '../net/reports';
 import { choose, markSeen, pendingScene, STORY, type StoryLine, type StoryScene } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
@@ -575,7 +574,6 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       pos: [s.x, s.y],
       levels: s.party.map((m) => `${m.classId} ${m.level}`),
       battles: s.battles,
-      difficulty: s.difficulty ?? 'normal',
       coop: !!this.coop,
       screen: `${window.innerWidth}x${window.innerHeight}`,
     };
@@ -1219,7 +1217,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     };
     const menu = new ListMenu(
       [
-        { label: 'Skills', description: 'Use a healing skill.', onSelect: () => this.packSkills() },
+        { label: 'Use a skill', description: 'Use a healing skill outside of a fight.', onSelect: () => this.packSkills() },
         { label: 'Items', description: 'Use an item.', onSelect: () => this.packItems() },
         { label: 'Party', description: 'View stats and equipment.', onSelect: () => this.partyStatus(() => this.openPack()) },
         { label: 'Materials', description: 'Monster parts to sell in town.', onSelect: () => this.materialsList(() => this.openPack()) },
@@ -1246,7 +1244,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(() => this.openPack()) },
         { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(() => this.openPack()) },
         { label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.showFeedback(() => this.openPack()) },
-        { label: 'Settings', description: 'Sound, battle and text speed, difficulty, tips.', onSelect: () => this.settings(() => this.openPack()) },
+        { label: 'Settings', description: 'Sound, battle and text speed, tips.', onSelect: () => this.settings(() => this.openPack()) },
         this.trial
           ? { label: 'End the test', description: 'Back to the drafting table.', onSelect: () => this.endTrial() }
           : { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.showTitle() },
@@ -1330,85 +1328,88 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   /** Music and effect volume, each cycling through five steps. */
-  /** Sound, speeds, and (for the save in hand) difficulty and tips. */
+  /** Volume sliders, battle and text speed, and (for the save in hand) tips. */
   settings(back: () => void, start = 0): void {
-    const steps = [0, 0.25, 0.5, 0.75, 1];
-    const names = ['Off', 'Low', 'Medium', 'High', 'Full'];
-    const label = (v: number) => names[steps.reduce((best, s, i) => (Math.abs(s - v) < Math.abs(steps[best] - v) ? i : best), 0)];
-    const next = (v: number) => steps[(steps.findIndex((s) => Math.abs(s - v) < 0.01) + 1) % steps.length];
-    const again = (i: number) => () => this.settings(back, i);
     const s = this.game.state;
     const solo = !this.coop && !this.trial;
-    const textSpeeds = Object.keys(TEXT_SPEED_NAMES) as TextSpeed[];
+    /** A 0–100% slider; keys move it in steps of 5. */
+    const slider = (kind: 'music' | 'sfx') => {
+      const input = el('input', { className: 'slider' });
+      input.type = 'range';
+      input.min = '0';
+      input.max = '100';
+      input.step = '5';
+      input.value = String(Math.round(audio.settings[kind] * 100));
+      const value = el('span', { className: 'slider-value', text: `${input.value}%` });
+      const set = (pct: number) => {
+        const v = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
+        input.value = String(v);
+        value.textContent = `${v}%`;
+        input.style.setProperty('--fill', `${v}%`);
+        audio.setVolume(kind, v / 100);
+      };
+      input.style.setProperty('--fill', `${input.value}%`);
+      input.addEventListener('input', () => set(Number(input.value)));
+      input.addEventListener('change', () => kind === 'sfx' && audio.play('chest'));
+      input.addEventListener('keydown', (e) => e.stopPropagation());
+      return {
+        control: el('div', { className: 'slider-wrap' }, [input, value]),
+        onAdjust: (step: -1 | 1) => {
+          set(Number(input.value) + step * 5);
+          if (kind === 'sfx') audio.play('menuMove');
+        },
+      };
+    };
+    /** A row of choices; the chosen one is lit. */
+    const choices = <T extends string | number>(options: [T, string][], current: () => T, pick: (v: T) => void) => {
+      const wrap = el('div', { className: 'choice-set' });
+      const draw = () => {
+        wrap.replaceChildren(
+          ...options.map(([v, label]) => {
+            const b = el('button', { className: v === current() ? 'choice on' : 'choice', text: label });
+            b.addEventListener('click', (e) => {
+              e.stopPropagation();
+              pick(v);
+              draw();
+            });
+            return b;
+          }),
+        );
+      };
+      draw();
+      const step = (dir: -1 | 1) => {
+        const i = options.findIndex(([v]) => v === current());
+        const next = options[Math.max(0, Math.min(options.length - 1, i + dir))][0];
+        pick(next);
+        draw();
+        audio.play('menuMove');
+      };
+      return { control: wrap, onAdjust: step, cycle: () => step(options.findIndex(([v]) => v === current()) === options.length - 1 ? -1 : 1) };
+    };
+    const music = slider('music');
+    const sfx = slider('sfx');
+    const battle = choices<BattleSpeed>([[1, 'Normal'], [2, 'Fast'], [3, 'Fastest']], () => prefs.battleSpeed, (v) => setPref('battleSpeed', v));
+    const text = choices<TextSpeed>(
+      (Object.keys(TEXT_SPEED_NAMES) as TextSpeed[]).map((v) => [v, TEXT_SPEED_NAMES[v]]),
+      () => prefs.textSpeed,
+      (v) => setPref('textSpeed', v),
+    );
+    const tips = choices<'on' | 'off'>([['on', 'On'], ['off', 'Off']], () => (s.tipsOff ? 'off' : 'on'), (v) => {
+      s.tipsOff = v === 'off';
+      this.save();
+    });
     const items: MenuItem[] = [
-      {
-        label: 'Music',
-        detail: label(audio.settings.music),
-        description: 'Press Enter to change.',
-        onSelect: () => {
-          audio.setVolume('music', next(audio.settings.music));
-          again(0)();
-        },
-      },
-      {
-        label: 'Effects',
-        detail: label(audio.settings.sfx),
-        description: 'Press Enter to change.',
-        onSelect: () => {
-          audio.setVolume('sfx', next(audio.settings.sfx));
-          audio.play('chest');
-          again(1)();
-        },
-      },
-      {
-        label: 'Battle speed',
-        detail: BATTLE_SPEED_NAMES[prefs.battleSpeed],
-        description: 'How fast the rounds of a fight play out. Enter during a round speeds it up even more.',
-        onSelect: () => {
-          setPref('battleSpeed', ((prefs.battleSpeed % 3) + 1) as BattleSpeed);
-          again(2)();
-        },
-      },
-      {
-        label: 'Text speed',
-        detail: TEXT_SPEED_NAMES[prefs.textSpeed],
-        description: 'How fast story lines appear.',
-        onSelect: () => {
-          setPref('textSpeed', textSpeeds[(textSpeeds.indexOf(prefs.textSpeed) + 1) % textSpeeds.length]);
-          again(3)();
-        },
-      },
+      { label: 'Music', description: 'Drag the slider, or use ← →.', control: music.control, onAdjust: music.onAdjust, onSelect: () => music.onAdjust(1) },
+      { label: 'Effects', description: 'Drag the slider, or use ← →.', control: sfx.control, onAdjust: sfx.onAdjust, onSelect: () => sfx.onAdjust(1) },
+      { label: 'Battle speed', description: 'How fast the rounds of a fight play out. Enter during a round speeds it up even more.', control: battle.control, onAdjust: battle.onAdjust, onSelect: battle.cycle },
+      { label: 'Text speed', description: 'How fast story lines appear.', control: text.control, onAdjust: text.onAdjust, onSelect: text.cycle },
+      ...(solo ? [{ label: 'Tips', description: 'Whether tips appear when something new comes up.', control: tips.control, onAdjust: tips.onAdjust, onSelect: tips.cycle }] : []),
+      { label: 'Back', onSelect: back },
     ];
-    if (solo) {
-      const diff = s.difficulty ?? 'normal';
-      items.push(
-        {
-          label: 'Difficulty',
-          detail: DIFFICULTIES[diff].name,
-          description: `${DIFFICULTIES[diff].description}\nYou can change it at any time; it counts from the next fight.`,
-          onSelect: () => {
-            s.difficulty = DIFFICULTY_IDS[(DIFFICULTY_IDS.indexOf(diff) + 1) % DIFFICULTY_IDS.length];
-            this.save();
-            again(4)();
-          },
-        },
-        {
-          label: 'Tips',
-          detail: s.tipsOff ? 'Off' : 'On',
-          description: 'Whether tips appear when something new comes up.',
-          onSelect: () => {
-            s.tipsOff = !s.tipsOff;
-            this.save();
-            again(5)();
-          },
-        },
-      );
-    }
-    items.push({ label: 'Back', onSelect: back });
     const menu = new ListMenu(items, { onCancel: back, startIndex: start });
     const desc = el('div', { className: 'menu-desc' });
     menu.describeInto(desc);
-    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Settings' }), menu.el, desc]), menu);
+    this.openOverlay(el('div', { className: 'panel dialog wide settings' }, [el('h2', { text: 'Settings' }), menu.el, desc]), menu);
   }
 
   partyStatus(back: () => void): void {

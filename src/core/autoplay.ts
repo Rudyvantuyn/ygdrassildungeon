@@ -7,6 +7,7 @@ import { chooseCommands } from './tactics';
 
 export { chooseCommands };
 import { DX, DY, isPassable, type FloorMap } from './dungeon';
+import { startFloorFor } from './data/chapters';
 import { FLOORS } from './data/floors';
 import { Game, type StepEvent } from './game';
 import { buyEquipment, buyItem, canEquip, equipmentForSale, innCost, netPrice, restAtInn, sellMaterial } from './town';
@@ -154,6 +155,28 @@ export function autoplay(seed: number, opts: AutoplayOptions = {}): AutoplayResu
   let bossRounds = 0;
   const lastFloor = Math.min(FLOORS.length, opts.floors ?? FLOORS.length) - 1;
 
+  /**
+   * Back to town, then down again to `floor`: a descent starts at the chapter's first floor, so the party
+   * walks (and fights) its way back down floor by floor.
+   */
+  let returning = 0;
+  const backTo = (floor: number): boolean => {
+    visitTown(game);
+    game.enterFloor(startFloorFor(floor, game.state.deepest));
+    returning += 1;
+    try {
+      while (game.state.floor < floor) {
+        // Too many trips in a row without getting anywhere: carry on from here instead.
+        if (returning > 3) return true;
+        if (!walkTo(find(game.map, 'stairs')[0])) return false;
+        game.descend();
+      }
+      return true;
+    } finally {
+      returning -= 1;
+    }
+  };
+
   const handle = (events: StepEvent[]): boolean => {
     for (const ev of events) {
       if (ev.type === 'encounter' || ev.type === 'prowler') {
@@ -164,10 +187,8 @@ export function autoplay(seed: number, opts: AutoplayOptions = {}): AutoplayResu
         healBetweenFights(game);
         // Someone is still down and can't be woken here, or the healer has run dry:
         // go back to the inn, then return to this floor.
-        if (opts.town && (!game.state.party.every(isAlive) || outOfSteam(game))) {
-          const floor = game.state.floor;
-          visitTown(game);
-          game.enterFloor(floor);
+        if (opts.town && returning === 0 && (!game.state.party.every(isAlive) || outOfSteam(game))) {
+          if (!backTo(game.state.floor)) return false;
         }
       }
     }
@@ -196,10 +217,8 @@ export function autoplay(seed: number, opts: AutoplayOptions = {}): AutoplayResu
   };
 
   for (let floor = 0; floor <= lastFloor; floor++) {
-    if (opts.town) {
-      visitTown(game);
-      game.enterFloor(floor);
-    }
+    // A new chapter starts with a trip to town; within a chapter the party only goes back when it must.
+    if (opts.town && startFloorFor(floor, game.state.deepest) === floor && !backTo(floor)) return result(game, floor, bossRounds);
     // Optional grinding first: pace back and forth.
     for (let i = 0; i < (opts.grindBattles ?? 0); i++) {
       const before = game.state.battles;
@@ -226,10 +245,7 @@ export function autoplay(seed: number, opts: AutoplayOptions = {}): AutoplayResu
     const boss = find(game.map, 'boss')[0];
     if (boss && !game.progress.bossDefeated) {
       // Rest at the inn first, like a sensible player would before a boss.
-      if (opts.town) {
-        visitTown(game);
-        game.enterFloor(floor);
-      }
+      if (opts.town && !backTo(floor)) return result(game, floor, bossRounds);
       // Top up at the spring on the way (it refills after a town visit).
       for (const spring of find(game.map, 'spring')) {
         if (!walkTo(spring)) return result(game, floor, bossRounds);

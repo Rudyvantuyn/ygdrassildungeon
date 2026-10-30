@@ -4,6 +4,8 @@ import { MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve,
 import { NOTE_MAX_LENGTH, emptyChart, eraseCell, setMark, setNote, setTerrain, terrainAt } from './chart';
 import { Combat, GOLD_RATE, PROWLER_FLEE_CHANCE, XP_RATE, type Command } from './combat';
 import { ENEMIES } from './data/enemies';
+import { startFloorFor, startFloors } from './data/chapters';
+import { createExpedition } from './expedition';
 import { FIRST_PROWLER_FLOOR, FLOORS } from './data/floors';
 import { SKILLS } from './data/skills';
 import { CLASSES } from './data/classes';
@@ -311,6 +313,25 @@ describe('town', () => {
     expect(game.tileHere()).toBe('up');
     game.ascend();
     expect(game.state.location).toBe('town');
+  });
+
+  it('starts a descent only at the first floor of a chapter it has opened', () => {
+    const game = Game.newGame(1);
+    game.state.deepest = 3;
+    game.enterFloor(3);
+    expect(game.state.location).toBe('town');
+    expect(startFloors(3)).toEqual([0]);
+    expect(startFloors(5)).toEqual([0, 5]);
+    expect(startFloorFor(8, 9)).toBe(5);
+    game.state.deepest = 7;
+    game.enterFloor(5);
+    expect(game.state.location).toBe('dungeon');
+    expect(game.state.floor).toBe(5);
+  });
+
+  it('expeditions also start at the beginning of a chapter', () => {
+    expect(createExpedition('h', 'Host', createStartingParty()[0], 7).startFloor).toBe(5);
+    expect(createExpedition('h', 'Host', createStartingParty()[0], 3).startFloor).toBe(0);
   });
 
   it('stairs up from the second floor lead to the stairs down on the first', () => {

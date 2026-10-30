@@ -10,6 +10,7 @@
 import type { CombatEvent, CombatSnapshot, Command } from './combat';
 import { CLASSES } from './data/classes';
 import { EQUIPMENT } from './data/equipment';
+import { startFloorFor } from './data/chapters';
 import { FLOORS } from './data/floors';
 import { MATERIALS } from './data/materials';
 import { ITEMS, makeInventory } from './data/items';
@@ -141,7 +142,7 @@ export function createExpedition(host: string, player: string, member: Member, s
     version: EXPEDITION_VERSION,
     host,
     phase: 'lobby',
-    startFloor: Math.max(0, Math.min(FLOORS.length - 1, Math.floor(startFloor))),
+    startFloor: startFloorFor(Math.max(0, Math.min(FLOORS.length - 1, Math.floor(startFloor))), FLOORS.length - 1),
     seats: [{ user: host, player: cleanPlayerName(player), member, left: false }],
     game: null,
     combat: null,

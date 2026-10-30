@@ -1,4 +1,3 @@
-import { DIFFICULTIES, type Difficulty, type DifficultyDef } from './difficulty';
 import { CLASSES } from './data/classes';
 import { ENEMIES, type EnemyDef, type EnemySkill } from './data/enemies';
 import { ITEMS } from './data/items';
@@ -96,8 +95,6 @@ export interface CombatSnapshot {
 export interface CombatOptions {
   boss?: boolean;
   prowler?: boolean;
-  /** The save's difficulty (standard when left out). */
-  difficulty?: Difficulty;
 }
 
 const WEAK_MULT = 1.5;
@@ -124,7 +121,6 @@ export class Combat {
   readonly status: PartyStatus[];
   readonly boss: boolean;
   readonly prowler: boolean;
-  private readonly difficulty: DifficultyDef;
   round = 1;
   outcome: Outcome | null = null;
   rewards: Rewards | null = null;
@@ -138,12 +134,10 @@ export class Combat {
   ) {
     this.boss = !!opts.boss;
     this.prowler = !!opts.prowler;
-    this.difficulty = DIFFICULTIES[opts.difficulty ?? 'normal'];
     this.enemies = enemyIds.map((id) => {
       const def = ENEMIES[id];
       if (!def) throw new Error(`Unknown enemy "${id}"`);
-      const hp = Math.max(1, Math.round(def.hp * this.difficulty.enemyHp));
-      return { def, name: def.name, hp, maxHp: hp, ailment: null, ailmentTurns: 0 };
+      return { def, name: def.name, hp: def.hp, maxHp: def.hp, ailment: null, ailmentTurns: 0 };
     });
     // "Bogling A", "Bogling B" when an enemy appears more than once.
     for (const e of this.enemies) {
@@ -489,7 +483,6 @@ export class Combat {
     if (action.kind === 'phys' && m.row === 'back' && !enemy.def.ranged) base *= 0.5;
     if (status.defending) base *= 0.5;
     if (status.guard > 0) base *= 0.7;
-    base *= this.difficulty.enemyDamage;
 
     const { damage, crit } = this.roll(base, action.power, action.element, [], [], action.kind === 'phys');
     m.hp = Math.max(0, m.hp - damage);
@@ -633,8 +626,8 @@ export class Combat {
   }
 
   private grantRewards(): Rewards {
-    const xp = Math.round(this.enemies.reduce((sum, e) => sum + e.def.xp, 0) * XP_RATE * this.difficulty.rewards);
-    const gold = Math.round(this.enemies.reduce((sum, e) => sum + e.def.gold, 0) * GOLD_RATE * this.difficulty.rewards);
+    const xp = Math.round(this.enemies.reduce((sum, e) => sum + e.def.xp, 0) * XP_RATE);
+    const gold = Math.round(this.enemies.reduce((sum, e) => sum + e.def.gold, 0) * GOLD_RATE);
     const drops: ItemId[] = [];
     for (const e of this.enemies) {
       if (e.def.drop && this.rng.chance(e.def.drop.chance)) drops.push(e.def.drop.item);

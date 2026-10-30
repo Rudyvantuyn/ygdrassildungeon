@@ -452,12 +452,11 @@ button:active {
 }
 
 .dialog.wide {
-  min-width: 560px;
-  max-width: 900px;
+  width: 800px;
 }
 
 .dialog.wide .menu {
-  min-width: 460px;
+  width: 100%;
 }
 
 table.stats td.gear,
@@ -632,9 +631,17 @@ table.stats th.gear {
   z-index: 10;
 }
 
+/*
+ * Every dialog has one of two fixed widths (standard 560px, wide 800px), so screens do not change size
+ * with their text. Text wraps onto the next line instead; very long words break rather than stick out.
+ */
 .dialog {
-  min-width: 420px;
-  max-width: 640px;
+  width: 560px;
+  max-width: calc(100% - 40px);
+  max-height: calc(100% - 40px);
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-wrap: break-word;
   padding: 22px 26px;
   display: flex;
   flex-direction: column;
@@ -671,8 +678,12 @@ table.stats th.gear {
 }
 
 .dialog .menu {
-  align-self: center;
-  min-width: 260px;
+  align-self: stretch;
+}
+
+/* Descriptions keep room for three lines, so a dialog does not jump in height while moving through its menu. */
+.dialog .menu-desc {
+  min-height: 3.6em;
 }
 
 .title-screen {
@@ -714,6 +725,7 @@ table.stats th.gear {
 }
 
 .map-editor {
+  width: auto;
   max-width: none;
   padding: 16px 20px;
   gap: 10px;
@@ -906,8 +918,8 @@ table.stats th.gear {
   }
 }
 
-.help {
-  max-width: 1040px;
+.dialog.help {
+  width: 1040px;
 }
 
 .help-grid {
@@ -1638,4 +1650,150 @@ table.stats thead th {
   color: #fff1cf;
   border-color: #e8c477;
   background: linear-gradient(180deg, rgba(110, 82, 40, 0.95), rgba(50, 36, 18, 0.95));
+}
+
+/* Town cards are buttons: keep their paintings when hovered (the general button hover would replace them). */
+#town-grid .town-card,
+#town-grid .town-card:hover {
+  background-color: #120d08;
+  background-size: cover;
+  background-position: center;
+}
+
+#town-grid .town-card:hover {
+  color: var(--text);
+}
+
+#town-grid .town-card.spot-rootdeep { background-image: url('/art/places/rootdeep.webp'); }
+#town-grid .town-card.spot-inn { background-image: url('/art/places/inn.webp'); }
+#town-grid .town-card.spot-shop { background-image: url('/art/places/shop.webp'); }
+#town-grid .town-card.spot-hall { background-image: url('/art/places/hall.webp'); }
+#town-grid .town-card.spot-board { background-image: url('/art/places/board.webp'); }
+#town-grid .town-card.spot-horn { background-image: url('/art/places/hornstone.webp'); }
+
+#town-grid .town-button:hover {
+  color: #fff1cf;
+}
+
+/* ── Settings: sliders and choice rows ───────────────────────────────────── */
+
+.menu-item.has-control {
+  gap: 18px;
+}
+
+.menu-item.has-control > span:first-child {
+  flex: none;
+  width: 150px;
+}
+
+.slider-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.slider {
+  --fill: 50%;
+  flex: 1;
+  height: 8px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: linear-gradient(90deg, #d4a957 var(--fill), #2a2016 var(--fill));
+  border: 1px solid #5a4424;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff1c0, #d4a957 60%, #8a6a34);
+  border: 1px solid #2a1c0a;
+  box-shadow: 0 1px 3px #000;
+}
+
+.slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff1c0, #d4a957 60%, #8a6a34);
+  border: 1px solid #2a1c0a;
+}
+
+.slider-value {
+  width: 48px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+}
+
+.choice-set {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+}
+
+.choice-set .choice {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--muted);
+  padding: 6px 4px;
+}
+
+.choice-set .choice.on {
+  color: #1a1206;
+  text-shadow: none;
+  background: linear-gradient(#f0cf6a, #b8893f);
+  border-color: #f0cf6a;
+}
+
+/* Small dialogs with a fixed purpose keep their own size. */
+.title-screen .dialog {
+  width: 360px;
+}
+
+/* Long menus scroll inside the dialog instead of running off the screen. */
+.dialog .menu {
+  position: relative;
+  max-height: 430px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #8a6a34 transparent;
+}
+
+.dialog {
+  overflow-y: visible;
+}
+
+/* The town's line of explanation wraps onto a second line rather than being cut off. */
+.town-head {
+  height: auto;
+  min-height: 44px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  box-sizing: border-box;
+}
+
+.town-desc {
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.3;
+}
+
+.menu.more-below {
+  mask-image: linear-gradient(180deg, #000 85%, transparent);
+}
+
+.menu.more-above {
+  mask-image: linear-gradient(0deg, #000 85%, transparent);
+}
+
+.menu.more-above.more-below {
+  mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
 }

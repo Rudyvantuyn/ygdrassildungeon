@@ -33,14 +33,15 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 - **Snellere gevechten**: *Repeat* (R) doet de vorige ronde opnieuw, *Auto* (O) laat de party zelf vechten tot je
   stopt (Esc of tikken). Gevechtssnelheid Normal / Fast / Fastest.
-- **Settings** (Pack of System): muziek, effecten, gevechtssnelheid, tekstsnelheid, moeilijkheid en tips.
-- **Moeilijkheid** per spel: *Gentle* (zwakkere vijanden, meer XP en goud), *Standard* (zoals bedoeld, hierop zijn de
-  balanstests afgesteld) en *Harsh*. Expedities gebruiken altijd Standard.
+- **Settings** (Pack of System): volume met schuifbalken, gevechtssnelheid, tekstsnelheid en tips. Er is bewust
+  geen moeilijkheidsinstelling: iedereen speelt met dezelfde regels, wat eerlijk is voor expedities.
 - **Feedback** (Pack of System): spelers sturen bugs en ideeën rechtstreeks naar de tabel `reports` in Supabase
   (alleen te lezen in het dashboard). Crashes worden automatisch gemeld vanaf de live site.
 - **Mobiel**: veeg over het beeld om te lopen en te draaien, grotere knoppen en tekst op touchscreens, volledig scherm
   bij de eerste tik, en een melding om de telefoon te kantelen.
 - Na hoofdstuk II: een afgesloten trap en "To be continued".
+- **Hoofdstukken in één keer**: een afdaling begint altijd bij de eerste verdieping van een hoofdstuk. Het volgende
+  hoofdstuk gaat pas open als de eindbaas van het vorige verslagen is. Geldt ook voor expedities.
 - **De stad als kaarten**: elke plek in Lindholm is een grote geschilderde kaart om op te tikken.
 - **Feedback-inbox** (`/inbox.html`): alleen voor de eigenaar; lezen, filteren en verwijderen.
 - **Privacy & Terms** (`/privacy.html`, ook via titelscherm en System). Lettertypen zitten nu in de game zelf.

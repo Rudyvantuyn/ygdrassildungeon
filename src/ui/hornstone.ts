@@ -3,6 +3,7 @@
  * Handles signing in, the cloud save, and gathering a party in a lobby.
  */
 import { CLASSES } from '../core/data/classes';
+import { chapterOf, startFloors } from '../core/data/chapters';
 import { FLOORS } from '../core/data/floors';
 import { claimShare, MAX_SEATS, type ExpeditionState, type Share } from '../core/expedition';
 import type { Game } from '../core/game';
@@ -140,12 +141,14 @@ export class Hornstone {
   private chooseFloor(member: Member): void {
     const deepest = this.game.state.deepest;
     const back = () => this.chooseMember('Who answers your horn?', (m) => this.chooseFloor(m));
-    const items: MenuItem[] = FLOORS.slice(0, deepest + 1).map((f, i) => ({
-      label: f.name,
+    const starts = startFloors(deepest);
+    const items: MenuItem[] = starts.map((i) => ({
+      label: `Chapter ${chapterOf(i).numeral}: ${chapterOf(i).name}`,
+      detail: FLOORS[i].name,
       onSelect: () => void this.run(() => online.create(member, i, deepest), (row) => this.lobby(row)),
     }));
     items.push({ label: 'Back', onSelect: back });
-    this.dialog('Where to?', [el('p', { text: 'Start on any floor you have reached.' })], new ListMenu(items, { onCancel: back, startIndex: deepest }));
+    this.dialog('Where to?', [el('p', { text: 'An expedition starts at the beginning of a chapter you have reached.' })], new ListMenu(items, { onCancel: back, startIndex: starts.length - 1 }));
   }
 
   private async browse(): Promise<void> {

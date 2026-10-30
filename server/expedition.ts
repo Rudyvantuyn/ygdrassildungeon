@@ -7,6 +7,7 @@
  * Build with `npm run build:server`, which bundles it into one file for deploying.
  */
 import { applyAction, cleanPlayerName, createExpedition, players, validMember, type Action, type ExpeditionState } from '../src/core/expedition';
+import { startFloorFor } from '../src/core/data/chapters';
 import { FLOORS } from '../src/core/data/floors';
 
 declare const Deno: {
@@ -132,7 +133,8 @@ async function create(user: string, body: Record<string, unknown>): Promise<Row>
   const member = validMember(body.member);
   if (!member) throw new Refusal('That adventurer cannot join.');
   const deepest = Math.max(0, Math.min(FLOORS.length - 1, Number(body.deepest) || 0));
-  const startFloor = Math.max(0, Math.min(deepest, Number(body.startFloor) || 0));
+  // Expeditions, too, may only begin at the start of a chapter the host has reached.
+  const startFloor = startFloorFor(Math.max(0, Math.min(deepest, Number(body.startFloor) || 0)), deepest);
   const player = cleanPlayerName(body.player);
   const state = createExpedition(user, player, member, startFloor);
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {

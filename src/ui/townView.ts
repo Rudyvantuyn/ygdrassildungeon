@@ -1,7 +1,7 @@
 import { audio } from '../audio/audio';
 import { CLASSES } from '../core/data/classes';
 import { EQUIPMENT, type EquipDef } from '../core/data/equipment';
-import { chapterOf } from '../core/data/chapters';
+import { chapterOf, startFloors } from '../core/data/chapters';
 import { resetSkills, spentPoints, unspentPoints } from '../core/skilltree';
 import { memberPicker, showSkillTree } from './skillsView';
 import { FLOORS } from '../core/data/floors';
@@ -81,7 +81,7 @@ export class TownView {
   show(): void {
     const s = this.game.state;
     const places: Place[] = [
-      { spot: 'rootdeep', name: 'The Rootdeep', detail: '', description: 'Enter the Rootdeep at any floor you have reached.', onSelect: () => this.rootdeep() },
+      { spot: 'rootdeep', name: 'The Rootdeep', detail: '', description: 'Descend from the start of a chapter you have opened.', onSelect: () => this.rootdeep() },
       { spot: 'inn', name: 'The Sleeping Stag', detail: `Rest · ${innCost(this.game)} G`, description: 'Rest to restore HP and SP, wake the fallen, and save.', onSelect: () => this.host.tips(['inn'], () => this.inn()) },
       { spot: 'shop', name: "Hilde's Supplies", detail: 'Shop', description: 'Buy items and gear, sell materials. Better gear appears as you go deeper.', onSelect: () => this.host.tips(['shop'], () => this.shop()) },
       { spot: 'hall', name: 'The Oath Hall', detail: 'Party · Skills', description: 'Swear in adventurers, choose who walks in the party, spend skill points.', onSelect: () => this.host.tips((s.oaths ?? 0) >= FOUNDING_OATHS ? ['oath', 'skillPoints'] : ['skillPoints'], () => this.hall()) },
@@ -90,7 +90,7 @@ export class TownView {
     ];
     const buttons: Place[] = [
       { spot: null, name: 'Party', detail: '', description: 'Stats and equipment of everyone in the party.', onSelect: () => this.host.partyStatus(() => this.back()) },
-      { spot: null, name: 'Settings', detail: '', description: 'Sound, battle and text speed, difficulty, tips.', onSelect: () => this.host.settings(() => this.back()) },
+      { spot: null, name: 'Settings', detail: '', description: 'Sound, battle and text speed, tips.', onSelect: () => this.host.settings(() => this.back()) },
       { spot: null, name: 'System', detail: '', description: 'Save, help, feedback, and quit to the title screen.', onSelect: () => this.system() },
     ];
     const all = [...places, ...buttons];
@@ -182,7 +182,7 @@ export class TownView {
     const menu = new ListMenu(
       [
         { label: 'Save', description: 'Save your progress.', onSelect: () => { this.host.save(); this.back(); this.host.toast('Game saved.'); } },
-        { label: 'Settings', description: 'Sound, battle and text speed, difficulty, tips.', onSelect: () => this.host.settings(() => this.system()) },
+        { label: 'Settings', description: 'Sound, battle and text speed, tips.', onSelect: () => this.host.settings(() => this.system()) },
         { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.host.showGuidebook(() => this.system()) },
         { label: 'How to Play', description: 'Controls and tips.', onSelect: () => this.host.showHelp(() => this.system()) },
         { label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.host.showFeedback(() => this.system()) },
@@ -583,11 +583,13 @@ export class TownView {
 
   private rootdeep(): void {
     const back = () => this.back();
-    const items: MenuItem[] = FLOORS.slice(0, this.game.state.deepest + 1).map((f, i) => ({
-      label: f.name,
-      detail: `Chapter ${chapterOf(i).numeral}`,
-      description: chapterOf(i).name,
+    const starts = startFloors(this.game.state.deepest);
+    const items: MenuItem[] = starts.map((i) => ({
+      label: `Chapter ${chapterOf(i).numeral}: ${chapterOf(i).name}`,
+      detail: FLOORS[i].name,
+      description: `Begin at ${FLOORS[i].name} and fight your way down. The next chapter opens once its guardian falls.`,
       onSelect: () => {
+        const f = FLOORS[i];
         this.host.closeOverlay();
         this.game.enterFloor(i);
         this.host.save();
@@ -596,8 +598,8 @@ export class TownView {
       },
     }));
     items.push({ label: 'Not yet', onSelect: back });
-    const menu = new ListMenu(items, { onCancel: back, startIndex: this.game.state.deepest });
-    this.dialog('The Rootdeep', [el('p', { text: 'Which floor will you start from?' })], menu, true);
+    const menu = new ListMenu(items, { onCancel: back, startIndex: starts.length - 1 });
+    this.dialog('The Rootdeep', [el('p', { text: 'Every descent starts at the beginning of a chapter. Where will you begin?' })], menu, true);
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

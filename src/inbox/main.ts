@@ -79,7 +79,6 @@ function contextLine(r: Report): string {
   if (c.location === 'town') parts.push('in Lindholm');
   else if (typeof c.floor === 'number') parts.push(`verdieping ${c.floor + 1}`);
   if (Array.isArray(c.levels)) parts.push(c.levels.join(', '));
-  if (c.difficulty && c.difficulty !== 'normal') parts.push(String(c.difficulty));
   if (c.coop) parts.push('expeditie');
   if (c.screen) parts.push(`scherm ${c.screen}`);
   if (r.version) parts.push(`versie ${r.version}`);
