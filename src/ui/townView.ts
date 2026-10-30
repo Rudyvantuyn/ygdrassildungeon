@@ -51,64 +51,105 @@ export interface TownHost {
   showGuidebook(back: () => void): void;
 }
 
+interface Place {
+  spot: TownSpot | null;
+  name: string;
+  detail: string;
+  description: string;
+  onSelect: () => void;
+}
+
 const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', sp: 'SP', atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES', spd: 'SPD' };
 
 /** Town menu (side panel) plus the Inn, Oath Hall, Shop and Rootdeep dialogs. */
 export class TownView {
   focus: TownSpot | null = 'rootdeep';
-  menu: ListMenu | null = null;
-  private lastIndex = 4;
+  menu: { handleKey(key: string): boolean } | null = null;
+  private lastIndex = 0;
 
   constructor(
     private readonly host: TownHost,
-    private readonly panel: HTMLElement,
+    /** The town screen, laid over the view and side panel while in town. */
+    private readonly grid: HTMLElement,
   ) {}
 
   get game(): Game {
     return this.host.game;
   }
 
-  /** Builds the side-panel menu. */
+  /** Builds the town screen: a large painted card for every place, plus Party, Settings and System. */
   show(): void {
-    const entries: (Omit<MenuItem, 'onFocus'> & { spot: TownSpot | null })[] = [
-      { label: 'Inn', detail: `${innCost(this.game)} G`, description: 'Rest to restore HP and SP, revive fallen members, and save.', spot: 'inn', onSelect: () => this.host.tips(['inn'], () => this.inn()) },
-      { label: 'Oath Hall', description: 'Register new adventurers and choose who joins the party.', spot: 'hall', onSelect: () => this.host.tips((this.game.state.oaths ?? 0) >= FOUNDING_OATHS ? ['oath', 'skillPoints'] : ['skillPoints'], () => this.hall()) },
-      { label: 'Shop', description: 'Buy items and equipment. Better gear appears as you go deeper.', spot: 'shop', onSelect: () => this.host.tips(['shop'], () => this.shop()) },
-      {
-        label: 'Notice Board',
-        detail: this.boardBadge(),
-        description: 'Requests from the people of Lindholm. Finished work pays well.',
-        spot: 'board',
-        onSelect: () => this.host.tips(['quests'], () => this.board()),
-      },
-      { label: 'Rootdeep', description: 'Enter the Rootdeep at any floor you have reached.', spot: 'rootdeep', onSelect: () => this.rootdeep() },
-      {
-        label: 'Hornstone',
-        description: 'Sound the horn to descend together with players from other halls.',
-        spot: 'horn',
-        onSelect: () => this.host.tips(['hornstone'], () => this.host.openHornstone()),
-      },
-      { label: 'Party', description: 'View stats and equipment.', spot: null, onSelect: () => this.host.partyStatus(() => this.back()) },
-      { label: 'System', description: 'Save, settings, help, and quit to the title screen.', spot: null, onSelect: () => this.system() },
+    const s = this.game.state;
+    const places: Place[] = [
+      { spot: 'rootdeep', name: 'The Rootdeep', detail: '', description: 'Enter the Rootdeep at any floor you have reached.', onSelect: () => this.rootdeep() },
+      { spot: 'inn', name: 'The Sleeping Stag', detail: `Rest · ${innCost(this.game)} G`, description: 'Rest to restore HP and SP, wake the fallen, and save.', onSelect: () => this.host.tips(['inn'], () => this.inn()) },
+      { spot: 'shop', name: "Hilde's Supplies", detail: 'Shop', description: 'Buy items and gear, sell materials. Better gear appears as you go deeper.', onSelect: () => this.host.tips(['shop'], () => this.shop()) },
+      { spot: 'hall', name: 'The Oath Hall', detail: 'Party · Skills', description: 'Swear in adventurers, choose who walks in the party, spend skill points.', onSelect: () => this.host.tips((s.oaths ?? 0) >= FOUNDING_OATHS ? ['oath', 'skillPoints'] : ['skillPoints'], () => this.hall()) },
+      { spot: 'board', name: 'The Notice Board', detail: this.boardBadge() || 'Requests', description: 'Requests from the people of Lindholm. Finished work pays well.', onSelect: () => this.host.tips(['quests'], () => this.board()) },
+      { spot: 'horn', name: 'The Hornstone', detail: 'Play together', description: 'Sound the horn to descend together with players from other halls.', onSelect: () => this.host.tips(['hornstone'], () => this.host.openHornstone()) },
     ];
-    const items: MenuItem[] = entries.map(({ spot, ...item }, i) => ({
-      ...item,
-      onFocus: () => {
-        this.focus = spot;
-        this.lastIndex = i;
-      },
-    }));
-    this.menu = new ListMenu(items, { startIndex: this.lastIndex });
-    const desc = el('div', { className: 'menu-desc' });
-    this.panel.innerHTML = '';
-    this.panel.append(
-      el('div', { className: 'cmd-title', text: 'Where to?' }),
-      this.menu.el,
-      desc,
-      el('div', { className: 'town-gold', text: `${this.game.state.gold} G` }),
-      el('div', { className: 'cmd-hint', text: '↑↓ choose · Enter confirm' }),
+    const buttons: Place[] = [
+      { spot: null, name: 'Party', detail: '', description: 'Stats and equipment of everyone in the party.', onSelect: () => this.host.partyStatus(() => this.back()) },
+      { spot: null, name: 'Settings', detail: '', description: 'Sound, battle and text speed, difficulty, tips.', onSelect: () => this.host.settings(() => this.back()) },
+      { spot: null, name: 'System', detail: '', description: 'Save, help, feedback, and quit to the title screen.', onSelect: () => this.system() },
+    ];
+    const all = [...places, ...buttons];
+    const nodes: HTMLElement[] = [];
+    const desc = el('div', { className: 'town-desc' });
+    const select = (i: number) => {
+      this.lastIndex = Math.max(0, Math.min(all.length - 1, i));
+      nodes.forEach((n, j) => n.classList.toggle('selected', j === this.lastIndex));
+      this.focus = all[this.lastIndex].spot;
+      desc.textContent = all[this.lastIndex].description;
+    };
+    const activate = (i: number) => {
+      select(i);
+      audio.play('menuSelect');
+      all[i].onSelect();
+    };
+    for (const [i, p] of all.entries()) {
+      const node =
+        p.spot
+          ? el('button', { className: `town-card spot-${p.spot}` }, [
+              el('div', { className: 'town-card-name', text: p.name }),
+              ...(p.detail ? [el('div', { className: 'town-card-detail', text: p.detail })] : []),
+            ])
+          : el('button', { className: 'town-button', text: p.name });
+      node.addEventListener('mouseenter', () => select(i));
+      node.addEventListener('click', () => activate(i));
+      nodes.push(node);
+    }
+    this.grid.replaceChildren(
+      el('div', { className: 'town-head' }, [
+        el('div', { className: 'town-name', text: 'Lindholm' }),
+        desc,
+        el('div', { className: 'town-gold', text: `${s.gold} G` }),
+      ]),
+      el('div', { className: 'town-cards' }, nodes.slice(0, places.length)),
+      el('div', { className: 'town-buttons' }, nodes.slice(places.length)),
     );
-    this.menu.describeInto(desc);
+    select(Math.min(this.lastIndex, all.length - 1));
+    const cols = 3;
+    this.menu = {
+      handleKey: (key: string): boolean => {
+        const i = this.lastIndex;
+        const onCards = i < places.length;
+        let next = i;
+        if (key === 'ArrowRight' || key === 'd' || key === 'D') next = i + 1;
+        else if (key === 'ArrowLeft' || key === 'a' || key === 'A') next = i - 1;
+        else if (key === 'ArrowDown' || key === 's' || key === 'S') next = onCards ? (i + cols < places.length ? i + cols : places.length + Math.min(i % cols, buttons.length - 1)) : i;
+        else if (key === 'ArrowUp' || key === 'w' || key === 'W') next = onCards ? i - cols : places.length - cols + Math.min(i - places.length, cols - 1);
+        else if (key === 'Enter' || key === ' ' || key === 'z' || key === 'Z') {
+          activate(i);
+          return true;
+        } else return false;
+        if (next >= 0 && next < all.length && next !== i) {
+          audio.play('menuMove');
+          select(next);
+        }
+        return true;
+      },
+    };
   }
 
   // ── Inn ────────────────────────────────────────────────────────────────────

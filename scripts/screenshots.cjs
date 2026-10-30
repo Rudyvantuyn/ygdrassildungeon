@@ -53,7 +53,7 @@ const out = 'screenshots';
   // Tips are covered above; the rest of the tour runs without them.
   await page.evaluate(() => (window.ygg.game.state.tipsOff = true));
   await shot('02-town');
-  await press('ArrowUp', 2); // Shop
+  await press('ArrowRight', 2); // Shop card
   await press('Enter');
   await press('ArrowDown'); // Equipment
   await press('Enter');
@@ -64,7 +64,7 @@ const out = 'screenshots';
   await press('Escape');
   await press('Escape');
   await press('Escape');
-  await press('ArrowDown', 2); // Rootdeep
+  await press('ArrowLeft', 2); // Rootdeep card
   await press('Enter');
   await press('Enter'); // first floor
   for (let i = 0; i < 12 && (await page.evaluate(() => window.ygg.mode)) === 'story'; i++) await page.keyboard.press('Escape');

@@ -77,7 +77,21 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private readonly townPanel: HTMLElement;
   private readonly town: TownView;
 
-  private mode: Mode = 'title';
+  private currentMode: Mode = 'title';
+  /** The last mode that was not a dialog on top of something else. */
+  private baseMode: Mode = 'title';
+  private townGrid!: HTMLElement;
+
+  private get mode(): Mode {
+    return this.currentMode;
+  }
+
+  private set mode(mode: Mode) {
+    this.currentMode = mode;
+    if (mode !== 'overlay' && mode !== 'busy') this.baseMode = mode;
+    // The town screen stays up behind the town's own dialogs, and hides for everything else.
+    this.townGrid?.classList.toggle('hidden', this.baseMode !== 'town');
+  }
   private overlayMenu: ListMenu | null = null;
   private combatView: CombatView | null = null;
   private mapEditor: MapEditor | null = null;
@@ -139,13 +153,14 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const partyEl = el('div', { id: 'party' });
     this.floaters = el('div', { id: 'floaters' });
     this.overlay = el('div', { id: 'overlay', className: 'hidden' });
-    this.stage.append(this.viewWrap, side, partyEl, this.floaters, this.overlay);
+    this.townGrid = el('div', { id: 'town-grid', className: 'hidden' });
+    this.stage.append(this.viewWrap, side, this.townGrid, partyEl, this.floaters, this.overlay);
 
     this.view = viewCanvas.getContext('2d')!;
     this.minimap = minimapCanvas.getContext('2d')!;
     this.corridor = new CorridorRenderer(this.view, VIEW_W, VIEW_H);
     this.party = new PartyView(partyEl);
-    this.town = new TownView(this, this.townPanel);
+    this.town = new TownView(this, this.townGrid);
 
     window.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
