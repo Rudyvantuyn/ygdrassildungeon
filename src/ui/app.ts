@@ -381,6 +381,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'Continue', disabled: !hasSave, onSelect: () => this.loadSave() },
         ...(isMaker() ? [{ label: 'Drafting Table', onSelect: () => this.showDesigner() }] : []),
         { label: 'How to Play', onSelect: () => this.showHelp(() => this.showTitle()) },
+        { label: 'Privacy & Terms', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
       ],
       { startIndex: hasSave ? 1 : 0 },
     );
@@ -599,7 +600,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.openOverlay(
       el('div', { className: 'panel dialog' }, [
         el('h2', { text: 'Feedback' }),
-        el('p', { text: 'Your report goes straight to the makers, with where you are in the game (no personal data).' }),
+        el('p', { text: 'Your message goes straight to the makers, with where you are in the game, your screen size and browser type. See Privacy & Terms on the title screen.' }),
         menu.el,
         desc,
       ]),

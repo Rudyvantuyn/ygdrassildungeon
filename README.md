@@ -41,6 +41,9 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Mobiel**: veeg over het beeld om te lopen en te draaien, grotere knoppen en tekst op touchscreens, volledig scherm
   bij de eerste tik, en een melding om de telefoon te kantelen.
 - Na hoofdstuk II: een afgesloten trap en "To be continued".
+- **De stad als kaarten**: elke plek in Lindholm is een grote geschilderde kaart om op te tikken.
+- **Feedback-inbox** (`/inbox.html`): alleen voor de eigenaar; lezen, filteren en verwijderen.
+- **Privacy & Terms** (`/privacy.html`, ook via titelscherm en System). Lettertypen zitten nu in de game zelf.
 
 ### Het grote verhaal (mijlpaal 13)
 

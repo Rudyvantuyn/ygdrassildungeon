@@ -81,3 +81,6 @@ Add new names there and keep the glossary in sync.
 - Player feedback and crash reports land in the `reports` table. Players can only insert; only the owner's confirmed
   account (rudyvantuyn@gmail.com, checked by `is_report_owner()`) can read and delete them, on `inbox.html`.
   The owner deletes what is not useful; pick up what is left (read it with SQL) and fix it.
+- `public/privacy.html` (privacy and terms) promises what data is stored and for how long; keep it true when adding
+  anything that stores or sends player data. Reports are deleted after 12 months by the `reports-retention` cron job.
+  Fonts are bundled (`@fontsource`), so no third-party font service is contacted.

@@ -291,7 +291,7 @@ export class Hornstone {
   private signUp(): void {
     this.form(
       'Create an account',
-      'Your player name is what others see at the Hornstone.',
+      'Your player name is what others see at the Hornstone. By creating an account you agree to the privacy and terms page (title screen).',
       [{ label: 'Player name', max: 16 }, { label: 'E-mail', type: 'email' }, { label: 'Password (6+ characters)', type: 'password' }],
       'Create',
       ([name, email, password], fail) => {

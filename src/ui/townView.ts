@@ -186,6 +186,7 @@ export class TownView {
         { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.host.showGuidebook(() => this.system()) },
         { label: 'How to Play', description: 'Controls and tips.', onSelect: () => this.host.showHelp(() => this.system()) },
         { label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.host.showFeedback(() => this.system()) },
+        { label: 'Privacy & Terms', description: 'What the game stores about you, and the rules of play (opens a new page).', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
         { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onSelect: () => this.host.showTitle() },
         { label: 'Back', onSelect: back },
       ],

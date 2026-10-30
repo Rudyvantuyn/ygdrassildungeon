@@ -1,6 +1,14 @@
 import { audio } from './audio/audio';
 import { watchErrors } from './net/reports';
 import { App } from './ui/app';
+// Fonts are bundled with the game (SIL Open Font License), so no font service sees players' addresses.
+import '@fontsource/cinzel/latin-600.css';
+import '@fontsource/cinzel/latin-700.css';
+import '@fontsource/cinzel/latin-800.css';
+import '@fontsource/nunito-sans/latin-400.css';
+import '@fontsource/nunito-sans/latin-400-italic.css';
+import '@fontsource/nunito-sans/latin-700.css';
+import '@fontsource/nunito-sans/latin-800.css';
 import './ui/styles.css';
 
 const root = document.getElementById('app')!;
