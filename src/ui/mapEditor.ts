@@ -6,7 +6,7 @@ import { el } from './dom';
 type Tool = 'floor' | 'wall' | 'erase' | MarkId;
 
 const TOOLS: { id: Tool; label: string; glyph: string; color: string }[] = [
-  { id: 'floor', label: 'Floor', glyph: '■', color: '#c9dfe6' },
+  { id: 'floor', label: 'Floor', glyph: '■', color: '#d8c9a4' },
   { id: 'wall', label: 'Wall', glyph: '■', color: '#5a7684' },
   { id: 'erase', label: 'Erase', glyph: '⌫', color: '#e8e2d0' },
   ...(Object.keys(MARKS) as MarkId[]).map((id) => ({ id, label: MARKS[id].label, glyph: MARKS[id].glyph, color: MARKS[id].color })),

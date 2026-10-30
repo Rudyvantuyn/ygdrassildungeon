@@ -14,8 +14,8 @@ export function mapLayout(size: number, map: FloorMap): MapLayout {
   return { cell, ox: Math.floor((size - cell * map.width) / 2), oy: Math.floor((size - cell * map.height) / 2) };
 }
 
-const FLOOR = '#c9dfe6';
-const WALL = '#3a4c55';
+const FLOOR = '#d8c9a4';
+const WALL = '#5a4630';
 
 /**
  * Draws the floor map: the player's own chart (manual/assisted), or the
@@ -34,11 +34,11 @@ export function drawMinimap(
   const auto = game.state.chartMode === 'auto';
 
   ctx.clearRect(0, 0, size, size);
-  ctx.fillStyle = '#0d1418';
+  ctx.fillStyle = '#16110c';
   ctx.fillRect(0, 0, size, size);
 
   // Grid paper
-  ctx.strokeStyle = 'rgba(120,170,190,0.1)';
+  ctx.strokeStyle = 'rgba(212,169,87,0.09)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 0; i <= map.width; i++) {

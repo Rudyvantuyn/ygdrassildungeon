@@ -133,13 +133,29 @@ export class CombatView {
       ctx.restore();
 
       if (fx.dyingSince === null) {
-        // HP gauge
+        // HP gauge: a dark trough with a bronze rim, like the party's bars
         const bw = Math.min(160, u * 0.7);
-        const ratio = this.enemyHp[i] / enemy.maxHp;
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(x - bw / 2 - 2, ground + 14, bw + 4, 10);
-        ctx.fillStyle = ratio > 0.5 ? '#e0a030' : ratio > 0.25 ? '#e07030' : '#e0483a';
-        ctx.fillRect(x - bw / 2, ground + 16, bw * ratio, 6);
+        const ratio = Math.max(0, this.enemyHp[i] / enemy.maxHp);
+        const top = ground + 14;
+        ctx.beginPath();
+        ctx.roundRect(x - bw / 2 - 3, top - 2, bw + 6, 12, 6);
+        ctx.fillStyle = '#6b5128';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(x - bw / 2 - 2, top - 1, bw + 4, 10, 5);
+        ctx.fillStyle = '#0c0907';
+        ctx.fill();
+        if (ratio > 0) {
+          const fill = ctx.createLinearGradient(0, top, 0, top + 8);
+          const [hi, mid, lo] = ratio > 0.5 ? ['#ffcf6a', '#d88a26', '#7a4410'] : ratio > 0.25 ? ['#ffa070', '#d8562a', '#7a2410'] : ['#ff8a7a', '#e0302a', '#8a0a06'];
+          fill.addColorStop(0, hi);
+          fill.addColorStop(0.55, mid);
+          fill.addColorStop(1, lo);
+          ctx.beginPath();
+          ctx.roundRect(x - bw / 2, top, Math.max(8, bw * ratio), 8, 4);
+          ctx.fillStyle = fill;
+          ctx.fill();
+        }
         const ailment = this.enemyAilment[i];
         if (ailment) {
           const badge = AILMENT_BADGE[ailment];
@@ -164,7 +180,7 @@ export class CombatView {
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
-        ctx.font = '800 20px "Nunito Sans", sans-serif';
+        ctx.font = '800 20px Cinzel, Georgia, serif';
         ctx.textAlign = 'center';
         ctx.lineWidth = 4;
         ctx.strokeText(enemy.name, x, top - 26);

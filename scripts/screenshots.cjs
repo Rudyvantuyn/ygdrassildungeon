@@ -52,6 +52,7 @@ const out = 'screenshots';
   await press('ArrowDown', 2); // Rootdeep
   await press('Enter');
   await press('Enter'); // first floor
+  for (let i = 0; i < 12 && (await page.evaluate(() => window.ygg.mode)) === 'story'; i++) await page.keyboard.press('Escape');
   await page.evaluate(() => (window.ygg.game.state.encounterAt = 999));
   await shot('02d-explore-start');
   await press('ArrowUp', 4);
