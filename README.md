@@ -29,6 +29,19 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Je eigen groep, grinden en tutorials (mijlpaal 12)
+
+- **Nieuw spel = je groep oprichten**: Brynja van de Oath Hall begeleidt je bij het kiezen van klasse, naam en rij,
+  met uitleg. De eerste vier eden zijn gratis.
+- Daarna kost elke nieuwe avonturier **goud (300, 600, 1200, …)** én een **Oath Token**. Die vind je bij bazen en
+  prowlers (altijd) en in een paar kisten.
+- **Grindy**: vijanden geven 70% van hun XP en 75% van hun goud. Doorstomen lukt niet meer; rustig trainen wel.
+- **Tutorials**: korte uitleg van de inwoners de eerste keer dat je iets tegenkomt (stad, eerste stap, kaart, gevecht,
+  groei, skillpunten, kisten, bronnen, verzamelen, statuseffecten, versterkingen, gevallen vrienden, prowlers,
+  bazen, herberg, winkel, eden, prikbord, Hornstone). Alles terug te lezen in het **Guidebook** (System of Pack),
+  en tips kunnen uit.
+- `docs/verhaal-briefing.md`: briefing voor de schrijver van het overkoepelende verhaal.
+
 ### Nieuwe klassen (mijlpaal 11)
 
 - **Skald** (achterste rij): liederen die aanval, verdediging of magie van de hele groep verhogen, een licht
@@ -191,7 +204,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Elementen | fysiek, vuur (fire), vorst (frost), storm |
 | Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead, War Song, Shieldhymn, Mocking Verse, Runic Chant, Restful Tune, Heroes' Saga, Cleave, Blood Price, Frenzy, Skull Splitter, Reaving Spin, Curse of Frailty, Curse of Weakness, Hollow Bolt, Witherblight, Stilling Gaze, Fate Unravelled, Fang Strike, Pack Hunt, Wolf Guard, Howl of the Pack, Hamstring, Moonfang Frenzy; passief: Stout Heart, Iron Skin, Keen Eye, Fleet Foot, Gentle Hands, Rune Lore, Deep Well; verzamelen: Forage, Mine, Fell, Fish |
 | Statuseffecten | Poison, Sleep, Paralysis |
-| Items | Sap Tonic (HP), Tide Draught (veel HP), Spirit Dew (SP), Clearwater (statuseffecten), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
+| Items | Oath Token (nodig voor nieuwe avonturiers), Sap Tonic (HP), Tide Draught (veel HP), Spirit Dew (SP), Clearwater (statuseffecten), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
 | Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe, Runehewn Axe, Hrimstring Bow, Frostbirch Rod, Scalehide Mail, Rimeweave Robe, Wyrmtooth Blade, Embersong Bow, Ashroot Rod, Emberscale Plate, Starveil Robe, Saltsteel Blade, Gullwind Bow, Driftwood Rod, Sharkhide Mail, Kelpweave Robe, Tidebreaker Axe, Stormgull Bow, Coralheart Rod, Anchor Plate, Deepscale Mail, Seafoam Robe, Fathom Edge, Wavecaller Bow, Abyss Rod, Leviathan Mail, Tidesong Robe |
 | Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, Hrimwolf, Frostcap, Rimeshell, Snowveil Moth, Cinderwing, Emberling, Rootfiend, Ashen Colossus, Brineling, Skerrywing, Reefclaw, Kelp Strangler, Brinecap, Seahound, Pearlmoth, Coralback, Tidecaller, Nykur, Saltwight, Gloom Eel, Deepmaw, Wavemaid, Fathomstone; bazen **The Blighted Elder**, **The Rootgnawer**, **The Drowned Jarl** en **The Hafgufa** |
 | Prowlers | Sterke monsters die zichtbaar over de kaart lopen: Grimtusk, Fenwraith, Root Draugr, Skerryjaw, Brine Draugr, Tidecoil |

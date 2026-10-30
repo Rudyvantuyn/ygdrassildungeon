@@ -7,6 +7,15 @@ import type { ClassId } from './types';
 export const MAX_PARTY = 4;
 export const MAX_ROSTER = 12;
 export const NAME_MAX_LENGTH = 12;
+/** The first adventurers swear the oath for free; after that each oath costs gold and an Oath Token. */
+export const FOUNDING_OATHS = 4;
+
+/** What swearing in the next adventurer costs. */
+export function oathCost(game: Game): { gold: number; tokens: number } {
+  const n = game.state.oaths ?? rosterSize(game);
+  if (n < FOUNDING_OATHS) return { gold: 0, tokens: 0 };
+  return { gold: Math.min(20000, 300 * 2 ** (n - FOUNDING_OATHS)), tokens: 1 };
+}
 
 export function rosterSize(game: Game): number {
   return game.state.party.length + game.state.reserve.length;
@@ -21,6 +30,12 @@ export function registerMember(game: Game, rawName: string, classId: ClassId): s
   const all = [...game.state.party, ...game.state.reserve];
   if (all.some((m) => m.name.toLowerCase() === name.toLowerCase())) return `There is already someone called ${name}.`;
   if (all.length >= MAX_ROSTER) return `The Oath Hall can hold at most ${MAX_ROSTER} adventurers.`;
+  const cost = oathCost(game);
+  if (game.state.gold < cost.gold) return `The oath costs ${cost.gold} G.`;
+  if ((game.state.inventory.oathToken ?? 0) < cost.tokens) return 'You need an Oath Token. Bosses and prowlers leave them, and some chests hold one.';
+  game.state.gold -= cost.gold;
+  game.state.inventory.oathToken = (game.state.inventory.oathToken ?? 0) - cost.tokens;
+  game.state.oaths = (game.state.oaths ?? rosterSize(game)) + 1;
   const member = createMember(name, classId);
   if (game.state.party.length < MAX_PARTY) game.state.party.push(member);
   else game.state.reserve.push(member);

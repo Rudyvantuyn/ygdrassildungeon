@@ -118,7 +118,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['hollowHound', 'duskwing', 'duskwing'], weight: 2 },
       { enemies: ['shellbark'], weight: 1 },
     ],
-    chests: [{ item: 'spiritDew', qty: 2 }, { item: 'sapTonic', qty: 3 }],
+    chests: [{ item: 'spiritDew', qty: 2 }, { item: 'oathToken', qty: 1 }],
     prowlers: [],
     palette: {
       textures: 'forest',
@@ -335,7 +335,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['seahound', 'brinecap'], weight: 2 },
       { enemies: ['kelpStrangler', 'skerrywing'], weight: 1 },
     ],
-    chests: [{ item: 'spiritDew', qty: 4 }, { gold: 1800 }],
+    chests: [{ item: 'spiritDew', qty: 4 }, { item: 'oathToken', qty: 1 }],
     // The Skerryjaw patrols the south passage; the east shaft goes around it.
     prowlers: [{ enemies: ['skerryjaw'], route: [[9, 14], [16, 14]], hunt: 0 }],
     palette: {
@@ -422,7 +422,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['saltwight'], weight: 2 },
       { enemies: ['nykur', 'pearlmoth'], weight: 1 },
     ],
-    chests: [{ item: 'tideDraught', qty: 5 }, { gold: 3200 }],
+    chests: [{ item: 'tideDraught', qty: 5 }, { item: 'oathToken', qty: 1 }],
     // Two prowlers: the south-west hall and the east hall. The middle passages lead around both.
     prowlers: [
       { enemies: ['skerryjaw'], route: [[7, 15], [10, 15]], hunt: 0 },

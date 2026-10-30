@@ -5,9 +5,9 @@ export interface ItemDef {
   name: string;
   /**
    * hp/sp restore an ally; cure removes ailments; revive (amount = % of max HP) wakes a fallen ally;
-   * warp returns the party to town (outside combat only).
+   * warp returns the party to town (outside combat only); token is a keepsake with a use in town.
    */
-  effect: 'hp' | 'sp' | 'cure' | 'revive' | 'warp';
+  effect: 'hp' | 'sp' | 'cure' | 'revive' | 'warp' | 'token';
   amount: number;
   price: number;
   description: string;
@@ -36,6 +36,14 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     price: 120,
     description: 'Toss it into the air and the wind carries you home to Lindholm. Use it from the pack menu.',
   },
+  oathToken: {
+    id: 'oathToken',
+    name: 'Oath Token',
+    effect: 'token',
+    amount: 0,
+    price: 0,
+    description: 'A carved token of living root-wood. The Oath Hall needs one to swear in each new adventurer. Found on bosses, prowlers and in some chests.',
+  },
 };
 
 /** A full inventory (every item present) from just the items you name. */
@@ -46,5 +54,5 @@ export function makeInventory(items: Partial<Record<ItemId, number>> = {}): Reco
 }
 
 export function usableInCombat(id: ItemId): boolean {
-  return ITEMS[id].effect !== 'warp';
+  return ITEMS[id].effect !== 'warp' && ITEMS[id].effect !== 'token';
 }

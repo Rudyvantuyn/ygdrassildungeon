@@ -57,6 +57,12 @@ export interface GameState {
   quests: Record<string, QuestState>;
   /** Story scenes already shown. */
   story: string[];
+  /** Adventurers ever sworn in at the Oath Hall (the first few are free). */
+  oaths?: number;
+  /** Tutorial tips already shown. */
+  tips?: string[];
+  /** Tutorial tips switched off. */
+  tipsOff?: boolean;
   /** Steps taken since the last encounter, compared against `encounterAt`. */
   danger: number;
   encounterAt: number;
@@ -125,6 +131,8 @@ export class Game {
     state.kills ??= {};
     state.quests ??= {};
     state.story ??= [];
+    state.oaths ??= state.party.length + state.reserve.length;
+    state.tips ??= [];
     // Saves from before skill points: give everyone the recommended build for their level.
     for (const m of [...state.party, ...state.reserve]) if (!m.skills) autoSpend(m);
     state.progress.forEach((p, i) => {
@@ -137,8 +145,14 @@ export class Game {
     state.cleared = state.progress[this.floors.length - 1].bossDefeated;
   }
 
-  static newGame(seed: number): Game {
-    return Game.fresh(seed, FLOORS);
+  /** A new game; `party` is the group the player made (the default party is for tests and the computer player). */
+  static newGame(seed: number, party?: Member[]): Game {
+    const game = Game.fresh(seed, FLOORS);
+    if (party) {
+      game.state.party = party;
+      game.state.oaths = party.length;
+    }
+    return game;
   }
 
   /**

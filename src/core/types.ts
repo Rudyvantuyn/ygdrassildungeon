@@ -27,7 +27,7 @@ export type ClassId = 'bastion' | 'strider' | 'mender' | 'runecaller' | 'skald' 
 /** Stats that skills can raise or lower for a few turns in a fight. */
 export type ModStat = 'atk' | 'def' | 'mag' | 'res';
 
-export type ItemId = 'sapTonic' | 'tideDraught' | 'spiritDew' | 'clearwater' | 'kindlingMoss' | 'homingFeather';
+export type ItemId = 'sapTonic' | 'tideDraught' | 'spiritDew' | 'clearwater' | 'kindlingMoss' | 'homingFeather' | 'oathToken';
 
 export type SkillId =
   | 'challenge'

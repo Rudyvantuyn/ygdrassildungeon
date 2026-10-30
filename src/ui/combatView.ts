@@ -25,6 +25,8 @@ export interface CombatHost {
   shakeView(): void;
   /** On an expedition: the player behind each party member. */
   readonly partyOwners?: string[];
+  /** Something worth a tip happened (shown after the fight). */
+  noticeTip?(id: string): void;
 }
 
 /**
@@ -434,6 +436,7 @@ export class CombatView {
         return;
       }
       case 'ailment': {
+        if (ev.ailment) this.host.noticeTip?.('ailment');
         audio.play(ev.ailment ? 'ailment' : 'cure');
         if (ev.side === 'enemy') this.enemyAilment[ev.target] = ev.ailment;
         else {
@@ -445,6 +448,7 @@ export class CombatView {
         return;
       }
       case 'down':
+        if (ev.side === 'party') this.host.noticeTip?.('fallen');
         if (ev.side === 'enemy') this.enemyAilment[ev.target] = null;
         else this.partyAilment[ev.target] = null;
         audio.play(ev.side === 'enemy' ? 'enemyDown' : 'allyDown');
@@ -473,7 +477,10 @@ export class CombatView {
       hp: this.partyHp,
       sp: this.partySp,
       ailments: this.partyAilment,
-      mods: this.combat.status.map((s) => modText(s.mods)),
+      mods: this.combat.status.map((s) => {
+        if (s.mods && Object.keys(s.mods).length) this.host.noticeTip?.('buffs');
+        return modText(s.mods);
+      }),
       active: this.current >= 0 ? this.current : null,
       owners: this.host.partyOwners,
     });

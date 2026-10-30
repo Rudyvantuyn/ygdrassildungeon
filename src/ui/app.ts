@@ -25,13 +25,15 @@ import { MapEditor } from './mapEditor';
 import { Designer, isMaker, loadDraft } from './designer';
 import { memberPicker, showSkillTree } from './skillsView';
 import { gatherPrompt } from './gatherView';
+import { Founding } from './founding';
+import { TIPS, TIP_BY_ID, type TipDef } from '../core/data/tutorials';
 import { GATHER_KINDS } from '../core/data/gathering';
 import { describeFinds } from '../core/expedition';
 import { unspentPoints } from '../core/skilltree';
 import { toFloorDef, type FloorDesign } from '../core/designer';
 import { markSeen, pendingScene, type StoryLine } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
-import { npcFromName } from './npc';
+import { npcFromName, npcSays } from './npc';
 import { ListMenu, type MenuItem } from './menu';
 import { PartyView } from './partyView';
 import { clearSave, readSave, writeSave } from './storage';
@@ -354,10 +356,21 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   private newGame(): void {
-    this.game = Game.newGame(randomSeed());
-    this.save();
-    this.closeOverlay();
-    this.enterTown();
+    const founding = new Founding(
+      {
+        openOverlay: (content, menu) => this.openOverlay(content, menu),
+        confirm: (title, text, yes, back) => this.confirm(title, text, yes, back),
+        preview: (party) => this.party.render(party),
+      },
+      (party) => {
+        this.game = Game.newGame(randomSeed(), party);
+        this.save();
+        this.closeOverlay();
+        this.enterTown();
+      },
+      () => this.showTitle(),
+    );
+    founding.start();
   }
 
   private loadSave(): void {
@@ -402,7 +415,22 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.message.classList.add('hidden');
     this.town.show();
     this.updateHud();
-    this.playStory('town', (id) => (id === 'chapterTwoEnd' ? this.showCredits() : (this.mode = 'town')));
+    const tips = () => this.townTips();
+    if (pendingScene(this.game, 'town')) this.playStory('town', (id) => (id === 'chapterTwoEnd' ? this.showCredits() : tips()));
+    else tips();
+  }
+
+  /** Tips for the town, each shown once: the town itself, then whatever has come up. */
+  private townTips(): void {
+    const s = this.game.state;
+    const back = () => {
+      this.closeOverlay();
+      this.mode = 'town';
+    };
+    const queue = ['town'];
+    if (s.party.some((m) => unspentPoints(m) > 0)) queue.push('skillPoints');
+    if ((s.inventory.oathToken ?? 0) > 0) queue.push('oath');
+    this.tips(queue, back);
   }
 
   enterDungeon(): void {
@@ -424,7 +452,93 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.message.classList.add('hidden');
     this.updateHud();
     // The story belongs to your own hall; expeditions skip it.
-    if (!this.coop) this.playStory('floor', () => (this.mode = 'explore'));
+    if (this.coop) return;
+    const tips = () => {
+      const queue = ['firstStep', ...this.tipQueue.splice(0)];
+      if (def.prowlers.length) queue.push('prowler');
+      if (def.boss && !this.game.progress.bossDefeated) queue.push('boss');
+      this.tips(queue, () => {
+        this.closeOverlay();
+        this.mode = 'explore';
+      });
+    };
+    if (pendingScene(this.game, 'floor')) this.playStory('floor', tips);
+    else tips();
+  }
+
+  // ── Tips ───────────────────────────────────────────────────────────────────
+
+  private resumeExplore(): void {
+    this.closeOverlay();
+    this.mode = 'explore';
+  }
+
+  /** Tips noticed during a fight, shown once the party is exploring again. */
+  private tipQueue: string[] = [];
+
+  /** Remembers a tip to show at the next calm moment (used during fights). */
+  noticeTip(id: string): void {
+    if (!this.tipQueue.includes(id)) this.tipQueue.push(id);
+  }
+
+  /** Shows the tips in `ids` that have not been seen yet, one after another, then calls `then`. */
+  tips(ids: string[], then: () => void): void {
+    const s = this.game.state;
+    const next = ids.find((id) => !s.tips?.includes(id) && TIP_BY_ID[id]);
+    if (!next || this.coop || this.trial || s.tipsOff) return then();
+    (s.tips ??= []).push(next);
+    this.save();
+    this.showTip(TIP_BY_ID[next], 0, () => this.tips(ids, then), true);
+  }
+
+  /** One tip, page by page. `live` tips offer to switch tips off; tips read from the Guidebook do not. */
+  showTip(tip: TipDef, page: number, then: () => void, live = false): void {
+    const last = page === tip.pages.length - 1;
+    const items: MenuItem[] = [
+      { label: last ? 'Got it' : 'Next', onSelect: () => (last ? then() : this.showTip(tip, page + 1, then, live)) },
+    ];
+    if (live) {
+      items.push({
+        label: 'No more tips',
+        description: 'Stop showing tips. You can read them all in the Guidebook, and switch them back on in the options.',
+        onSelect: () => {
+          this.game.state.tipsOff = true;
+          this.save();
+          then();
+        },
+      });
+    }
+    const menu = new ListMenu(items, { onCancel: () => then() });
+    this.openOverlay(
+      el('div', { className: 'panel dialog wide tip' }, [
+        el('h2', { text: tip.title }),
+        npcSays(tip.speaker, tip.pages[page]),
+        el('p', { className: 'tip-page', text: tip.pages.length > 1 ? `${page + 1} / ${tip.pages.length}` : '' }),
+        menu.el,
+      ]),
+      menu,
+    );
+  }
+
+  /** Every tip, to read again. */
+  showGuidebook(back: () => void, start = 0): void {
+    const items: MenuItem[] = TIPS.map((tip, i) => ({
+      label: tip.title,
+      detail: this.game.state.tips?.includes(tip.id) ? '' : 'new',
+      onSelect: () => this.showTip(tip, 0, () => this.showGuidebook(back, i)),
+    }));
+    items.push({
+      label: this.game.state.tipsOff ? 'Tips: off' : 'Tips: on',
+      description: 'Whether tips appear when something new comes up.',
+      onSelect: () => {
+        this.game.state.tipsOff = !this.game.state.tipsOff;
+        this.save();
+        this.showGuidebook(back, items.length - 2);
+      },
+    });
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back, startIndex: start });
+    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Guidebook' }), menu.el]), menu);
   }
 
   // ── Expeditions ────────────────────────────────────────────────────────────
@@ -699,6 +813,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       case 'chestAhead':
         audio.play('bump');
         this.toast(ev.opened ? 'An empty chest.' : 'A chest! Press Space or Act to open it.');
+        if (!ev.opened) this.tips(['chest'], () => this.resumeExplore());
         return;
       case 'nothing':
         return;
@@ -742,6 +857,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           this.toast('The spring has run dry.');
           return;
         }
+        if (!this.game.state.tips?.includes('spring') && !this.game.state.tipsOff && !this.trial) return this.tips(['spring'], () => this.handleStep(ev));
         this.confirm('Healing spring', 'Drink from the spring? It fully restores the party and saves your game. It only works once.', () => {
           audio.play('spring');
           this.game.drinkSpring();
@@ -751,6 +867,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         });
         return;
       case 'gatherSpot': {
+        if (!this.game.state.tips?.includes('gather') && !this.game.state.tipsOff && !this.trial) return this.tips(['gather'], () => this.handleStep(ev));
         const message = gatherPrompt(ev);
         if (!message.ask) return this.toast(message.text);
         this.confirm(GATHER_KINDS[ev.kind].verb, message.text, () => {
@@ -800,6 +917,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   // ── Combat ─────────────────────────────────────────────────────────────────
 
   startCombat(combat: Combat, driver: RoundDriver | null = null): void {
+    if (!this.coop && !this.trial && !this.game.state.tips?.includes('battle') && !this.game.state.tipsOff) {
+      this.mode = 'busy';
+      return this.tips(['battle'], () => this.startCombat(combat, driver));
+    }
     this.closeOverlay();
     this.mode = 'combat';
     this.toastEl.classList.add('hidden');
@@ -845,6 +966,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const levelUps = r.levelUps.map((l) =>
       el('div', { className: 'levelup', text: `${this.game.state.party[l.member].name} reached level ${l.level}! A new skill point to spend.` }),
     );
+    this.noticeTip('victory');
+    if (r.levelUps.length) this.noticeTip('skillPoints');
     const done = () => {
       this.closeOverlay();
       if (this.coop) return this.coop.combatOver();
@@ -944,6 +1067,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           description: 'Spend skill points. Every level brings one; each skill goes up to rank 10.',
           onSelect: () => this.packSkillTree(),
         },
+        { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(() => this.openPack()) },
         { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.soundOptions(() => this.openPack()) },
         this.trial
           ? { label: 'End the test', description: 'Back to the drafting table.', onSelect: () => this.endTrial() }
@@ -993,7 +1117,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private packItems(): void {
     const party = this.game.state.party;
     const inv = this.game.state.inventory;
-    const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].effect !== 'warp');
+    const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].effect !== 'warp' && ITEMS[id].effect !== 'token');
     const items: MenuItem[] = usable.map((id) => ({
       label: ITEMS[id].name,
       detail: `×${inv[id] ?? 0}`,
@@ -1095,6 +1219,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   private showMapOverlay(): void {
+    if (!this.game.state.tips?.includes('map') && !this.game.state.tipsOff && !this.trial && !this.coop) return this.tips(['map'], () => this.showMapOverlay());
     this.mapEditor = new MapEditor(this.game, () => {
       this.mapEditor = null;
       this.closeOverlay();
@@ -1168,10 +1293,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
   // ── Overlay helpers ────────────────────────────────────────────────────────
 
-  confirm(title: string, text: string, yes: () => void): void {
+  /** Yes/no question. Saying no goes back to `back`, or to exploring when there is none. */
+  confirm(title: string, text: string, yes: () => void, back?: () => void): void {
     const no = () => {
       this.closeOverlay();
-      this.enterExplore();
+      if (back) back();
+      else this.enterExplore();
     };
     const menu = new ListMenu(
       [

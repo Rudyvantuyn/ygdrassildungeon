@@ -23,7 +23,7 @@ import {
   restAtInn,
   statDelta,
 } from '../core/town';
-import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow } from '../core/guild';
+import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow, oathCost, FOUNDING_OATHS } from '../core/guild';
 import type { ClassId, Member, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
 import { el } from './dom';
@@ -44,7 +44,10 @@ export interface TownHost {
   soundOptions(back: () => void): void;
   showHelp(back: () => void): void;
   openHornstone(): void;
-  confirm(title: string, text: string, yes: () => void): void;
+  confirm(title: string, text: string, yes: () => void, back?: () => void): void;
+  /** Shows tips not seen yet, then continues. */
+  tips(ids: string[], then: () => void): void;
+  showGuidebook(back: () => void): void;
 }
 
 const STAT_LABELS: Record<keyof Stats, string> = { hp: 'HP', sp: 'SP', atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES', spd: 'SPD' };
@@ -67,22 +70,22 @@ export class TownView {
   /** Builds the side-panel menu. */
   show(): void {
     const entries: (Omit<MenuItem, 'onFocus'> & { spot: TownSpot | null })[] = [
-      { label: 'Inn', detail: `${innCost(this.game)} G`, description: 'Rest to restore HP and SP, revive fallen members, and save.', spot: 'inn', onSelect: () => this.inn() },
-      { label: 'Oath Hall', description: 'Register new adventurers and choose who joins the party.', spot: 'hall', onSelect: () => this.hall() },
-      { label: 'Shop', description: 'Buy items and equipment. Better gear appears as you go deeper.', spot: 'shop', onSelect: () => this.shop() },
+      { label: 'Inn', detail: `${innCost(this.game)} G`, description: 'Rest to restore HP and SP, revive fallen members, and save.', spot: 'inn', onSelect: () => this.host.tips(['inn'], () => this.inn()) },
+      { label: 'Oath Hall', description: 'Register new adventurers and choose who joins the party.', spot: 'hall', onSelect: () => this.host.tips((this.game.state.oaths ?? 0) >= FOUNDING_OATHS ? ['oath', 'skillPoints'] : ['skillPoints'], () => this.hall()) },
+      { label: 'Shop', description: 'Buy items and equipment. Better gear appears as you go deeper.', spot: 'shop', onSelect: () => this.host.tips(['shop'], () => this.shop()) },
       {
         label: 'Notice Board',
         detail: this.boardBadge(),
         description: 'Requests from the people of Lindholm. Finished work pays well.',
         spot: 'board',
-        onSelect: () => this.board(),
+        onSelect: () => this.host.tips(['quests'], () => this.board()),
       },
       { label: 'Rootdeep', description: 'Enter the Rootdeep at any floor you have reached.', spot: 'rootdeep', onSelect: () => this.rootdeep() },
       {
         label: 'Hornstone',
         description: 'Sound the horn to descend together with players from other halls.',
         spot: 'horn',
-        onSelect: () => this.host.openHornstone(),
+        onSelect: () => this.host.tips(['hornstone'], () => this.host.openHornstone()),
       },
       { label: 'Party', description: 'View stats and equipment.', spot: null, onSelect: () => this.host.partyStatus(() => this.back()) },
       { label: 'System', description: 'Save, sound, help, and quit to the title screen.', spot: null, onSelect: () => this.system() },
@@ -138,6 +141,7 @@ export class TownView {
       [
         { label: 'Save', description: 'Save your progress.', onSelect: () => { this.host.save(); this.back(); this.host.toast('Game saved.'); } },
         { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.host.soundOptions(() => this.system()) },
+        { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.host.showGuidebook(() => this.system()) },
         { label: 'How to Play', description: 'Controls and tips.', onSelect: () => this.host.showHelp(() => this.system()) },
         { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onSelect: () => this.host.showTitle() },
         { label: 'Back', onSelect: back },
@@ -237,8 +241,8 @@ export class TownView {
       [
         {
           label: 'Register an adventurer',
-          detail: `${rosterSize(this.game)}/${MAX_ROSTER}`,
-          description: 'Swear in a new adventurer at level 1.',
+          detail: oathText(this.game),
+          description: `Swear in a new adventurer at level 1 (${rosterSize(this.game)}/${MAX_ROSTER} in the hall). Each oath after your first party costs more gold and an Oath Token; you have ${s.inventory.oathToken ?? 0}.`,
           disabled: rosterSize(this.game) >= MAX_ROSTER,
           onSelect: () => this.chooseClass(),
         },
@@ -288,7 +292,7 @@ export class TownView {
             this.host.save();
             this.host.updateHud();
             this.unlearn();
-          }),
+          }, () => this.unlearn()),
       };
     });
     items.push({ label: 'Back', onSelect: back });
@@ -334,7 +338,7 @@ export class TownView {
       ],
       { onCancel: () => this.chooseClass() },
     );
-    this.dialog(`A new ${CLASSES[classId].name}`, [el('p', { text: 'What is your name, adventurer?' }), input, error], menu);
+    this.dialog(`A new ${CLASSES[classId].name}`, [el('p', { text: 'What is your name, adventurer?' }), el('p', { className: 'gold-line', text: `The oath costs ${oathText(this.game)}.` }), input, error], menu);
     input.focus();
   }
 
@@ -572,6 +576,13 @@ export class TownView {
     }
     this.host.openOverlay(el('div', { className: 'panel dialog wide' }, children), menu);
   }
+}
+
+/** "600 G + 1 Oath Token", or "free". */
+function oathText(game: Game): string {
+  const cost = oathCost(game);
+  if (!cost.gold && !cost.tokens) return 'free';
+  return `${cost.gold} G + ${cost.tokens} Oath Token`;
 }
 
 /** The Oath Hall's fee for unlearning: a little more for every level. */

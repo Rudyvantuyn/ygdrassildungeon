@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { chooseCommands } from './autoplay';
-import { MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow } from './guild';
+import { MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, oathCost, registerMember, rosterSize, shiftMember, toggleRow } from './guild';
 import { NOTE_MAX_LENGTH, emptyChart, eraseCell, setMark, setNote, setTerrain, terrainAt } from './chart';
-import { Combat, PROWLER_FLEE_CHANCE, type Command } from './combat';
+import { Combat, GOLD_RATE, PROWLER_FLEE_CHANCE, XP_RATE, type Command } from './combat';
 import { ENEMIES } from './data/enemies';
 import { FIRST_PROWLER_FLOOR, FLOORS } from './data/floors';
 import { SKILLS } from './data/skills';
@@ -160,8 +160,8 @@ describe('combat', () => {
     expect(combat.enemies.map((e) => e.name)).toEqual(['Bogling A', 'Bogling B']);
     for (let round = 0; round < 20 && !combat.outcome; round++) combat.resolveRound(attackAll(combat));
     expect(combat.outcome).toBe('victory');
-    expect(combat.rewards!.xp).toBe(ENEMIES.bogling.xp * 2);
-    expect(party.every((m) => m.xp === ENEMIES.bogling.xp * 2)).toBe(true);
+    expect(combat.rewards!.xp).toBe(Math.round(ENEMIES.bogling.xp * 2 * XP_RATE));
+    expect(party.every((m) => m.xp === combat.rewards!.xp)).toBe(true);
   });
 
   it('weakness boosts elemental damage', () => {
@@ -239,7 +239,7 @@ describe('combat', () => {
     game.enterFloor(2, true);
     const goldBefore = game.state.gold;
     beatBoss(game);
-    expect(game.state.gold).toBe(goldBefore + ENEMIES.blightedElder.gold);
+    expect(game.state.gold).toBe(goldBefore + Math.round(ENEMIES.blightedElder.gold * GOLD_RATE));
     expect(game.progress.bossDefeated).toBe(true);
     expect(game.state.cleared).toBe(false);
   });
@@ -549,8 +549,29 @@ describe('chart (player-drawn map)', () => {
 });
 
 describe('Oath Hall (party management)', () => {
+  /** Enough gold and Oath Tokens that the cost of an oath never gets in the way. */
+  const rich = (game: Game) => {
+    game.state.gold = 1e7;
+    game.state.inventory.oathToken = 99;
+    return game;
+  };
+
+  it('the first party is free; after that each oath costs more gold and an Oath Token', () => {
+    const game = Game.newGame(1, []);
+    for (const name of ['A', 'B', 'C', 'D']) expect(registerMember(game, name, 'strider')).toBeNull();
+    expect(game.state.gold).toBe(150);
+    expect(registerMember(game, 'E', 'strider')).toMatch(/300 G/);
+    game.state.gold = 1000;
+    expect(registerMember(game, 'E', 'strider')).toMatch(/Oath Token/);
+    game.state.inventory.oathToken = 2;
+    expect(registerMember(game, 'E', 'strider')).toBeNull();
+    expect(game.state.gold).toBe(700);
+    expect(game.state.inventory.oathToken).toBe(1);
+    expect(oathCost(game)).toEqual({ gold: 600, tokens: 1 });
+  });
+
   it('registers adventurers: party first, then the reserve', () => {
-    const game = Game.newGame(1);
+    const game = rich(Game.newGame(1));
     game.state.party.pop();
     expect(registerMember(game, '  Astrid  ', 'bastion')).toBeNull();
     expect(game.state.party.at(-1)!.name).toBe('Astrid');
@@ -560,7 +581,7 @@ describe('Oath Hall (party management)', () => {
   });
 
   it('rejects empty, too long and duplicate names, and a full roster', () => {
-    const game = Game.newGame(1);
+    const game = rich(Game.newGame(1));
     expect(registerMember(game, '   ', 'bastion')).toMatch(/name/);
     expect(registerMember(game, 'x'.repeat(NAME_MAX_LENGTH + 1), 'bastion')).toMatch(/at most/);
     expect(registerMember(game, 'bram', 'strider')).toMatch(/already/);
@@ -569,7 +590,7 @@ describe('Oath Hall (party management)', () => {
   });
 
   it('swaps members between party and reserve, keeping at least one in the party', () => {
-    const game = Game.newGame(1);
+    const game = rich(Game.newGame(1));
     registerMember(game, 'Sigrun', 'runecaller');
     expect(moveToParty(game, 0)).toBe(false); // party is full
     expect(moveToReserve(game, 0)).toBe(true);
@@ -581,7 +602,7 @@ describe('Oath Hall (party management)', () => {
   });
 
   it('changes marching order and rows, and dismisses reserve members', () => {
-    const game = Game.newGame(1);
+    const game = rich(Game.newGame(1));
     expect(shiftMember(game, 0, 1)).toBe(true);
     expect(game.state.party[1].name).toBe('Bram');
     expect(shiftMember(game, 0, -1)).toBe(false);
@@ -593,7 +614,7 @@ describe('Oath Hall (party management)', () => {
   });
 
   it('a smaller party still fights, and the reserve survives a save', () => {
-    const game = Game.newGame(1);
+    const game = rich(Game.newGame(1));
     moveToReserve(game, 3);
     moveToReserve(game, 2);
     const combat = game.startCombat(['bogling']);

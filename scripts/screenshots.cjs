@@ -34,9 +34,24 @@ const out = 'screenshots';
   await page.waitForTimeout(800);
   await shot('01-title');
 
-  await press('Enter'); // New Game -> town
-  await page.waitForTimeout(300); // skipped intro:
+  await press('Enter'); // New Game -> founding the party at the Oath Hall
+  await shot('01b-founding');
+  // Swear in four adventurers: [name, steps down the class list].
+  for (const [name, down] of [['Bram', 0], ['Sela', 1], ['Wren', 2], ['Orrin', 3]]) {
+    await press('Enter'); // Swear in an adventurer
+    await press('ArrowDown', down);
+    await press('Enter'); // the class
+    await page.keyboard.type(name);
+    await press('Enter'); // swear the oath
+  }
+  await shot('01c-founded');
+  await press('Enter'); // Set out for Lindholm
+  // The intro story and the first tips: show one, then step through them.
   for (let i = 0; i < 12 && (await page.evaluate(() => window.ygg.mode)) === 'story'; i++) await page.keyboard.press('Escape');
+  await shot('01d-tip');
+  for (let i = 0; i < 12 && (await page.evaluate(() => window.ygg.mode)) === 'overlay'; i++) await press('Escape');
+  // Tips are covered above; the rest of the tour runs without them.
+  await page.evaluate(() => (window.ygg.game.state.tipsOff = true));
   await shot('02-town');
   await press('ArrowUp', 2); // Shop
   await press('Enter');

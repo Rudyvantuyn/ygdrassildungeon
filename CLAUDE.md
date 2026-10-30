@@ -40,6 +40,15 @@ Add new names there and keep the glossary in sync.
 - **Character growth is dynamic**: skill points per level, spent in a skill tree per class; skills have ranks 1–10.
   There are also gathering skills (e.g. foraging, mining) used at gathering spots in the dungeon. More classes are
   welcome; invent them freely (own names).
+- **A new game starts by founding the party**: the player swears in their own adventurers (up to four, free) with
+  Brynja's guidance. After that every new adventurer costs rising gold **and an Oath Token** (found on bosses,
+  prowlers and in a few chests), so the roster cannot grow endlessly.
+- **The game is meant to be grindy and challenging**: XP and gold come slowly (`XP_RATE`, `GOLD_RATE` in combat.ts);
+  the balance tests check that rushing fails and steady training wins.
+- **Lots of tutorials**: short tips by the townsfolk the first time something comes up (`src/core/data/tutorials.ts`),
+  all readable again in the Guidebook, and they can be switched off. Add a tip for every new mechanic.
+- **The overarching story will be written by a friend of the owner.** `docs/verhaal-briefing.md` tells the writer what
+  the game needs; turn what they deliver into `src/core/data/story.ts` scenes.
 
 - **Multiplayer** means going into the dungeon together: each player brings one of their own adventurers into a
   party of up to four (an "expedition"). No shared town. Trading may come later (low priority). Leaderboards and

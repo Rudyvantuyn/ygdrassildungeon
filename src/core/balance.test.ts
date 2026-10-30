@@ -39,43 +39,41 @@ describe('balance (computer player)', () => {
   const seeds = Array.from({ length: 20 }, (_, i) => 1000 + i);
   const count = (results: AutoplayResult[], ok: (r: AutoplayResult) => boolean) => results.filter(ok).length;
 
-  it('the Blighted Elder (third floor) is a real threat without grinding', () => {
+  // The game is meant to be grindy: rushing ahead fails, steady training wins.
+  it('the Blighted Elder (third floor) cannot be rushed', () => {
     const results = seeds.map((s) => autoplay(s, { floors: 3 }));
-    const won = count(results, (r) => r.bossesDefeated >= 1);
-    expect(won).toBeGreaterThanOrEqual(8);
-    expect(won).toBeLessThan(20);
+    expect(count(results, (r) => r.bossesDefeated >= 1)).toBeLessThanOrEqual(3);
     const avgLevel = results.reduce((sum, r) => sum + r.levels[0], 0) / results.length;
-    expect(avgLevel).toBeGreaterThan(4.5);
-    expect(avgLevel).toBeLessThan(8);
+    expect(avgLevel).toBeGreaterThan(4);
+    expect(avgLevel).toBeLessThan(7);
   });
 
   it('a careful party that grinds a little and shops in town beats the Elder', () => {
     const plain = count(seeds.map((s) => autoplay(s, { floors: 3, grindBattles: 5 })), (r) => r.bossesDefeated >= 1);
     const town = count(seeds.map((s) => autoplay(s, { floors: 3, grindBattles: 5, town: true })), (r) => r.bossesDefeated >= 1);
     expect(town).toBeGreaterThanOrEqual(plain);
-    expect(town).toBeGreaterThanOrEqual(18);
+    expect(town).toBeGreaterThanOrEqual(17);
   });
 
-  it('the Rootgnawer (end of chapter I) needs training', () => {
+  it('the Rootgnawer (end of chapter I) needs real training', () => {
     const beaten = (r: AutoplayResult) => r.bossesDefeated >= 2;
     const untrained = count(seeds.map((s) => autoplay(s, { floors: 5, town: true })), beaten);
-    expect(untrained).toBeGreaterThanOrEqual(1);
-    expect(untrained).toBeLessThanOrEqual(12);
-    const trained = count(seeds.map((s) => autoplay(s, { floors: 5, town: true, grindBattles: 20 })), beaten);
-    expect(trained).toBeGreaterThanOrEqual(17);
+    expect(untrained).toBeLessThanOrEqual(6);
+    const some = count(seeds.map((s) => autoplay(s, { floors: 5, town: true, grindBattles: 10 })), beaten);
+    expect(some).toBeLessThanOrEqual(16);
+    const trained = count(seeds.map((s) => autoplay(s, { floors: 5, town: true, grindBattles: 30 })), beaten);
+    expect(trained).toBeGreaterThanOrEqual(18);
   });
 
-  it('the Hafgufa (end of chapter II) needs training too', () => {
-    const some = seeds.slice(0, 12).map((s) => autoplay(s, { town: true, grindBattles: 10 }));
-    const cleared = count(some, (r) => r.cleared);
-    expect(cleared).toBeGreaterThanOrEqual(1);
-    expect(cleared).toBeLessThanOrEqual(9);
-    const trained = seeds.slice(0, 12).map((s) => autoplay(s, { town: true, grindBattles: 20 }));
-    expect(count(trained, (r) => r.cleared)).toBeGreaterThanOrEqual(9);
-    // Chapter II is paced for a party in its twenties; level 40 stays out of reach for now.
+  it('the Hafgufa (end of chapter II) needs even more', () => {
+    const some = seeds.slice(0, 12).map((s) => autoplay(s, { town: true, grindBattles: 20 }));
+    expect(count(some, (r) => r.cleared)).toBeLessThanOrEqual(8);
+    const trained = seeds.slice(0, 12).map((s) => autoplay(s, { town: true, grindBattles: 40 }));
+    expect(count(trained, (r) => r.cleared)).toBeGreaterThanOrEqual(10);
+    // Paced for a party around level 30; level 40 stays out of reach for now.
     const avgLevel = trained.reduce((sum, r) => sum + r.levels[0], 0) / trained.length;
-    expect(avgLevel).toBeGreaterThan(24);
-    expect(avgLevel).toBeLessThan(35);
+    expect(avgLevel).toBeGreaterThan(26);
+    expect(avgLevel).toBeLessThan(37);
   });
 });
 

@@ -20,7 +20,7 @@ export function restAtInn(game: Game): boolean {
 }
 
 export function itemsForSale(game: Game): ItemId[] {
-  return (Object.keys(ITEMS) as ItemId[]).filter((id) => (ITEMS[id].minFloor ?? 0) <= game.state.deepest);
+  return (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].effect !== 'token' && (ITEMS[id].minFloor ?? 0) <= game.state.deepest);
 }
 
 export function buyItem(game: Game, id: ItemId): boolean {

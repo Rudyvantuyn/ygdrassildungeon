@@ -98,6 +98,12 @@ export interface CombatOptions {
 }
 
 const WEAK_MULT = 1.5;
+/**
+ * The pace of growth: share of the listed XP and gold an enemy gives. Below 1 on purpose, so getting
+ * stronger takes time (the owner wants a game that rewards grinding).
+ */
+export const XP_RATE = 0.7;
+export const GOLD_RATE = 0.75;
 /** Prowlers are hard to shake off, whatever the party's speed. */
 export const PROWLER_FLEE_CHANCE = 0.3;
 const RESIST_MULT = 0.5;
@@ -620,12 +626,14 @@ export class Combat {
   }
 
   private grantRewards(): Rewards {
-    const xp = this.enemies.reduce((sum, e) => sum + e.def.xp, 0);
-    const gold = this.enemies.reduce((sum, e) => sum + e.def.gold, 0);
+    const xp = Math.round(this.enemies.reduce((sum, e) => sum + e.def.xp, 0) * XP_RATE);
+    const gold = Math.round(this.enemies.reduce((sum, e) => sum + e.def.gold, 0) * GOLD_RATE);
     const drops: ItemId[] = [];
     for (const e of this.enemies) {
       if (e.def.drop && this.rng.chance(e.def.drop.chance)) drops.push(e.def.drop.item);
     }
+    // Bosses and prowlers always leave an Oath Token: the way to grow the roster.
+    if (this.boss || this.prowler) drops.push('oathToken');
     for (const item of drops) this.inventory[item] = (this.inventory[item] ?? 0) + 1;
     const materials: string[] = [];
     for (const e of this.enemies) {
