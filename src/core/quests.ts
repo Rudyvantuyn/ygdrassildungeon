@@ -48,7 +48,7 @@ export function questProgress(game: Game, def: QuestDef): { current: number; tar
 
 export function acceptQuest(game: Game, id: string): boolean {
   const def = QUESTS.find((q) => q.id === id);
-  if (!def || game.state.quests[id]) return false;
+  if (!def || game.state.quests[id] || game.state.deepest < def.minFloor) return false;
   const start = def.kind === 'hunt' ? (game.state.kills[def.target as string] ?? 0) : 0;
   game.state.quests[id] = { status: 'active', start };
   return true;

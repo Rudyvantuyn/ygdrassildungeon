@@ -98,7 +98,7 @@ export const TIPS: TipDef[] = [
     title: 'Gathering',
     speaker: 'torvald',
     pages: [
-      'Glowing signs on the floor are gathering spots: ✿ plants, ◆ ore, ♠ wood, ≈ fish.',
+      'Glowing medallions over the floor mark gathering spots: plants (a green sprig), ore (blue crystals), wood (an axe) and fish.',
       'Someone in the party needs the matching skill: Forage, Mine, Fell or Fish. They are in every skill tree.',
       'Each spot gives two tries per descent. Higher ranks find more, and rarer things. The noise can draw monsters.',
     ],
@@ -138,8 +138,8 @@ export const TIPS: TipDef[] = [
     pages: [
       'That shape in the dark is a prowler: a beast that gorged on Ymir\'s flesh and grew far stronger than anything around it.',
       'Do not fight one until you are much stronger. There is always a way around; some hunt you if you come close.',
-      'Running from a prowler works only about one time in three.',
-      'Those who do bring one down carry home an Oath Token, and the Oath Hall needs those.',
+      'Running from a prowler works only about one time in three, however many of you try.',
+      'The first time you bring one down, it leaves an Oath Token. It comes back after a while; its token does not.',
     ],
   },
   {
@@ -199,7 +199,7 @@ export const TIPS: TipDef[] = [
     title: 'The Hornstone',
     speaker: 'ketil',
     pages: [
-      'Every town that swore the Pact has a Hornstone. Blow it and Wayfinders from other halls can answer. Each brings one adventurer; four make an expedition.',
+      'Every town of the Pact has a Hornstone. Blow it and Wayfinders from other halls answer. Each brings one adventurer; four make an expedition.',
       'What you find on an expedition is shared when it ends. You need an account to use the horn.',
     ],
   },

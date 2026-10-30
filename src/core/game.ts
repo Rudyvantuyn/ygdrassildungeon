@@ -28,6 +28,8 @@ export interface FloorProgress {
   chart: Chart;
   /** Gathering spots used this visit: cell index → times. */
   gathered?: Record<number, number>;
+  /** Prowlers (by index) that already gave their Oath Token: they come back, the token does not. */
+  prowlerTokens?: number[];
 }
 
 export type Location = 'town' | 'dungeon';
@@ -134,6 +136,10 @@ export class Game {
     state.quests ??= {};
     state.story ??= [];
     state.choices ??= {};
+    if (!Number.isFinite(state.gold)) state.gold = 0;
+    if (!Number.isInteger(state.deepest) || state.deepest < 0) state.deepest = 0;
+    // Number the oaths of adventurers from before oaths were numbered.
+    [...state.party, ...state.reserve].forEach((m, i) => (m.oath ??= i + 1));
     // Difficulty settings existed briefly; everyone plays by the same rules (fair for expeditions).
     delete (state as { difficulty?: unknown }).difficulty;
     state.oaths ??= state.party.length + state.reserve.length;
@@ -156,6 +162,7 @@ export class Game {
     if (party) {
       game.state.party = party;
       game.state.oaths = party.length;
+      party.forEach((m, i) => (m.oath = i + 1));
     }
     return game;
   }
@@ -226,7 +233,8 @@ export class Game {
 
   static load(json: string): Game {
     const state = JSON.parse(json) as GameState;
-    if (state.version !== SAVE_VERSION) throw new SaveVersionError(state.version);
+    if (!state || typeof state !== 'object' || state.version !== SAVE_VERSION) throw new SaveVersionError(state?.version);
+    if (!Array.isArray(state.party) || !state.party.length || !Array.isArray(state.progress)) throw new SaveVersionError(state.version);
     return new Game(state);
   }
 
@@ -410,7 +418,8 @@ export class Game {
 
   startProwlerCombat(index: number): Combat {
     this.state.fighting = index;
-    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true });
+    const paid = this.progress.prowlerTokens?.includes(index) ?? false;
+    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true, oathToken: !paid });
   }
 
   startBossCombat(): Combat {
@@ -425,7 +434,11 @@ export class Game {
     const fighting = this.state.fighting ?? null;
     if (fighting !== null) {
       const prowler = this.progress.prowlers[fighting];
-      if (combat.outcome === 'victory') prowler.defeated = true;
+      if (combat.outcome === 'victory') {
+        prowler.defeated = true;
+        const paid = (this.progress.prowlerTokens ??= []);
+        if (!paid.includes(fighting)) paid.push(fighting);
+      }
       // After a successful escape the prowler is dazed for a few steps.
       if (combat.outcome === 'fled') prowler.stun = 3;
       this.state.fighting = null;

@@ -1,5 +1,6 @@
 import { GATHER_KINDS } from '../core/data/gathering';
-import { MARKS, terrainAt } from '../core/chart';
+import { MARKS, terrainAt, type MarkId } from '../core/chart';
+import { drawIcon, type IconId } from './icons';
 import { tileAt, type FloorMap, isGatherTile } from '../core/dungeon';
 import type { Game } from '../core/game';
 
@@ -68,12 +69,12 @@ export function drawMinimap(
           } else {
             ctx.fillStyle = FLOOR;
             ctx.fillRect(px + 1, py + 1, cell - 2, cell - 2);
-            if (tile === 'stairs') glyph(ctx, px + mid, py + mid, cell, MARKS.down.color, MARKS.down.glyph);
-            if (tile === 'up') glyph(ctx, px + mid, py + mid, cell, MARKS.up.color, MARKS.up.glyph);
-            if (tile === 'chest') glyph(ctx, px + mid, py + mid, cell, game.isChestOpened(x, y) ? '#9a9a9a' : MARKS.chest.color, MARKS.chest.glyph);
-            if (tile === 'spring') glyph(ctx, px + mid, py + mid, cell, game.progress.springUsed ? '#7a9aa8' : MARKS.spring.color, MARKS.spring.glyph);
-            if (tile === 'boss' && !game.progress.bossDefeated) glyph(ctx, px + mid, py + mid, cell, '#d0302a', '✸');
-            if (isGatherTile(tile)) glyph(ctx, px + mid, py + mid, cell, GATHER_KINDS[tile].color, GATHER_KINDS[tile].glyph);
+            if (tile === 'stairs') glyph(ctx, px + mid, py + mid, cell, MARKS.down.color, MARKS.down.glyph, 'down');
+            if (tile === 'up') glyph(ctx, px + mid, py + mid, cell, MARKS.up.color, MARKS.up.glyph, 'up');
+            if (tile === 'chest') glyph(ctx, px + mid, py + mid, cell, game.isChestOpened(x, y) ? '#9a9a9a' : MARKS.chest.color, MARKS.chest.glyph, 'chest', game.isChestOpened(x, y));
+            if (tile === 'spring') glyph(ctx, px + mid, py + mid, cell, game.progress.springUsed ? '#7a9aa8' : MARKS.spring.color, MARKS.spring.glyph, 'spring', game.progress.springUsed);
+            if (tile === 'boss' && !game.progress.bossDefeated) glyph(ctx, px + mid, py + mid, cell, '#d0302a', '✸', 'boss');
+            if (isGatherTile(tile)) glyph(ctx, px + mid, py + mid, cell, GATHER_KINDS[tile].color, GATHER_KINDS[tile].glyph, tile);
           }
         }
       } else {
@@ -88,14 +89,14 @@ export function drawMinimap(
       }
 
       const mark = chart.marks[index];
-      if (mark) glyph(ctx, px + mid, py + mid, cell, MARKS[mark].color, MARKS[mark].glyph);
+      if (mark) glyph(ctx, px + mid, py + mid, cell, MARKS[mark].color, MARKS[mark].glyph, MARK_ICONS[mark]);
     }
   }
 
   // Prowlers the party has seen
   game.progress.prowlers.forEach((p) => {
     if (p.defeated || !game.isExplored(p.x, p.y)) return;
-    glyph(ctx, ox + p.x * cell + cell / 2, oy + p.y * cell + cell / 2, cell, p.chasing ? '#e8402a' : '#e08a1a', '◆');
+    glyph(ctx, ox + p.x * cell + cell / 2, oy + p.y * cell + cell / 2, cell, p.chasing ? '#e8402a' : '#e08a1a', '◆', 'prowler');
   });
 
   // Party arrow
@@ -123,7 +124,12 @@ export function drawMinimap(
   }
 }
 
-function glyph(ctx: CanvasRenderingContext2D, x: number, y: number, cell: number, color: string, text: string): void {
+/** The icon for each mark the player can place. */
+export const MARK_ICONS: Record<MarkId, IconId> = { down: 'down', up: 'up', chest: 'chest', spring: 'spring', danger: 'danger', note: 'note', gather: 'forage' };
+
+/** A map symbol: the painted icon when it has loaded, else `text` in `color`. */
+function glyph(ctx: CanvasRenderingContext2D, x: number, y: number, cell: number, color: string, text: string, id?: IconId, dim = false): void {
+  if (id && drawIcon(ctx, id, x, y, cell * 0.96, dim)) return;
   ctx.fillStyle = color;
   ctx.font = `bold ${Math.floor(cell * 0.7)}px sans-serif`;
   ctx.textAlign = 'center';

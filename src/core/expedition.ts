@@ -16,7 +16,7 @@ import { MATERIALS } from './data/materials';
 import { ITEMS, makeInventory } from './data/items';
 import { SKILLS } from './data/skills';
 import { Game, type GameState, type StepEvent } from './game';
-import { NAME_MAX_LENGTH } from './guild';
+import { NAME_MAX_LENGTH, cleanName, nameLength } from './guild';
 import { fullRestore, isAlive, knownSkills, MAX_LEVEL, memberStats, xpForLevel } from './party';
 import { validSkills } from './skilltree';
 import { chooseCommands } from './tactics';
@@ -57,6 +57,8 @@ export interface Share {
   gold: number;
   materials: Record<string, number>;
   kills: Record<string, number>;
+  /** Oath Tokens won on the way, shared out one at a time. */
+  items?: Partial<Record<ItemId, number>>;
 }
 
 export interface ExpeditionState {
@@ -100,12 +102,17 @@ export type Action =
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
 /** Checks that an adventurer sent by a client is one the game could have produced. */
+/** The best gear tier an honest adventurer can carry at `level` (generous: tier t is sold from floor t). */
+export function maxGearTier(level: number): number {
+  return Math.floor(level / 2) + 1;
+}
+
 export function validMember(raw: unknown): Member | null {
   if (!raw || typeof raw !== 'object') return null;
   const m = raw as Partial<Member>;
   if (typeof m.name !== 'string') return null;
-  const name = m.name.trim();
-  if (!name || name.length > NAME_MAX_LENGTH) return null;
+  const name = cleanName(m.name);
+  if (!name || nameLength(name) > NAME_MAX_LENGTH) return null;
   if (typeof m.classId !== 'string' || !(m.classId in CLASSES)) return null;
   const level = m.level;
   if (typeof level !== 'number' || !Number.isInteger(level) || level < 1 || level > MAX_LEVEL) return null;
@@ -118,6 +125,9 @@ export function validMember(raw: unknown): Member | null {
     if (typeof id !== 'string') return false;
     const def = EQUIPMENT[id];
     if (!def || def.slot !== slot || !def.classes.includes(classId)) return false;
+    // Gear far beyond what an adventurer of this level could have bought is not accepted (a cheap cheat check;
+    // saves are kept on the player's device, so this cannot be exact).
+    if (def.tier > maxGearTier(level)) return false;
     return id;
   };
   const weapon = gear(m.weapon, 'weapon');
@@ -126,6 +136,7 @@ export function validMember(raw: unknown): Member | null {
   const skills = m.skills ?? {};
   if (!validSkills(classId, level, skills)) return null;
   const member: Member = { name, classId, row: m.row === 'back' ? 'back' : 'front', level, xp, hp: 1, sp: 0, skills: { ...skills } };
+  if (Number.isInteger(m.oath) && (m.oath as number) > 0) member.oath = m.oath;
   if (weapon) member.weapon = weapon;
   if (armor) member.armor = armor;
   fullRestore([member]);
@@ -217,8 +228,11 @@ function run(state: ExpeditionState, user: string, action: Action, now: number, 
       }
       for (const s of state.seats) if (s.user === user) s.left = true;
       if (leaderSeat(state) < 0) {
-        // Everybody is gone: the adventurers find their own way home.
-        end(state, 'returned');
+        // Everybody is gone. Walking out of a fight counts as losing it: no running from a guardian this way.
+        if (state.phase === 'combat') {
+          end(state, 'wiped');
+          note(state, 'Everyone left in the middle of a fight. The Rootdeep keeps what it found.');
+        } else end(state, 'returned');
         return null;
       }
       note(state, `${state.seats[seat].player} has left. Their adventurer fights on alone.`);
@@ -446,6 +460,7 @@ function end(state: ExpeditionState, reason: EndReason): void {
   if (game) {
     const gold = wiped ? 0 : Math.floor(game.gold / users.length);
     const pieces = wiped ? [] : Object.entries(game.materials).flatMap(([id, n]) => Array<string>(n).fill(id));
+    const tokens = wiped ? 0 : (game.inventory.oathToken ?? 0);
     shares.forEach((share, u) => {
       share.gold = gold;
       share.kills = { ...game.kills };
@@ -455,6 +470,9 @@ function end(state: ExpeditionState, reason: EndReason): void {
       pieces.forEach((id, i) => {
         if (i % users.length === u) share.materials[id] = (share.materials[id] ?? 0) + 1;
       });
+      // Tokens are rare: each one goes to a single player, in turn.
+      const mine = Math.floor(tokens / users.length) + (u < tokens % users.length ? 1 : 0);
+      if (mine) share.items = { oathToken: mine };
     });
   }
   state.result = { reason, shares };
@@ -477,18 +495,23 @@ export function claimShare(home: GameState, share: Share): string[] {
   home.gold += share.gold;
   for (const [id, n] of Object.entries(share.materials)) home.materials[id] = (home.materials[id] ?? 0) + n;
   for (const [id, n] of Object.entries(share.kills)) home.kills[id] = (home.kills[id] ?? 0) + n;
+  for (const [id, n] of Object.entries(share.items ?? {})) home.inventory[id as ItemId] = (home.inventory[id as ItemId] ?? 0) + (n ?? 0);
   const updated: string[] = [];
   for (const back of share.members) {
-    const mine = [...home.party, ...home.reserve].find((m) => m.name === back.name && m.classId === back.classId);
+    // The same adventurer: same name and class, and the same oath when both know it.
+    const mine = [...home.party, ...home.reserve].find(
+      (m) => m.name === back.name && m.classId === back.classId && (m.oath === undefined || back.oath === undefined || m.oath === back.oath),
+    );
     if (!mine) continue;
     // Only ever move forward, in case an older share is claimed late.
     if (back.xp > mine.xp) {
       mine.xp = back.xp;
       mine.level = back.level;
     }
+    // HP and SP stay as they were at home: an expedition is no free night at the inn.
     const max = memberStats(mine);
-    mine.hp = Math.min(back.hp, max.hp);
-    mine.sp = Math.min(back.sp, max.sp);
+    mine.hp = Math.min(mine.hp, max.hp);
+    mine.sp = Math.min(mine.sp, max.sp);
     updated.push(mine.name);
   }
   return updated;

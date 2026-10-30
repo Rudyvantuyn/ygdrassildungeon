@@ -94,6 +94,8 @@ export interface Member {
   sp: number;
   weapon?: string;
   armor?: string;
+  /** Which oath this was in its save (1, 2, …): tells apart two adventurers who share a name over time. */
+  oath?: number;
   /** Ranks bought with skill points (1–10). Saves from before skill points get a recommended build. */
   skills?: Partial<Record<SkillId, number>>;
 }

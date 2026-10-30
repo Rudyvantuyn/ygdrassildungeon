@@ -149,3 +149,27 @@ exported at 1024×1024 and scaled to 384 px WebP.
 | chest | MAHZeb7Z0H4 |
 | chest-open | MAHZeSMxMkQ |
 | spring | MAHZeQ7Kilc |
+
+## Map icons (`public/art/icons`)
+
+- Generated with Canva AI (2026-10-30), commercial use allowed under Canva's terms. Taken from the 200×200 previews,
+  cropped to the medallion, masked round and resized to 128×128 WebP (`down`, `up`, `chest`, `spring`, `danger`, `note`,
+  `forage`, `mine`, `fell`, `fish`, `boss`, `prowler`).
+- Prompt: *Painterly dark-fantasy game map icon: a round carved dark stone medallion with a thin worn gold rim, centered,
+  ... on a plain flat black background. In the middle, glowing ...: [symbol]. Hand-painted texture, strong readable
+  silhouette at small size, no text, no letters, no border outside the medallion.*
+
+| File | Canva media id |
+|---|---|
+| icons/down.webp | MAHZf6oOCho |
+| icons/up.webp | MAHZf2lvAFo |
+| icons/forage.webp | MAHZf6eloGk |
+| icons/mine.webp | MAHZf2JFEv8 |
+| icons/fell.webp | MAHZf3Xk9zU |
+| icons/fish.webp | MAHZfwyoOzs |
+| icons/chest.webp | MAHZf1fGOw4 |
+| icons/spring.webp | MAHZf1zi520 |
+| icons/boss.webp | MAHZf1WGBGg |
+| icons/prowler.webp | MAHZf3nfZb8 |
+| icons/danger.webp | MAHZf3vropk |
+| icons/note.webp | MAHZf7CVLTs |

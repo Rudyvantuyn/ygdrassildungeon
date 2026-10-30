@@ -38,7 +38,7 @@ import { drawPortrait } from '../render/portraits';
 import { npcFromName, npcSays } from './npc';
 import { ListMenu, type MenuItem } from './menu';
 import { PartyView } from './partyView';
-import { clearSave, readSave, writeSave } from './storage';
+import { readSave, writeSave } from './storage';
 import { TownView, type TownHost } from './townView';
 
 const VIEW_W = 860;
@@ -418,8 +418,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     try {
       this.game = Game.load(data);
     } catch {
-      clearSave();
-      this.showTitle('Your save was made with an older version of the game and could not be loaded. Please start a new game.');
+      // Keep the save as it is (it may load in a later version); a new game would replace it.
+      this.showTitle('This save could not be loaded. It is kept for now; starting a new game will replace it.');
       return;
     }
     this.closeOverlay();

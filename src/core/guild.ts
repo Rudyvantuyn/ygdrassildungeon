@@ -7,6 +7,16 @@ import type { ClassId } from './types';
 export const MAX_PARTY = 4;
 export const MAX_ROSTER = 12;
 export const NAME_MAX_LENGTH = 12;
+
+/** A name as typed, cleaned up: invisible and control characters removed, spaces collapsed. */
+export function cleanName(raw: string): string {
+  return raw.replace(/[\u0000-\u001f\u007f-\u009f\u00ad\u200b-\u200f\u2028-\u202f\u2060-\u206f\ufeff]/g, '').trim().replace(/\s+/g, ' ');
+}
+
+/** Length in characters as a player sees them (an emoji counts once). */
+export function nameLength(name: string): number {
+  return [...name].length;
+}
 /** The first adventurers swear the oath for free; after that each oath costs gold and an Oath Token. */
 export const FOUNDING_OATHS = 4;
 
@@ -23,9 +33,9 @@ export function rosterSize(game: Game): number {
 
 /** Returns an error message, or null when the new member was added (to the party if there is room, else the reserve). */
 export function registerMember(game: Game, rawName: string, classId: ClassId): string | null {
-  const name = rawName.trim().replace(/\s+/g, ' ');
+  const name = cleanName(rawName);
   if (!name) return 'Give your adventurer a name.';
-  if (name.length > NAME_MAX_LENGTH) return `Names can be at most ${NAME_MAX_LENGTH} letters.`;
+  if (nameLength(name) > NAME_MAX_LENGTH) return `Names can be at most ${NAME_MAX_LENGTH} letters.`;
   if (!CLASSES[classId]) return 'Unknown class.';
   const all = [...game.state.party, ...game.state.reserve];
   if (all.some((m) => m.name.toLowerCase() === name.toLowerCase())) return `There is already someone called ${name}.`;
@@ -37,6 +47,7 @@ export function registerMember(game: Game, rawName: string, classId: ClassId): s
   game.state.inventory.oathToken = (game.state.inventory.oathToken ?? 0) - cost.tokens;
   game.state.oaths = (game.state.oaths ?? rosterSize(game)) + 1;
   const member = createMember(name, classId);
+  member.oath = game.state.oaths;
   if (game.state.party.length < MAX_PARTY) game.state.party.push(member);
   else game.state.reserve.push(member);
   return null;

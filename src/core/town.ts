@@ -75,6 +75,7 @@ export function buyEquipment(game: Game, equipId: string, memberIndex: number): 
   const e = EQUIPMENT[equipId];
   const m = game.state.party[memberIndex];
   if (!e || !m || !canEquip(m, e) || m[e.slot] === e.id) return false;
+  if (!equipmentForSale(game).includes(e)) return false;
   const cost = netPrice(m, e);
   if (game.state.gold < cost) return false;
   game.state.gold -= cost;

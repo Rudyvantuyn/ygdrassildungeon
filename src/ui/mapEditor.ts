@@ -1,6 +1,7 @@
 import { CHART_MODES, MARKS, NOTE_MAX_LENGTH, eraseCell, setMark, setNote, setTerrain, type ChartMode, type MarkId } from '../core/chart';
 import type { Game } from '../core/game';
-import { drawMinimap, mapLayout } from '../render/minimap';
+import { MARK_ICONS, drawMinimap, mapLayout } from '../render/minimap';
+import { iconPath } from '../render/icons';
 import { el } from './dom';
 
 type Tool = 'floor' | 'wall' | 'erase' | MarkId;
@@ -57,9 +58,18 @@ export class MapEditor {
     TOOLS.forEach((t, i) => {
       const b = el('button', { className: 'map-tool' });
       b.innerHTML = `<span class="glyph"></span><span class="name"></span><span class="key">${i + 1}</span>`;
-      b.querySelector('.glyph')!.textContent = t.glyph;
+      const glyph = b.querySelector('.glyph') as HTMLElement;
+      if (t.id in MARK_ICONS) {
+        // Marks show the same painted icon as on the map.
+        const img = el('img', { className: 'map-tool-icon' });
+        img.src = `art/${iconPath(MARK_ICONS[t.id as MarkId])}`;
+        img.alt = '';
+        glyph.append(img);
+      } else {
+        glyph.textContent = t.glyph;
+        glyph.style.color = t.color;
+      }
       b.querySelector('.name')!.textContent = t.label;
-      (b.querySelector('.glyph') as HTMLElement).style.color = t.color;
       b.addEventListener('click', () => this.selectTool(t.id));
       this.toolButtons.set(t.id, b);
       tools.appendChild(b);

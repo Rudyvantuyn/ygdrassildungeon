@@ -90,11 +90,15 @@ export interface CombatSnapshot {
   rewards: Rewards | null;
   boss: boolean;
   prowler: boolean;
+  oathToken?: boolean;
+  fleeTried?: number;
 }
 
 export interface CombatOptions {
   boss?: boolean;
   prowler?: boolean;
+  /** Whether winning leaves an Oath Token (a guardian, or a prowler the first time it falls). */
+  oathToken?: boolean;
 }
 
 const WEAK_MULT = 1.5;
@@ -121,7 +125,10 @@ export class Combat {
   readonly status: PartyStatus[];
   readonly boss: boolean;
   readonly prowler: boolean;
+  private readonly oathToken: boolean;
   round = 1;
+  /** Round of the party's last escape attempt (one per round). */
+  private fleeTried = 0;
   outcome: Outcome | null = null;
   rewards: Rewards | null = null;
 
@@ -134,6 +141,7 @@ export class Combat {
   ) {
     this.boss = !!opts.boss;
     this.prowler = !!opts.prowler;
+    this.oathToken = opts.oathToken ?? (this.boss || this.prowler);
     this.enemies = enemyIds.map((id) => {
       const def = ENEMIES[id];
       if (!def) throw new Error(`Unknown enemy "${id}"`);
@@ -156,12 +164,14 @@ export class Combat {
       rewards: this.rewards,
       boss: this.boss,
       prowler: this.prowler,
+      oathToken: this.oathToken,
+      fleeTried: this.fleeTried,
     };
   }
 
   /** Rebuilds a fight from a snapshot, around the given party, pack and random source. */
   static restore(snap: CombatSnapshot, party: Member[], inventory: Record<ItemId, number>, rng: Rng): Combat {
-    const combat = new Combat(party, snap.enemies.map((e) => e.id), inventory, rng, { boss: snap.boss, prowler: snap.prowler });
+    const combat = new Combat(party, snap.enemies.map((e) => e.id), inventory, rng, { boss: snap.boss, prowler: snap.prowler, oathToken: snap.oathToken });
     combat.apply(snap);
     return combat;
   }
@@ -175,6 +185,7 @@ export class Combat {
     this.round = snap.round;
     this.outcome = snap.outcome;
     this.rewards = snap.rewards;
+    this.fleeTried = snap.fleeTried ?? 0;
   }
 
   get canFlee(): boolean {
@@ -376,6 +387,9 @@ export class Combat {
       }
 
       case 'flee': {
+        // The party flees together: one try per round, however many call for it.
+        if (this.fleeTried === this.round) return;
+        this.fleeTried = this.round;
         events.push({ type: 'act', side: 'party', actor: i, text: `${m.name} looks for an escape...` });
         if (!this.canFlee) {
           events.push({ type: 'info', text: "There's no escape!" });
@@ -633,7 +647,7 @@ export class Combat {
       if (e.def.drop && this.rng.chance(e.def.drop.chance)) drops.push(e.def.drop.item);
     }
     // Bosses and prowlers always leave an Oath Token: the way to grow the roster.
-    if (this.boss || this.prowler) drops.push('oathToken');
+    if (this.oathToken) drops.push('oathToken');
     for (const item of drops) this.inventory[item] = (this.inventory[item] ?? 0) + 1;
     const materials: string[] = [];
     for (const e of this.enemies) {

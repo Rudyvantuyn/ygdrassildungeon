@@ -2,6 +2,7 @@ import { ENEMIES } from '../core/data/enemies';
 import type { Palette } from '../core/data/floors';
 import { isGatherTile, relCell, tileAt } from '../core/dungeon';
 import { GATHER_KINDS, type GatherKind } from '../core/data/gathering';
+import { drawIcon, type IconId } from './icons';
 import type { Game } from '../core/game';
 import { mix, shade, withAlpha } from './color';
 import { drawMonster } from './monsters';
@@ -451,7 +452,8 @@ export class CorridorRenderer {
     glow.addColorStop(0, `rgba(255,220,140,${pulse * (1 - f)})`);
     glow.addColorStop(1, 'rgba(255,220,140,0)');
     ctx.fillStyle = glow;
-    ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
+    ctx.fillRect(gx - r, gy - r, r * 2, r * 2);    const bob = Math.sin(time / 500 + s) * r * 0.05;
+    this.floatingIcon('down', gx, gy - r * 1.1 + bob, r * 1.25, f, '#ffcf7a');
   }
 
   /** Stairs going up: a few steps rising towards a soft light from above. */
@@ -478,7 +480,8 @@ export class CorridorRenderer {
     glow.addColorStop(0, `rgba(200,255,210,${pulse * (1 - f)})`);
     glow.addColorStop(1, 'rgba(200,255,210,0)');
     ctx.fillStyle = glow;
-    ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
+    ctx.fillRect(gx - r, gy - r, r * 2, r * 2);    const [ix, iy] = this.project([s, 0.05, z]);
+    this.floatingIcon('up', ix, iy + Math.sin(time / 500 + s) * r * 0.04, r * 0.75, f, '#c8ffd2');
   }
 
   /**
@@ -667,8 +670,9 @@ export class CorridorRenderer {
       ctx.arc(mx, my, Math.max(1.5, rx * 0.08), 0, Math.PI * 2);
       ctx.fill();
     }
-    // A floating sign above the spot, so it reads from a distance.
+    // A floating medallion above the spot, so it reads from a distance.
     const bob = Math.sin(time / 500 + s) * rx * 0.08;
+    if (this.floatingIcon(kind, cx, cy - rx * 1.15 + bob, rx * 0.95, f, color)) return;
     ctx.font = `bold ${Math.max(10, Math.round(rx * 0.7))}px serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -677,6 +681,18 @@ export class CorridorRenderer {
     ctx.fillStyle = withAlpha(color, 0.95 * (1 - f));
     ctx.fillText(GATHER_KINDS[kind].glyph, cx, cy - rx * 1.1 + bob);
     ctx.shadowBlur = 0;
+  }
+
+  /** A painted icon hovering in the corridor, with a soft glow; fades with the fog. False until it has loaded. */
+  private floatingIcon(id: IconId, x: number, y: number, size: number, fog: number, glowColor: string): boolean {
+    const ctx = this.ctx;
+    if (size < 6 || fog > 0.92) return true;
+    ctx.save();
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = size * 0.35;
+    const drawn = drawIcon(ctx, id, x, y, size, false, 1 - fog);
+    ctx.restore();
+    return drawn;
   }
 
   private bossSigil(s: number, d: number, time: number): void {

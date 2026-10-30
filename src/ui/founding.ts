@@ -3,7 +3,7 @@
  * through swearing in their first adventurers (free, up to a full party).
  */
 import { CLASSES } from '../core/data/classes';
-import { FOUNDING_OATHS, NAME_MAX_LENGTH } from '../core/guild';
+import { FOUNDING_OATHS, NAME_MAX_LENGTH, cleanName, nameLength } from '../core/guild';
 import { createMember } from '../core/party';
 import type { ClassId, Member } from '../core/types';
 import { el } from './dom';
@@ -113,7 +113,8 @@ export class Founding {
     input.placeholder = 'Name';
     const error = el('p', { className: 'form-error' });
     const submit = () => {
-      const name = input.value.trim().replace(/\s+/g, ' ');
+      const name = cleanName(input.value);
+      if (nameLength(name) > NAME_MAX_LENGTH) return void (error.textContent = `Names can be at most ${NAME_MAX_LENGTH} letters.`);
       if (!name) return void (error.textContent = 'Give your adventurer a name.');
       if (this.members.some((m) => m.name.toLowerCase() === name.toLowerCase())) return void (error.textContent = `There is already someone called ${name}.`);
       this.members.push(createMember(name, classId));

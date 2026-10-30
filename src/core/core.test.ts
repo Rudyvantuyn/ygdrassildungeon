@@ -5,7 +5,7 @@ import { NOTE_MAX_LENGTH, emptyChart, eraseCell, setMark, setNote, setTerrain, t
 import { Combat, GOLD_RATE, PROWLER_FLEE_CHANCE, XP_RATE, type Command } from './combat';
 import { ENEMIES } from './data/enemies';
 import { startFloorFor, startFloors } from './data/chapters';
-import { createExpedition } from './expedition';
+import { claimShare, createExpedition, validMember } from './expedition';
 import { FIRST_PROWLER_FLOOR, FLOORS } from './data/floors';
 import { SKILLS } from './data/skills';
 import { CLASSES } from './data/classes';
@@ -327,6 +327,53 @@ describe('town', () => {
     game.enterFloor(5);
     expect(game.state.location).toBe('dungeon');
     expect(game.state.floor).toBe(5);
+  });
+
+  it('flees as one party: a single roll per round', () => {
+    let escaped = 0;
+    for (let seed = 1; seed <= 600; seed++) {
+      const combat = new Combat(createStartingParty(), ['grimtusk'], makeInventory({}), new Rng(seed), { prowler: true });
+      combat.resolveRound(combat.party.map(() => ({ kind: 'flee' }) as Command));
+      if (combat.outcome === 'fled') escaped++;
+    }
+    expect(escaped / 600).toBeGreaterThan(0.24);
+    expect(escaped / 600).toBeLessThan(0.36);
+  });
+
+  it('a prowler leaves an Oath Token only the first time it falls', () => {
+    const game = Game.newGame(1);
+    game.state.deepest = 6;
+    game.enterFloor(6, true);
+    const first = game.startProwlerCombat(0);
+    first.enemies.forEach((e) => (e.hp = 0));
+    first.outcome = 'victory';
+    game.finishCombat(first);
+    expect(game.progress.prowlerTokens).toEqual([0]);
+    game.returnToTown();
+    game.enterFloor(6, true);
+    const again = game.startProwlerCombat(0);
+    expect(again.snapshot().oathToken).toBe(false);
+  });
+
+  it('an expedition share brings XP and tokens home, but no free rest', () => {
+    const game = Game.newGame(1);
+    const home = game.state.party[0];
+    home.hp = 5;
+    const back = { ...home, xp: home.xp + 50, hp: 999 };
+    claimShare(game.state, { user: 'u', members: [back], gold: 10, materials: {}, kills: {}, items: { oathToken: 1 } });
+    expect(home.hp).toBe(5);
+    expect(home.xp).toBe(back.xp);
+    expect(game.state.inventory.oathToken).toBe(1);
+    // Someone new with the same name is not the adventurer who went.
+    const other = { ...back, oath: 99, xp: back.xp + 500 };
+    claimShare(game.state, { user: 'u', members: [other], gold: 0, materials: {}, kills: {} });
+    expect(home.xp).toBe(back.xp);
+  });
+
+  it('expeditions refuse gear far beyond the adventurer\'s level', () => {
+    const m = createStartingParty()[0];
+    expect(validMember({ ...m, weapon: 'fathomEdge' })).toBeNull();
+    expect(validMember({ ...m, level: 20, xp: xpForLevel(20), skills: {} , weapon: 'fathomEdge' })?.weapon).toBe('fathomEdge');
   });
 
   it('expeditions also start at the beginning of a chapter', () => {
