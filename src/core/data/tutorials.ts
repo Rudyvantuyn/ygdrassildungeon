@@ -28,7 +28,7 @@ export const TIPS: TipDef[] = [
     title: 'Into the Rootdeep',
     speaker: 'sigrid',
     pages: [
-      'Move with the arrow keys or the buttons. You walk one cell at a time; turning is free.',
+      'Move with the arrow keys or the buttons. On a phone you can also swipe the view: up to walk, sideways to turn.',
       'The danger orb grows brighter as you walk. When it burns, a fight is close.',
       'The roots of the Great Tree always lead home: the stairs up take you back toward Lindholm. Turning back in time is no shame.',
       'Use Act to open chests, drink from springs and gather. Pack holds your items, skills and options.',
@@ -53,6 +53,7 @@ export const TIPS: TipDef[] = [
       'The front row takes most blows. The back row is safer, but weapons hit for half there, except bows.',
       'Skills cost SP. Every foe is weak to something: fire, frost or storm. A weakness hit does half again as much.',
       'Defend halves the damage you take this round. Fleeing works often against small fry, never against a boss.',
+      'Repeat does last round again. Auto lets the party fight on its own; stop it with Esc or a tap. Battle speed is in Settings.',
     ],
   },
   {
@@ -175,6 +176,15 @@ export const TIPS: TipDef[] = [
       'Your first party swore for free. Every oath after that costs gold, more each time, and an Oath Token.',
       'Oath Tokens are shards of Ymir\'s bone. The realms honour no oath sworn without one. Guardians and prowlers carry them, and a few chests hold one.',
       'Adventurers in the hall can swap into the party at any time.',
+    ],
+  },
+  {
+    id: 'choice',
+    title: 'Choices',
+    speaker: 'sigrid',
+    pages: [
+      'Some moments ask you to choose. Every choice is remembered, and the people of the Pact will remember it too.',
+      'There is no wrong answer, only roads. Read the story again, choices and all, in the Chronicle (Pack).',
     ],
   },
   {

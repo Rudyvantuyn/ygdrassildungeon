@@ -1422,3 +1422,78 @@ table.stats thead th {
 .feedback-input:focus {
   outline: none;
 }
+
+/* ── Phones ─────────────────────────────────────────────────────────────── */
+
+#rotate-hint {
+  display: none;
+}
+
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotate-hint:not(.dismissed) {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 24px;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 40%, #1c140c, #050407 75%);
+    color: var(--text);
+    font-size: 20px;
+  }
+}
+
+#rotate-hint .rotate-icon {
+  font-size: 72px;
+  color: var(--gold);
+  animation: rotate-phone 2.4s ease-in-out infinite;
+}
+
+@keyframes rotate-phone {
+  0%, 30% { transform: rotate(0deg); }
+  60%, 100% { transform: rotate(90deg); }
+}
+
+#rotate-hint button {
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 16px;
+  padding: 10px 18px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border-hi);
+  border-radius: 4px;
+}
+
+/* On a phone the stage is shown at about half size: larger text and buttons keep it readable. */
+@media (pointer: coarse) {
+  .menu-item {
+    font-size: 21px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  #town-panel .menu-item {
+    font-size: 19px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+  #town-panel .menu-desc {
+    font-size: 14px;
+    min-height: 0;
+  }
+  #command-panel .menu-item {
+    font-size: 20px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  .menu-item .detail {
+    font-size: 16px;
+  }
+  .menu-desc {
+    font-size: 17px;
+  }
+}

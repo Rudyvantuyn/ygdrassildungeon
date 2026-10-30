@@ -153,10 +153,31 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       if (this.onKey(e.key)) e.preventDefault();
     });
 
+    this.swipeControls();
+
     // Town paintings and portraits are small; fetch them right away.
     preloadTownScenes();
     preload(['gerd', 'hilde', 'brynja', 'sigrid', 'ketil'].map((id) => `people/${id}.webp`));
     this.showTitle();
+  }
+
+  /** On touch screens: swipe the dungeon view to walk (up/down) and turn (left/right). */
+  private swipeControls(): void {
+    let start: { x: number; y: number } | null = null;
+    this.viewWrap.addEventListener('touchstart', (e) => {
+      start = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+    }, { passive: true });
+    this.viewWrap.addEventListener('touchend', (e) => {
+      if (!start || this.mode !== 'explore') return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - start.x;
+      const dy = t.clientY - start.y;
+      start = null;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;
+      // Dragging the world: swipe left to turn right, swipe up to step forward.
+      if (Math.abs(dx) > Math.abs(dy)) this.onKey(dx < 0 ? 'ArrowRight' : 'ArrowLeft');
+      else this.onKey(dy < 0 ? 'ArrowUp' : 'ArrowDown');
+    }, { passive: true });
   }
 
   /** Called every animation frame. */
@@ -796,7 +817,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     }
     markSeen(this.game, scene.id);
     this.playLines(scene.lines, () => {
-      if (scene.choice && !this.game.state.choices?.[scene.id]) this.storyChoice(scene, () => then(scene.id));
+      if (scene.choice && !this.game.state.choices?.[scene.id]) this.tips(['choice'], () => this.storyChoice(scene, () => then(scene.id)));
       else then(scene.id);
     });
   }

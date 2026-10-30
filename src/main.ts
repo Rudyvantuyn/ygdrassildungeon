@@ -10,11 +10,35 @@ watchErrors(() => app.reportContext());
 // Scale the fixed 1280×720 stage to fit any window.
 function fit(): void {
   const stage = document.getElementById('stage')!;
-  const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
-  stage.style.transform = `scale(${scale})`;
+  const w = window.visualViewport?.width ?? window.innerWidth;
+  const h = window.visualViewport?.height ?? window.innerHeight;
+  stage.style.transform = `scale(${Math.min(w / 1280, h / 720)})`;
 }
 window.addEventListener('resize', fit);
+window.visualViewport?.addEventListener('resize', fit);
 fit();
+
+// Phones held upright: the game is made for landscape. Offer full screen, or play on anyway.
+const rotate = document.createElement('div');
+rotate.id = 'rotate-hint';
+rotate.innerHTML = '<div class="rotate-icon">⟳</div><p>Turn your phone sideways to play.</p>';
+const anyway = document.createElement('button');
+anyway.textContent = 'Play upright anyway';
+anyway.addEventListener('click', () => rotate.classList.add('dismissed'));
+rotate.append(anyway);
+document.body.append(rotate);
+
+// On touch devices the first tap goes full screen (where the browser allows it) and asks for landscape.
+const touch = window.matchMedia('(pointer: coarse)').matches;
+if (touch && document.documentElement.requestFullscreen) {
+  const goFull = () => {
+    document.documentElement
+      .requestFullscreen({ navigationUI: 'hide' })
+      .then(() => (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.('landscape'))
+      .catch(() => undefined);
+  };
+  window.addEventListener('pointerup', goFull, { once: true });
+}
 
 function loop(time: number): void {
   app.frame(time);

@@ -29,6 +29,19 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Klaar voor spelers (mijlpaal 14)
+
+- **Snellere gevechten**: *Repeat* (R) doet de vorige ronde opnieuw, *Auto* (O) laat de party zelf vechten tot je
+  stopt (Esc of tikken). Gevechtssnelheid Normal / Fast / Fastest.
+- **Settings** (Pack of System): muziek, effecten, gevechtssnelheid, tekstsnelheid, moeilijkheid en tips.
+- **Moeilijkheid** per spel: *Gentle* (zwakkere vijanden, meer XP en goud), *Standard* (zoals bedoeld, hierop zijn de
+  balanstests afgesteld) en *Harsh*. Expedities gebruiken altijd Standard.
+- **Feedback** (Pack of System): spelers sturen bugs en ideeën rechtstreeks naar de tabel `reports` in Supabase
+  (alleen te lezen in het dashboard). Crashes worden automatisch gemeld vanaf de live site.
+- **Mobiel**: veeg over het beeld om te lopen en te draaien, grotere knoppen en tekst op touchscreens, volledig scherm
+  bij de eerste tik, en een melding om de telefoon te kantelen.
+- Na hoofdstuk II: een afgesloten trap en "To be continued".
+
 ### Het grote verhaal (mijlpaal 13)
 
 - Het verhaal van Thijs zit erin (zie `docs/verhaal.md`): Ginnungagap, Ymir, de goden die hem doodden en Midgard uit
