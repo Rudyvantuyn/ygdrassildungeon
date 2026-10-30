@@ -15,12 +15,18 @@ const root = document.getElementById('app')!;
 const app = new App(root);
 watchErrors(() => app.reportContext());
 
-// Scale the fixed 1280×720 stage to fit any window.
+/**
+ * Scale the stage to fit any window. Small screens (phones) get their own, more compact 960×440 layout
+ * instead of a shrunken 1280×720 one, so text and buttons stay large enough to read and tap.
+ */
 function fit(): void {
   const stage = document.getElementById('stage')!;
   const w = window.visualViewport?.width ?? window.innerWidth;
   const h = window.visualViewport?.height ?? window.innerHeight;
-  stage.style.transform = `scale(${Math.min(w / 1280, h / 720)})`;
+  const phone = Math.min(w / 1280, h / 720) < 0.72;
+  document.body.classList.toggle('phone', phone);
+  const [sw, sh] = phone ? [960, 440] : [1280, 720];
+  stage.style.transform = `scale(${Math.min(w / sw, h / sh)})`;
 }
 window.addEventListener('resize', fit);
 window.visualViewport?.addEventListener('resize', fit);

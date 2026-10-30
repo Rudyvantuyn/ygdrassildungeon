@@ -17,6 +17,7 @@ import { el, floater } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import type { PartyView } from './partyView';
 import { prefs } from './prefs';
+import { stagePoint } from './stagePoint';
 
 /** How much faster each battle speed plays. */
 const SPEED_FACTOR = { 1: 1, 2: 1.8, 3: 3 } as const;
@@ -63,8 +64,6 @@ export const AILMENT_BADGE: Record<Ailment, { short: string; color: string }> = 
 const HIT_SOUND: Record<Element, Sfx> = { phys: 'hitPhys', fire: 'hitFire', frost: 'hitFrost', storm: 'hitStorm' };
 
 /** View offset of the corridor canvas inside the stage. */
-const VIEW_X = 20;
-const VIEW_Y = 20;
 
 export class CombatView {
   private fx: EnemyFx[];
@@ -227,7 +226,13 @@ export class CombatView {
   private enemyAnchor(i: number): { x: number; y: number } {
     const { x, ground, u } = this.layout(i);
     const size = this.combat.enemies[i].def.art.size;
-    return { x: VIEW_X + x, y: VIEW_Y + ground - u * size * 0.5 };
+    // The view canvas may be shown smaller than it is drawn (the phone layout): map canvas to stage coordinates.
+    const view = document.getElementById('view') as HTMLCanvasElement | null;
+    if (!view) return { x: 20 + x, y: 20 + ground - u * size * 0.5 };
+    const tl = stagePoint(view, 0, 0);
+    const br = stagePoint(view, 1, 1);
+    const k = (br.x - tl.x) / view.width;
+    return { x: tl.x + x * k, y: tl.y + (ground - u * size * 0.5) * k };
   }
 
   // ── Input ──────────────────────────────────────────────────────────────────

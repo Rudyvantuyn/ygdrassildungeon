@@ -37,8 +37,9 @@ De knoppen rechts op het scherm werken ook met muis of touch.
   geen moeilijkheidsinstelling: iedereen speelt met dezelfde regels, wat eerlijk is voor expedities.
 - **Feedback** (Pack of System): spelers sturen bugs en ideeën rechtstreeks naar de tabel `reports` in Supabase
   (alleen te lezen in het dashboard). Crashes worden automatisch gemeld vanaf de live site.
-- **Mobiel**: veeg over het beeld om te lopen en te draaien, grotere knoppen en tekst op touchscreens, volledig scherm
-  bij de eerste tik, en een melding om de telefoon te kantelen.
+- **Mobiel**: op kleine schermen schakelt de game over naar een eigen telefoonindeling (960×440 in plaats van een
+  verkleinde 1280×720): grote beweegknoppen, partykaarten onderaan, gevechtsmenu over de hele zijkolom, dialogen die
+  scrollen. Veeg over het beeld om te lopen en te draaien; volledig scherm bij de eerste tik.
 - Na hoofdstuk II: een afgesloten trap en "To be continued".
 - **Hoofdstukken in één keer**: een afdaling begint altijd bij de eerste verdieping van een hoofdstuk. Het volgende
   hoofdstuk gaat pas open als de eindbaas van het vorige verslagen is. Geldt ook voor expedities.

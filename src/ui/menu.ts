@@ -33,7 +33,7 @@ export class ListMenu {
     private opts: MenuOptions = {},
   ) {
     // A menu that can be left with Escape also gets a Back row, unless it already has a way out.
-    const exits = /^(back|leave|close|done|not yet|cancel|no|keep|got it)\b/i;
+    const exits = /^(back|leave|close|done|not yet|cancel|no|keep|got it|continue|return|load|ok)\b/i;
     if (opts.onCancel && opts.backRow !== false && !items.some((it) => exits.test(it.label))) {
       const cancel = opts.onCancel;
       items = [...items, { label: 'Back', onSelect: cancel }];

@@ -1481,34 +1481,7 @@ table.stats thead th {
   border-radius: 4px;
 }
 
-/* On a phone the stage is shown at about half size: larger text and buttons keep it readable. */
-@media (pointer: coarse) {
-  .menu-item {
-    font-size: 21px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-  #town-panel .menu-item {
-    font-size: 19px;
-    padding-top: 3px;
-    padding-bottom: 3px;
-  }
-  #town-panel .menu-desc {
-    font-size: 14px;
-    min-height: 0;
-  }
-  #command-panel .menu-item {
-    font-size: 20px;
-    padding-top: 6px;
-    padding-bottom: 6px;
-  }
-  .menu-item .detail {
-    font-size: 16px;
-  }
-  .menu-desc {
-    font-size: 17px;
-  }
-}
+
 
 /* ── Town screen: a painted card per place ───────────────────────────────── */
 
@@ -1877,16 +1850,348 @@ table.stats tr.divider td {
   height: 620px;
 }
 
-/* Phones: text in dialogs large enough to read at half scale. */
-@media (pointer: coarse) {
-  .dialog p,
-  .dialog .menu-desc,
-  .npc-line p,
-  .town-desc,
-  .story-text p {
-    font-size: 19px;
-  }
-  #controls button {
-    font-size: 20px;
-  }
+
+
+/* ══ Phone layout ═════════════════════════════════════════════════════════════
+ * Small screens get a 960×440 stage (main.ts sets body.phone): the view on the left, the side column on the
+ * right with large movement buttons, and the party along the bottom. Shown at about 0.7–0.9 scale on a phone,
+ * so everything is roughly 1.6× the size it would be in the shrunken desktop layout.
+ */
+body.phone #stage {
+  width: 960px;
+  height: 440px;
+}
+
+body.phone #view-wrap {
+  left: 8px;
+  top: 8px;
+  width: 552px;
+  height: 334px;
+}
+
+body.phone #side {
+  left: 572px;
+  top: 8px;
+  width: 380px;
+  height: 340px;
+  gap: 6px;
+}
+
+body.phone #party {
+  left: 8px;
+  top: 352px;
+  width: 944px;
+  height: 80px;
+  gap: 6px;
+}
+
+/* Side column: floor name, then minimap and status side by side, then the buttons. */
+body.phone #floor-panel {
+  min-height: 0;
+  padding: 4px 12px;
+}
+
+body.phone #floor-name {
+  font-size: 18px;
+}
+
+body.phone #map-panel {
+  padding: 5px;
+}
+
+body.phone #minimap {
+  width: 128px;
+  height: 128px;
+}
+
+body.phone #side {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  grid-template-rows: auto 140px 1fr;
+  grid-template-areas:
+    'floor floor'
+    'map status'
+    'controls controls';
+}
+
+body.phone #floor-panel { grid-area: floor; }
+body.phone #map-panel { grid-area: map; }
+body.phone #status-row {
+  grid-area: status;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  font-size: 18px;
+}
+body.phone #gold { margin-left: 0; font-size: 20px; }
+body.phone #controls {
+  grid-area: controls;
+  margin-top: 0;
+  gap: 5px;
+  padding: 6px;
+}
+body.phone #controls button {
+  font-size: 24px;
+  padding: 0;
+  min-height: 0;
+}
+body.phone #controls .act,
+body.phone #controls button:last-child,
+body.phone #controls button:nth-child(5) {
+  font-size: 16px;
+}
+body.phone #command-panel,
+body.phone #town-panel {
+  grid-column: 1 / -1;
+  grid-row: 2 / -1;
+  padding: 8px 10px;
+  gap: 4px;
+  min-height: 0;
+  overflow: hidden;
+}
+body.phone #command-panel .menu {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+body.phone #command-panel .menu-item {
+  font-size: 18px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+body.phone .cmd-hint {
+  display: none;
+}
+body.phone #command-panel .menu-desc {
+  font-size: 13px;
+  min-height: 0;
+}
+
+/* Party cards: compact, portrait small, name and HP/SP readable. */
+body.phone .member {
+  grid-template-columns: 48px 1fr;
+  column-gap: 8px;
+  row-gap: 3px;
+  padding: 5px 8px;
+}
+body.phone .member .portrait {
+  width: 48px;
+  height: 48px;
+  grid-row: span 3;
+  align-self: center;
+}
+body.phone .member-name {
+  font-size: 15px;
+}
+body.phone .member-class {
+  display: none;
+}
+body.phone .member-row {
+  font-size: 10px;
+}
+body.phone .bar {
+  height: 15px;
+}
+body.phone .bar span {
+  font-size: 11px;
+}
+body.phone .member.active {
+  transform: translateY(-4px);
+}
+
+/* Town: the cards fill everything above the party. */
+body.phone #town-grid {
+  width: 960px;
+  height: 348px;
+  padding: 8px 8px 4px;
+  gap: 6px;
+}
+body.phone .town-head {
+  min-height: 34px;
+  padding: 3px 12px;
+  gap: 12px;
+}
+body.phone .town-name {
+  font-size: 19px;
+}
+body.phone .town-desc {
+  font-size: 14px;
+}
+body.phone #town-grid .town-gold {
+  font-size: 18px;
+}
+body.phone .town-cards {
+  gap: 6px;
+}
+body.phone .town-card {
+  padding: 8px 12px;
+}
+body.phone .town-card-name {
+  font-size: 21px;
+}
+body.phone .town-card-detail {
+  font-size: 14px;
+}
+body.phone .town-button {
+  height: 36px;
+  font-size: 17px;
+}
+
+/* Messages and toasts inside the smaller view. */
+body.phone .msg {
+  min-width: 0;
+  max-width: 520px;
+  font-size: 17px;
+  padding: 6px 14px;
+  top: 8px;
+}
+body.phone .toast {
+  white-space: normal;
+  max-width: 520px;
+  text-align: center;
+  bottom: 10px;
+}
+
+/* Story box: lower and tighter. */
+body.phone .story-box {
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  min-height: 0;
+  padding: 10px 14px;
+  gap: 12px;
+}
+body.phone .story-portrait {
+  width: 72px;
+  height: 72px;
+}
+body.phone .story-text p {
+  font-size: 17px;
+}
+
+/* Dialogs: fit the 440px height. The menu scrolls; everything else keeps its size. */
+body.phone .dialog {
+  max-width: calc(100% - 16px);
+  max-height: calc(100% - 16px);
+  padding: 12px 18px;
+  gap: 8px;
+  overflow: hidden;
+}
+body.phone .dialog > * {
+  flex-shrink: 0;
+}
+body.phone .dialog > .menu {
+  flex: 0 1 auto;
+  min-height: 72px;
+  max-height: none;
+}
+body.phone .dialog h2 {
+  font-size: 21px;
+}
+body.phone .dialog h2::after {
+  margin-top: 4px;
+  height: 9px;
+}
+body.phone .dialog p {
+  font-size: 16px;
+}
+body.phone .dialog .menu-desc {
+  min-height: 0;
+  font-size: 14px;
+}
+body.phone .menu-item {
+  font-size: 18px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+body.phone .npc-portrait {
+  width: 72px;
+  height: 72px;
+}
+body.phone .npc-line {
+  gap: 12px;
+}
+body.phone .dialog.wide {
+  width: 860px;
+}
+body.phone .dialog.help {
+  overflow-y: auto;
+}
+body.phone .dialog.party-status {
+  overflow-y: auto;
+}
+body.phone .dialog.map-editor {
+  height: calc(100% - 16px);
+  padding: 8px 12px;
+}
+body.phone .map-canvas {
+  width: 360px;
+  height: 360px;
+}
+body.phone .dialog.map-editor h2 {
+  display: none;
+}
+
+/* Title screen. */
+body.phone .logo {
+  font-size: 58px;
+}
+body.phone .tagline {
+  font-size: 15px;
+}
+body.phone .title-screen {
+  gap: 10px;
+}
+body.phone .title-foot {
+  display: none;
+}
+
+/* Room for the Skip button beside the story text. */
+.story-box .story-text {
+  padding-right: 64px;
+}
+
+body.phone #command-panel .menu-item {
+  font-size: 17px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+body.phone #command-panel .cmd-title {
+  font-size: 16px;
+}
+body.phone #command-panel .menu-desc {
+  font-size: 12px;
+  line-height: 1.25;
+  max-height: 2.6em;
+  overflow: hidden;
+}
+
+/* Phone: during a fight the command panel takes the whole side column. */
+body.phone #side:has(#command-panel:not(.hidden)) #floor-panel {
+  display: none;
+}
+body.phone #command-panel {
+  grid-row: 1 / -1;
+}
+
+/* Phone: the map editor's tool column scrolls, the Close button stays reachable. */
+body.phone .map-body {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+body.phone .map-side {
+  overflow-y: auto;
+  min-height: 0;
+  width: 320px;
+}
+body.phone .map-tool {
+  padding: 3px 4px;
+}
+body.phone .map-side .map-label,
+body.phone .map-cell-info {
+  display: none;
+}
+body.phone .map-side {
+  gap: 5px;
 }

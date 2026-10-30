@@ -4,6 +4,7 @@ import { unspentPoints } from '../core/skilltree';
 import type { Ailment, Member } from '../core/types';
 import { AILMENT_BADGE } from './combatView';
 import { drawPortrait } from '../render/portraits';
+import { stagePoint } from './stagePoint';
 
 export interface PartyDisplay {
   /** Overrides for shown HP/SP (used to animate combat playback). */
@@ -83,7 +84,8 @@ export class PartyView {
   anchor(i: number): { x: number; y: number } {
     const el = this.cards[i]?.root;
     if (!el) return { x: 640, y: 600 };
-    return { x: 20 + el.offsetLeft + el.offsetWidth / 2, y: 556 + el.offsetTop + 20 };
+    const p = stagePoint(el, 0.5, 0);
+    return { x: p.x, y: p.y + 20 };
   }
 
   private build(party: Member[]): void {
