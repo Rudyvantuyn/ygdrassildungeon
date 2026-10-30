@@ -50,7 +50,7 @@ export function xpForLevel(level: number): number {
 export function knownSkills(m: Member): SkillDef[] {
   return CLASSES[m.classId].skills.flatMap((e) => {
     const skill = skillFor(m, e.skill);
-    return skill && skill.kind !== 'passive' ? [skill] : [];
+    return skill && skill.kind !== 'passive' && skill.kind !== 'gather' ? [skill] : [];
   });
 }
 

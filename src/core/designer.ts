@@ -13,13 +13,14 @@ export const MIN_SIZE = 8;
 export const MAX_SIZE = 30;
 export const MAX_CHESTS = 6;
 export const MAX_SPRINGS = 2;
+export const MAX_GATHER = 6;
 export const MAX_PROWLERS = 4;
 export const MAX_ROUTE = 8;
 export const NAME_MAX = 24;
 
 /** The characters a design's rows are made of (the same legend as FloorDef). */
-export type Cell = '#' | '.' | 'S' | '>' | 'T' | '~' | 'B';
-const CELLS = new Set<string>(['#', '.', 'S', '>', 'T', '~', 'B']);
+export type Cell = '#' | '.' | 'S' | '>' | 'T' | '~' | 'B' | 'P' | 'O' | 'W' | 'F';
+const CELLS = new Set<string>(['#', '.', 'S', '>', 'T', '~', 'B', 'P', 'O', 'W', 'F']);
 
 export interface ProwlerDesign {
   enemy: string;
@@ -209,6 +210,7 @@ export function problems(d: FloorDesign): string[] {
   if (d.boss && !BOSS_CHOICES.includes(d.boss)) out.push('That boss does not exist.');
   if (find(d, 'T').length > MAX_CHESTS) out.push(`At most ${MAX_CHESTS} chests per floor.`);
   if (find(d, '~').length > MAX_SPRINGS) out.push(`At most ${MAX_SPRINGS} springs per floor.`);
+  if ((['P', 'O', 'W', 'F'] as Cell[]).reduce((n, c) => n + find(d, c).length, 0) > MAX_GATHER) out.push(`At most ${MAX_GATHER} gathering spots per floor.`);
 
   const reachable = reach(d, starts[0]);
   let stranded = 0;
@@ -228,7 +230,7 @@ export function problems(d: FloorDesign): string[] {
     if (!PROWLER_CHOICES.includes(p.enemy)) out.push(`Prowler ${i + 1} is not a known prowler.`);
     if (!p.route.length) out.push(`Give the ${label} a patrol route.`);
     if (p.route.length > MAX_ROUTE) out.push(`The ${label}'s route has more than ${MAX_ROUTE} points.`);
-    if (p.route.some(([x, y]) => !reachable.has(`${x},${y}`))) out.push(`The ${label}'s route must be on open, reachable floor.`);
+    if (p.route.some(([x, y]) => cellAt(d, x, y) !== '.' || !reachable.has(`${x},${y}`))) out.push(`The ${label}'s route must be on plain, reachable floor.`);
   });
   // House rule: every prowler floor has a way around them.
   if (d.prowlers.length && !out.some((p) => p.includes('route'))) {
@@ -262,6 +264,7 @@ export function toFloorDef(d: FloorDesign): FloorDef {
     boss: d.boss ? [d.boss] : undefined,
     prowlers: d.prowlers.map((p) => ({ enemies: [p.enemy], route: p.route.map(([x, y]) => [x, y] as [number, number]), hunt: p.hunt })),
     palette: THEMES.find((t) => t.id === d.theme)!.palette,
+    depth: d.monsters,
   };
 }
 

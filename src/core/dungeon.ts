@@ -1,7 +1,8 @@
 import type { FloorDef } from './data/floors';
+import type { GatherKind } from './data/gathering';
 import type { Dir } from './types';
 
-export type Tile = 'wall' | 'floor' | 'up' | 'stairs' | 'chest' | 'spring' | 'boss';
+export type Tile = 'wall' | 'floor' | 'up' | 'stairs' | 'chest' | 'spring' | 'boss' | GatherKind;
 
 export interface FloorMap {
   width: number;
@@ -24,7 +25,15 @@ const LEGEND: Record<string, Tile> = {
   T: 'chest',
   '~': 'spring',
   B: 'boss',
+  P: 'forage',
+  O: 'mine',
+  W: 'fell',
+  F: 'fish',
 };
+
+export function isGatherTile(tile: Tile): tile is GatherKind {
+  return tile === 'forage' || tile === 'mine' || tile === 'fell' || tile === 'fish';
+}
 
 export function parseFloor(def: FloorDef): FloorMap {
   const height = def.rows.length;

@@ -1,4 +1,5 @@
 import type { Element, Inflict, SkillId, Stats } from '../types';
+import type { GatherKind } from './gathering';
 
 export type SkillTarget = 'enemy' | 'allEnemies' | 'ally' | 'allAllies' | 'self';
 
@@ -7,7 +8,7 @@ export interface SkillDef {
   name: string;
   sp: number;
   target: SkillTarget;
-  kind: 'phys' | 'magic' | 'heal' | 'revive' | 'cure' | 'ailment' | 'challenge' | 'guard' | 'passive';
+  kind: 'phys' | 'magic' | 'heal' | 'revive' | 'cure' | 'ailment' | 'challenge' | 'guard' | 'passive' | 'gather';
   element: Element;
   /** Percent of a normal attack (damage) or of the heal formula. */
   power: number;
@@ -20,6 +21,8 @@ export interface SkillDef {
   turns?: number;
   /** Passive skills: a stat raised by this many percent per rank. */
   passive?: { stat: keyof Stats; perRank: number };
+  /** Gathering skills: what kind of spot they work on. */
+  gather?: GatherKind;
   description: string;
 }
 
@@ -282,5 +285,45 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     power: 0,
     passive: { stat: 'sp', perRank: 5 },
     description: 'A calm mind holds more power. Raises max SP.',
+  }),
+  forage: skill({
+    id: 'forage',
+    name: 'Forage',
+    sp: 0,
+    target: 'self',
+    kind: 'gather',
+    power: 0,
+    gather: 'forage',
+    description: 'Gather plants, herbs and seaweed at green spots. Higher ranks find more, and rarer things.',
+  }),
+  mine: skill({
+    id: 'mine',
+    name: 'Mine',
+    sp: 0,
+    target: 'self',
+    kind: 'gather',
+    power: 0,
+    gather: 'mine',
+    description: 'Dig ore and crystals from glittering veins. Higher ranks find more, and rarer things.',
+  }),
+  fell: skill({
+    id: 'fell',
+    name: 'Fell',
+    sp: 0,
+    target: 'self',
+    kind: 'gather',
+    power: 0,
+    gather: 'fell',
+    description: 'Cut good wood from fallen roots and sunken trees. Higher ranks find more, and rarer things.',
+  }),
+  fish: skill({
+    id: 'fish',
+    name: 'Fish',
+    sp: 0,
+    target: 'self',
+    kind: 'gather',
+    power: 0,
+    gather: 'fish',
+    description: 'Catch fish in pools and tidewater. Higher ranks find more, and rarer things.',
   }),
 };

@@ -52,7 +52,11 @@ export type SkillId =
   | 'fleetFoot'
   | 'gentleHands'
   | 'runeLore'
-  | 'deepWell';
+  | 'deepWell'
+  | 'forage'
+  | 'mine'
+  | 'fell'
+  | 'fish';
 
 export interface Member {
   name: string;

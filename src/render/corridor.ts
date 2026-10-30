@@ -1,6 +1,7 @@
 import { ENEMIES } from '../core/data/enemies';
 import type { Palette } from '../core/data/floors';
-import { relCell, tileAt } from '../core/dungeon';
+import { isGatherTile, relCell, tileAt } from '../core/dungeon';
+import { GATHER_KINDS, type GatherKind } from '../core/data/gathering';
 import type { Game } from '../core/game';
 import { mix, shade, withAlpha } from './color';
 import { drawMonster } from './monsters';
@@ -156,6 +157,7 @@ export class CorridorRenderer {
           if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y), pal);
           if (tile === 'spring' && d > 0) this.spring(s, d, time, game.progress.springUsed, pal);
           if (tile === 'boss' && d > 0 && !game.progress.bossDefeated) this.bossSigil(s, d, time);
+          if (isGatherTile(tile) && d > 0) this.gatherSpot(s, d, tile, time);
           const prowler = d > 0 ? game.prowlerAt(cell.x, cell.y) : -1;
           if (prowler >= 0) {
             const def = ENEMIES[game.floorDef.prowlers[prowler].enemies[0]];
@@ -632,6 +634,49 @@ export class CorridorRenderer {
       this.scratchCanvas.height = size;
     }
     return this.scratchCanvas;
+  }
+
+  /** A gathering spot: a soft glow on the floor in the kind's colour, with drifting motes. */
+  private gatherSpot(s: number, d: number, kind: GatherKind, time: number): void {
+    const ctx = this.ctx;
+    const z = d + 0.5;
+    const f = this.fog(z);
+    const [cx, cy] = this.project([s, 0.5, z]);
+    const [ex] = this.project([s + 0.36, 0.5, z]);
+    const rx = ex - cx;
+    const color = GATHER_KINDS[kind].color;
+    const pulse = 0.7 + 0.3 * Math.sin(time / 420 + s * 3);
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx * 1.4);
+    glow.addColorStop(0, withAlpha(color, 0.9 * pulse * (1 - f)));
+    glow.addColorStop(1, withAlpha(color, 0));
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, 0.35);
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(0, 0, rx * 1.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    for (let i = 0; i < 5; i++) {
+      const t = (time / 1800 + i / 5) % 1;
+      const ang = i * 2.4 + s;
+      const mx = cx + Math.cos(ang) * rx * 0.6;
+      const my = cy - t * rx * 1.6;
+      ctx.fillStyle = withAlpha(color, (1 - t) * 0.9 * (1 - f));
+      ctx.beginPath();
+      ctx.arc(mx, my, Math.max(1.5, rx * 0.08), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // A floating sign above the spot, so it reads from a distance.
+    const bob = Math.sin(time / 500 + s) * rx * 0.08;
+    ctx.font = `bold ${Math.max(10, Math.round(rx * 0.7))}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = color;
+    ctx.shadowBlur = rx * 0.4;
+    ctx.fillStyle = withAlpha(color, 0.95 * (1 - f));
+    ctx.fillText(GATHER_KINDS[kind].glyph, cx, cy - rx * 1.1 + bob);
+    ctx.shadowBlur = 0;
   }
 
   private bossSigil(s: number, d: number, time: number): void {

@@ -6,6 +6,8 @@
 import { audio } from '../audio/audio';
 import type { Combat, CombatEvent, Command } from '../core/combat';
 import { FLOORS } from '../core/data/floors';
+import { GATHER_KINDS } from '../core/data/gathering';
+import { gatherPrompt } from './gatherView';
 import { ITEMS } from '../core/data/items';
 import { leaderSeat, type Action, type ExpeditionState, type LogEntry } from '../core/expedition';
 import { Game, type StepEvent } from '../core/game';
@@ -272,6 +274,7 @@ export class CoopSession {
       case 'stairs':
       case 'upstairs':
       case 'spring':
+      case 'gatherSpot':
         // Shown after the mirror is updated, so the dialog sees the new position.
         window.setTimeout(() => this.offer(ev), 0);
         return;
@@ -293,6 +296,10 @@ export class CoopSession {
     } else if (ev.type === 'upstairs') {
       const text = floor === 0 ? 'Lead everyone back to Lindholm? This ends the expedition.' : `Climb up to ${FLOORS[floor - 1].name}?`;
       this.host.confirm('Stairs up', text, () => void this.send({ type: 'ascend' }));
+    } else if (ev.type === 'gatherSpot') {
+      const message = gatherPrompt(ev);
+      if (!message.ask) return this.host.toast(message.text);
+      this.host.confirm(GATHER_KINDS[ev.kind].verb, message.text, () => void this.send({ type: 'gather' }));
     } else if (ev.type === 'spring') {
       if (ev.used) return this.host.toast('The spring has run dry.');
       this.host.confirm('Healing spring', 'Let everyone drink from the spring? It fully restores the party. It only works once.', () => {

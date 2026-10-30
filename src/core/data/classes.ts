@@ -6,6 +6,14 @@ export interface TreeEntry {
   requires?: [SkillId, number];
 }
 
+/** Gathering skills every class can learn. */
+const GATHERING: TreeEntry[] = [
+  { skill: 'forage', level: 1 },
+  { skill: 'mine', level: 1 },
+  { skill: 'fell', level: 1 },
+  { skill: 'fish', level: 1 },
+];
+
 export interface ClassDef {
   id: ClassId;
   name: string;
@@ -38,6 +46,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'ironFormation', level: 3, requires: ['challenge', 2] },
       { skill: 'ironSkin', level: 5, requires: ['stoutHeart', 2] },
       { skill: 'rampartCrash', level: 16, requires: ['bulwarkBash', 5] },
+      ...GATHERING,
     ],
     color: '#d9a441',
     description: 'Shield-bearer of the front line. Draws enemy attacks and shields the party.',
@@ -56,6 +65,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'scatterVolley', level: 3, requires: ['twinFang', 2] },
       { skill: 'fleetFoot', level: 5, requires: ['keenEye', 2] },
       { skill: 'galePiercer', level: 18, requires: ['scatterVolley', 5] },
+      ...GATHERING,
     ],
     color: '#6fbf73',
     description: 'Swift archer. Fights well from either row and strikes several foes at once.',
@@ -75,6 +85,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'deepWell', level: 4 },
       { skill: 'rekindle', level: 6, requires: ['cleanse', 2] },
       { skill: 'wellspring', level: 18, requires: ['verdantChorus', 5] },
+      ...GATHERING,
     ],
     color: '#8fd3e8',
     description: 'Healer of the back row. Keeps the party standing with mending songs.',
@@ -95,6 +106,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       { skill: 'wildfire', level: 4, requires: ['emberRune', 3] },
       { skill: 'slumberRune', level: 5, requires: ['frostRune', 2] },
       { skill: 'thunderhead', level: 20, requires: ['stormRune', 5] },
+      ...GATHERING,
     ],
     color: '#c58af0',
     description: 'Carver of elemental runes. Fragile, but hits enemy weaknesses hard.',

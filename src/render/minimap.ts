@@ -1,5 +1,6 @@
+import { GATHER_KINDS } from '../core/data/gathering';
 import { MARKS, terrainAt } from '../core/chart';
-import { tileAt, type FloorMap } from '../core/dungeon';
+import { tileAt, type FloorMap, isGatherTile } from '../core/dungeon';
 import type { Game } from '../core/game';
 
 export interface MapLayout {
@@ -72,6 +73,7 @@ export function drawMinimap(
             if (tile === 'chest') glyph(ctx, px + mid, py + mid, cell, game.isChestOpened(x, y) ? '#9a9a9a' : MARKS.chest.color, MARKS.chest.glyph);
             if (tile === 'spring') glyph(ctx, px + mid, py + mid, cell, game.progress.springUsed ? '#7a9aa8' : MARKS.spring.color, MARKS.spring.glyph);
             if (tile === 'boss' && !game.progress.bossDefeated) glyph(ctx, px + mid, py + mid, cell, '#d0302a', '✸');
+            if (isGatherTile(tile)) glyph(ctx, px + mid, py + mid, cell, GATHER_KINDS[tile].color, GATHER_KINDS[tile].glyph);
           }
         }
       } else {

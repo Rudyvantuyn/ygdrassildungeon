@@ -1237,6 +1237,10 @@ table.stats thead th {
 .draft-tool .swatch[data-cell='T'] { background: #8a5a2b; }
 .draft-tool .swatch[data-cell='~'] { background: #2f8fb8; }
 .draft-tool .swatch[data-cell='B'] { background: #c23a2a; }
+.draft-tool .swatch[data-cell='P'] { background: #7cc85a; }
+.draft-tool .swatch[data-cell='O'] { background: #c8a46a; }
+.draft-tool .swatch[data-cell='W'] { background: #b07a4a; }
+.draft-tool .swatch[data-cell='F'] { background: #5ab0e0; }
 .draft-tool .swatch[data-cell='route'] { background: #ff7a4a; border-radius: 50%; }
 
 .draft-settings,

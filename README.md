@@ -29,6 +29,16 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Verzamelen (mijlpaal 10)
+
+- Vier **verzamelskills** in elke skillboom: **Forage** (planten), **Mine** (erts), **Fell** (hout) en **Fish** (vis).
+- Elke verdieping heeft **verzamelplekken** (gloed met een teken: ✿ ◆ ♠ ≈). Ga erop staan en kies *Act*; wie in de groep
+  de hoogste rank heeft, verzamelt. Twee pogingen per plek per bezoek; in de stad herstellen de plekken.
+- Hogere rank: meer vondsten (2 vanaf rank 4, 3 vanaf rank 8) en meer kans op zeldzame. Dieper in een hoofdstuk ligt
+  zeldzamer spul. Het lawaai lokt soms monsters (10%).
+- Vondsten zijn materialen voor de winkel. Werkt ook op expedities (de server beslist). In de Drafting Table te tekenen
+  als `P` (forage), `O` (mine), `W` (fell) en `F` (fish).
+
 ### Skillpunten (mijlpaal 9)
 
 - Elk level geeft een **skillpunt** (3 op level 1). Punten gaan in de **skillboom** van de klasse; elke skill heeft
@@ -165,13 +175,13 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |
 | Elementen | fysiek, vuur (fire), vorst (frost), storm |
-| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead; passief: Stout Heart, Iron Skin, Keen Eye, Fleet Foot, Gentle Hands, Rune Lore, Deep Well |
+| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead; passief: Stout Heart, Iron Skin, Keen Eye, Fleet Foot, Gentle Hands, Rune Lore, Deep Well; verzamelen: Forage, Mine, Fell, Fish |
 | Statuseffecten | Poison, Sleep, Paralysis |
 | Items | Sap Tonic (HP), Tide Draught (veel HP), Spirit Dew (SP), Clearwater (statuseffecten), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
 | Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe, Runehewn Axe, Hrimstring Bow, Frostbirch Rod, Scalehide Mail, Rimeweave Robe, Wyrmtooth Blade, Embersong Bow, Ashroot Rod, Emberscale Plate, Starveil Robe, Saltsteel Blade, Gullwind Bow, Driftwood Rod, Sharkhide Mail, Kelpweave Robe, Tidebreaker Axe, Stormgull Bow, Coralheart Rod, Anchor Plate, Deepscale Mail, Seafoam Robe, Fathom Edge, Wavecaller Bow, Abyss Rod, Leviathan Mail, Tidesong Robe |
 | Vijanden | Bogling, Duskwing, Briar Gnawer, Hollow Hound, Puffcap, Shellbark, Gloam Moth, Root Colossus, Hrimwolf, Frostcap, Rimeshell, Snowveil Moth, Cinderwing, Emberling, Rootfiend, Ashen Colossus, Brineling, Skerrywing, Reefclaw, Kelp Strangler, Brinecap, Seahound, Pearlmoth, Coralback, Tidecaller, Nykur, Saltwight, Gloom Eel, Deepmaw, Wavemaid, Fathomstone; bazen **The Blighted Elder**, **The Rootgnawer**, **The Drowned Jarl** en **The Hafgufa** |
 | Prowlers | Sterke monsters die zichtbaar over de kaart lopen: Grimtusk, Fenwraith, Root Draugr, Skerryjaw, Brine Draugr, Tidecoil |
-| Materialen | Bog Jelly, Dusk Membrane, Briar Quill, Hollow Fang, Puffcap Spores, Bark Shell, Gloam Scale, Heartwood Knot, Rime Pelt, Frost Gill, Ice Carapace, Snowveil Wing, Cinder Feather, Ember Core, Fiend Root, Ash Slab, Grim Tusk, Wraith Silk, Draugr Bone, Blighted Heartwood, Gnawer Fang, Brine Gel, Skerry Plume, Reef Shell, Kelp Cord, Salt Spores, Seahound Fang, Pearl Dust, Coral Chunk, Tideglass, Nykur Mane, Salt Bone, Eel Lantern, Deepmaw Tooth, Foam Silk, Fathom Core, Skerryjaw Fin, Brine Crown, Coil Scale, Jarl's Crown, Hafgufa Pearl |
+| Materialen | Bog Jelly, Dusk Membrane, Briar Quill, Hollow Fang, Puffcap Spores, Bark Shell, Gloam Scale, Heartwood Knot, Rime Pelt, Frost Gill, Ice Carapace, Snowveil Wing, Cinder Feather, Ember Core, Fiend Root, Ash Slab, Grim Tusk, Wraith Silk, Draugr Bone, Blighted Heartwood, Gnawer Fang, Brine Gel, Skerry Plume, Reef Shell, Kelp Cord, Salt Spores, Seahound Fang, Pearl Dust, Coral Chunk, Tideglass, Nykur Mane, Salt Bone, Eel Lantern, Deepmaw Tooth, Foam Silk, Fathom Core, Skerryjaw Fin, Brine Crown, Coil Scale, Jarl's Crown, Hafgufa Pearl; verzameld: Wild Sorrel, Bitterroot, Moonpetal, Copper Nugget, Iron Ore, Starsilver, Ashwood Log, Blackoak Log, Heartoak Burl, River Perch, Rootcarp, Glimmer Trout, Sea Lettuce, Glasswort, Pearl Kelp, Rock Salt, Coral Ore, Deepiron, Driftwood, Drowned Oak, Ghostwood, Silver Sprat, Stormfin, Moonscale Eel |
 | Speciale uitrusting | Briarthorn Spear, Duskweave Cloak, Barkshell Mail, Gloamscale Robe, Heartknot Staff, Elderheart Mail, Rimefang Blade, Snowveil Bow, Embercore Rod, Grimtusk Cleaver, Draugrbone Bow, Wraithsilk Robe, Reefshell Mail, Nacre Robe, Eel Lantern Rod, Skerryjaw Saber, Brinecrown Bow, Coilscale Robe, Jarlguard Plate |
 | Samen spelen | **Hornstone** (ontmoetingssteen), expeditie, Sound the Horn, Answer a Horn, gathering (lobby), share (je deel van de buit) |
 | Menu's | Pack (rugzak-menu in de dungeon), Map (kaarteditor), Notice Board (quests), System, Danger-bol |

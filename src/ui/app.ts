@@ -24,6 +24,9 @@ import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
 import { Designer, isMaker, loadDraft } from './designer';
 import { memberPicker, showSkillTree } from './skillsView';
+import { gatherPrompt } from './gatherView';
+import { GATHER_KINDS } from '../core/data/gathering';
+import { describeFinds } from '../core/expedition';
 import { unspentPoints } from '../core/skilltree';
 import { toFloorDef, type FloorDesign } from '../core/designer';
 import { markSeen, pendingScene, type StoryLine } from '../core/data/story';
@@ -747,6 +750,26 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           this.toast('The party feels refreshed. Game saved.');
         });
         return;
+      case 'gatherSpot': {
+        const message = gatherPrompt(ev);
+        if (!message.ask) return this.toast(message.text);
+        this.confirm(GATHER_KINDS[ev.kind].verb, message.text, () => {
+          const found = this.game.gather();
+          if (!found) return;
+          audio.play('chest');
+          this.save();
+          this.enterExplore();
+          this.toast(`Found ${describeFinds(found.finds)}!`);
+          if (found.ambush) {
+            const ambush = found.ambush;
+            window.setTimeout(() => {
+              this.toast('The noise has drawn monsters!');
+              this.handleStep({ type: 'encounter', enemies: ambush });
+            }, 900);
+          }
+        });
+        return;
+      }
       case 'boss':
         audio.music(null);
         audio.play('bossIntro');

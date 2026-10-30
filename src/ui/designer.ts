@@ -37,6 +37,10 @@ const TOOLS: { id: Tool; label: string; key: string }[] = [
   { id: '~', label: 'Spring', key: '6' },
   { id: 'B', label: 'Boss', key: '7' },
   { id: 'route', label: 'Prowler', key: '8' },
+  { id: 'P', label: 'Forage', key: '9' },
+  { id: 'O', label: 'Mine', key: '0' },
+  { id: 'W', label: 'Fell', key: '-' },
+  { id: 'F', label: 'Fish', key: '=' },
 ];
 
 /** Party level suggested for testing a floor with the monsters of Rootdeep floor i. */
@@ -224,7 +228,7 @@ export class Designer {
 
   private routePoint(x: number, y: number): void {
     const c = cellAt(this.design, x, y);
-    if (c === '#' || c === 'T') return;
+    if (c !== '.') return; // prowlers only walk plain floor
     if (!this.design.prowlers.length) this.addProwler();
     const p = this.design.prowlers[this.prowler];
     const at = p.route.findIndex(([rx, ry]) => rx === x && ry === y);
@@ -263,6 +267,10 @@ export class Designer {
           T: ['▣', '#8a5a2b'],
           '~': ['≈', '#2f8fb8'],
           B: ['✸', '#c23a2a'],
+          P: ['✿', '#4a9a2a'],
+          O: ['◆', '#9a7a3a'],
+          W: ['♠', '#8a5a2a'],
+          F: ['≈', '#2a7ab0'],
         };
         const g = glyph[c as Cell];
         if (g) {

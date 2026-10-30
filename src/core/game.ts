@@ -3,10 +3,12 @@ import { Combat, type CombatSnapshot } from './combat';
 import { FLOORS, type FloorDef } from './data/floors';
 import { makeInventory } from './data/items';
 import type { QuestState } from './quests';
-import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
+import { DX, DY, isGatherTile, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
 import { createStartingParty, fullRestore, isAlive, xpForLevel } from './party';
 import { EQUIPMENT_LIST } from './data/equipment';
-import { autoSpend } from './skilltree';
+import { autoSpend, rankOf } from './skilltree';
+import { GATHER_AMBUSH, GATHER_KINDS, GATHER_TABLES, GATHER_USES, type GatherKind } from './data/gathering';
+import { FLOORS_PER_CHAPTER } from './data/chapters';
 import { STORY } from './data/story';
 import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
 import { Rng } from './rng';
@@ -24,6 +26,8 @@ export interface FloorProgress {
   prowlers: ProwlerState[];
   /** The map the player draws. */
   chart: Chart;
+  /** Gathering spots used this visit: cell index → times. */
+  gathered?: Record<number, number>;
 }
 
 export type Location = 'town' | 'dungeon';
@@ -78,12 +82,22 @@ export type StepEvent =
   | { type: 'stairs' }
   | { type: 'upstairs' }
   | { type: 'spring'; used: boolean }
+  /** Standing on a gathering spot. `rank` is the party's best rank in its skill (0 = nobody can). */
+  | { type: 'gatherSpot'; kind: GatherKind; left: number; rank: number }
   | { type: 'boss' }
   | { type: 'encounter'; enemies: string[] }
   /** A prowler and the party ran into each other. */
   | { type: 'prowler'; index: number }
   /** A hunting prowler has noticed the party. */
   | { type: 'prowlerAlert'; index: number };
+
+export interface GatherResult {
+  kind: GatherKind;
+  /** Material ids found (already added to the party's materials). */
+  finds: string[];
+  /** Monsters drawn by the noise, or null. */
+  ambush: string[] | null;
+}
 
 export class SaveVersionError extends Error {
   constructor(readonly found: number) {
@@ -279,6 +293,11 @@ export class Game {
       events.push({ type: 'spring', used: this.progress.springUsed });
       return events;
     }
+    if (isGatherTile(tile)) {
+      const spot = this.gatherSpotHere()!;
+      events.push({ type: 'gatherSpot', ...spot });
+      return events;
+    }
     if (tile === 'boss' && !this.progress.bossDefeated && this.floorDef.boss) {
       events.push({ type: 'boss' });
       return events;
@@ -339,6 +358,7 @@ export class Game {
     this.state.location = 'town';
     this.state.progress.forEach((p, i) => {
       p.springUsed = false;
+      p.gathered = {};
       p.prowlers = initProwlers(this.floors[i]);
     });
   }
@@ -402,7 +422,51 @@ export class Game {
   }
 
   /** The action button: interact with whatever is right in front of the party. */
+  /** The Rootdeep floor this floor counts as (drawn floors borrow one). */
+  get depth(): number {
+    return this.floorDef.depth ?? this.state.floor;
+  }
+
+  /** The party's best rank in a gathering skill; only those still standing can gather. */
+  gatherRank(kind: GatherKind): number {
+    return Math.max(0, ...this.state.party.filter(isAlive).map((m) => rankOf(m, GATHER_KINDS[kind].skill)));
+  }
+
+  gatherSpotHere(): { kind: GatherKind; left: number; rank: number } | null {
+    const tile = this.tileHere();
+    if (!isGatherTile(tile)) return null;
+    const used = this.progress.gathered?.[this.state.y * this.map.width + this.state.x] ?? 0;
+    return { kind: tile, left: Math.max(0, GATHER_USES - used), rank: this.gatherRank(tile) };
+  }
+
+  /**
+   * Gather at the spot the party stands on. Better ranks find more, and rarer things; deeper floors
+   * in a chapter hold rarer things too. The noise may draw monsters (`ambush`: start that fight).
+   */
+  gather(): GatherResult | null {
+    const spot = this.gatherSpotHere();
+    if (!spot || spot.left <= 0 || spot.rank <= 0) return null;
+    const index = this.state.y * this.map.width + this.state.x;
+    this.progress.gathered = { ...this.progress.gathered, [index]: GATHER_USES - spot.left + 1 };
+    const table = GATHER_TABLES[Math.min(GATHER_TABLES.length - 1, Math.floor(this.depth / FLOORS_PER_CHAPTER))][spot.kind];
+    const inChapter = this.depth % FLOORS_PER_CHAPTER;
+    const count = 1 + (spot.rank >= 4 ? 1 : 0) + (spot.rank >= 8 ? 1 : 0);
+    const finds: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const roll = this.rng.next();
+      const rare = 0.03 + 0.015 * spot.rank + 0.015 * inChapter;
+      const uncommon = rare + 0.22 + 0.02 * spot.rank + 0.03 * inChapter;
+      const id = roll < rare ? table[2] : roll < uncommon ? table[1] : table[0];
+      finds.push(id);
+      this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
+    }
+    const ambush = this.rng.chance(GATHER_AMBUSH) ? this.rng.weighted(this.floorDef.encounters).enemies : null;
+    return { kind: spot.kind, finds, ambush };
+  }
+
   interact(): StepEvent {
+    const spot = this.gatherSpotHere();
+    if (spot) return { type: 'gatherSpot', ...spot };
     const ahead = relCell(this.state.x, this.state.y, this.state.dir, 1, 0);
     if (tileAt(this.map, ahead.x, ahead.y) === 'chest') return this.openChest(ahead.x, ahead.y);
     return { type: 'nothing' };

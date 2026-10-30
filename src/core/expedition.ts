@@ -11,6 +11,7 @@ import type { CombatEvent, CombatSnapshot, Command } from './combat';
 import { CLASSES } from './data/classes';
 import { EQUIPMENT } from './data/equipment';
 import { FLOORS } from './data/floors';
+import { MATERIALS } from './data/materials';
 import { ITEMS, makeInventory } from './data/items';
 import { SKILLS } from './data/skills';
 import { Game, type GameState, type StepEvent } from './game';
@@ -88,6 +89,7 @@ export type Action =
   | { type: 'descend' }
   | { type: 'ascend' }
   | { type: 'drink' }
+  | { type: 'gather' }
   | { type: 'feather' }
   /** `round` guards against a choice arriving after its round was already settled. */
   | { type: 'command'; seat: number; command: Command | null; round?: number }
@@ -255,6 +257,7 @@ function run(state: ExpeditionState, user: string, action: Action, now: number, 
     case 'descend':
     case 'ascend':
     case 'drink':
+    case 'gather':
     case 'feather':
       if (state.phase !== 'explore') return state.phase === 'combat' ? 'Not during a fight.' : 'The expedition has not set out yet.';
       if (!isLeader) return 'Only the leader can do that.';
@@ -317,6 +320,13 @@ function explore(state: ExpeditionState, action: Action, now: number): string | 
       if (!game.drinkSpring()) return 'There is nothing to drink here.';
       note(state, 'The expedition drinks from the spring and feels refreshed.');
       break;
+    case 'gather': {
+      const found = game.gather();
+      if (!found) return 'There is nothing to gather here.';
+      note(state, `The expedition gathers: ${describeFinds(found.finds)}.`);
+      if (found.ambush) events.push({ type: 'encounter', enemies: found.ambush });
+      break;
+    }
     case 'feather':
       if ((game.state.inventory.homingFeather ?? 0) <= 0) return 'There is no Homing Feather left.';
       game.state.inventory.homingFeather -= 1;
@@ -406,6 +416,13 @@ function save(state: ExpeditionState, game: Game): void {
 }
 
 type Unsequenced<T> = T extends unknown ? Omit<T, 'seq'> : never;
+
+/** "Iron Ore ×2, Starsilver" */
+export function describeFinds(ids: string[]): string {
+  const counts = new Map<string, number>();
+  for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
+  return [...counts].map(([id, n]) => `${MATERIALS[id]?.name ?? id}${n > 1 ? ` ×${n}` : ''}`).join(', ');
+}
 
 function log(state: ExpeditionState, entry: Unsequenced<LogEntry>): void {
   state.log.push({ ...entry, seq: state.seq + 1 } as LogEntry);
