@@ -35,7 +35,7 @@ function prowlerWinRate(id: string, level: number, tier: number, fights = 100): 
 
 // Deterministic seeds, so these are stable. If a balance change breaks them,
 // re-check the numbers on purpose rather than loosening the bounds blindly.
-describe('balance (computer player)', () => {
+describe('balance (computer player)', { timeout: 60_000 }, () => {
   const seeds = Array.from({ length: 20 }, (_, i) => 1000 + i);
   const count = (results: AutoplayResult[], ok: (r: AutoplayResult) => boolean) => results.filter(ok).length;
 

@@ -86,6 +86,8 @@ released commercially, so each asset needs a known origin and licence.
 | people/ylva.webp | MAHZdXG4ibw |
 | people/aske.webp | MAHZdf8GuyE |
 | people/torvald.webp | MAHZdUExJQk |
+| people/hrodna.webp | MAHZfU0QrEo (page 97) |
+| people/eira.webp | MAHZfQNkAB8 (page 98) |
 | heroes/bastion-a.webp | MAHZdRXRNxM |
 | heroes/bastion-b.webp | MAHZdbjQY2o |
 | heroes/strider-a.webp | MAHZdQlTv2U |

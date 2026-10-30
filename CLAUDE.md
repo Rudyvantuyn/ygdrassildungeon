@@ -47,8 +47,10 @@ Add new names there and keep the glossary in sync.
   the balance tests check that rushing fails and steady training wins.
 - **Lots of tutorials**: short tips by the townsfolk the first time something comes up (`src/core/data/tutorials.ts`),
   all readable again in the Guidebook, and they can be switched off. Add a tip for every new mechanic.
-- **The overarching story will be written by a friend of the owner.** `docs/verhaal-briefing.md` tells the writer what
-  the game needs; turn what they deliver into `src/core/data/story.ts` scenes.
+- **The overarching story is written by Thijs, a friend of the owner.** `docs/verhaal-briefing.md` tells the writer what
+  the game needs; `docs/verhaal.md` holds his story and how it is woven in (`src/core/data/story.ts`). The story never
+  ends: every chapter resolves something and opens a deeper secret. Choices lean toward one of three roads (Asgard,
+  the realms, Midgard's own third way); later chapters must react to them. Keep the canon in `docs/verhaal.md` in sync.
 
 - **Multiplayer** means going into the dungeon together: each player brings one of their own adventurers into a
   party of up to four (an "expedition"). No shared town. Trading may come later (low priority). Leaderboards and

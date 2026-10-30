@@ -259,7 +259,7 @@ export class TownView {
       ],
       { onCancel: back, startIndex: start },
     );
-    this.dialog('The Oath Hall', [npcSays('brynja', '"Speak your oath, and the Great Tree will remember your name."')], menu, true);
+    this.dialog('The Oath Hall', [npcSays('brynja', '"Swear on the bone of Ymir, and the realms will remember your name."')], menu, true);
   }
 
   private skills(): void {

@@ -57,6 +57,8 @@ export interface GameState {
   quests: Record<string, QuestState>;
   /** Story scenes already shown. */
   story: string[];
+  /** Choices made at the end of story scenes: scene id → option id. */
+  choices?: Record<string, string>;
   /** Adventurers ever sworn in at the Oath Hall (the first few are free). */
   oaths?: number;
   /** Tutorial tips already shown. */
@@ -131,6 +133,7 @@ export class Game {
     state.kills ??= {};
     state.quests ??= {};
     state.story ??= [];
+    state.choices ??= {};
     state.oaths ??= state.party.length + state.reserve.length;
     state.tips ??= [];
     // Saves from before skill points: give everyone the recommended build for their level.
@@ -208,6 +211,7 @@ export class Game {
       kills: {},
       quests: {},
       story: [],
+      choices: {},
     }, floors);
     game.rollEncounterAt();
     return game;

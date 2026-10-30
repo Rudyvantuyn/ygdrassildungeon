@@ -12,6 +12,8 @@ export const NPC_NAMES: Record<NpcId, string> = {
   ylva: 'Ylva the shepherd',
   aske: 'Brother Aske, healer',
   torvald: 'Torvald the carver',
+  hrodna: 'Hrodna, Envoy of the Frost Court',
+  eira: 'Eira the Wanderer',
 };
 
 /** The person behind a name as written in quests and the story ("Hjalmar the miller" → hjalmar). */

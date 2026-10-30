@@ -31,7 +31,7 @@ import { GATHER_KINDS } from '../core/data/gathering';
 import { describeFinds } from '../core/expedition';
 import { unspentPoints } from '../core/skilltree';
 import { toFloorDef, type FloorDesign } from '../core/designer';
-import { markSeen, pendingScene, type StoryLine } from '../core/data/story';
+import { choose, markSeen, pendingScene, STORY, type StoryLine, type StoryScene } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
 import { npcFromName, npcSays } from './npc';
 import { ListMenu, type MenuItem } from './menu';
@@ -347,7 +347,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     );
     const screen = el('div', { className: 'title-screen' }, [
       el('div', { className: 'logo', text: 'YGDRASSIL' }),
-      el('div', { className: 'tagline', text: 'Descent beneath the Great Tree' }),
+      el('div', { className: 'tagline', text: 'The road to Asgard runs through Ymir' }),
       el('div', { className: 'panel dialog' }, [menu.el]),
       ...(notice ? [el('div', { className: 'title-notice panel', text: notice })] : []),
       el('div', { className: 'title-foot', text: 'Arrow keys / WASD to move · Enter to confirm · Esc to go back' }),
@@ -416,8 +416,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.town.show();
     this.updateHud();
     const tips = () => this.townTips();
-    if (pendingScene(this.game, 'town')) this.playStory('town', (id) => (id === 'chapterTwoEnd' ? this.showCredits() : tips()));
-    else tips();
+    // Scenes waiting in town play one after the other.
+    const story = (): void => {
+      if (!pendingScene(this.game, 'town')) return tips();
+      this.playStory('town', (id) => (id === 'chapterTwoEnd' ? this.showCredits() : story()));
+    };
+    story();
   }
 
   /** Tips for the town, each shown once: the town itself, then whatever has come up. */
@@ -684,8 +688,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.openOverlay(
       el('div', { className: 'title-screen credits' }, [
         el('div', { className: 'logo', text: 'YGDRASSIL' }),
-        el('div', { className: 'tagline', text: 'Descent beneath the Great Tree' }),
-        el('p', { className: 'credits-line', text: 'Thank you for playing.' }),
+        el('div', { className: 'tagline', text: 'The road to Asgard runs through Ymir' }),
+        el('p', { className: 'credits-line', text: 'End of Chapter II. The road goes on, deeper than the sea.' }),
         el('div', { className: 'rewards' }, [
           el('span', { text: 'Party' }), el('span', { className: 'v', text: s.party.map((m) => `${m.name} Lv ${m.level}`).join(', ') }),
           el('span', { text: 'Steps taken' }), el('span', { className: 'v', text: String(s.steps) }),
@@ -693,7 +697,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           el('span', { text: 'Requests completed' }), el('span', { className: 'v', text: `${quests}` }),
           el('span', { text: 'Gold' }), el('span', { className: 'v', text: `${s.gold} G` }),
         ]),
-        el('p', { className: 'credits-line small', text: 'A game by Rudy van Tuijn · built with Claude' }),
+        el('p', { className: 'credits-line small', text: 'A game by Rudy van Tuijn · story by Thijs · built with Claude' }),
         el('div', { className: 'panel dialog' }, [menu.el]),
       ]),
       menu,
@@ -710,13 +714,67 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       return;
     }
     markSeen(this.game, scene.id);
+    this.playLines(scene.lines, () => {
+      if (scene.choice && !this.game.state.choices?.[scene.id]) this.storyChoice(scene, () => then(scene.id));
+      else then(scene.id);
+    });
+  }
+
+  /** Shows story lines one box at a time, then calls `then`. */
+  private playLines(lines: StoryLine[], then: () => void): void {
     const box = el('div', { className: 'story-box panel' });
     box.addEventListener('click', () => this.storyKey('Enter'));
     this.viewWrap.appendChild(box);
-    this.story = { lines: scene.lines, index: 0, shown: 0, then: () => then(scene.id), box };
+    this.story = { lines, index: 0, shown: 0, then, box };
     this.mode = 'story';
     this.toastEl.classList.add('hidden');
     this.showStoryLine();
+  }
+
+  /** The choice at the end of a scene. It cannot be skipped; what was chosen is said, then the story goes on. */
+  private storyChoice(scene: StoryScene, then: () => void): void {
+    const choice = scene.choice!;
+    const items: MenuItem[] = choice.options.map((o) => ({
+      label: o.label,
+      onSelect: () => {
+        this.closeOverlay();
+        choose(this.game, scene.id, o.id);
+        this.save();
+        this.playLines(o.reply, then);
+      },
+    }));
+    const menu = new ListMenu(items);
+    this.openOverlay(
+      el('div', { className: 'panel dialog story-choice' }, [
+        el('h2', { text: scene.title }),
+        el('p', { text: choice.prompt }),
+        el('p', { className: 'muted', text: 'This choice will be remembered.' }),
+        menu.el,
+      ]),
+      menu,
+    );
+  }
+
+  /** The Chronicle: every scene seen so far, to read again, with the choices made. */
+  showChronicle(back: () => void, start = 0): void {
+    const seen = STORY.filter((sc) => this.game.state.story.includes(sc.id));
+    const items: MenuItem[] = seen.map((sc, i) => {
+      const picked = sc.choice?.options.find((o) => o.id === this.game.state.choices?.[sc.id]);
+      return {
+        label: sc.title,
+        detail: picked ? '◆' : '',
+        description: picked ? `You chose: ${picked.label}.` : '',
+        onSelect: () => {
+          this.closeOverlay();
+          this.playLines([...sc.lines, ...(picked?.reply ?? [])], () => this.showChronicle(back, i));
+        },
+      };
+    });
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back, startIndex: Math.min(start, items.length - 1) });
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Chronicle' }), menu.el, desc]), menu);
   }
 
   private showStoryLine(): void {
@@ -1025,8 +1083,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.save();
     this.openOverlay(
       el('div', { className: 'panel dialog' }, [
-        el('h2', { text: 'The deep water is calm!' }),
-        el('p', { text: 'The Hafgufa has sunk into the dark, and the Great Tree drinks sweet water again.' }),
+        el('h2', { text: 'The first ward has fallen!' }),
+        el('p', { text: 'The Hafgufa has sunk into the dark, and the first of the gods\' wards is broken.' }),
         el('p', { text: `Steps: ${s.steps} · Battles: ${s.battles} · Gold: ${s.gold} G` }),
         menu.el,
       ]),
@@ -1068,6 +1126,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           onSelect: () => this.packSkillTree(),
         },
         { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(() => this.openPack()) },
+        { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(() => this.openPack()) },
         { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.soundOptions(() => this.openPack()) },
         this.trial
           ? { label: 'End the test', description: 'Back to the drafting table.', onSelect: () => this.endTrial() }

@@ -3,7 +3,7 @@ import { shade } from './color';
 import { onSpriteLoad, sprite } from './sprites';
 
 /** People of Lindholm with a painted portrait (art/people/<id>.webp). */
-export type NpcId = 'gerd' | 'hilde' | 'brynja' | 'sigrid' | 'ketil' | 'hjalmar' | 'ylva' | 'aske' | 'torvald';
+export type NpcId = 'gerd' | 'hilde' | 'brynja' | 'sigrid' | 'ketil' | 'hjalmar' | 'ylva' | 'aske' | 'torvald' | 'hrodna' | 'eira';
 export type PortraitKind = ClassId | NpcId;
 
 const CLASSES: readonly string[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin'];

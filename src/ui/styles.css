@@ -1391,3 +1391,9 @@ table.stats thead th {
   font-size: 12px;
   color: var(--muted);
 }
+
+.story-choice .muted {
+  opacity: 0.7;
+  font-style: italic;
+  font-size: 0.9em;
+}

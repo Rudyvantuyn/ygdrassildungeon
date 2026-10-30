@@ -29,6 +29,21 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Het grote verhaal (mijlpaal 13)
+
+- Het verhaal van Thijs zit erin (zie `docs/verhaal.md`): Ginnungagap, Ymir, de goden die hem doodden en Midgard uit
+  zijn lichaam bouwden, de andere werelden die Midgard aanvallen, en het **Pact of the Gap**: vind een weg naar Asgard
+  en Midgard wordt gespaard. De groep zijn de **Wayfinders** van dat pact.
+- De Rootdeep is de weg omlaag door Ymirs lichaam: hoofdstuk I zijn haar en vlees (bos), hoofdstuk II zijn bloed (zee).
+- Twee nieuwe personages met eigen portret: **Hrodna**, gezant van de Frost Court (de andere werelden), en **Eira the
+  Wanderer**, een zwerfster met een lantaarn die meer weet dan ze zegt.
+- **Keuzes**: op drie momenten kies je wie iets krijgt (Hrodna, Eira, of Midgard zelf). Dat wordt onthouden en telt
+  op richting de drie wegen (Asgard, de werelden, of een derde weg); latere scènes reageren erop.
+- Verhaalscènes bij elke verdieping, geheimen die langzaam loskomen (Hallvards vloot, de gouden runen, "de vrouw met
+  de lantaarn"), en de spelregels verklaard (Oath Tokens zijn botsplinters van Ymir, prowlers aten van zijn lichaam).
+- **Chronicle** (Pack): lees elke gezien scène terug, met je keuzes.
+- Vier nieuwe opdrachten van Hrodna en Eira.
+
 ### Je eigen groep, grinden en tutorials (mijlpaal 12)
 
 - **Nieuw spel = je groep oprichten**: Brynja van de Oath Hall begeleidt je bij het kiezen van klasse, naam en rij,
@@ -194,10 +209,11 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 |---|---|
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
 | Hoofdstukken | I: The Greenwood Roots, II: The Drowned Roots |
+| Verhaal | **Pact of the Gap** (het pact met de andere werelden), **Wayfinders** (de gezworen avonturiers), **Frost Court** (de werelden die het pact tekenden), ward (een slot van de goden op de weg naar Asgard), Chronicle (verhaal teruglezen), Hallvard (jarl van het eerste pact) |
 | Tekenscherm | The Drafting Table; thema's Greenwood, Frostwood, Emberroot, Tidewater, Coral, Abyss |
 | Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimewood IV, Wyrmroot V, Saltmarsh VI, Kelpwood VII, Coral Vault VIII, Ran's Reach IX, Aegir's Hall X |
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
-| Personages | Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder) |
+| Personages | Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder), Hrodna (gezant van de Frost Court), Eira the Wanderer |
 | Party | Bram, Sela, Wren, Orrin |
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie), Skald (liederen die de groep versterken), Berserker (bijl, veel schade, weinig verdediging), Seeress (vervloekingen), Wolfkin (jager met wolf) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |

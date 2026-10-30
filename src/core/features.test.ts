@@ -5,7 +5,7 @@ import { EQUIPMENT_LIST } from './data/equipment';
 import { makeInventory } from './data/items';
 import { MATERIALS } from './data/materials';
 import { QUESTS } from './data/quests';
-import { STORY, markSeen, pendingScene } from './data/story';
+import { STORY, choose, leanings, markSeen, pendingScene } from './data/story';
 import { Game } from './game';
 import { createStartingParty, memberStats } from './party';
 import { acceptQuest, boardQuests, questProgress, questStage, turnInQuest } from './quests';
@@ -171,8 +171,10 @@ describe('quests', () => {
 describe('story', () => {
   it('plays each scene once, at the right moment', () => {
     const game = Game.newGame(1);
-    expect(pendingScene(game, 'town')?.id).toBe('intro');
-    markSeen(game, 'intro');
+    expect(pendingScene(game, 'town')?.id).toBe('prologue');
+    markSeen(game, 'prologue');
+    expect(pendingScene(game, 'town')?.id).toBe('pact');
+    markSeen(game, 'pact');
     expect(pendingScene(game, 'town')).toBeNull();
     game.enterFloor(0);
     expect(pendingScene(game, 'floor')?.id).toBe('firstDescent');
@@ -180,8 +182,30 @@ describe('story', () => {
     game.state.progress[2].bossDefeated = true;
     expect(pendingScene(game, 'town')?.id).toBe('elderFallen');
     const copy = Game.load(game.serialize());
-    expect(copy.state.story).toEqual(['intro', 'firstDescent']);
+    expect(copy.state.story).toEqual(['prologue', 'pact', 'firstDescent']);
     for (const s of STORY) expect(s.lines.length).toBeGreaterThan(0);
+  });
+
+  it('remembers choices and how they lean', () => {
+    const game = Game.newGame(1);
+    expect(choose(game, 'elderFallen', 'nope')).toBeNull();
+    expect(choose(game, 'elderFallen', 'keep')?.leaning).toBe('midgard');
+    // Only the first choice counts.
+    choose(game, 'elderFallen', 'hrodna');
+    expect(game.state.choices).toEqual({ elderFallen: 'keep' });
+    choose(game, 'jarlFallen', 'eira');
+    expect(leanings(Game.load(game.serialize()))).toEqual({ asgard: 1, realms: 0, midgard: 1 });
+    game.state.deepest = 5;
+    for (const id of ['prologue', 'pact', 'wanderer', 'oathTruth']) markSeen(game, id);
+    expect(pendingScene(game, 'town')?.id).toBe('runeMidgard');
+  });
+
+  it('keeps every story line short enough for one box', () => {
+    for (const s of STORY) {
+      const lines = [...s.lines, ...(s.choice?.options.flatMap((o) => o.reply) ?? [])];
+      for (const line of lines) expect(line.text.length, `${s.id}: ${line.text}`).toBeLessThanOrEqual(150);
+      for (const o of s.choice?.options ?? []) expect(o.reply.length).toBeGreaterThan(0);
+    }
   });
 });
 

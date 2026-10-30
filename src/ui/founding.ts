@@ -52,11 +52,11 @@ export class Founding {
     const say =
       n === 0
         ? first
-          ? '"So you have come to swear the oath. Good. Lindholm needs explorers. Nobody goes into the Rootdeep alone: choose who will walk at your side. Up to four may swear today, at no cost."'
+          ? '"So you have come to swear the Pact. Good. Midgard needs Wayfinders to find the road the realms want. Nobody goes into the Rootdeep alone: choose who will walk at your side. Up to four may swear today, at no cost."'
           : '"Who will be the first to swear?"'
         : n < FOUNDING_OATHS
           ? `"${n} sworn. A full party has four: two to hold the front, two to work from behind. Take more, or set out as you are."`
-          : '"Four sworn, a full party. Later oaths will cost you gold and an Oath Token from the deep, so choose well. Ready?"';
+          : '"Four sworn, a full party. Later oaths need gold and an Oath Token, a shard of Ymir from the deep, so choose well. Ready?"';
     const items: MenuItem[] = [
       ...this.members.map((m, i) => ({
         label: `${m.name}`,

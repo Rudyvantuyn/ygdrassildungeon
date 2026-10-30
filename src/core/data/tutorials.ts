@@ -19,7 +19,7 @@ export const TIPS: TipDef[] = [
     pages: [
       'This is Lindholm. Everything you need before a descent is here.',
       'Rest at the Sleeping Stag to heal. Hilde\'s shop sells supplies and gear. The notice board has paid requests.',
-      'The Oath Hall is where adventurers are sworn in and parties are formed. The Rootdeep entrance is past the well.',
+      'The Oath Hall is where Wayfinders swear the Pact and parties are formed. The Rootdeep entrance is past the well.',
       'Explorers who rush in die. Explorers who come back, a little stronger each time, reach the bottom.',
     ],
   },
@@ -30,7 +30,7 @@ export const TIPS: TipDef[] = [
     pages: [
       'Move with the arrow keys or the buttons. You walk one cell at a time; turning is free.',
       'The danger orb grows brighter as you walk. When it burns, a fight is close.',
-      'The stairs up (where you came in) always lead back toward Lindholm. Turning back in time is no shame.',
+      'The roots of the Great Tree always lead home: the stairs up take you back toward Lindholm. Turning back in time is no shame.',
       'Use Act to open chests, drink from springs and gather. Pack holds your items, skills and options.',
     ],
   },
@@ -39,7 +39,7 @@ export const TIPS: TipDef[] = [
     title: 'Drawing the map',
     speaker: 'ylva',
     pages: [
-      'The Rootdeep has never been mapped. The map in the corner fills in where you have walked.',
+      'The Rootdeep has never been mapped: before the Pact, nobody was allowed down. The map in the corner fills in where you have walked.',
       'Open Map to draw walls, floor and marks yourself: chests, springs, danger, notes.',
       'Change the map mode there: draw everything yourself, let your steps be filled in, or let the map draw itself.',
     ],
@@ -60,7 +60,7 @@ export const TIPS: TipDef[] = [
     title: 'Growing stronger',
     speaker: 'brynja',
     pages: [
-      'Every fight gives experience. Levels come slowly; that is how the Rootdeep is.',
+      'Every fight gives experience. Levels come slowly; that is how the Rootdeep is. What dies in Ymir\'s body grows back, so there is always more to fight.',
       'Each level brings a skill point. A ✦ on a card means points are waiting to be spent.',
       'Monsters also leave materials. Sell them at Hilde\'s shop for gold.',
     ],
@@ -134,7 +134,7 @@ export const TIPS: TipDef[] = [
     title: 'Prowlers',
     speaker: 'sigrid',
     pages: [
-      'That shape in the dark is a prowler: a beast far stronger than anything around it. They roam where you can see them.',
+      'That shape in the dark is a prowler: a beast that gorged on Ymir\'s flesh and grew far stronger than anything around it.',
       'Do not fight one until you are much stronger. There is always a way around; some hunt you if you come close.',
       'Running from a prowler works only about one time in three.',
       'Those who do bring one down carry home an Oath Token, and the Oath Hall needs those.',
@@ -173,7 +173,7 @@ export const TIPS: TipDef[] = [
     speaker: 'brynja',
     pages: [
       'Your first party swore for free. Every oath after that costs gold, more each time, and an Oath Token.',
-      'Oath Tokens are carved from living root-wood. Guardians and prowlers leave them, and a few chests hold one.',
+      'Oath Tokens are shards of Ymir\'s bone. The realms honour no oath sworn without one. Guardians and prowlers carry them, and a few chests hold one.',
       'Adventurers in the hall can swap into the party at any time.',
     ],
   },
@@ -188,7 +188,7 @@ export const TIPS: TipDef[] = [
     title: 'The Hornstone',
     speaker: 'ketil',
     pages: [
-      'Blow the Hornstone and explorers from other halls can answer. Each brings one adventurer; four make an expedition.',
+      'Every town that swore the Pact has a Hornstone. Blow it and Wayfinders from other halls can answer. Each brings one adventurer; four make an expedition.',
       'What you find on an expedition is shared when it ends. You need an account to use the horn.',
     ],
   },
