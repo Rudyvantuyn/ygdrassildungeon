@@ -10,6 +10,7 @@ released commercially, so each asset needs a known origin and licence.
   current terms before release.
 - All images were exported at 1200×1200 from the Canva design "Ygdrassil monster art sheet"
   (DAHZbPIDnaM), then processed with `scripts/process-art.py` (background removed, cropped, 560 px WebP).
+  Chapter II monsters (brineling … hafgufa) were generated on 2026-10-30 and exported at 1024×1024.
 - Shared style prompt: *Painterly dark-fantasy game monster illustration, full body, centered, isolated
   on a plain flat dark charcoal background, Norse folklore mood, dramatic top lighting, soft rim light,
   hand-painted texture, high detail, no text, no border.* followed by a short description of the creature.
@@ -37,6 +38,26 @@ released commercially, so each asset needs a known origin and licence.
 | shellbark | MAHZc6FbP0Y |
 | snowveil | MAHZc-j_m-4 |
 | grimtusk | MAHZc-q9TLM |
+| brineling | MAHZeU6lHPo |
+| skerrywing | MAHZeZj4RVc |
+| reefclaw | MAHZeZuuERo |
+| kelpStrangler | MAHZecN5iJw |
+| brinecap | MAHZef_T8bs |
+| pearlmoth | MAHZefp6fNU |
+| coralback | MAHZea9sWbk |
+| tidecaller | MAHZefEYeEY |
+| nykur | MAHZeXcnQoM |
+| seahound | MAHZeRS56i0 |
+| saltwight | MAHZeQ1CHQk |
+| gloomEel | MAHZeWD8D2U |
+| deepmaw | MAHZeVe93sI |
+| wavemaid | MAHZeRt_dnM |
+| fathomstone | MAHZeTHHISI |
+| skerryjaw | MAHZeeEVoFs |
+| brineDraugr | MAHZeTp3IDI |
+| tidecoil | MAHZefZiBNw |
+| drownedJarl | MAHZeZ8maFI |
+| hafgufa | MAHZeZot0-M |
 
 ## Town, people and heroes (`public/art/places`, `people`, `heroes`)
 
@@ -92,3 +113,26 @@ released commercially, so each asset needs a known origin and licence.
 | emberroot-wall | MAHZd3ws7c0 |
 | emberroot-floor | MAHZdyuoIDE |
 | emberroot-ceiling | MAHZd9_u4L8 |
+| tidewater-wall | MAHZeTE52_4 |
+| tidewater-floor | MAHZeWWUgdk |
+| tidewater-ceiling | MAHZefAPiP0 |
+| coral-wall | MAHZeQ9rGaQ |
+| coral-floor | MAHZeWaFT8w |
+| coral-ceiling | MAHZeQs2k9I |
+| abyss-wall | MAHZee2KK7s |
+| abyss-floor | MAHZed0Af8s |
+| abyss-ceiling | MAHZeb0mye8 |
+
+## Dungeon props (`public/art/props/<name>.webp`)
+
+- Generated with Canva's AI image generator on 2026-10-30, exported from the art sheet (DAHZbPIDnaM) at
+  1024×1024 and cut out with `scripts/process-art.py`.
+- Style prompt: *Painterly dark-fantasy game prop illustration, centered, isolated on a plain flat dark charcoal
+  background, dramatic top lighting, soft rim light, hand-painted texture, high detail, no text, no border.*
+  followed by a short description of the prop.
+
+| File | Canva media id |
+|---|---|
+| chest | MAHZeb7Z0H4 |
+| chest-open | MAHZeSMxMkQ |
+| spring | MAHZeQ7Kilc |

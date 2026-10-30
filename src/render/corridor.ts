@@ -153,8 +153,8 @@ export class CorridorRenderer {
           if (!tex) this.floorCell(s, d, pal);
           if (tile === 'stairs' && d > 0) this.stairs(s, d, pal, time);
           if (tile === 'up') this.upStairs(s, d, pal, time);
-          if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y));
-          if (tile === 'spring' && d > 0) this.spring(s, d, time, game.progress.springUsed);
+          if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y), pal);
+          if (tile === 'spring' && d > 0) this.spring(s, d, time, game.progress.springUsed, pal);
           if (tile === 'boss' && d > 0 && !game.progress.bossDefeated) this.bossSigil(s, d, time);
           const prowler = d > 0 ? game.prowlerAt(cell.x, cell.y) : -1;
           if (prowler >= 0) {
@@ -479,7 +479,37 @@ export class CorridorRenderer {
     ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
   }
 
-  private chest(s: number, d: number, opened: boolean): void {
+  /**
+   * A painted prop standing on the floor at the middle of cell (s, d), `width` cells wide,
+   * darkened by the fog like everything else. Returns false while the sprite is still loading.
+   */
+  private billboard(path: string, s: number, d: number, width: number, fogColor: string): boolean {
+    const img = sprite(path);
+    if (!img) return false;
+    const z = d + 0.5;
+    const f = this.fog(z);
+    const [cx, cy] = this.project([s, 0.5, z]);
+    const [ex] = this.project([s + width / 2, 0.5, z]);
+    const w = Math.round((ex - cx) * 2);
+    const h = Math.round((w * img.naturalHeight) / img.naturalWidth);
+    if (w < 2 || h < 2) return true;
+    const off = this.scratch(Math.max(w, h));
+    const octx = off.getContext('2d')!;
+    octx.clearRect(0, 0, w, h);
+    octx.drawImage(img, 0, 0, w, h);
+    if (f > 0.02) {
+      octx.globalCompositeOperation = 'source-atop';
+      octx.fillStyle = withAlpha(fogColor, f);
+      octx.fillRect(0, 0, w, h);
+      octx.globalCompositeOperation = 'source-over';
+    }
+    // The sprites have a little padding below the feet, so sink them in slightly.
+    this.ctx.drawImage(off, 0, 0, w, h, cx - w / 2, cy - h * 0.94, w, h);
+    return true;
+  }
+
+  private chest(s: number, d: number, opened: boolean, pal: Palette): void {
+    if (d > 0 && this.billboard(opened ? 'props/chest-open.webp' : 'props/chest.webp', s, d, 0.5, pal.fog)) return;
     const ctx = this.ctx;
     const z = d + 0.5;
     const f = this.fog(z);
@@ -520,10 +550,23 @@ export class CorridorRenderer {
     ctx.stroke();
   }
 
-  private spring(s: number, d: number, time: number, used: boolean): void {
+  private spring(s: number, d: number, time: number, used: boolean, pal: Palette): void {
     const ctx = this.ctx;
     const z = d + 0.5;
     const f = this.fog(z);
+    if (this.billboard('props/spring.webp', s, d, 0.62, pal.fog)) {
+      // A soft glow over the water while it can still be drunk from.
+      if (used) return;
+      const [cx, cy] = this.project([s, 0.36, z]);
+      const r = 110 * this.scaleAt(z);
+      const pulse = 0.3 + 0.15 * Math.sin(time / 300);
+      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      glow.addColorStop(0, `rgba(120,230,255,${pulse * (1 - f)})`);
+      glow.addColorStop(1, 'rgba(120,230,255,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+      return;
+    }
     const [cx, cy] = this.project([s, 0.5, z]);
     const [ex] = this.project([s + 0.36, 0.5, z]);
     const rx = ex - cx;
