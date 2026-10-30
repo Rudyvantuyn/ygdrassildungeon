@@ -1,13 +1,21 @@
 import type { EnemyDef } from '../core/data/enemies';
 import { shade } from './color';
+import { sprite } from './sprites';
 
 type Ctx = CanvasRenderingContext2D;
 
+/** The painted sprite of an enemy (art/monsters/<id>.webp). */
+export function monsterSprite(def: EnemyDef): HTMLImageElement | null {
+  return sprite(`monsters/${def.id}.webp`);
+}
+
 /**
  * Draws a monster standing on (x, groundY). `u` is the base size in pixels;
- * `t` is time in ms for idle animation.
+ * `t` is time in ms for idle animation. Uses the painted sprite once it has
+ * loaded, and the procedural shape until then.
  */
-export function drawMonster(ctx: Ctx, art: EnemyDef['art'], x: number, groundY: number, u: number, t: number): void {
+export function drawMonster(ctx: Ctx, def: EnemyDef, x: number, groundY: number, u: number, t: number): void {
+  const art = def.art;
   const s = u * art.size;
   ctx.save();
   ctx.translate(x, groundY);
@@ -16,7 +24,19 @@ export function drawMonster(ctx: Ctx, art: EnemyDef['art'], x: number, groundY: 
   ctx.beginPath();
   ctx.ellipse(0, 0, s * 0.5, s * 0.1, 0, 0, Math.PI * 2);
   ctx.fill();
-  SHAPES[art.shape](ctx, s, art.color, art.accent, t);
+  const img = monsterSprite(def);
+  if (img) {
+    // Fit into a box about as tall as the shape would be, and not too wide.
+    const scale = Math.min((s * 1.25) / img.naturalHeight, (s * 1.7) / img.naturalWidth);
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    // Slow breathing
+    const breath = Math.sin(t / 520) * 0.018;
+    ctx.scale(1 - breath * 0.5, 1 + breath);
+    ctx.drawImage(img, -w / 2, -h + s * 0.04, w, h);
+  } else {
+    SHAPES[art.shape](ctx, s, art.color, art.accent, t);
+  }
   ctx.restore();
 }
 

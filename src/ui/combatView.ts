@@ -129,7 +129,7 @@ export class CombatView {
       ctx.globalAlpha = alpha;
       ctx.translate(x + shake, ground + sink);
       ctx.scale(lunge, lunge);
-      drawMonster(ctx, enemy.def.art, 0, 0, u, time + i * 777);
+      drawMonster(ctx, enemy.def, 0, 0, u, time + i * 777);
       ctx.restore();
 
       if (fx.dyingSince === null) {

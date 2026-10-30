@@ -80,8 +80,8 @@ export class CorridorRenderer {
           if (tile === 'boss' && d > 0 && !game.progress.bossDefeated) this.bossSigil(s, d, time);
           const prowler = d > 0 ? game.prowlerAt(cell.x, cell.y) : -1;
           if (prowler >= 0) {
-            const art = ENEMIES[game.floorDef.prowlers[prowler].enemies[0]].art;
-            this.prowler(s, d, art, time + prowler * 911, game.progress.prowlers[prowler].chasing);
+            const def = ENEMIES[game.floorDef.prowlers[prowler].enemies[0]];
+            this.prowler(s, d, def, time + prowler * 911, game.progress.prowlers[prowler].chasing);
           }
         }
       }
@@ -376,7 +376,7 @@ export class CorridorRenderer {
   }
 
   /** A prowler: the monster's dark silhouette wrapped in a smouldering aura. */
-  private prowler(s: number, d: number, art: (typeof ENEMIES)[string]['art'], time: number, chasing: boolean): void {
+  private prowler(s: number, d: number, def: (typeof ENEMIES)[string], time: number, chasing: boolean): void {
     const ctx = this.ctx;
     const z = d + 0.5;
     const f = this.fog(z);
@@ -398,7 +398,7 @@ export class CorridorRenderer {
     const off = this.scratch(size);
     const octx = off.getContext('2d')!;
     octx.clearRect(0, 0, size, size);
-    drawMonster(octx, art, size / 2, size * 0.92, u, time);
+    drawMonster(octx, def, size / 2, size * 0.92, u, time);
     octx.globalCompositeOperation = 'source-atop';
     octx.fillStyle = `rgba(12,6,16,${0.88 - 0.3 * f})`;
     octx.fillRect(0, 0, size, size);

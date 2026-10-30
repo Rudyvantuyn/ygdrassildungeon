@@ -13,6 +13,7 @@ import { CLASSES } from '../core/data/classes';
 import { CorridorRenderer } from '../render/corridor';
 import { drawMinimap } from '../render/minimap';
 import { drawTown } from '../render/town';
+import { preload } from '../render/sprites';
 import { audio } from '../audio/audio';
 import { themeFor } from '../audio/compose';
 import { CombatView, type CombatHost, type RoundDriver } from './combatView';
@@ -394,6 +395,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
   enterExplore(): void {
     audio.music(themeFor({ location: 'dungeon', floor: this.game.state.floor }));
+    // Load this floor's monster art before the first fight.
+    const def = this.game.floorDef;
+    const ids = [...def.encounters.flatMap((e) => e.enemies), ...(def.boss ?? []), ...def.prowlers.flatMap((p) => p.enemies)];
+    preload([...new Set(ids)].map((id) => `monsters/${id}.webp`));
     this.mode = 'explore';
     this.showSide('explore');
     this.message.classList.add('hidden');

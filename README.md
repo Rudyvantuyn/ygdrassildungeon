@@ -29,6 +29,13 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Geschilderde monsters (mijlpaal 6)
+
+- Alle 21 vijanden, prowlers en eindbazen zijn nu geschilderde AI-illustraties in één stijl (in plaats van getekende
+  vormen). Ze ademen licht, en de prowlers in de gangen gebruiken hun silhouet.
+- Herkomst en prompts staan in `art/SOURCES.md`; `scripts/process-art.py` knipt de achtergrond weg en maakt er
+  WebP-sprites van (`public/art/monsters/`). Zolang een plaatje laadt, tekent het spel de oude vorm.
+
 ### Samen spelen (mijlpaal 5)
 
 - **Hornstone** (in Lindholm): log in met e-mail of als gast, en ga met andere spelers op **expeditie**. Elke speler
@@ -135,7 +142,8 @@ src/
     expedition.ts Spelregels van expedities met meerdere spelers (draait op de server)
     tactics.ts  Hoe de computer commando's kiest (autoplay en afwezige spelers)
     autoplay.ts Computer-speler die het spel uitspeelt (gebruikt voor balanstests)
-  render/       Canvas-tekenwerk: gang, monsters, minikaart, stad
+  render/       Canvas-tekenwerk: gang, monsters (sprites + reservevormen), minikaart, stad
+public/art/     Geschilderde sprites (herkomst: art/SOURCES.md)
   audio/        Muziek (compose.ts: componeert de loops, getest) en geluid (audio.ts: Web Audio)
   net/          Online: accounts, cloud-save, expedities (Supabase)
   ui/           Schermen, menu's, gevechtsweergave, Hornstone en expedities
