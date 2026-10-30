@@ -73,3 +73,22 @@ released commercially, so each asset needs a known origin and licence.
 | heroes/mender-b.webp | MAHZdfPUZ-Y |
 | heroes/runecaller-a.webp | MAHZdYDmfUA |
 | heroes/runecaller-b.webp | MAHZdWRakr8 |
+
+## Dungeon textures (`public/art/dungeon/<set>-wall|floor|ceiling.webp`)
+
+- Generated with Canva AI (2026-10-30), exported from pages 48–56 of the same Canva design, then made seamless and
+  resized with `scripts/make-tiles.py`. Prompts: *Seamless tileable texture, flat orthographic view, no perspective,
+  no vignette, even lighting, painterly hand-painted dark fantasy game texture: ...* (stone wall with roots and moss /
+  forest floor / root ceiling; frosted versions; charred versions with ember cracks).
+
+| File | Canva media id |
+|---|---|
+| forest-wall | MAHZd3kjK24 |
+| forest-floor | MAHZd2DHrpk |
+| forest-ceiling | MAHZd2HV4hk |
+| frostwood-wall | MAHZd3Ra5Zk |
+| frostwood-floor | MAHZd0TGfR0 |
+| frostwood-ceiling | MAHZd9vA_xk |
+| emberroot-wall | MAHZd3ws7c0 |
+| emberroot-floor | MAHZdyuoIDE |
+| emberroot-ceiling | MAHZd9_u4L8 |

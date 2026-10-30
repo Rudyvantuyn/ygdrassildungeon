@@ -121,7 +121,7 @@ const list: EnemyDef[] = [
     material: { id: 'heartwoodKnot', chance: 0.4 },
     art: { shape: 'golem', color: '#6e5a44', accent: '#7fe0c0', size: 1.1 },
   },
-  // ── Depth 4: Rimehollow ─────────────────────────────────────────────────
+  // ── Depth 4: Rimewood ──────────────────────────────────────────────────
   {
     id: 'hrimwolf',
     name: 'Hrimwolf',

@@ -2,8 +2,9 @@ import { ENEMIES } from '../core/data/enemies';
 import type { Palette } from '../core/data/floors';
 import { relCell, tileAt } from '../core/dungeon';
 import type { Game } from '../core/game';
-import { mix, shade } from './color';
+import { mix, shade, withAlpha } from './color';
 import { drawMonster } from './monsters';
+import { sprite } from './sprites';
 
 /**
  * First-person grid view, drawn with the painter's algorithm.
@@ -19,8 +20,20 @@ const Z_CLIP = NEAR - EYE;
 /** Half-width of the front wall one step ahead, as a fraction of the view width. */
 const RING_1 = 0.27;
 const MAX_DEPTH = 7;
+/** Width in pixels of the vertical slices side walls are drawn in. */
+const STRIP = 3;
+/** Height in pixels of the rows the floor and ceiling are drawn in. */
+const ROW = 2;
 
 type P3 = [number, number, number];
+
+interface TextureSet {
+  /** The wall texture at full size and halved down to 32 px, to pick from by on-screen size (less shimmer). */
+  wall: CanvasImageSource[];
+  floor: CanvasPattern;
+  ceiling: CanvasPattern;
+  size: number;
+}
 
 export class CorridorRenderer {
   private sx = 0;
@@ -39,11 +52,69 @@ export class CorridorRenderer {
     this.cy = h * 0.5;
   }
 
+  private patterns = new Map<HTMLImageElement, CanvasPattern>();
+  private mips = new Map<HTMLImageElement, HTMLCanvasElement[]>();
+  /** Floor and ceiling look the same from every cell (the party always stands in a cell's middle), so they are drawn once per floor. */
+  private planeCache: { key: string; canvas: HTMLCanvasElement } | null = null;
+
+  /** The floor's painted textures, once all three have loaded. */
+  private textureSet(pal: Palette): TextureSet | null {
+    if (!pal.textures) return null;
+    const wall = sprite(`dungeon/${pal.textures}-wall.webp`);
+    const floor = sprite(`dungeon/${pal.textures}-floor.webp`);
+    const ceiling = sprite(`dungeon/${pal.textures}-ceiling.webp`);
+    if (!wall || !floor || !ceiling) return null;
+    const pattern = (img: HTMLImageElement) => {
+      let p = this.patterns.get(img);
+      if (!p) {
+        p = this.ctx.createPattern(img, 'repeat')!;
+        this.patterns.set(img, p);
+      }
+      return p;
+    };
+    let wallMips = this.mips.get(wall);
+    if (!wallMips) {
+      wallMips = [];
+      let source: CanvasImageSource = wall;
+      for (let size = wall.naturalWidth; size >= 32; size = Math.floor(size / 2)) {
+        const c = document.createElement('canvas');
+        c.width = c.height = size;
+        const g = c.getContext('2d')!;
+        g.imageSmoothingQuality = 'high';
+        g.drawImage(source, 0, 0, size, size);
+        wallMips.push(c);
+        source = c;
+      }
+      this.mips.set(wall, wallMips);
+    }
+    return { wall: wallMips, floor: pattern(floor), ceiling: pattern(ceiling), size: floor.naturalWidth };
+  }
+
+  /** The smallest wall mip that is still at least `px` pixels big. */
+  private wallFor(tex: TextureSet, px: number): HTMLCanvasElement {
+    const mips = tex.wall as HTMLCanvasElement[];
+    let pick = mips[0];
+    for (const m of mips) if (m.width >= px) pick = m;
+    return pick;
+  }
+
   draw(game: Game, time: number): void {
     const { ctx, w, h } = this;
     const pal = game.floorDef.palette;
     const { x: px, y: py, dir } = game.state;
+    const tex = this.textureSet(pal);
 
+    if (tex) {
+      const key = `${pal.textures}|${pal.fog}`;
+      if (this.planeCache?.key !== key) {
+        const canvas = this.planeCache?.canvas ?? document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        this.planes(canvas.getContext('2d')!, tex, pal);
+        this.planeCache = { key, canvas };
+      }
+      ctx.drawImage(this.planeCache.canvas, 0, 0);
+    } else {
     // Ceiling and floor gradients fading into fog at the horizon.
     const sky = ctx.createLinearGradient(0, 0, 0, this.cy);
     sky.addColorStop(0, shade(pal.ceiling, 0.05));
@@ -55,6 +126,7 @@ export class CorridorRenderer {
     ground.addColorStop(1, shade(pal.floor, 0.08));
     ctx.fillStyle = ground;
     ctx.fillRect(0, this.cy, w, h - this.cy);
+    }
 
     for (let d = MAX_DEPTH; d >= 0; d--) {
       // Enough side cells to fill the view at this depth.
@@ -68,11 +140,17 @@ export class CorridorRenderer {
         const cell = relCell(px, py, dir, d, s);
         const tile = tileAt(game.map, cell.x, cell.y);
         if (tile === 'wall') {
-          if (d >= 1) this.wallFront(s, d, pal, cell.x, cell.y);
-          if (s < 0) this.wallSide(s + 0.5, d, pal, cell.x, cell.y, -1);
-          if (s > 0) this.wallSide(s - 0.5, d, pal, cell.x, cell.y, 1);
+          if (tex) {
+            if (d >= 1) this.paintedFront(tex, s, d, pal);
+            if (s < 0) this.paintedSide(tex, s + 0.5, d, pal, -1);
+            if (s > 0) this.paintedSide(tex, s - 0.5, d, pal, 1);
+          } else {
+            if (d >= 1) this.wallFront(s, d, pal, cell.x, cell.y);
+            if (s < 0) this.wallSide(s + 0.5, d, pal, cell.x, cell.y, -1);
+            if (s > 0) this.wallSide(s - 0.5, d, pal, cell.x, cell.y, 1);
+          }
         } else {
-          this.floorCell(s, d, pal);
+          if (!tex) this.floorCell(s, d, pal);
           if (tile === 'stairs' && d > 0) this.stairs(s, d, pal, time);
           if (tile === 'up') this.upStairs(s, d, pal, time);
           if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y));
@@ -85,6 +163,18 @@ export class CorridorRenderer {
           }
         }
       }
+    }
+
+    // The party's torchlight: a soft warm glow on what is close.
+    if (tex) {
+      const glow = ctx.createRadialGradient(this.cx, h * 0.95, 0, this.cx, h * 0.8, w * 0.6);
+      glow.addColorStop(0, 'rgba(255,170,90,0.16)');
+      glow.addColorStop(1, 'rgba(255,170,90,0)');
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
     }
 
     // Vignette
@@ -139,6 +229,90 @@ export class CorridorRenderer {
 
   private fog(z: number): number {
     return Math.min(1, Math.pow(z / (MAX_DEPTH + 0.5), 0.85));
+  }
+
+  // ── Painted surfaces ───────────────────────────────────────────────────────
+
+  /**
+   * Floor and ceiling as two continuous planes, drawn row by row with a repeating
+   * pattern (one texture tile per cell), then darkened into the fog towards the horizon.
+   */
+  private planes(ctx: CanvasRenderingContext2D, tex: TextureSet, pal: Palette): void {
+    const { w, h, cx, cy, sx, sy } = this;
+    const T = tex.size;
+    const far = MAX_DEPTH + 1 + EYE;
+    ctx.fillStyle = pal.fog;
+    ctx.fillRect(0, 0, w, h);
+    for (const [pattern, sign] of [[tex.floor, 1], [tex.ceiling, -1]] as const) {
+      const horizon = cy + sign * ((0.5 * sy) / far);
+      const edge = sign > 0 ? h : 0;
+      for (let y = horizon; sign > 0 ? y < edge : y > edge; y += sign * ROW) {
+        const mid = y + (sign * ROW) / 2;
+        const dist = (0.5 * sy) / Math.abs(mid - cy); // distance from the eye
+        const z = dist - EYE;
+        const k = sx / (dist * T); // screen pixels per texture pixel at this depth
+        const v = ((z % 1) + 1) % 1;
+        pattern.setTransform(new DOMMatrix([k, 0, 0, k, cx - 0.5 * T * k, mid - v * T * k]));
+        ctx.fillStyle = pattern;
+        ctx.fillRect(0, sign > 0 ? y : y - ROW, w, ROW + 0.5);
+      }
+      // Fog towards the horizon
+      const fog = ctx.createLinearGradient(0, horizon, 0, edge);
+      for (let i = 0; i <= 6; i++) {
+        const t = i / 6;
+        const yy = horizon + (edge - horizon) * t;
+        const dist = (0.5 * sy) / Math.max(1, Math.abs(yy - cy));
+        fog.addColorStop(t, withAlpha(pal.fog, 0.15 + 0.85 * this.fog(dist - EYE)));
+      }
+      ctx.fillStyle = fog;
+      ctx.fillRect(0, Math.min(horizon, edge), w, Math.abs(edge - horizon));
+    }
+  }
+
+  private paintedFront(tex: TextureSet, s: number, d: number, pal: Palette): void {
+    const ctx = this.ctx;
+    const [x0, y0] = this.project([s - 0.5, -0.5, d]);
+    const [x1, y1] = this.project([s + 0.5, 0.5, d]);
+    if (x1 < 0 || x0 > this.w) return;
+    ctx.drawImage(this.wallFor(tex, y1 - y0), x0, y0, x1 - x0, y1 - y0);
+    ctx.fillStyle = withAlpha(pal.fog, 0.1 + 0.9 * this.fog(d));
+    ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+    ctx.lineWidth = Math.max(1, 2 * this.scaleAt(d));
+    ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+  }
+
+  /** A side face at lateral x spanning depth d..d+1, in vertical slices so the texture follows the perspective. */
+  private paintedSide(tex: TextureSet, x: number, d: number, pal: Palette, side: number): void {
+    const { ctx, cx, cy, sx, sy } = this;
+    const zNear = Math.max(d, Z_CLIP);
+    const xa = cx + (x * sx) / (zNear + EYE);
+    const xb = cx + (x * sx) / (d + 1 + EYE);
+    const lo = Math.max(0, Math.min(xa, xb));
+    const hi = Math.min(this.w, Math.max(xa, xb));
+    if (hi <= lo) return;
+    for (let sxp = lo; sxp < hi; sxp += STRIP) {
+      const mid = Math.min(hi, sxp + STRIP / 2);
+      const dist = (x * sx) / (mid - cx);
+      if (!(dist > 0)) continue;
+      const u = Math.min(0.999, Math.max(0, dist - EYE - d));
+      const half = (0.5 * sy) / dist;
+      const img = this.wallFor(tex, half * 2);
+      const T = img.width;
+      // Left walls run front-to-back from the right edge of the texture, so it is never mirrored.
+      const tx = (side < 0 ? 1 - u : u) * T;
+      ctx.drawImage(img, Math.min(T - 1, tx), 0, 1, T, sxp, cy - half, STRIP + 0.6, half * 2);
+    }
+    // Shade: side walls are a little darker, and fade into the fog with depth.
+    this.poly([[x, -0.5, d], [x, -0.5, d + 1], [x, 0.5, d + 1], [x, 0.5, d]]);
+    const grad = ctx.createLinearGradient(xa, 0, xb, 0);
+    grad.addColorStop(0, withAlpha(pal.fog, 0.22 + 0.78 * this.fog(zNear)));
+    grad.addColorStop(1, withAlpha(pal.fog, 0.22 + 0.78 * this.fog(d + 1)));
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+    ctx.lineWidth = Math.max(1, 2 * this.scaleAt(d));
+    ctx.stroke();
   }
 
   // ── Walls ──────────────────────────────────────────────────────────────────

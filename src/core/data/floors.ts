@@ -7,6 +7,8 @@ export interface Palette {
   floor: string;
   ceiling: string;
   fog: string;
+  /** Painted textures for walls, floor and ceiling (art/dungeon/<textures>-wall.webp etc.). */
+  textures?: string;
 }
 
 /**
@@ -76,6 +78,7 @@ export const FLOORS: FloorDef[] = [
     chests: [{ item: 'sapTonic', qty: 2 }, { gold: 60 }],
     prowlers: [],
     palette: {
+      textures: 'forest',
       wall: '#4f5d3f',
       wallEdge: '#2b3322',
       moss: '#7fa04a',
@@ -116,6 +119,7 @@ export const FLOORS: FloorDef[] = [
     chests: [{ item: 'spiritDew', qty: 2 }, { item: 'sapTonic', qty: 3 }],
     prowlers: [],
     palette: {
+      textures: 'forest',
       wall: '#5a4a38',
       wallEdge: '#2e251b',
       moss: '#9a8a4a',
@@ -158,6 +162,7 @@ export const FLOORS: FloorDef[] = [
     prowlers: [],
     boss: ['blightedElder'],
     palette: {
+      textures: 'forest',
       wall: '#3e4a52',
       wallEdge: '#1c2328',
       moss: '#5fa08a',
@@ -167,7 +172,7 @@ export const FLOORS: FloorDef[] = [
     },
   },
   {
-    name: 'Rimehollow IV',
+    name: 'Rimewood IV',
     rows: [
       '##################',
       '#S...#.....#....T#',
@@ -198,6 +203,7 @@ export const FLOORS: FloorDef[] = [
     chests: [{ item: 'spiritDew', qty: 3 }, { gold: 450 }],
     prowlers: [],
     palette: {
+      textures: 'frostwood',
       wall: '#4a5a6e',
       wallEdge: '#1e2733',
       moss: '#a8d0e8',
@@ -246,6 +252,7 @@ export const FLOORS: FloorDef[] = [
     ],
     boss: ['rootgnawer'],
     palette: {
+      textures: 'emberroot',
       wall: '#4e3a34',
       wallEdge: '#22160f',
       moss: '#c06a3a',

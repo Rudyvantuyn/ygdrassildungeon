@@ -33,6 +33,9 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 - **Lindholm** is geschilderd: het stadsbeeld toont de plek die je in het menu kiest (herberg, Oath Hall, winkel,
   prikbord, Rootdeep, Hornstone), met een zachte overgang. Het titelscherm heeft eigen art.
+- **De Rootdeep** is geschilderd: muren, vloeren en plafonds hebben geschilderde texturen per thema (bos, winterbos,
+  brandende wortels), met mist in de diepte en het licht van je fakkels. Thema per verdieping: `palette.textures` in
+  `src/core/data/floors.ts`; texturen maak je naadloos met `scripts/make-tiles.py`.
 - **Personages** hebben portretten: Gerd, Brynja, Hilde en Ketil staan bij hun venster; opdrachtgevers bij hun
   opdracht; Sigrid in de verhaalscènes. Je eigen avonturiers krijgen een geschilderd portret per klasse (twee
   varianten, gekozen op naam).
@@ -118,7 +121,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Onderwerp | Namen |
 |---|---|
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
-| Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimehollow IV, Wyrmroot V |
+| Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimewood IV, Wyrmroot V |
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
 | Personages | Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder) |
 | Party | Bram, Sela, Wren, Orrin |

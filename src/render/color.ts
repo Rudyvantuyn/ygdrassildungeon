@@ -30,3 +30,9 @@ export function mix(a: string, b: string, t: number, alpha = 1): string {
 export function shade(color: string, amount: number): string {
   return amount >= 0 ? mix(color, '#ffffff', amount) : mix(color, '#000000', -amount);
 }
+
+/** A #rrggbb colour as rgba() with the given opacity. */
+export function withAlpha(color: string, alpha: number): string {
+  const [r, g, b] = parse(color);
+  return `rgba(${r},${g},${b},${Math.min(1, Math.max(0, alpha))})`;
+}
