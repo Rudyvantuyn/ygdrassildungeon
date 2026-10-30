@@ -37,3 +37,39 @@ released commercially, so each asset needs a known origin and licence.
 | shellbark | MAHZc6FbP0Y |
 | snowveil | MAHZc-j_m-4 |
 | grimtusk | MAHZc-q9TLM |
+
+## Town, people and heroes (`public/art/places`, `people`, `heroes`)
+
+- Generated the same way (Canva AI, 2026-10-30), exported from pages 23–47 of the same Canva design, then resized
+  to WebP (places 1280×720, portraits 384×384).
+- Places use: *Painterly dark-fantasy game background, ... hand-painted texture, high detail, no text.* Portraits use:
+  *Painterly dark-fantasy character portrait, head and shoulders, three-quarter view, looking at the viewer, warm rim
+  light, dark muted plain background, hand-painted texture, high detail, no text, no border.* plus a description.
+
+| File | Canva media id |
+|---|---|
+| places/hall.webp | MAHZdfn1nwc |
+| places/shop.webp | MAHZddr7ZWU |
+| places/board.webp | MAHZdX05bKc |
+| places/town.webp | MAHZdQYCk5I |
+| places/inn.webp | MAHZdc4jvHk |
+| places/rootdeep.webp | MAHZdaOmySw |
+| places/hornstone.webp | MAHZdYugJ34 |
+| places/title.webp | MAHZdfaKrjo |
+| people/gerd.webp | MAHZdcF-e90 |
+| people/hilde.webp | MAHZdcM75LI |
+| people/brynja.webp | MAHZdQIM02s |
+| people/sigrid.webp | MAHZdSonhuc |
+| people/ketil.webp | MAHZdRvjo6s |
+| people/hjalmar.webp | MAHZdf2xUfo |
+| people/ylva.webp | MAHZdXG4ibw |
+| people/aske.webp | MAHZdf8GuyE |
+| people/torvald.webp | MAHZdUExJQk |
+| heroes/bastion-a.webp | MAHZdRXRNxM |
+| heroes/bastion-b.webp | MAHZdbjQY2o |
+| heroes/strider-a.webp | MAHZdQlTv2U |
+| heroes/strider-b.webp | MAHZdTCyX4w |
+| heroes/mender-a.webp | MAHZdXkodX8 |
+| heroes/mender-b.webp | MAHZdfPUZ-Y |
+| heroes/runecaller-a.webp | MAHZdYDmfUA |
+| heroes/runecaller-b.webp | MAHZdWRakr8 |

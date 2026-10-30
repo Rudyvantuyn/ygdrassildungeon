@@ -24,6 +24,7 @@ import type { ClassId, ItemId, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
+import { npcFromName, npcSays } from './npc';
 
 export interface TownHost {
   game: Game;
@@ -123,7 +124,7 @@ export class TownView {
       ],
       { onCancel: back },
     );
-    this.dialog('The Sleeping Stag', [el('p', { text: `"Welcome, explorers! A warm bed and a hot meal for ${cost} gold."` })], menu);
+    this.dialog('The Sleeping Stag', [npcSays('gerd', `"Welcome, explorers! A warm bed and a hot meal for ${cost} gold."`)], menu);
   }
 
   private system(): void {
@@ -206,8 +207,12 @@ export class TownView {
     this.dialog(
       q.title,
       [
-        el('p', { className: 'quest-giver', text: q.giver }),
-        el('p', { text: `"${q.text}"` }),
+        ...(() => {
+          const npc = npcFromName(q.giver);
+          return npc
+            ? [npcSays(npc, `"${q.text}"`, q.giver)]
+            : [el('p', { className: 'quest-giver', text: q.giver }), el('p', { text: `"${q.text}"` })];
+        })(),
         el('div', { className: 'rewards' }, [
           el('span', { text: 'Goal' }), el('span', { className: 'v', text: questGoal(q) }),
           el('span', { text: 'Reward' }), el('span', { className: 'v', text: rewardText(q) }),
@@ -238,7 +243,7 @@ export class TownView {
       ],
       { onCancel: back, startIndex: start },
     );
-    this.dialog('The Oath Hall', [el('p', { text: '"Speak your oath, and the Great Tree will remember your name."' })], menu, true);
+    this.dialog('The Oath Hall', [npcSays('brynja', '"Speak your oath, and the Great Tree will remember your name."')], menu, true);
   }
 
   private chooseClass(): void {
@@ -370,7 +375,7 @@ export class TownView {
       ],
       { onCancel: back, startIndex: start },
     );
-    this.dialog("Hilde's Supplies", [el('p', { text: '"Take a look. Everything here was made to survive the Rootdeep."' })], menu);
+    this.dialog("Hilde's Supplies", [npcSays('hilde', '"Take a look. Everything here was made to survive the Rootdeep."')], menu);
   }
 
   private shopItems(start = 0): void {

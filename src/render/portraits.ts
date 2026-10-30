@@ -1,7 +1,13 @@
 import type { ClassId } from '../core/types';
 import { shade } from './color';
+import { onSpriteLoad, sprite } from './sprites';
 
-export type PortraitKind = ClassId | 'sigrid';
+/** People of Lindholm with a painted portrait (art/people/<id>.webp). */
+export type NpcId = 'gerd' | 'hilde' | 'brynja' | 'sigrid' | 'ketil' | 'hjalmar' | 'ylva' | 'aske' | 'torvald';
+export type PortraitKind = ClassId | NpcId;
+
+const CLASSES: readonly string[] = ['bastion', 'strider', 'mender', 'runecaller'];
+const isClass = (kind: PortraitKind): kind is ClassId => CLASSES.includes(kind);
 
 const HAIR = ['#2a1a12', '#5a3a1e', '#8a5a2a', '#c89a4a', '#e8d090', '#a0a0a8', '#6a2a1a', '#1a1a22'];
 const SKIN = ['#f2d2b6', '#e0b494', '#c48a64', '#9a6a48', '#f4dcc8'];
@@ -13,11 +19,48 @@ function hash(text: string): number {
   return h >>> 0;
 }
 
+/** The painted portrait for a person: each class has two, picked by name; NPCs have their own. */
+function paintedPath(kind: PortraitKind, name: string): string {
+  if (isClass(kind)) return `heroes/${kind}-${hash(name) % 2 ? 'b' : 'a'}.webp`;
+  return `people/${kind}.webp`;
+}
+
 /**
- * A painted bust in a round frame. Looks are derived from the name, so every
- * adventurer gets a face of their own, while the class decides the outfit.
+ * A portrait in a round frame: the painted one once it has loaded (the canvas is
+ * redrawn then), and a procedural bust until then.
  */
 export function drawPortrait(ctx: CanvasRenderingContext2D, size: number, kind: PortraitKind, name: string, accent: string): void {
+  const path = paintedPath(kind, name);
+  const img = sprite(path);
+  if (!img) {
+    drawBust(ctx, size, isClass(kind) ? kind : 'sigrid', name, accent);
+    onSpriteLoad(path, () => drawPortrait(ctx, size, kind, name, accent));
+    return;
+  }
+  const s = size;
+  ctx.save();
+  ctx.clearRect(0, 0, s, s);
+  ctx.beginPath();
+  ctx.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2);
+  ctx.clip();
+  // The faces sit a little above the middle of the paintings.
+  const zoom = 1.12;
+  ctx.drawImage(img, (s - s * zoom) / 2, -s * 0.02, s * zoom, s * zoom);
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+  ctx.lineWidth = Math.max(1, s * 0.02);
+  ctx.beginPath();
+  ctx.arc(s / 2, s / 2, s / 2 - ctx.lineWidth / 2, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+type BustKind = ClassId | 'sigrid';
+
+/**
+ * A drawn bust in a round frame. Looks are derived from the name, so every
+ * adventurer gets a face of their own, while the class decides the outfit.
+ */
+function drawBust(ctx: CanvasRenderingContext2D, size: number, kind: BustKind, name: string, accent: string): void {
   const h = hash(name + kind);
   const hair = kind === 'sigrid' ? '#d8d8e0' : HAIR[h % HAIR.length];
   const skin = SKIN[(h >>> 3) % SKIN.length];
@@ -41,7 +84,7 @@ export function drawPortrait(ctx: CanvasRenderingContext2D, size: number, kind: 
   const headR = s * 0.19;
 
   // Shoulders / outfit
-  const outfit: Record<PortraitKind, string> = {
+  const outfit: Record<BustKind, string> = {
     bastion: '#7a828c',
     strider: '#3e5a32',
     mender: '#e8e4d8',

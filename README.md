@@ -29,7 +29,13 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
-### Geschilderde monsters (mijlpaal 6)
+### Geschilderde wereld (mijlpaal 6)
+
+- **Lindholm** is geschilderd: het stadsbeeld toont de plek die je in het menu kiest (herberg, Oath Hall, winkel,
+  prikbord, Rootdeep, Hornstone), met een zachte overgang. Het titelscherm heeft eigen art.
+- **Personages** hebben portretten: Gerd, Brynja, Hilde en Ketil staan bij hun venster; opdrachtgevers bij hun
+  opdracht; Sigrid in de verhaalscènes. Je eigen avonturiers krijgen een geschilderd portret per klasse (twee
+  varianten, gekozen op naam).
 
 - Alle 21 vijanden, prowlers en eindbazen zijn nu geschilderde AI-illustraties in één stijl (in plaats van getekende
   vormen). Ze ademen licht, en de prowlers in de gangen gebruiken hun silhouet.
@@ -114,7 +120,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
 | Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimehollow IV, Wyrmroot V |
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
-| Personages | Sigrid (hoedster van Lindholm), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder) |
+| Personages | Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder) |
 | Party | Bram, Sela, Wren, Orrin |
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |

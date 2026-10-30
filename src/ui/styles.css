@@ -1008,3 +1008,37 @@ table.stats thead th {
   text-transform: none;
   letter-spacing: 0;
 }
+
+/* ── People of Lindholm ────────────────────────────────────────────────────── */
+.npc-line {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  text-align: left;
+}
+
+.npc-portrait {
+  width: 104px;
+  height: 104px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--border-hi);
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.6);
+}
+
+.npc-words {
+  flex: 1;
+}
+
+.npc-name {
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.dialog .npc-line p {
+  text-align: left;
+  font-style: italic;
+}

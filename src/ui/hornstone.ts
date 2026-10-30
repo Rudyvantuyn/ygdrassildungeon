@@ -12,6 +12,7 @@ import { MATERIALS } from '../core/data/materials';
 import { online, OnlineError, type ExpeditionRow } from '../net/online';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
+import { npcSays } from './npc';
 
 export interface HornstoneHost {
   game: Game;
@@ -104,7 +105,7 @@ export class Hornstone {
     const menu = new ListMenu(items, { onCancel: back });
     this.dialog(
       'The Hornstone',
-      [el('p', { text: 'A great horn hangs from the old standing stone. When it sounds, adventurers from other halls come to share the descent.' })],
+      [npcSays('ketil', '"Blow the horn, and adventurers from other halls will come to share the descent. I have heard it answered for forty winters."')],
       menu,
       true,
     );
@@ -275,7 +276,7 @@ export class Hornstone {
       ],
       { onCancel: back },
     );
-    this.dialog('The Hornstone', [el('p', { text: 'To answer horns from other halls, tell the Hornstone who you are.' })], menu, true);
+    this.dialog('The Hornstone', [npcSays('ketil', '"Before you sound the horn, tell me who you are, so the other halls know whom they answer."')], menu, true);
   }
 
   private signIn(): void {

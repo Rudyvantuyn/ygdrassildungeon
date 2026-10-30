@@ -3,6 +3,7 @@
  * is ready, callers fall back to the procedural drawing.
  */
 const cache = new Map<string, HTMLImageElement | null>();
+const waiting = new Map<string, (() => void)[]>();
 
 /** The image for `path` (relative to the site), or null while it is still loading or missing. */
 export function sprite(path: string): HTMLImageElement | null {
@@ -11,7 +12,14 @@ export function sprite(path: string): HTMLImageElement | null {
   if (typeof Image === 'undefined') return null;
   const img = new Image();
   img.decoding = 'async';
-  img.onerror = () => cache.set(path, null);
+  img.onerror = () => {
+    cache.set(path, null);
+    waiting.delete(path);
+  };
+  img.onload = () => {
+    for (const cb of waiting.get(path) ?? []) cb();
+    waiting.delete(path);
+  };
   img.src = `art/${path}`;
   cache.set(path, img);
   return null;
@@ -20,4 +28,11 @@ export function sprite(path: string): HTMLImageElement | null {
 /** Starts loading sprites ahead of time (e.g. the enemies of the floor being entered). */
 export function preload(paths: string[]): void {
   for (const path of paths) sprite(path);
+}
+
+/** Calls `cb` once the sprite has loaded (right away if it already has; never if it is missing). */
+export function onSpriteLoad(path: string, cb: () => void): void {
+  if (sprite(path)) return cb();
+  if (cache.get(path) === null) return;
+  waiting.set(path, [...(waiting.get(path) ?? []), cb]);
 }

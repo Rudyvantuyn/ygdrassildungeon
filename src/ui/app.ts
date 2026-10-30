@@ -12,7 +12,7 @@ import type { ItemId, Loot } from '../core/types';
 import { CLASSES } from '../core/data/classes';
 import { CorridorRenderer } from '../render/corridor';
 import { drawMinimap } from '../render/minimap';
-import { drawTown } from '../render/town';
+import { drawTownScene, preloadTownScenes } from '../render/town';
 import { preload } from '../render/sprites';
 import { audio } from '../audio/audio';
 import { themeFor } from '../audio/compose';
@@ -24,6 +24,7 @@ import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
 import { markSeen, pendingScene, type StoryLine } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
+import { npcFromName } from './npc';
 import { ListMenu, type MenuItem } from './menu';
 import { PartyView } from './partyView';
 import { clearSave, readSave, writeSave } from './storage';
@@ -137,6 +138,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       if (this.onKey(e.key)) e.preventDefault();
     });
 
+    // Town paintings and portraits are small; fetch them right away.
+    preloadTownScenes();
+    preload(['gerd', 'hilde', 'brynja', 'sigrid', 'ketil'].map((id) => `people/${id}.webp`));
     this.showTitle();
   }
 
@@ -152,7 +156,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     if (this.mode === 'combat' && this.combatView) {
       this.combatView.draw(ctx, VIEW_W, VIEW_H, time);
     } else if (this.game?.state.location === 'town') {
-      drawTown(ctx, VIEW_W, VIEW_H, time, this.mode === 'title' ? null : this.town.focus);
+      // During the story the whole town is shown, without a caption under the text box.
+      const story = this.mode === 'story';
+      drawTownScene(ctx, VIEW_W, VIEW_H, time, this.mode === 'title' || story ? null : this.town.focus, this.mode === 'title', !story);
     } else if (this.game) {
       this.corridor.draw(this.game, time);
     }
@@ -593,7 +599,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     if (line.speaker) {
       const portrait = el('canvas', { className: 'story-portrait' });
       portrait.width = portrait.height = 192;
-      drawPortrait(portrait.getContext('2d')!, 192, 'sigrid', line.speaker, '#8aa0c0');
+      drawPortrait(portrait.getContext('2d')!, 192, npcFromName(line.speaker) ?? 'sigrid', line.speaker, '#8aa0c0');
       st.box.append(portrait);
     }
     const text = el('div', { className: 'story-text' });

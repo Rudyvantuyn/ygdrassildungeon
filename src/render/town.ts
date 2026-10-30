@@ -2,6 +2,8 @@
  * The town of Lindholm at dusk, at the roots of the Great Tree.
  * `focus` lights up the building that matches the selected town menu entry.
  */
+import { sprite } from './sprites';
+
 export type TownSpot = 'inn' | 'hall' | 'shop' | 'board' | 'rootdeep' | 'horn';
 
 const SPOTS: Record<TownSpot, { x: number; label: string }> = {
@@ -317,4 +319,104 @@ function drawHornstone(ctx: CanvasRenderingContext2D, x: number, ground: number,
   ctx.textAlign = 'center';
   ctx.fillStyle = lit ? '#f0cf6a' : '#c9c0a8';
   ctx.fillText(label, x + 8, top - 14);
+}
+
+// ── Painted scenes ────────────────────────────────────────────────────────────
+
+/** The painting shown for each town spot (art/places/<name>.webp). */
+const SCENES: Record<TownSpot | 'town' | 'title', { image: string; caption: string }> = {
+  town: { image: 'town', caption: 'Lindholm' },
+  title: { image: 'title', caption: '' },
+  inn: { image: 'inn', caption: 'The Sleeping Stag' },
+  hall: { image: 'hall', caption: 'The Oath Hall' },
+  shop: { image: 'shop', caption: "Hilde's Supplies" },
+  board: { image: 'board', caption: 'The Notice Board' },
+  rootdeep: { image: 'rootdeep', caption: 'The Rootdeep' },
+  horn: { image: 'hornstone', caption: 'The Hornstone' },
+};
+
+const FADE_MS = 450;
+let shown: keyof typeof SCENES = 'town';
+let previous: keyof typeof SCENES | null = null;
+let changedAt = 0;
+
+export function preloadTownScenes(): void {
+  for (const scene of Object.values(SCENES)) sprite(`places/${scene.image}.webp`);
+}
+
+/**
+ * Lindholm as paintings: the selected spot's painting (the whole town when nothing is
+ * selected, the title art on the title screen), crossfading between them. Falls back to
+ * the drawn town until the paintings have loaded.
+ */
+export function drawTownScene(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  time: number,
+  focus: TownSpot | null,
+  title: boolean,
+  showCaption = true,
+): void {
+  const key: keyof typeof SCENES = title ? 'title' : (focus ?? 'town');
+  if (key !== shown) {
+    previous = shown;
+    shown = key;
+    changedAt = time;
+  }
+  const current = sprite(`places/${SCENES[shown].image}.webp`);
+  if (!current) {
+    drawTown(ctx, w, h, time, title ? null : focus);
+    return;
+  }
+  const k = Math.min(1, (time - changedAt) / FADE_MS);
+  const before = previous && k < 1 ? sprite(`places/${SCENES[previous].image}.webp`) : null;
+  if (before) paintScene(ctx, before, w, h, time, 1);
+  paintScene(ctx, current, w, h, time, before ? k : 1);
+
+  // Fireflies drifting over every scene
+  for (let i = 0; i < 14; i++) {
+    const t = time / 1000 + i * 7.3;
+    const x = ((Math.sin(t * 0.21 + i) * 0.5 + 0.5) * 0.9 + 0.05) * w;
+    const y = ((Math.cos(t * 0.17 + i * 1.7) * 0.5 + 0.5) * 0.55 + 0.35) * h;
+    const glow = 0.35 + 0.35 * Math.sin(t * 2.3 + i);
+    ctx.fillStyle = `rgba(220,255,160,${glow})`;
+    ctx.beginPath();
+    ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Vignette and caption
+  const vignette = ctx.createRadialGradient(w / 2, h / 2, h * 0.35, w / 2, h / 2, w * 0.7);
+  vignette.addColorStop(0, 'rgba(0,0,0,0)');
+  vignette.addColorStop(1, 'rgba(0,0,0,0.5)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, w, h);
+  const caption = SCENES[shown].caption;
+  if (caption && showCaption) {
+    ctx.save();
+    ctx.globalAlpha = before ? k : 1;
+    ctx.font = '800 26px Cinzel, Georgia, serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = '#f0cf6a';
+    ctx.fillText(caption, 24, h - 22);
+    ctx.restore();
+  }
+}
+
+/** Draws a painting covering the view, with a slow drift so the scene feels alive. */
+function paintScene(ctx: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number, time: number, alpha: number): void {
+  const zoom = 1.06 + 0.025 * Math.sin(time / 9000);
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight) * zoom;
+  const dw = img.naturalWidth * scale;
+  const dh = img.naturalHeight * scale;
+  const dx = (w - dw) / 2 + Math.sin(time / 13000) * 8;
+  const dy = (h - dh) / 2 + Math.cos(time / 11000) * 5;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(img, dx, dy, dw, dh);
+  ctx.restore();
 }
