@@ -4,6 +4,8 @@ import type { SkillDef } from '../core/data/skills';
 import type { Game } from '../core/game';
 import { isAlive, knownSkills, memberStats } from '../core/party';
 import { rankOf } from '../core/skilltree';
+import type { Mods } from '../core/combat';
+import type { ModStat } from '../core/types';
 import type { ItemId } from '../core/types';
 import type { CorridorRenderer } from '../render/corridor';
 import { drawMonster } from '../render/monsters';
@@ -158,6 +160,14 @@ export class CombatView {
           ctx.fill();
         }
         const ailment = this.enemyAilment[i];
+        const mods = modText(enemy.mods);
+        if (mods) {
+          // Next to the ailment badge when there is one, else in its place.
+          ctx.font = '800 12px "Nunito Sans", sans-serif';
+          ctx.textAlign = ailment ? 'left' : 'center';
+          ctx.fillStyle = '#f0e0b0';
+          ctx.fillText(mods, ailment ? x + 28 : x, ground + 41);
+        }
         if (ailment) {
           const badge = AILMENT_BADGE[ailment];
           ctx.font = '800 13px "Nunito Sans", sans-serif';
@@ -463,6 +473,7 @@ export class CombatView {
       hp: this.partyHp,
       sp: this.partySp,
       ailments: this.partyAilment,
+      mods: this.combat.status.map((s) => modText(s.mods)),
       active: this.current >= 0 ? this.current : null,
       owners: this.host.partyOwners,
     });
@@ -489,4 +500,11 @@ export class CombatView {
   private wait(ms: number): Promise<void> {
     return new Promise((resolve) => window.setTimeout(resolve, this.fast ? ms / 3 : ms));
   }
+}
+
+/** "ATK▲ DEF▼" for the buffs and debuffs on a fighter. */
+function modText(mods: Mods | undefined): string {
+  if (!mods) return '';
+  const names: Record<ModStat, string> = { atk: 'ATK', def: 'DEF', mag: 'MAG', res: 'RES' };
+  return (Object.keys(mods) as ModStat[]).map((k) => `${names[k]}${mods[k]!.amount > 0 ? '▲' : '▼'}`).join(' ');
 }

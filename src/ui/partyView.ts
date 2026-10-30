@@ -13,6 +13,8 @@ export interface PartyDisplay {
   active?: number | null;
   /** On an expedition: the player behind each card (shown instead of the row). */
   owners?: string[];
+  /** In a fight: active buffs and debuffs, shown instead of the row (e.g. "ATK▲ DEF▼"). */
+  mods?: string[];
 }
 
 interface Card {
@@ -61,8 +63,10 @@ export class PartyView {
       card.ailment.style.background = ailment ? AILMENT_BADGE[ailment].color : '';
       card.ailment.classList.toggle('hidden', !ailment);
       card.root.classList.toggle('active', display.active === i);
-      card.row.textContent = display.owners?.[i] ?? m.row;
-      card.row.classList.toggle('owner', !!display.owners);
+      const mods = display.mods?.[i];
+      card.row.textContent = mods || (display.owners?.[i] ?? m.row);
+      card.row.classList.toggle('owner', !!display.owners && !mods);
+      card.row.classList.toggle('mods', !!mods);
     });
   }
 

@@ -22,7 +22,10 @@ export interface Stats {
   spd: number;
 }
 
-export type ClassId = 'bastion' | 'strider' | 'mender' | 'runecaller';
+export type ClassId = 'bastion' | 'strider' | 'mender' | 'runecaller' | 'skald' | 'berserker' | 'seeress' | 'wolfkin';
+
+/** Stats that skills can raise or lower for a few turns in a fight. */
+export type ModStat = 'atk' | 'def' | 'mag' | 'res';
 
 export type ItemId = 'sapTonic' | 'tideDraught' | 'spiritDew' | 'clearwater' | 'kindlingMoss' | 'homingFeather';
 
@@ -56,7 +59,30 @@ export type SkillId =
   | 'forage'
   | 'mine'
   | 'fell'
-  | 'fish';
+  | 'fish'
+  | 'warSong'
+  | 'shieldHymn'
+  | 'mockingVerse'
+  | 'runicChant'
+  | 'restfulTune'
+  | 'heroesSaga'
+  | 'cleave'
+  | 'bloodPrice'
+  | 'frenzy'
+  | 'skullSplitter'
+  | 'reavingSpin'
+  | 'curseOfFrailty'
+  | 'curseOfWeakness'
+  | 'hollowBolt'
+  | 'witherblight'
+  | 'stillingGaze'
+  | 'fateUnravel'
+  | 'fangStrike'
+  | 'packHunt'
+  | 'wolfGuard'
+  | 'packHowl'
+  | 'hamstring'
+  | 'moonfangFrenzy';
 
 export interface Member {
   name: string;

@@ -4,12 +4,35 @@ import { ITEMS } from './data/items';
 import { skillFor } from './skilltree';
 import { grantXp, healAmount, healMember, isAlive, memberStats, restoreSp, revive } from './party';
 import type { Rng } from './rng';
-import type { Ailment, Element, Inflict, ItemId, Member, SkillId } from './types';
+import type { Ailment, Element, Inflict, ItemId, Member, ModStat, SkillId } from './types';
 
 /** Something in the fight that can suffer an ailment. */
 interface Afflictable {
   ailment: Ailment | null;
   ailmentTurns: number;
+  /** Raised or lowered stats (percent) and the rounds they still last. */
+  mods?: Mods;
+}
+
+export type Mods = Partial<Record<ModStat, { amount: number; turns: number }>>;
+
+/**
+ * How buffs and debuffs change a hit: the attacker's attack (or magic) raises the damage by its
+ * percent, the defender's defence (or resistance) lowers it by its percent.
+ */
+function modFactor(attacker: Mods | undefined, defender: Mods | undefined, kind: 'phys' | 'magic'): number {
+  const up = attacker?.[kind === 'phys' ? 'atk' : 'mag']?.amount ?? 0;
+  const guard = defender?.[kind === 'phys' ? 'def' : 'res']?.amount ?? 0;
+  return Math.max(0.2, 1 + up / 100) * Math.max(0.2, 1 - guard / 100);
+}
+
+function tickMods(unit: Afflictable): void {
+  if (!unit.mods) return;
+  for (const stat of Object.keys(unit.mods) as ModStat[]) {
+    const m = unit.mods[stat]!;
+    m.turns -= 1;
+    if (m.turns <= 0) delete unit.mods[stat];
+  }
 }
 
 export interface EnemyUnit extends Afflictable {
@@ -60,7 +83,7 @@ export type CombatEvent =
 
 /** Everything about a fight that changes while it runs, in plain JSON (for saving or sending). */
 export interface CombatSnapshot {
-  enemies: { id: string; name: string; hp: number; ailment: Ailment | null; ailmentTurns: number }[];
+  enemies: { id: string; name: string; hp: number; ailment: Ailment | null; ailmentTurns: number; mods?: Mods }[];
   status: PartyStatus[];
   round: number;
   outcome: Outcome | null;
@@ -78,6 +101,9 @@ const WEAK_MULT = 1.5;
 /** Prowlers are hard to shake off, whatever the party's speed. */
 export const PROWLER_FLEE_CHANCE = 0.3;
 const RESIST_MULT = 0.5;
+
+const STAT_WORDS: Record<ModStat, string> = { atk: 'attack', def: 'defence', mag: 'magic', res: 'resistance' };
+const clone = <T>(value: T): T => (value === undefined ? value : (JSON.parse(JSON.stringify(value)) as T));
 
 export const AILMENT_NAMES: Record<Ailment, string> = { poison: 'Poison', sleep: 'Sleep', paralysis: 'Paralysis' };
 const AILMENT_TURNS: Record<Ailment, number> = { poison: 4, sleep: 3, paralysis: 3 };
@@ -117,8 +143,8 @@ export class Combat {
 
   snapshot(): CombatSnapshot {
     return {
-      enemies: this.enemies.map((e) => ({ id: e.def.id, name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns })),
-      status: this.status.map((s) => ({ ...s })),
+      enemies: this.enemies.map((e) => ({ id: e.def.id, name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns, mods: clone(e.mods) })),
+      status: this.status.map((s) => ({ ...s, mods: clone(s.mods) })),
       round: this.round,
       outcome: this.outcome,
       rewards: this.rewards,
@@ -136,9 +162,9 @@ export class Combat {
 
   /** Overwrites this fight's changing state in place with a snapshot of the same fight. */
   apply(snap: CombatSnapshot): void {
-    snap.enemies.forEach((e, i) => Object.assign(this.enemies[i], { name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns }));
+    snap.enemies.forEach((e, i) => Object.assign(this.enemies[i], { name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns, mods: clone(e.mods) }));
     snap.status.forEach((s, i) => {
-      if (this.status[i]) Object.assign(this.status[i], s);
+      if (this.status[i]) Object.assign(this.status[i], { ...s, mods: clone(s.mods) });
     });
     this.round = snap.round;
     this.outcome = snap.outcome;
@@ -199,6 +225,7 @@ export class Combat {
       this.checkEnd(events);
     }
 
+    for (const unit of [...this.status, ...this.enemies]) tickMods(unit);
     for (const s of this.status) {
       s.defending = false;
       s.taunt = Math.max(0, s.taunt - 1);
@@ -238,6 +265,11 @@ export class Combat {
         }
         m.sp -= skill.sp;
         events.push({ type: 'sp', target: i, sp: m.sp });
+        if (skill.hpCost) {
+          const cost = Math.min(m.hp - 1, Math.round((memberStats(m).hp * skill.hpCost) / 100));
+          m.hp -= cost;
+          events.push({ type: 'damage', side: 'party', target: i, amount: cost, hp: m.hp, crit: false, weak: false, resist: false, element: 'phys' });
+        }
         events.push({ type: 'act', side: 'party', actor: i, text: `${m.name} uses ${skill.name}!` });
 
         if (skill.kind === 'phys' || skill.kind === 'magic') {
@@ -276,6 +308,24 @@ export class Combat {
             events.push({ type: 'heal', target: cmd.target, amount: hp, hp });
             events.push({ type: 'info', text: `${target.name} is back on their feet!` });
           }
+        } else if (skill.kind === 'buff' || skill.kind === 'debuff') {
+          const enemiesHit = skill.kind === 'debuff';
+          const targets = enemiesHit
+            ? skill.target === 'allEnemies' ? this.livingEnemies() : [this.retargetEnemy(cmd.target)]
+            : skill.target === 'allAllies' ? this.livingParty() : skill.target === 'self' ? [i] : [this.retargetAlly(cmd.target)];
+          for (const t of targets) {
+            if (t < 0) continue;
+            const unit = enemiesHit ? this.enemies[t] : this.status[t];
+            unit.mods ??= {};
+            for (const mod of skill.mods ?? []) {
+              const old = unit.mods[mod.stat];
+              // The stronger effect wins; casting again refreshes it.
+              const amount = old && Math.abs(old.amount) > Math.abs(mod.amount) && Math.sign(old.amount) === Math.sign(mod.amount) ? old.amount : mod.amount;
+              unit.mods[mod.stat] = { amount, turns: skill.turns ?? 3 };
+            }
+          }
+          const who = enemiesHit ? (skill.target === 'allEnemies' ? 'The enemies' : this.enemies[targets[0]]?.name ?? 'The enemy') : skill.target === 'allAllies' ? 'The party' : this.party[targets[0]]?.name ?? m.name;
+          events.push({ type: 'info', text: `${who}: ${(skill.mods ?? []).map((x) => `${STAT_WORDS[x.stat]} ${x.amount > 0 ? 'up' : 'down'}`).join(', ')}.` });
         } else if (skill.kind === 'challenge') {
           this.status[i].taunt = skill.turns ?? 2;
           events.push({ type: 'info', text: `The enemies glare at ${m.name}.` });
@@ -364,6 +414,7 @@ export class Combat {
 
     let base = kind === 'phys' ? stats.atk * 1.6 - enemy.def.def * 0.8 : stats.mag * 1.7 - enemy.def.res * 0.8;
     base = Math.max(stats.atk * 0.3, base);
+    base *= modFactor(this.status[memberIndex].mods, enemy.mods, kind);
     if (kind === 'phys' && m.row === 'back' && !CLASSES[m.classId].ranged) base *= 0.5;
 
     const { damage, crit, weak, resist } = this.roll(base, power, element, enemy.def.weak, enemy.def.resist, kind === 'phys');
@@ -422,6 +473,7 @@ export class Combat {
     let base =
       action.kind === 'phys' ? enemy.def.atk * 1.6 - stats.def * 0.8 : enemy.def.mag * 1.7 - stats.res * 0.8;
     base = Math.max(enemy.def.atk * 0.3, base);
+    base *= modFactor(enemy.mods, status.mods, action.kind);
     if (action.kind === 'phys' && m.row === 'back' && !enemy.def.ranged) base *= 0.5;
     if (status.defending) base *= 0.5;
     if (status.guard > 0) base *= 0.7;

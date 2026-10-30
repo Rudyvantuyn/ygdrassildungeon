@@ -29,6 +29,20 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Nieuwe klassen (mijlpaal 11)
+
+- **Skald** (achterste rij): liederen die aanval, verdediging of magie van de hele groep verhogen, een licht
+  genezend lied en een lied dat vijanden verzwakt. Een echte steunklasse.
+- **Berserker** (voorste rij): de hoogste aanval, weinig verdediging. Raakt alle vijanden, betaalt HP voor
+  vernietigende slagen (Blood Price) en kan in Frenzy gaan (veel meer aanval, minder verdediging).
+- **Seeress** (achterste rij): vervloekingen die verdediging, aanval en magie van vijanden verlagen, vergif en
+  verlamming, plus een ijsschicht.
+- **Wolfkin** (voorste rij): een snelle jager die samen met een wolf vecht: dubbele aanvallen, de wolf beschermt een
+  bondgenoot, en een huil die alle vijanden kwetsbaar maakt.
+- Nieuw in gevechten: **versterkingen en verzwakkingen** voor een paar beurten (te zien als ATK▲, DEF▼ op de kaarten
+  en onder vijanden). +20% aanval betekent 20% meer schade; −20% verdediging bij een vijand 20% meer schade op hem.
+- De nieuwe klassen dragen bestaande uitrusting (zwaarden en bijlen, maliën, roben) en hebben geschilderde portretten.
+
 ### Verzamelen (mijlpaal 10)
 
 - Vier **verzamelskills** in elke skillboom: **Forage** (planten), **Mine** (erts), **Fell** (hout) en **Fish** (vis).
@@ -172,10 +186,10 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
 | Personages | Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder) |
 | Party | Bram, Sela, Wren, Orrin |
-| Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie) |
+| Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie), Skald (liederen die de groep versterken), Berserker (bijl, veel schade, weinig verdediging), Seeress (vervloekingen), Wolfkin (jager met wolf) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |
 | Elementen | fysiek, vuur (fire), vorst (frost), storm |
-| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead; passief: Stout Heart, Iron Skin, Keen Eye, Fleet Foot, Gentle Hands, Rune Lore, Deep Well; verzamelen: Forage, Mine, Fell, Fish |
+| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead, War Song, Shieldhymn, Mocking Verse, Runic Chant, Restful Tune, Heroes' Saga, Cleave, Blood Price, Frenzy, Skull Splitter, Reaving Spin, Curse of Frailty, Curse of Weakness, Hollow Bolt, Witherblight, Stilling Gaze, Fate Unravelled, Fang Strike, Pack Hunt, Wolf Guard, Howl of the Pack, Hamstring, Moonfang Frenzy; passief: Stout Heart, Iron Skin, Keen Eye, Fleet Foot, Gentle Hands, Rune Lore, Deep Well; verzamelen: Forage, Mine, Fell, Fish |
 | Statuseffecten | Poison, Sleep, Paralysis |
 | Items | Sap Tonic (HP), Tide Draught (veel HP), Spirit Dew (SP), Clearwater (statuseffecten), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
 | Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe, Runehewn Axe, Hrimstring Bow, Frostbirch Rod, Scalehide Mail, Rimeweave Robe, Wyrmtooth Blade, Embersong Bow, Ashroot Rod, Emberscale Plate, Starveil Robe, Saltsteel Blade, Gullwind Bow, Driftwood Rod, Sharkhide Mail, Kelpweave Robe, Tidebreaker Axe, Stormgull Bow, Coralheart Rod, Anchor Plate, Deepscale Mail, Seafoam Robe, Fathom Edge, Wavecaller Bow, Abyss Rod, Leviathan Mail, Tidesong Robe |

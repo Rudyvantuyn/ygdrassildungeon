@@ -1,4 +1,4 @@
-import type { Element, Inflict, SkillId, Stats } from '../types';
+import type { Element, Inflict, ModStat, SkillId, Stats } from '../types';
 import type { GatherKind } from './gathering';
 
 export type SkillTarget = 'enemy' | 'allEnemies' | 'ally' | 'allAllies' | 'self';
@@ -8,7 +8,7 @@ export interface SkillDef {
   name: string;
   sp: number;
   target: SkillTarget;
-  kind: 'phys' | 'magic' | 'heal' | 'revive' | 'cure' | 'ailment' | 'challenge' | 'guard' | 'passive' | 'gather';
+  kind: 'phys' | 'magic' | 'heal' | 'revive' | 'cure' | 'ailment' | 'challenge' | 'guard' | 'passive' | 'gather' | 'buff' | 'debuff';
   element: Element;
   /** Percent of a normal attack (damage) or of the heal formula. */
   power: number;
@@ -21,6 +21,10 @@ export interface SkillDef {
   turns?: number;
   /** Passive skills: a stat raised by this many percent per rank. */
   passive?: { stat: keyof Stats; perRank: number };
+  /** Buffs and debuffs: stats raised (or lowered, if negative) by this many percent for `turns` rounds. */
+  mods?: { stat: ModStat; amount: number }[];
+  /** Paid in HP, as a percent of max HP, on top of the SP cost. */
+  hpCost?: number;
   /** Gathering skills: what kind of spot they work on. */
   gather?: GatherKind;
   description: string;
@@ -325,5 +329,118 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     power: 0,
     gather: 'fish',
     description: 'Catch fish in pools and tidewater. Higher ranks find more, and rarer things.',
+  }),
+
+  // ── Skald ──────────────────────────────────────────────────────────────────
+  warSong: skill({
+    id: 'warSong', name: 'War Song', sp: 6, target: 'allAllies', kind: 'buff', power: 0, turns: 3,
+    mods: [{ stat: 'atk', amount: 22 }],
+    description: 'A rousing battle song. Raises the attack of the whole party.',
+  }),
+  shieldHymn: skill({
+    id: 'shieldHymn', name: 'Shieldhymn', sp: 6, target: 'allAllies', kind: 'buff', power: 0, turns: 3,
+    mods: [{ stat: 'def', amount: 20 }],
+    description: 'A slow, steady hymn. Raises the defence of the whole party.',
+  }),
+  mockingVerse: skill({
+    id: 'mockingVerse', name: 'Mocking Verse', sp: 7, target: 'allEnemies', kind: 'debuff', power: 0, turns: 3,
+    mods: [{ stat: 'atk', amount: -12 }],
+    description: 'A cutting verse that saps the foes\' fighting spirit. Lowers enemy attack.',
+  }),
+  runicChant: skill({
+    id: 'runicChant', name: 'Runic Chant', sp: 6, target: 'allAllies', kind: 'buff', power: 0, turns: 3,
+    mods: [{ stat: 'mag', amount: 22 }, { stat: 'res', amount: 15 }],
+    description: 'Chanted runes hum in the air. Raises magic and resistance of the whole party.',
+  }),
+  restfulTune: skill({
+    id: 'restfulTune', name: 'Restful Tune', sp: 8, target: 'allAllies', kind: 'heal', power: 45,
+    field: true,
+    description: 'A soft tune that eases every wound a little.',
+  }),
+  heroesSaga: skill({
+    id: 'heroesSaga', name: "Heroes' Saga", sp: 16, target: 'allAllies', kind: 'buff', power: 0, turns: 4,
+    mods: [{ stat: 'atk', amount: 20 }, { stat: 'def', amount: 20 }],
+    description: 'The old saga of the first explorers. Raises attack and defence of the whole party.',
+  }),
+  // ── Berserker ──────────────────────────────────────────────────────────────
+  cleave: skill({
+    id: 'cleave', name: 'Cleave', sp: 6, target: 'allEnemies', kind: 'phys', power: 75,
+    description: 'One wide swing through every enemy.',
+  }),
+  bloodPrice: skill({
+    id: 'bloodPrice', name: 'Blood Price', sp: 3, target: 'enemy', kind: 'phys', power: 260, hpCost: 12,
+    description: 'Pay in blood for a crushing blow. Costs some of your own HP.',
+  }),
+  frenzy: skill({
+    id: 'frenzy', name: 'Frenzy', sp: 5, target: 'self', kind: 'buff', power: 0, turns: 3,
+    mods: [{ stat: 'atk', amount: 35 }, { stat: 'def', amount: -20 }],
+    description: 'Give in to the battle-rage: much more attack, less defence.',
+  }),
+  skullSplitter: skill({
+    id: 'skullSplitter', name: 'Skull Splitter', sp: 9, target: 'enemy', kind: 'phys', power: 180,
+    inflict: { ailment: 'paralysis', chance: 0.25 },
+    description: 'A blow to the head. May leave the enemy stunned and paralysed.',
+  }),
+  reavingSpin: skill({
+    id: 'reavingSpin', name: 'Reaving Spin', sp: 16, target: 'allEnemies', kind: 'phys', power: 140,
+    description: 'Spin with the axe held out. A storm of steel that hits every enemy.',
+  }),
+  // ── Seeress ────────────────────────────────────────────────────────────────
+  curseOfFrailty: skill({
+    id: 'curseOfFrailty', name: 'Curse of Frailty', sp: 5, target: 'enemy', kind: 'debuff', power: 0, turns: 3,
+    mods: [{ stat: 'def', amount: -28 }],
+    description: 'Bones turn brittle. Lowers one enemy\'s defence.',
+  }),
+  curseOfWeakness: skill({
+    id: 'curseOfWeakness', name: 'Curse of Weakness', sp: 5, target: 'enemy', kind: 'debuff', power: 0, turns: 3,
+    mods: [{ stat: 'atk', amount: -22 }, { stat: 'mag', amount: -22 }],
+    description: 'Strength drains away. Lowers one enemy\'s attack and magic.',
+  }),
+  hollowBolt: skill({
+    id: 'hollowBolt', name: 'Hollow Bolt', sp: 5, target: 'enemy', kind: 'magic', element: 'frost', power: 155,
+    description: 'A bolt of cold from the other side. Frost damage to one enemy.',
+  }),
+  witherblight: skill({
+    id: 'witherblight', name: 'Witherblight', sp: 8, target: 'allEnemies', kind: 'ailment', power: 0,
+    inflict: { ailment: 'poison', chance: 0.45 },
+    description: 'A creeping rot. May poison every enemy.',
+  }),
+  stillingGaze: skill({
+    id: 'stillingGaze', name: 'Stilling Gaze', sp: 6, target: 'enemy', kind: 'ailment', power: 0,
+    inflict: { ailment: 'paralysis', chance: 0.55 },
+    description: 'Look into its eyes and hold it still. May paralyse one enemy.',
+  }),
+  fateUnravel: skill({
+    id: 'fateUnravel', name: 'Fate Unravelled', sp: 14, target: 'allEnemies', kind: 'debuff', power: 0, turns: 4,
+    mods: [{ stat: 'def', amount: -20 }, { stat: 'res', amount: -20 }],
+    description: 'Pull the threads of their fate apart. Lowers defence and resistance of every enemy.',
+  }),
+  // ── Wolfkin ────────────────────────────────────────────────────────────────
+  fangStrike: skill({
+    id: 'fangStrike', name: 'Fang Strike', sp: 4, target: 'enemy', kind: 'phys', power: 140,
+    description: 'Your wolf lunges for the throat of one enemy.',
+  }),
+  packHunt: skill({
+    id: 'packHunt', name: 'Pack Hunt', sp: 6, target: 'enemy', kind: 'phys', power: 80, hits: 2,
+    description: 'You and your wolf strike the same enemy, one after the other.',
+  }),
+  wolfGuard: skill({
+    id: 'wolfGuard', name: 'Wolf Guard', sp: 5, target: 'ally', kind: 'buff', power: 0, turns: 3,
+    mods: [{ stat: 'def', amount: 30 }],
+    description: 'Your wolf stands watch over an ally. Raises their defence.',
+  }),
+  packHowl: skill({
+    id: 'packHowl', name: 'Howl of the Pack', sp: 8, target: 'allEnemies', kind: 'debuff', power: 0, turns: 3,
+    mods: [{ stat: 'def', amount: -12 }],
+    description: 'A howl that chills the blood. Lowers the defence of every enemy.',
+  }),
+  hamstring: skill({
+    id: 'hamstring', name: 'Hamstring', sp: 6, target: 'enemy', kind: 'phys', power: 110,
+    inflict: { ailment: 'paralysis', chance: 0.35 },
+    description: 'Your wolf bites at the legs. May paralyse the enemy.',
+  }),
+  moonfangFrenzy: skill({
+    id: 'moonfangFrenzy', name: 'Moonfang Frenzy', sp: 15, target: 'allEnemies', kind: 'phys', power: 70, hits: 2,
+    description: 'Wolf and hunter tear through the enemy line twice.',
   }),
 };

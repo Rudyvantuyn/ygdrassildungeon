@@ -17,6 +17,8 @@ export function rankEffect(skill: SkillDef, rank: number): string {
   if (s.kind === 'phys' || s.kind === 'magic') parts.push(`power ${s.power}%`);
   if (s.kind === 'heal') parts.push(`healing ${s.power}%`);
   if (s.kind === 'revive') parts.push(`wakes with ${s.power}% HP`);
+  for (const mod of s.mods ?? []) parts.push(`${mod.amount > 0 ? '+' : ''}${mod.amount}% ${STAT_NAMES[mod.stat]}`);
+  if (s.hpCost) parts.push(`costs ${s.hpCost}% HP`);
   if (s.inflict) parts.push(`${Math.round(s.inflict.chance * 100)}% ${s.inflict.ailment}`);
   if (s.turns) parts.push(`${s.turns} turns`);
   parts.push(`${s.sp} SP`);

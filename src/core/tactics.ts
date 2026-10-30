@@ -53,6 +53,36 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
         if ((combat.boss || combat.enemies[weakest].def.weak.includes('storm')) && canUse(i, 'galePiercer')) return { kind: 'skill', skill: 'galePiercer', target: weakest };
         if (combat.boss && canUse(i, 'twinFang')) return { kind: 'skill', skill: 'twinFang', target: weakest };
         break;
+      case 'skald': {
+        const partyHas = (stat: 'atk' | 'def') => party.some((_, j) => isAlive(party[j]) && combat.status[j].mods?.[stat]);
+        if (hurt.length >= 2 && canUse(i, 'restfulTune')) return { kind: 'skill', skill: 'restfulTune', target: -1 };
+        if (combat.boss && !partyHas('atk') && canUse(i, 'heroesSaga')) return { kind: 'skill', skill: 'heroesSaga', target: -1 };
+        if (!partyHas('atk') && canUse(i, 'warSong')) return { kind: 'skill', skill: 'warSong', target: -1 };
+        if (!partyHas('def') && canUse(i, 'shieldHymn')) return { kind: 'skill', skill: 'shieldHymn', target: -1 };
+        if (!combat.enemies[weakest].mods?.atk && canUse(i, 'mockingVerse')) return { kind: 'skill', skill: 'mockingVerse', target: -1 };
+        break;
+      }
+      case 'berserker': {
+        if (living.length >= 2 && canUse(i, 'reavingSpin')) return { kind: 'skill', skill: 'reavingSpin', target: -1 };
+        if (living.length >= 2 && canUse(i, 'cleave')) return { kind: 'skill', skill: 'cleave', target: -1 };
+        if ((combat.boss || combat.prowler) && !combat.status[i].mods?.atk && canUse(i, 'frenzy')) return { kind: 'skill', skill: 'frenzy', target: -1 };
+        if (canUse(i, 'skullSplitter')) return { kind: 'skill', skill: 'skullSplitter', target: weakest };
+        if (m.hp > memberStats(m).hp * 0.6 && canUse(i, 'bloodPrice')) return { kind: 'skill', skill: 'bloodPrice', target: weakest };
+        break;
+      }
+      case 'seeress': {
+        const foe = combat.enemies[weakest];
+        if (living.length >= 2 && !foe.mods?.def && canUse(i, 'fateUnravel')) return { kind: 'skill', skill: 'fateUnravel', target: -1 };
+        if ((combat.boss || combat.prowler || foe.hp > 300) && !foe.mods?.def && canUse(i, 'curseOfFrailty')) return { kind: 'skill', skill: 'curseOfFrailty', target: weakest };
+        if ((combat.boss || combat.prowler) && !foe.mods?.atk && canUse(i, 'curseOfWeakness')) return { kind: 'skill', skill: 'curseOfWeakness', target: weakest };
+        if (canUse(i, 'hollowBolt')) return { kind: 'skill', skill: 'hollowBolt', target: weakest };
+        break;
+      }
+      case 'wolfkin':
+        if (living.length >= 2 && canUse(i, 'moonfangFrenzy')) return { kind: 'skill', skill: 'moonfangFrenzy', target: -1 };
+        if (canUse(i, 'packHunt')) return { kind: 'skill', skill: 'packHunt', target: weakest };
+        if (canUse(i, 'fangStrike')) return { kind: 'skill', skill: 'fangStrike', target: weakest };
+        break;
       case 'bastion':
         if (combat.boss && canUse(i, 'ironFormation') && combat.status[i].guard === 0) return { kind: 'skill', skill: 'ironFormation', target: -1 };
         if (living.length >= 2 && canUse(i, 'rampartCrash')) return { kind: 'skill', skill: 'rampartCrash', target: -1 };

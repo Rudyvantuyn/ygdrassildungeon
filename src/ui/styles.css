@@ -1374,3 +1374,8 @@ table.stats thead th {
   border-radius: 4px;
   z-index: 3;
 }
+
+.member-row.mods {
+  color: #f0d070;
+  letter-spacing: 0.02em;
+}

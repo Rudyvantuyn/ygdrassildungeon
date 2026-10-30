@@ -94,6 +94,17 @@ released commercially, so each asset needs a known origin and licence.
 | heroes/mender-b.webp | MAHZdfPUZ-Y |
 | heroes/runecaller-a.webp | MAHZdYDmfUA |
 | heroes/runecaller-b.webp | MAHZdWRakr8 |
+| heroes/skald-a.webp | MAHZfAteqUA |
+| heroes/skald-b.webp | MAHZfPSY9A0 |
+| heroes/berserker-a.webp | MAHZfC3Nw2A |
+| heroes/berserker-b.webp | MAHZfNOjYBg |
+| heroes/seeress-a.webp | MAHZfFz4yT4 |
+| heroes/seeress-b.webp | MAHZfKKCKks |
+| heroes/wolfkin-a.webp | MAHZfDYXyOg |
+| heroes/wolfkin-b.webp | MAHZfAY-HtE |
+
+The Skald, Berserker, Seeress and Wolfkin portraits were added on 2026-10-30 (pages 89–96 of the same design),
+exported at 1024×1024 and scaled to 384 px WebP.
 
 ## Dungeon textures (`public/art/dungeon/<set>-wall|floor|ceiling.webp`)
 
