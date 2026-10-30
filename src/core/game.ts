@@ -4,7 +4,9 @@ import { FLOORS, type FloorDef } from './data/floors';
 import { makeInventory } from './data/items';
 import type { QuestState } from './quests';
 import { DX, DY, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
-import { createStartingParty, fullRestore, isAlive } from './party';
+import { createStartingParty, fullRestore, isAlive, xpForLevel } from './party';
+import { EQUIPMENT_LIST } from './data/equipment';
+import { STORY } from './data/story';
 import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
 import { Rng } from './rng';
 import type { Dir, ItemId, Loot, Member } from './types';
@@ -92,7 +94,11 @@ export class Game {
   map: FloorMap;
   private rng: Rng;
 
-  private constructor(public state: GameState) {
+  private constructor(
+    public state: GameState,
+    /** The floors of this run: the Rootdeep, or a single floor from the drafting table. */
+    readonly floors: readonly FloorDef[] = FLOORS,
+  ) {
     this.rng = new Rng(state.rng);
     this.map = parseFloor(this.floorDef);
     // Fill in fields that saves from earlier builds don't have yet.
@@ -105,18 +111,45 @@ export class Game {
     state.quests ??= {};
     state.story ??= [];
     state.progress.forEach((p, i) => {
-      p.prowlers ??= initProwlers(FLOORS[i]);
+      p.prowlers ??= initProwlers(this.floors[i]);
       p.chart ??= emptyChart(p.explored.length);
     });
     // New chapters add floors; saves from before them get fresh progress for those.
-    for (let i = state.progress.length; i < FLOORS.length; i++) state.progress.push(newProgress(FLOORS[i]));
+    for (let i = state.progress.length; i < this.floors.length; i++) state.progress.push(newProgress(this.floors[i]));
     // "Cleared" means the last floor's boss has fallen (it meant floor 5 before chapter II).
-    state.cleared = state.progress[FLOORS.length - 1].bossDefeated;
+    state.cleared = state.progress[this.floors.length - 1].bossDefeated;
   }
 
   static newGame(seed: number): Game {
-    const progress = FLOORS.map(newProgress);
-    const start = parseFloor(FLOORS[0]).start;
+    return Game.fresh(seed, FLOORS);
+  }
+
+  /**
+   * A test run of one floor from the drafting table: a party at `level` wearing the best gear
+   * the shop sells by floor `tier`, standing at the floor's start. Nothing of it is saved.
+   */
+  static trial(def: FloorDef, level: number, tier: number, seed: number): Game {
+    const game = Game.fresh(seed, [def]);
+    const s = game.state;
+    for (const m of s.party) {
+      m.level = level;
+      m.xp = xpForLevel(level);
+      for (const slot of ['weapon', 'armor'] as const) {
+        const best = EQUIPMENT_LIST.filter((e) => e.slot === slot && e.tier <= tier && !e.requires && e.classes.includes(m.classId)).sort((a, b) => b.price - a.price)[0];
+        m[slot] = best?.id;
+      }
+    }
+    fullRestore(s.party);
+    s.inventory = makeInventory({ sapTonic: 6, tideDraught: tier >= 5 ? 4 : 0, spiritDew: 3, clearwater: 3, kindlingMoss: 2 });
+    s.story = STORY.map((scene) => scene.id);
+    s.gold = 0;
+    game.enterFloor(0);
+    return game;
+  }
+
+  private static fresh(seed: number, floors: readonly FloorDef[]): Game {
+    const progress = floors.map(newProgress);
+    const start = parseFloor(floors[0]).start;
     const game = new Game({
       version: SAVE_VERSION,
       rng: seed,
@@ -142,7 +175,7 @@ export class Game {
       kills: {},
       quests: {},
       story: [],
-    });
+    }, floors);
     game.rollEncounterAt();
     return game;
   }
@@ -164,11 +197,11 @@ export class Game {
   }
 
   get floorDef(): FloorDef {
-    return FLOORS[this.state.floor];
+    return this.floors[this.state.floor];
   }
 
   get isLastFloor(): boolean {
-    return this.state.floor === FLOORS.length - 1;
+    return this.state.floor === this.floors.length - 1;
   }
 
   get progress(): FloorProgress {
@@ -282,7 +315,7 @@ export class Game {
 
   /** Enter the Rootdeep at the start of a floor the party has already reached. */
   enterFloor(floor: number, unlock = false): void {
-    if (floor < 0 || floor >= FLOORS.length) return;
+    if (floor < 0 || floor >= this.floors.length) return;
     if (!unlock && floor > this.state.deepest) return;
     this.state.location = 'dungeon';
     this.state.floor = floor;
@@ -301,7 +334,7 @@ export class Game {
     this.state.location = 'town';
     this.state.progress.forEach((p, i) => {
       p.springUsed = false;
-      p.prowlers = initProwlers(FLOORS[i]);
+      p.prowlers = initProwlers(this.floors[i]);
     });
   }
 

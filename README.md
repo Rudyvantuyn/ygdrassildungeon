@@ -29,6 +29,17 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### De Drafting Table (mijlpaal 8)
+
+- Op het titelscherm: **Drafting Table**, een tekenscherm om zelf verdiepingen te maken (ook met touch).
+- Gereedschap: muur, gang, start, trap omlaag, kist, bron, baas en prowler-routes. Kies grootte (8–30 vakjes),
+  uiterlijk (de zes geschilderde texturen), welke monsters er wonen (die van een bestaande verdieping) en de baas.
+- Het scherm controleert de regels van de Rootdeep zelf: alles bereikbaar, een doel (trap en/of baas), en altijd een
+  weg om elke prowler heen.
+- **Test play** speelt de verdieping meteen, met een groep op een zelfgekozen level; er wordt niets opgeslagen.
+- Ontwerpen blijven bewaard (concept + "My floors") en zijn te delen als **code** (`YGF1.…`). Zo'n code zet je om met
+  `node scripts/floor-code.mjs <code>` om de verdieping aan het spel toe te voegen.
+
 ### Hoofdstukken (mijlpaal 7)
 
 - De Rootdeep is verdeeld in **hoofdstukken van vijf verdiepingen**, elk met een eigen thema, eigen monsters en een
@@ -135,6 +146,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 |---|---|
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
 | Hoofdstukken | I: The Greenwood Roots, II: The Drowned Roots |
+| Tekenscherm | The Drafting Table; thema's Greenwood, Frostwood, Emberroot, Tidewater, Coral, Abyss |
 | Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimewood IV, Wyrmroot V, Saltmarsh VI, Kelpwood VII, Coral Vault VIII, Ran's Reach IX, Aegir's Hall X |
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
 | Personages | Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder) |

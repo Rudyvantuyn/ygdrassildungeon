@@ -22,6 +22,8 @@ import { Hornstone, shareLines, type HornstoneHost } from './hornstone';
 import { online, type ExpeditionRow } from '../net/online';
 import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
+import { Designer, loadDraft } from './designer';
+import { toFloorDef, type FloorDesign } from '../core/designer';
 import { markSeen, pendingScene, type StoryLine } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
 import { npcFromName } from './npc';
@@ -35,7 +37,7 @@ const VIEW_H = 520;
 const MAP_SIZE = 270;
 const MOVE_COOLDOWN = 150;
 
-type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'editor' | 'story' | 'busy';
+type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'editor' | 'drafting' | 'story' | 'busy';
 type SidePanel = 'explore' | 'combat' | 'town';
 type ViewFx = { kind: 'step' | 'turn' | 'bump' | 'encounter' | 'shake'; start: number };
 
@@ -69,6 +71,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private overlayMenu: ListMenu | null = null;
   private combatView: CombatView | null = null;
   private mapEditor: MapEditor | null = null;
+  private designer: Designer | null = null;
+  /** The floor being test-played from the drafting table (nothing is saved meanwhile). */
+  private trial: FloorDesign | null = null;
   private story: { lines: StoryLine[]; index: number; shown: number; then: () => void; box: HTMLElement } | null = null;
   private fx: ViewFx | null = null;
   private lastMove = 0;
@@ -206,6 +211,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         return this.storyKey(key);
       case 'editor':
         return this.mapEditor?.handleKey(key) ?? false;
+      case 'drafting':
+        return this.designer?.handleKey(key) ?? false;
       case 'town':
         if (key === 'h' || key === 'H') {
           this.showHelp(() => {
@@ -326,6 +333,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       [
         { label: 'New Game', onSelect: () => this.newGame() },
         { label: 'Continue', disabled: !hasSave, onSelect: () => this.loadSave() },
+        { label: 'Drafting Table', onSelect: () => this.showDesigner() },
         { label: 'How to Play', onSelect: () => this.showHelp(() => this.showTitle()) },
       ],
       { startIndex: hasSave ? 1 : 0 },
@@ -363,6 +371,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   save(): void {
+    if (this.trial) return;
     writeSave((this.home ?? this.game).serialize());
   }
 
@@ -400,7 +409,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   enterExplore(): void {
-    audio.music(themeFor({ location: 'dungeon', floor: this.game.state.floor }));
+    audio.music(themeFor({ location: 'dungeon', floor: this.trial ? this.trial.monsters : this.game.state.floor }));
     // Load this floor's monster art before the first fight.
     const def = this.game.floorDef;
     const ids = [...def.encounters.flatMap((e) => e.enemies), ...(def.boss ?? []), ...def.prowlers.flatMap((p) => p.enemies)];
@@ -700,6 +709,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         this.toast('The chest is empty.');
         return;
       case 'stairs':
+        if (this.trial) return this.confirm('Stairs down', 'Your floor ends here. Head back to the drafting table?', () => this.endTrial());
         if (this.game.isLastFloor) return;
         this.confirm('Stairs down', `Descend to ${FLOORS[this.game.state.floor + 1].name}?`, () => {
           audio.play('stairs');
@@ -710,6 +720,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         });
         return;
       case 'upstairs': {
+        if (this.trial) return this.confirm('Stairs up', 'Stop the test and head back to the drafting table?', () => this.endTrial());
         const leaving = this.game.state.floor === 0;
         const text = leaving ? 'Leave the Rootdeep and return to Lindholm?' : `Climb up to ${FLOORS[this.game.state.floor - 1].name}?`;
         this.confirm('Stairs up', text, () => {
@@ -814,7 +825,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       if (this.coop) return this.coop.combatOver();
       if (!combat.boss) return this.enterExplore();
       this.playStory('victory', () => {
-        if (this.game.state.cleared) return this.showCleared();
+        if (this.game.state.cleared && !this.trial) return this.showCleared();
         this.enterExplore();
         this.toast(`${combat.enemies[0].def.name} has fallen. The way down lies open.`);
       });
@@ -833,6 +844,15 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   private showGameOver(): void {
+    if (this.trial) {
+      const design = this.trial;
+      const menu = new ListMenu([
+        { label: 'Try again', onSelect: () => this.startTrial(design, this.game.state.party[0].level) },
+        { label: 'Back to the drafting table', onSelect: () => this.endTrial() },
+      ]);
+      this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Your party has fallen' }), el('p', { text: 'Too hard? Try a higher test level, or soften the floor.' }), menu.el]), menu);
+      return;
+    }
     const hasSave = readSave() !== null;
     const menu = new ListMenu([
       { label: 'Load last save', disabled: !hasSave, onSelect: () => this.loadSave() },
@@ -894,7 +914,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             }),
         },
         { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.soundOptions(() => this.openPack()) },
-        { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.showTitle() },
+        this.trial
+          ? { label: 'End the test', description: 'Back to the drafting table.', onSelect: () => this.endTrial() }
+          : { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.showTitle() },
         { label: 'Close', onSelect: close },
       ],
       { onCancel: close },
@@ -1052,6 +1074,46 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.overlay.classList.remove('hidden');
     this.overlayMenu = null;
     this.mode = 'editor';
+  }
+
+  // ── Drafting table ─────────────────────────────────────────────────────────
+
+  private showDesigner(design: FloorDesign = loadDraft()): void {
+    this.designer = new Designer(design, {
+      onTest: (d, level) => this.startTrial(d, level),
+      onClose: () => {
+        this.designer = null;
+        this.showTitle();
+      },
+    });
+    this.overlay.innerHTML = '';
+    this.overlay.appendChild(this.designer.el);
+    this.overlay.classList.remove('hidden');
+    this.overlayMenu = null;
+    this.mode = 'drafting';
+  }
+
+  private startTrial(design: FloorDesign, level: number): void {
+    this.designer = null;
+    this.closeOverlay();
+    this.trial = design;
+    this.game = Game.trial(toFloorDef(design), level, design.monsters, randomSeed());
+    this.party.render(this.game.state.party);
+    this.enterExplore();
+    this.toast(`Testing ${design.name} with a level ${level} party.`);
+  }
+
+  private endTrial(): void {
+    const design = this.trial ?? undefined;
+    this.trial = null;
+    this.closeOverlay();
+    this.game = Game.newGame(1); // background scenery only
+    this.showSide('town');
+    this.town.show();
+    this.updateHud();
+    this.party.render(this.game.state.party);
+    audio.music(themeFor({ location: 'title' }));
+    this.showDesigner(design);
   }
 
   // ── Overlay helpers ────────────────────────────────────────────────────────
