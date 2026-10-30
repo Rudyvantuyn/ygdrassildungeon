@@ -31,7 +31,9 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ### De Drafting Table (mijlpaal 8)
 
-- Op het titelscherm: **Drafting Table**, een tekenscherm om zelf verdiepingen te maken (ook met touch).
+- Een **makersgereedschap**, geen spelersfunctie: de knop **Drafting Table** staat alleen op het titelscherm van een
+  apparaat dat de game één keer opende met `?maker` achter het adres (`?maker=off` verbergt hem weer).
+  Een tekenscherm om zelf verdiepingen te maken (ook met touch).
 - Gereedschap: muur, gang, start, trap omlaag, kist, bron, baas en prowler-routes. Kies grootte (8–30 vakjes),
   uiterlijk (de zes geschilderde texturen), welke monsters er wonen (die van een bestaande verdieping) en de baas.
 - Het scherm controleert de regels van de Rootdeep zelf: alles bereikbaar, een doel (trap en/of baas), en altijd een

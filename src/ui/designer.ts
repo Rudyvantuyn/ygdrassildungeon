@@ -70,6 +70,24 @@ function writeJson(key: string, value: unknown): void {
   }
 }
 
+const MAKER_KEY = 'ygdrassil-maker';
+
+/**
+ * The drafting table is a tool for the game's makers, not a player feature. It shows up on the
+ * title screen only on devices that once opened the game with `?maker` in the address
+ * (and `?maker=off` hides it again).
+ */
+export function isMaker(): boolean {
+  try {
+    const flag = new URLSearchParams(location.search).get('maker');
+    if (flag === 'off') localStorage.removeItem(MAKER_KEY);
+    else if (flag !== null) localStorage.setItem(MAKER_KEY, '1');
+    return localStorage.getItem(MAKER_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 /** The last drawing, so leaving the table (or a test run) never loses work. */
 export function loadDraft(): FloorDesign {
   const code = readJson<string | null>(DRAFT_KEY, null);

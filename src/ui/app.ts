@@ -22,7 +22,7 @@ import { Hornstone, shareLines, type HornstoneHost } from './hornstone';
 import { online, type ExpeditionRow } from '../net/online';
 import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
-import { Designer, loadDraft } from './designer';
+import { Designer, isMaker, loadDraft } from './designer';
 import { toFloorDef, type FloorDesign } from '../core/designer';
 import { markSeen, pendingScene, type StoryLine } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
@@ -333,7 +333,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       [
         { label: 'New Game', onSelect: () => this.newGame() },
         { label: 'Continue', disabled: !hasSave, onSelect: () => this.loadSave() },
-        { label: 'Drafting Table', onSelect: () => this.showDesigner() },
+        ...(isMaker() ? [{ label: 'Drafting Table', onSelect: () => this.showDesigner() }] : []),
         { label: 'How to Play', onSelect: () => this.showHelp(() => this.showTitle()) },
       ],
       { startIndex: hasSave ? 1 : 0 },
