@@ -41,7 +41,8 @@ export interface TownHost {
   enterDungeon(): void;
   showTitle(): void;
   partyStatus(back: () => void): void;
-  soundOptions(back: () => void): void;
+  settings(back: () => void): void;
+  showFeedback(back: () => void): void;
   showHelp(back: () => void): void;
   openHornstone(): void;
   confirm(title: string, text: string, yes: () => void, back?: () => void): void;
@@ -88,7 +89,7 @@ export class TownView {
         onSelect: () => this.host.tips(['hornstone'], () => this.host.openHornstone()),
       },
       { label: 'Party', description: 'View stats and equipment.', spot: null, onSelect: () => this.host.partyStatus(() => this.back()) },
-      { label: 'System', description: 'Save, sound, help, and quit to the title screen.', spot: null, onSelect: () => this.system() },
+      { label: 'System', description: 'Save, settings, help, and quit to the title screen.', spot: null, onSelect: () => this.system() },
     ];
     const items: MenuItem[] = entries.map(({ spot, ...item }, i) => ({
       ...item,
@@ -140,9 +141,10 @@ export class TownView {
     const menu = new ListMenu(
       [
         { label: 'Save', description: 'Save your progress.', onSelect: () => { this.host.save(); this.back(); this.host.toast('Game saved.'); } },
-        { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.host.soundOptions(() => this.system()) },
+        { label: 'Settings', description: 'Sound, battle and text speed, difficulty, tips.', onSelect: () => this.host.settings(() => this.system()) },
         { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.host.showGuidebook(() => this.system()) },
         { label: 'How to Play', description: 'Controls and tips.', onSelect: () => this.host.showHelp(() => this.system()) },
+        { label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.host.showFeedback(() => this.system()) },
         { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onSelect: () => this.host.showTitle() },
         { label: 'Back', onSelect: back },
       ],

@@ -1,3 +1,4 @@
+import type { Difficulty } from './difficulty';
 import { emptyChart, setTerrain, type Chart, type ChartMode } from './chart';
 import { Combat, type CombatSnapshot } from './combat';
 import { FLOORS, type FloorDef } from './data/floors';
@@ -57,6 +58,8 @@ export interface GameState {
   quests: Record<string, QuestState>;
   /** Story scenes already shown. */
   story: string[];
+  /** How hard fights are (standard when missing). */
+  difficulty?: Difficulty;
   /** Choices made at the end of story scenes: scene id → option id. */
   choices?: Record<string, string>;
   /** Adventurers ever sworn in at the Oath Hall (the first few are free). */
@@ -389,7 +392,7 @@ export class Game {
   }
 
   startCombat(enemies: string[]): Combat {
-    return new Combat(this.state.party, enemies, this.state.inventory, this.rng);
+    return new Combat(this.state.party, enemies, this.state.inventory, this.rng, { difficulty: this.state.difficulty });
   }
 
   /** Index of the active prowler standing on (x, y), or -1. */
@@ -404,11 +407,11 @@ export class Game {
 
   startProwlerCombat(index: number): Combat {
     this.state.fighting = index;
-    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true });
+    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true, difficulty: this.state.difficulty });
   }
 
   startBossCombat(): Combat {
-    return new Combat(this.state.party, this.floorDef.boss ?? [], this.state.inventory, this.rng, { boss: true });
+    return new Combat(this.state.party, this.floorDef.boss ?? [], this.state.inventory, this.rng, { boss: true, difficulty: this.state.difficulty });
   }
 
   /** Call after a combat is over, with the finished combat. */

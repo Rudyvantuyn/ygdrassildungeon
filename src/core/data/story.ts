@@ -441,6 +441,17 @@ export const STORY: StoryScene[] = [
       { speaker: SIGRID, text: 'Rest. Train. Grow strong. The Rootdeep is not done with you, and I fear the realms and the gods are not either.' },
     ],
   },
+  {
+    id: 'sealedStair',
+    title: 'The sealed stair',
+    when: 'floor',
+    ready: (g) => g.state.cleared && g.state.floor === 9,
+    lines: [
+      { speaker: NARRATOR, text: 'Behind the Hafgufa\'s resting place, a stair winds down into bone-white stone. Ymir\'s bones, waiting.' },
+      { speaker: NARRATOR, text: 'A second ward seals it, a wall of cold gold light. It does not yield. Not yet.' },
+      { speaker: NARRATOR, text: 'To be continued in Chapter III.' },
+    ],
+  },
 ];
 
 export const SCENE_BY_ID: Record<string, StoryScene> = Object.fromEntries(STORY.map((s) => [s.id, s]));

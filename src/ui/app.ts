@@ -31,6 +31,9 @@ import { GATHER_KINDS } from '../core/data/gathering';
 import { describeFinds } from '../core/expedition';
 import { unspentPoints } from '../core/skilltree';
 import { toFloorDef, type FloorDesign } from '../core/designer';
+import { DIFFICULTIES, DIFFICULTY_IDS } from '../core/difficulty';
+import { BATTLE_SPEED_NAMES, prefs, setPref, TEXT_SPEED_NAMES, TEXT_SPEED_STEP, type BattleSpeed, type TextSpeed } from './prefs';
+import { sendReport, type ReportKind } from '../net/reports';
 import { choose, markSeen, pendingScene, STORY, type StoryLine, type StoryScene } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
 import { npcFromName, npcSays } from './npc';
@@ -525,6 +528,82 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   /** Every tip, to read again. */
+  /** Where the player is, sent along with bug and crash reports. */
+  reportContext(): Record<string, unknown> {
+    const s = this.game.state;
+    return {
+      mode: this.mode,
+      location: s.location,
+      floor: s.floor,
+      pos: [s.x, s.y],
+      levels: s.party.map((m) => `${m.classId} ${m.level}`),
+      battles: s.battles,
+      difficulty: s.difficulty ?? 'normal',
+      coop: !!this.coop,
+      screen: `${window.innerWidth}x${window.innerHeight}`,
+    };
+  }
+
+  /** Send a bug report or an idea to the makers. */
+  showFeedback(back: () => void): void {
+    const kinds: [ReportKind, string, string][] = [
+      ['bug', 'Report a bug', 'Something broke, looks wrong, or did not do what you expected.'],
+      ['idea', 'Share an idea', 'Something you would like to see, or change.'],
+      ['other', 'Something else', 'Praise, questions, anything.'],
+    ];
+    const menu = new ListMenu(
+      [
+        ...kinds.map(([kind, label, description]) => ({ label, description, onSelect: () => this.writeFeedback(kind, label, back) })),
+        { label: 'Back', onSelect: back },
+      ],
+      { onCancel: back },
+    );
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    this.openOverlay(
+      el('div', { className: 'panel dialog' }, [
+        el('h2', { text: 'Feedback' }),
+        el('p', { text: 'Your report goes straight to the makers, with where you are in the game (no personal data).' }),
+        menu.el,
+        desc,
+      ]),
+      menu,
+    );
+  }
+
+  private writeFeedback(kind: ReportKind, title: string, back: () => void): void {
+    const input = el('textarea', { className: 'feedback-input' });
+    input.maxLength = 4000;
+    input.placeholder = kind === 'bug' ? 'What happened? What did you expect?' : 'Tell us...';
+    const status = el('p', { className: 'form-error' });
+    let sending = false;
+    const send = async () => {
+      const text = input.value.trim();
+      if (text.length < 3) return void (status.textContent = 'Write a few words first.');
+      if (sending) return;
+      sending = true;
+      status.textContent = 'Sending...';
+      const ok = await sendReport(kind, text, this.reportContext());
+      sending = false;
+      if (!ok) return void (status.textContent = 'Could not send it. Check your connection and try again.');
+      back();
+      this.toast('Thank you! Your message was sent.');
+    };
+    input.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Escape') this.showFeedback(back);
+    });
+    const menu = new ListMenu(
+      [
+        { label: 'Send', onSelect: () => void send() },
+        { label: 'Back', onSelect: () => this.showFeedback(back) },
+      ],
+      { onCancel: () => this.showFeedback(back) },
+    );
+    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: title }), input, status, menu.el]), menu);
+    input.focus();
+  }
+
   showGuidebook(back: () => void, start = 0): void {
     const items: MenuItem[] = TIPS.map((tip, i) => ({
       label: tip.title,
@@ -624,7 +703,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           description: 'Go home alone. Your adventurer fights on without you and comes home with the others.',
           onSelect: () => this.confirm('Leave', 'Leave the expedition and head home?', () => coop.leave()),
         },
-        { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.soundOptions(() => this.openCoopPack()) },
+        { label: 'Settings', description: 'Sound, battle and text speed.', onSelect: () => this.settings(() => this.openCoopPack()) },
         { label: 'Close', onSelect: close },
       ],
       { onCancel: close },
@@ -690,6 +769,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         el('div', { className: 'logo', text: 'YGDRASSIL' }),
         el('div', { className: 'tagline', text: 'The road to Asgard runs through Ymir' }),
         el('p', { className: 'credits-line', text: 'End of Chapter II. The road goes on, deeper than the sea.' }),
+        el('p', { className: 'credits-line big', text: 'To be continued' }),
+        el('p', { className: 'credits-line small', text: 'Chapter III is being written. Your Wayfinders, your choices and your map will be waiting.' }),
         el('div', { className: 'rewards' }, [
           el('span', { text: 'Party' }), el('span', { className: 'v', text: s.party.map((m) => `${m.name} Lv ${m.level}`).join(', ') }),
           el('span', { text: 'Steps taken' }), el('span', { className: 'v', text: String(s.steps) }),
@@ -797,7 +878,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     st.shown = 0;
     const step = () => {
       if (this.story !== st || st.lines[st.index] !== line) return;
-      st.shown = Math.min(line.text.length, st.shown + 2);
+      st.shown = Math.min(line.text.length, st.shown + TEXT_SPEED_STEP[prefs.textSpeed]);
       body.textContent = line.text.slice(0, st.shown);
       if (st.shown < line.text.length) window.setTimeout(step, 18);
     };
@@ -1127,7 +1208,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         },
         { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(() => this.openPack()) },
         { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(() => this.openPack()) },
-        { label: 'Sound', description: 'Music and effect volume.', onSelect: () => this.soundOptions(() => this.openPack()) },
+        { label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.showFeedback(() => this.openPack()) },
+        { label: 'Settings', description: 'Sound, battle and text speed, difficulty, tips.', onSelect: () => this.settings(() => this.openPack()) },
         this.trial
           ? { label: 'End the test', description: 'Back to the drafting table.', onSelect: () => this.endTrial() }
           : { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.showTitle() },
@@ -1211,39 +1293,85 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   /** Music and effect volume, each cycling through five steps. */
-  soundOptions(back: () => void, start = 0): void {
+  /** Sound, speeds, and (for the save in hand) difficulty and tips. */
+  settings(back: () => void, start = 0): void {
     const steps = [0, 0.25, 0.5, 0.75, 1];
     const names = ['Off', 'Low', 'Medium', 'High', 'Full'];
     const label = (v: number) => names[steps.reduce((best, s, i) => (Math.abs(s - v) < Math.abs(steps[best] - v) ? i : best), 0)];
     const next = (v: number) => steps[(steps.findIndex((s) => Math.abs(s - v) < 0.01) + 1) % steps.length];
-    const menu = new ListMenu(
-      [
+    const again = (i: number) => () => this.settings(back, i);
+    const s = this.game.state;
+    const solo = !this.coop && !this.trial;
+    const textSpeeds = Object.keys(TEXT_SPEED_NAMES) as TextSpeed[];
+    const items: MenuItem[] = [
+      {
+        label: 'Music',
+        detail: label(audio.settings.music),
+        description: 'Press Enter to change.',
+        onSelect: () => {
+          audio.setVolume('music', next(audio.settings.music));
+          again(0)();
+        },
+      },
+      {
+        label: 'Effects',
+        detail: label(audio.settings.sfx),
+        description: 'Press Enter to change.',
+        onSelect: () => {
+          audio.setVolume('sfx', next(audio.settings.sfx));
+          audio.play('chest');
+          again(1)();
+        },
+      },
+      {
+        label: 'Battle speed',
+        detail: BATTLE_SPEED_NAMES[prefs.battleSpeed],
+        description: 'How fast the rounds of a fight play out. Enter during a round speeds it up even more.',
+        onSelect: () => {
+          setPref('battleSpeed', ((prefs.battleSpeed % 3) + 1) as BattleSpeed);
+          again(2)();
+        },
+      },
+      {
+        label: 'Text speed',
+        detail: TEXT_SPEED_NAMES[prefs.textSpeed],
+        description: 'How fast story lines appear.',
+        onSelect: () => {
+          setPref('textSpeed', textSpeeds[(textSpeeds.indexOf(prefs.textSpeed) + 1) % textSpeeds.length]);
+          again(3)();
+        },
+      },
+    ];
+    if (solo) {
+      const diff = s.difficulty ?? 'normal';
+      items.push(
         {
-          label: 'Music',
-          detail: label(audio.settings.music),
-          description: 'Press Enter to change.',
+          label: 'Difficulty',
+          detail: DIFFICULTIES[diff].name,
+          description: `${DIFFICULTIES[diff].description}\nYou can change it at any time; it counts from the next fight.`,
           onSelect: () => {
-            audio.setVolume('music', next(audio.settings.music));
-            this.soundOptions(back, 0);
+            s.difficulty = DIFFICULTY_IDS[(DIFFICULTY_IDS.indexOf(diff) + 1) % DIFFICULTY_IDS.length];
+            this.save();
+            again(4)();
           },
         },
         {
-          label: 'Effects',
-          detail: label(audio.settings.sfx),
-          description: 'Press Enter to change.',
+          label: 'Tips',
+          detail: s.tipsOff ? 'Off' : 'On',
+          description: 'Whether tips appear when something new comes up.',
           onSelect: () => {
-            audio.setVolume('sfx', next(audio.settings.sfx));
-            audio.play('chest');
-            this.soundOptions(back, 1);
+            s.tipsOff = !s.tipsOff;
+            this.save();
+            again(5)();
           },
         },
-        { label: 'Back', onSelect: back },
-      ],
-      { onCancel: back, startIndex: start },
-    );
+      );
+    }
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back, startIndex: start });
     const desc = el('div', { className: 'menu-desc' });
     menu.describeInto(desc);
-    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Sound' }), menu.el, desc]), menu);
+    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Settings' }), menu.el, desc]), menu);
   }
 
   partyStatus(back: () => void): void {

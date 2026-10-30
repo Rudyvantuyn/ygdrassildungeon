@@ -7,8 +7,8 @@ import type { Action, ExpeditionState } from '../core/expedition';
 import type { Member } from '../core/types';
 
 /** Public project settings (safe to ship: access is enforced by the database's row rules). */
-const SUPABASE_URL = 'https://prcwekmvndxddqbgdnbf.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_yll4mETh0joHMteo8EtIkw_KRYY-gUp';
+export const SUPABASE_URL = 'https://prcwekmvndxddqbgdnbf.supabase.co';
+export const SUPABASE_KEY = 'sb_publishable_yll4mETh0joHMteo8EtIkw_KRYY-gUp';
 /** Open lobbies older than this are no longer listed. */
 const LOBBY_MAX_AGE_MS = 3 * 60 * 60 * 1000;
 

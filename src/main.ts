@@ -1,9 +1,11 @@
 import { audio } from './audio/audio';
+import { watchErrors } from './net/reports';
 import { App } from './ui/app';
 import './ui/styles.css';
 
 const root = document.getElementById('app')!;
 const app = new App(root);
+watchErrors(() => app.reportContext());
 
 // Scale the fixed 1280×720 stage to fit any window.
 function fit(): void {

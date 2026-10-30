@@ -951,6 +951,13 @@ table.stats th.gear {
   color: var(--muted);
 }
 
+.credits-line.big {
+  font-family: var(--font-title, serif);
+  font-size: 34px;
+  letter-spacing: 0.08em;
+  color: #f0c060;
+}
+
 .title-notice {
   max-width: 520px;
   padding: 10px 16px;
@@ -1396,4 +1403,22 @@ table.stats thead th {
   opacity: 0.7;
   font-style: italic;
   font-size: 0.9em;
+}
+
+.feedback-input {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: #0a1013;
+  border: 1px solid var(--border-hi);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.feedback-input:focus {
+  outline: none;
 }

@@ -3,7 +3,8 @@ import { ITEMS, usableInCombat } from '../core/data/items';
 import type { SkillDef } from '../core/data/skills';
 import type { Game } from '../core/game';
 import { isAlive, knownSkills, memberStats } from '../core/party';
-import { rankOf } from '../core/skilltree';
+import { rankOf, skillFor } from '../core/skilltree';
+import { chooseCommands } from '../core/tactics';
 import type { Mods } from '../core/combat';
 import type { ModStat } from '../core/types';
 import type { ItemId } from '../core/types';
@@ -14,6 +15,10 @@ import type { Ailment, Element } from '../core/types';
 import { el, floater } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import type { PartyView } from './partyView';
+import { prefs } from './prefs';
+
+/** How much faster each battle speed plays. */
+const SPEED_FACTOR = { 1: 1, 2: 1.8, 3: 3 } as const;
 
 export interface CombatHost {
   game: Game;
@@ -73,6 +78,10 @@ export class CombatView {
   private target: number | null = null;
   private playing = false;
   private fast = false;
+  /** The commands of the last round, for "Repeat". */
+  private lastCommands: (Command | null)[] | null = null;
+  /** Auto battle: the party picks its own commands every round until stopped. */
+  private auto = false;
   private time = 0;
   private statusEl: HTMLElement | null = null;
 
@@ -221,9 +230,18 @@ export class CombatView {
   handleKey(key: string): boolean {
     if (this.playing) {
       if (key === 'Enter' || key === ' ' || key === 'z' || key === 'Z') this.fast = true;
+      if (this.auto && (key === 'Escape' || key === 'x' || key === 'X')) this.stopAuto();
       return true;
     }
     if (!this.menu) return false;
+    if (this.target === null && (key === 'r' || key === 'R') && this.lastCommands) {
+      this.repeat();
+      return true;
+    }
+    if (this.target === null && (key === 'o' || key === 'O')) {
+      this.startAuto();
+      return true;
+    }
     if (this.target !== null && (key === 'ArrowLeft' || key === 'a' || key === 'A')) return this.menu.handleKey('ArrowUp');
     if (this.target !== null && (key === 'ArrowRight' || key === 'd' || key === 'D')) return this.menu.handleKey('ArrowDown');
     return this.menu.handleKey(key);
@@ -235,7 +253,54 @@ export class CombatView {
     this.commands = this.combat.party.map(() => null);
     this.syncParty();
     this.current = -1;
+    if (this.auto) return this.fillAndGo(chooseCommands(this.combat));
     this.nextMember();
+  }
+
+  /** Whether this player picks for party member `i` this round. */
+  private mine(i: number): boolean {
+    return isAlive(this.combat.party[i]) && (this.driver?.controls(i) ?? true);
+  }
+
+  /** Sets the commands for everyone this player controls and plays the round. */
+  private fillAndGo(picks: (Command | null)[]): void {
+    this.commands = this.combat.party.map((_, i) => (this.mine(i) ? picks[i] : null));
+    this.current = this.combat.party.length;
+    void this.execute();
+  }
+
+  /** Does the same as last round, where that still works; otherwise what the party would pick itself. */
+  private repeat(): void {
+    const last = this.lastCommands;
+    if (!last) return;
+    const fallback = chooseCommands(this.combat);
+    const party = this.combat.party;
+    const usable = (i: number, cmd: Command | null): boolean => {
+      if (!cmd) return false;
+      if (cmd.kind === 'skill') {
+        const skill = skillFor(party[i], cmd.skill);
+        if (!skill || party[i].sp < skill.sp) return false;
+        if (skill.kind === 'revive') return cmd.target >= 0 && !isAlive(party[cmd.target]);
+        return true;
+      }
+      if (cmd.kind === 'item') {
+        if ((this.combat.inventory[cmd.item] ?? 0) <= 0) return false;
+        return ITEMS[cmd.item].effect === 'revive' ? !isAlive(party[cmd.target]) : isAlive(party[cmd.target]);
+      }
+      if (cmd.kind === 'flee') return this.combat.canFlee;
+      return true;
+    };
+    this.fillAndGo(party.map((_, i) => (usable(i, last[i]) ? last[i] : fallback[i])));
+  }
+
+  private startAuto(): void {
+    this.auto = true;
+    this.fillAndGo(chooseCommands(this.combat));
+  }
+
+  private stopAuto(): void {
+    this.auto = false;
+    this.showPanel('Auto battle', null, 'Auto stops after this round.');
   }
 
   private nextMember(): void {
@@ -278,6 +343,10 @@ export class CombatView {
       { label: 'Skills', detail: '▸', description: 'Use a class skill (costs SP).', onSelect: () => this.showSkillMenu() },
       { label: 'Defend', description: 'Halve damage taken this turn. Acts first.', onSelect: () => this.setCommand({ kind: 'defend' }) },
       { label: 'Items', detail: '▸', description: 'Use an item from the bag.', onSelect: () => this.showItemMenu() },
+      ...(this.lastCommands
+        ? [{ label: 'Repeat', detail: 'R', description: 'Everyone does what they did last round (where they still can).', onSelect: () => this.repeat() }]
+        : []),
+      { label: 'Auto', detail: 'O', description: 'The party fights on its own, round after round. Esc or tap the panel to stop.', onSelect: () => this.startAuto() },
       {
         label: 'Flee',
         description: this.combat.canFlee ? `Try to escape (${Math.round(this.combat.fleeChance() * 100)}%).` : 'There is no escape from this fight!',
@@ -363,14 +432,16 @@ export class CombatView {
     this.menu = null;
     this.renderParty();
 
+    if (this.commands.some(Boolean)) this.lastCommands = [...this.commands];
     let events: CombatEvent[];
     const round = this.combat.round;
+    const hint = this.auto ? 'Auto · Enter: speed up · Esc: stop' : 'Enter: speed up';
     if (this.driver) {
       this.showPanel(`Round ${round}`, null, 'Waiting for the others...');
       events = await this.driver.resolve(this.commands);
-      this.showPanel(`Round ${round}`, null, 'Enter: speed up');
+      this.showPanel(`Round ${round}`, null, hint);
     } else {
-      this.showPanel(`Round ${round}`, null, 'Enter: speed up');
+      this.showPanel(`Round ${round}`, null, hint);
       events = this.combat.resolveRound(this.commands);
     }
     for (const ev of events) await this.play(ev);
@@ -498,6 +569,8 @@ export class CombatView {
     panel.append(el('div', { className: 'cmd-title', text: title }));
     if (menu) panel.append(menu.el);
     panel.append(desc, el('div', { className: 'cmd-hint', text: hint }));
+    if (this.auto) panel.onclick = () => this.stopAuto();
+    else panel.onclick = null;
     this.statusEl = this.driver?.status ? el('div', { className: 'cmd-timer' }) : null;
     if (this.statusEl) panel.append(this.statusEl);
     this.menu = menu;
@@ -505,7 +578,8 @@ export class CombatView {
   }
 
   private wait(ms: number): Promise<void> {
-    return new Promise((resolve) => window.setTimeout(resolve, this.fast ? ms / 3 : ms));
+    const speed = SPEED_FACTOR[prefs.battleSpeed] * (this.fast ? 3 : 1);
+    return new Promise((resolve) => window.setTimeout(resolve, ms / speed));
   }
 }
 
