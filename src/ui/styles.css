@@ -2195,3 +2195,79 @@ body.phone .map-cell-info {
 body.phone .map-side {
   gap: 5px;
 }
+
+/* ── Fixes from the second test round ─────────────────────────────────────── */
+
+/* A focused row that cannot be chosen stays readable. */
+.menu-item.disabled.selected {
+  color: #a8977a;
+}
+
+/* Quest details: labels and values in two neat columns. */
+.quest-table td,
+.dialog table td {
+  text-align: left;
+}
+
+/* Touch screens: no keyboard hints. */
+@media (pointer: coarse) {
+  .map-tool .key {
+    display: none;
+  }
+}
+
+/* Phone: party names never push the row tag onto a second line. */
+body.phone .member-head {
+  flex-wrap: nowrap;
+}
+body.phone .member-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Phone: bigger story Skip button, taller town buttons and choice buttons. */
+body.phone .story-box .story-skip {
+  font-size: 15px;
+  padding: 7px 14px;
+  top: 6px;
+}
+body.phone .town-button {
+  height: 40px;
+}
+body.phone .choice-set .choice {
+  padding: 9px 4px;
+}
+
+/* Phone: the credits fit the screen. */
+body.phone .title-screen.credits {
+  gap: 6px;
+  overflow-y: auto;
+  justify-content: flex-start;
+  padding: 10px 0;
+}
+body.phone .credits .logo {
+  font-size: 42px;
+}
+body.phone .credits .credits-line.big {
+  font-size: 24px;
+}
+body.phone .credits .credits-line {
+  font-size: 15px;
+}
+body.phone .credits .rewards {
+  font-size: 14px;
+  row-gap: 2px;
+}
+
+/* Quest details: label column right-aligned, values left-aligned, both lined up. */
+.rewards.quest-facts {
+  justify-content: start;
+  margin-left: 20%;
+}
+.rewards.quest-facts .v {
+  text-align: left;
+}
+.title-screen.credits {
+  background: radial-gradient(ellipse at 50% 40%, rgba(20, 40, 30, 0.96), rgba(3, 6, 8, 0.99));
+}

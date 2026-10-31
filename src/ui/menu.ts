@@ -62,8 +62,8 @@ export class ListMenu {
     });
     this.focus(this.index);
     this.el.addEventListener('scroll', () => this.markOverflow(), { passive: true });
-    // Sizes are only known once the menu is on screen.
-    requestAnimationFrame(() => this.markOverflow());
+    // Sizes are only known once the menu is on screen: then bring the chosen row into view.
+    requestAnimationFrame(() => this.focus(this.index));
   }
 
   /** Fades the top or bottom edge of a scrolling menu when there is more to see there. */

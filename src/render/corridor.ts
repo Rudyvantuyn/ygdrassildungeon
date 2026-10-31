@@ -785,6 +785,9 @@ export class CorridorRenderer {
     glow.addColorStop(1, 'rgba(255,60,40,0)');
     ctx.fillStyle = glow;
     ctx.fillRect(cx - rx * 1.5, cy - rx * 1.5, rx * 3, rx * 3);
+    // The guardian's medallion hovers over the sigil, so it reads from a distance.
+    const bob = Math.sin(time / 450 + s) * rx * 0.06;
+    this.floatingIcon('boss', cx, cy - rx * 1.25 + bob, rx * 1.05, f, '#ff5a40');
   }
 }
 

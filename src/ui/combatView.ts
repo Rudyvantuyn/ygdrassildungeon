@@ -19,6 +19,9 @@ import type { PartyView } from './partyView';
 import { prefs } from './prefs';
 import { stagePoint } from './stagePoint';
 
+/** Touch screens have no keyboard: key hints are left out there. */
+const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+
 /** How much faster each battle speed plays. */
 const SPEED_FACTOR = { 1: 1, 2: 1.8, 3: 3 } as const;
 
@@ -363,9 +366,9 @@ export class CombatView {
       { label: 'Defend', description: 'Halve damage taken this round. Acts first.', onSelect: () => this.setCommand({ kind: 'defend' }) },
       { label: 'Items', detail: '▸', description: 'Use an item from the bag.', onSelect: () => this.showItemMenu() },
       ...(this.lastCommands
-        ? [{ label: 'Repeat', detail: 'R', description: 'Everyone does what they did last round (where they still can).', onSelect: () => this.repeat() }]
+        ? [{ label: 'Repeat', detail: TOUCH ? undefined : 'R', description: 'Everyone does what they did last round (where they still can).', onSelect: () => this.repeat() }]
         : []),
-      { label: 'Auto', detail: 'O', description: 'The party fights on its own, round after round. Esc or tap the panel to stop.', onSelect: () => this.startAuto() },
+      { label: 'Auto', detail: TOUCH ? undefined : 'O', description: 'The party fights on its own, round after round. Esc or tap the panel to stop.', onSelect: () => this.startAuto() },
       {
         label: 'Flee',
         description: this.combat.canFlee ? `Try to escape (${Math.round(this.combat.fleeChance() * 100)}%).` : 'There is no escape from this fight!',

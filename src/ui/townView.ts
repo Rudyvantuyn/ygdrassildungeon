@@ -225,7 +225,7 @@ export class TownView {
     if (items.length === 0) items.push({ label: 'No requests right now', disabled: true, onSelect: () => {} });
     items.push({ label: 'Leave', onSelect: back });
     const menu = new ListMenu(items, { onCancel: back, startIndex: start });
-    this.dialog('Notice Board', [el('p', { className: 'gold-line', text: `Requests completed: ${done}` })], menu, true);
+    this.dialog('The Notice Board', [el('p', { className: 'gold-line', text: `Requests completed: ${done}` })], menu, true);
   }
 
   private questDetail(q: QuestDef, listIndex: number): void {
@@ -267,7 +267,7 @@ export class TownView {
             ? [npcSays(npc, `"${q.text}"`, q.giver)]
             : [el('p', { className: 'quest-giver', text: q.giver }), el('p', { text: `"${q.text}"` })];
         })(),
-        el('div', { className: 'rewards' }, [
+        el('div', { className: 'rewards quest-facts' }, [
           el('span', { text: 'Goal' }), el('span', { className: 'v', text: questGoal(q) }),
           el('span', { text: 'Reward' }), el('span', { className: 'v', text: rewardText(q) }),
           el('span', { text: 'Status' }), el('span', { className: 'v', text: status }),

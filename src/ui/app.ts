@@ -155,6 +155,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const partyEl = el('div', { id: 'party' });
     this.floaters = el('div', { id: 'floaters' });
     this.overlay = el('div', { id: 'overlay', className: 'hidden' });
+    // Tapping the dark area around a dialog goes back, like Escape (not on the title screen).
+    this.overlay.addEventListener('click', (e) => {
+      if (e.target === this.overlay && this.mode === 'overlay') this.overlayMenu?.handleKey('Escape');
+    });
     this.townGrid = el('div', { id: 'town-grid', className: 'hidden' });
     this.stage.append(this.viewWrap, side, this.townGrid, partyEl, this.floaters, this.overlay);
 
@@ -1117,6 +1121,11 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   // ── Combat ─────────────────────────────────────────────────────────────────
 
   startCombat(combat: Combat, driver: RoundDriver | null = null): void {
+    // A fight ends any story scene still on screen.
+    if (this.story) {
+      this.story.box.remove();
+      this.story = null;
+    }
     if (!this.coop && !this.trial && !this.game.state.tips?.includes('battle') && !this.game.state.tipsOff) {
       this.mode = 'busy';
       return this.tips(['battle'], () => this.startCombat(combat, driver));
