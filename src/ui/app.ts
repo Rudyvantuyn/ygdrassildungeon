@@ -13,7 +13,7 @@ import { CLASSES } from '../core/data/classes';
 import { CorridorRenderer } from '../render/corridor';
 import { drawMinimap } from '../render/minimap';
 import { drawTownScene, preloadTownScenes } from '../render/town';
-import { preload } from '../render/sprites';
+import { preload, sprite } from '../render/sprites';
 import { audio } from '../audio/audio';
 import { themeFor } from '../audio/compose';
 import { CombatView, type CombatHost, type RoundDriver } from './combatView';
@@ -177,9 +177,13 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       if (this.mode === 'story' && this.story && !this.story.box.contains(e.target as Node)) this.storyKey('Enter');
     });
 
-    // Town paintings and portraits are small; fetch them right away.
-    preloadTownScenes();
-    preload(['gerd', 'hilde', 'brynja', 'sigrid', 'ketil'].map((id) => `people/${id}.webp`));
+    // The title needs only its own painting; the town paintings and portraits follow once the page is idle.
+    sprite('places/title.webp');
+    const later = (cb: () => void) => (typeof requestIdleCallback === 'function' ? requestIdleCallback(cb, { timeout: 2500 }) : setTimeout(cb, 800));
+    later(() => {
+      preloadTownScenes();
+      preload(['gerd', 'hilde', 'brynja', 'sigrid', 'ketil'].map((id) => `people/${id}.webp`));
+    });
     this.showTitle();
   }
 
@@ -497,7 +501,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     // Load this floor's monster art before the first fight.
     const def = this.game.floorDef;
     const ids = [...def.encounters.flatMap((e) => e.enemies), ...(def.boss ?? []), ...def.prowlers.flatMap((p) => p.enemies)];
-    preload([...[...new Set(ids)].map((id) => `monsters/${id}.webp`), 'props/chest.webp', 'props/chest-open.webp', 'props/spring.webp', 'props/stairs-up.webp', 'props/stairs-down.webp', ...['forage', 'mine', 'fell', 'fish'].map((k) => `props/gather-${k}.webp`)]);
+    preload([...[...new Set(ids)].map((id) => `monsters/${id}.webp`), 'props/chest.webp', 'props/chest-open.webp', 'props/spring.webp', 'props/stairs-up.webp', 'props/stairs-down.webp', ...gatherKindsOn(this.game.map).map((k) => `props/gather-${k}.webp`)]);
     this.mode = 'explore';
     this.showSide('explore');
     this.message.classList.add('hidden');
@@ -1618,4 +1622,9 @@ function tally(ids: string[]): [string, number][] {
   const counts = new Map<string, number>();
   for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
   return [...counts];
+}
+
+/** The kinds of gathering spot a floor has (only their pictures are loaded). */
+function gatherKindsOn(map: { tiles: string[] }): string[] {
+  return [...new Set(map.tiles.filter((t) => ['forage', 'mine', 'fell', 'fish'].includes(t)))];
 }

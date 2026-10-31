@@ -78,6 +78,8 @@ export class CombatView {
   private target: number | null = null;
   private playing = false;
   private fast = false;
+  /** The corridor behind the fight, drawn once. */
+  private backdrop: HTMLCanvasElement | null = null;
   /** The commands of the last round, for "Repeat". */
   private lastCommands: (Command | null)[] | null = null;
   /** Auto battle: the party picks its own commands every round until stopped. */
@@ -122,7 +124,14 @@ export class CombatView {
 
   draw(ctx: CanvasRenderingContext2D, w: number, h: number, time: number): void {
     this.time = time;
-    this.host.corridor.draw(this.host.game, time);
+    // The party stands still during a fight: draw the corridor once and reuse the picture.
+    if (!this.backdrop) {
+      this.host.corridor.draw(this.host.game, time);
+      this.backdrop = document.createElement('canvas');
+      this.backdrop.width = ctx.canvas.width;
+      this.backdrop.height = ctx.canvas.height;
+      this.backdrop.getContext('2d')!.drawImage(ctx.canvas, 0, 0);
+    } else ctx.drawImage(this.backdrop, 0, 0);
     if (this.statusEl && this.driver?.status) this.statusEl.textContent = this.driver.status();
     ctx.fillStyle = this.combat.boss ? 'rgba(40,0,0,0.5)' : this.combat.prowler ? 'rgba(40,16,0,0.5)' : 'rgba(0,0,0,0.45)';
     ctx.fillRect(0, 0, w, h);

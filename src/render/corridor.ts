@@ -130,6 +130,19 @@ export class CorridorRenderer {
     ctx.fillRect(0, this.cy, w, h - this.cy);
     }
 
+    // Per screen column, the nearest depth with a wall face across it: walls hidden behind it are skipped.
+    const cov = (this.cover ??= new Uint8Array(w));
+    cov.fill(255);
+    for (let d = 1; d <= MAX_DEPTH; d++) {
+      const lat = Math.ceil(((d + 1 + EYE) * this.w) / (2 * this.sx) + 0.5);
+      for (let s = -lat; s <= lat; s++) {
+        const c = relCell(px, py, dir, d, s);
+        if (tileAt(game.map, c.x, c.y) !== 'wall') continue;
+        const [x0] = this.project([s - 0.5, -0.5, d]);
+        const [x1] = this.project([s + 0.5, 0.5, d]);
+        for (let i = Math.max(0, Math.ceil(x0)); i < Math.min(w, Math.floor(x1)); i++) if (cov[i] > d) cov[i] = d;
+      }
+    }
     for (let d = MAX_DEPTH; d >= 0; d--) {
       // Enough side cells to fill the view at this depth.
       const lateral = Math.ceil(((d + 1 + EYE) * this.w) / (2 * this.sx) + 0.5);
@@ -168,24 +181,39 @@ export class CorridorRenderer {
       }
     }
 
-    // The party's torchlight: a soft warm glow on what is close.
-    if (tex) {
-      const glow = ctx.createRadialGradient(this.cx, h * 0.95, 0, this.cx, h * 0.8, w * 0.6);
+    // The party's torchlight and the vignette never change: they are painted once and reused.
+    const key = `${w}x${h}`;
+    if (this.overlayCache?.key !== key) {
+      const layer = () => {
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        return c;
+      };
+      const glowCanvas = layer();
+      const g = glowCanvas.getContext('2d')!;
+      const glow = g.createRadialGradient(this.cx, h * 0.95, 0, this.cx, h * 0.8, w * 0.6);
       glow.addColorStop(0, 'rgba(255,170,90,0.16)');
       glow.addColorStop(1, 'rgba(255,170,90,0)');
+      g.fillStyle = glow;
+      g.fillRect(0, 0, w, h);
+      const canvas = layer();
+      const v = canvas.getContext('2d')!;
+      const vignette = v.createRadialGradient(this.cx, this.cy, h * 0.25, this.cx, this.cy, w * 0.75);
+      vignette.addColorStop(0, 'rgba(0,0,0,0)');
+      vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
+      v.fillStyle = vignette;
+      v.fillRect(0, 0, w, h);
+      this.overlayCache = { key, canvas, glow: glowCanvas };
+    }
+    // The torchlight (a soft warm glow on what is close) only on painted floors.
+    if (tex) {
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(this.overlayCache.glow, 0, 0);
       ctx.restore();
     }
-
-    // Vignette
-    const vignette = ctx.createRadialGradient(this.cx, this.cy, h * 0.25, this.cx, this.cy, w * 0.75);
-    vignette.addColorStop(0, 'rgba(0,0,0,0)');
-    vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
-    ctx.fillStyle = vignette;
-    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(this.overlayCache.canvas, 0, 0);
   }
 
   // ── Projection ─────────────────────────────────────────────────────────────
@@ -294,7 +322,11 @@ export class CorridorRenderer {
     const lo = Math.max(0, Math.min(xa, xb));
     const hi = Math.min(this.w, Math.max(xa, xb));
     if (hi <= lo) return;
+    const cov = this.cover!;
     for (let sxp = lo; sxp < hi; sxp += STRIP) {
+      // Behind a nearer wall face on both edges of this strip: nothing of it would show.
+      const ci = sxp | 0;
+      if (cov[ci] <= d && cov[Math.min(this.w - 1, ci + STRIP)] <= d) continue;
       const mid = Math.min(hi, sxp + STRIP / 2);
       const dist = (x * sx) / (mid - cx);
       if (!(dist > 0)) continue;
@@ -642,6 +674,10 @@ export class CorridorRenderer {
   }
 
   private scratchCanvas: HTMLCanvasElement | null = null;
+  /** Nearest covering wall depth per screen column, for the frame being drawn. */
+  private cover: Uint8Array | null = null;
+  /** The torchlight and vignette, which never change: drawn once. */
+  private overlayCache: { key: string; canvas: HTMLCanvasElement; glow: HTMLCanvasElement } | null = null;
 
   private scratch(size: number): HTMLCanvasElement {
     if (!this.scratchCanvas) this.scratchCanvas = document.createElement('canvas');
