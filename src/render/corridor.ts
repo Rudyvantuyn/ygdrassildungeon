@@ -158,7 +158,7 @@ export class CorridorRenderer {
           if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y), pal);
           if (tile === 'spring' && d > 0) this.spring(s, d, time, game.progress.springUsed, pal);
           if (tile === 'boss' && d > 0 && !game.progress.bossDefeated) this.bossSigil(s, d, time);
-          if (isGatherTile(tile) && d > 0) this.gatherSpot(s, d, tile, time);
+          if (isGatherTile(tile) && d > 0) this.gatherSpot(s, d, tile, time, pal);
           const prowler = d > 0 ? game.prowlerAt(cell.x, cell.y) : -1;
           if (prowler >= 0) {
             const def = ENEMIES[game.floorDef.prowlers[prowler].enemies[0]];
@@ -432,6 +432,18 @@ export class CorridorRenderer {
     const ctx = this.ctx;
     const z = d + 0.5;
     const f = this.fog(z);
+    // The painted stairwell, with a warm glow breathing up out of it.
+    if (this.billboard('props/stairs-down.webp', s, d, 0.95, pal.fog, 0.6)) {
+      const [gx, gy] = this.project([s, 0.42, z]);
+      const r = 70 * this.scaleAt(z);
+      const pulse = 0.35 + 0.2 * Math.sin(time / 450);
+      const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
+      glow.addColorStop(0, `rgba(255,190,110,${pulse * (1 - f)})`);
+      glow.addColorStop(1, 'rgba(255,190,110,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
+      return;
+    }
     // Dark opening with steps going down
     this.poly([[s - 0.32, 0.5, z - 0.3], [s + 0.32, 0.5, z - 0.3], [s + 0.32, 0.5, z + 0.3], [s - 0.32, 0.5, z + 0.3]]);
     ctx.fillStyle = mix('#050505', pal.fog, f * 0.6);
@@ -459,6 +471,7 @@ export class CorridorRenderer {
   /** Stairs going up: a few steps rising towards a soft light from above. */
   private upStairs(s: number, d: number, pal: Palette, time: number): void {
     if (d === 0) return; // standing on it: nothing to see
+    if (this.billboard('props/stairs-up.webp', s, d, 0.85, pal.fog)) return;
     const ctx = this.ctx;
     const z = d + 0.5;
     const f = this.fog(z);
@@ -488,7 +501,7 @@ export class CorridorRenderer {
    * A painted prop standing on the floor at the middle of cell (s, d), `width` cells wide,
    * darkened by the fog like everything else. Returns false while the sprite is still loading.
    */
-  private billboard(path: string, s: number, d: number, width: number, fogColor: string): boolean {
+  private billboard(path: string, s: number, d: number, width: number, fogColor: string, squash = 1): boolean {
     const img = sprite(path);
     if (!img) return false;
     const z = d + 0.5;
@@ -496,7 +509,7 @@ export class CorridorRenderer {
     const [cx, cy] = this.project([s, 0.5, z]);
     const [ex] = this.project([s + width / 2, 0.5, z]);
     const w = Math.round((ex - cx) * 2);
-    const h = Math.round((w * img.naturalHeight) / img.naturalWidth);
+    const h = Math.round(((w * img.naturalHeight) / img.naturalWidth) * squash);
     if (w < 2 || h < 2) return true;
     const off = this.scratch(Math.max(w, h));
     const octx = off.getContext('2d')!;
@@ -640,10 +653,19 @@ export class CorridorRenderer {
   }
 
   /** A gathering spot: a soft glow on the floor in the kind's colour, with drifting motes. */
-  private gatherSpot(s: number, d: number, kind: GatherKind, time: number): void {
+  private gatherSpot(s: number, d: number, kind: GatherKind, time: number, pal: Palette): void {
     const ctx = this.ctx;
     const z = d + 0.5;
     const f = this.fog(z);
+    // The painted spot (herbs, an ore vein, a felled root, a pool) with a small medallion hovering above it.
+    if (this.billboard(`props/gather-${kind}.webp`, s, d, 0.6, pal.fog)) {
+      const [cx, cy] = this.project([s, 0.5, z]);
+      const [ex] = this.project([s + 0.3, 0.5, z]);
+      const rx = ex - cx;
+      const bob = Math.sin(time / 500 + s) * rx * 0.08;
+      this.floatingIcon(kind, cx, cy - rx * 1.85 + bob, rx * 0.6, f, GATHER_KINDS[kind].color);
+      return;
+    }
     const [cx, cy] = this.project([s, 0.5, z]);
     const [ex] = this.project([s + 0.36, 0.5, z]);
     const rx = ex - cx;

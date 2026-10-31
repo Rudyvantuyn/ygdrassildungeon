@@ -149,6 +149,15 @@ exported at 1024×1024 and scaled to 384 px WebP.
 | chest | MAHZeb7Z0H4 |
 | chest-open | MAHZeSMxMkQ |
 | spring | MAHZeQ7Kilc |
+| stairs-up | MAHZjB0zcz4 |
+| stairs-down | MAHZjIMpE7Y |
+| gather-forage | MAHZjFuqJ8I |
+| gather-mine | MAHZjNke4v4 |
+| gather-fell | MAHZjD0W7Eo |
+| gather-fish | MAHZjEM0ijo |
+
+The stairs and gathering props (2026-10-31) were taken from Canva's 600×600 editor previews of the second art sheet
+(DAHZjHbNJ9E) and cut out with `scripts/process-art.py`.
 
 ## Map icons (`public/art/icons`)
 
