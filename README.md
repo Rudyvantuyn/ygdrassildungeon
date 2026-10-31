@@ -2,7 +2,7 @@
 
 Een first-person dungeon crawler met de gameplay van klassieke grid-crawlers (zoals Etrian Odyssey),
 maar met een eigen wereld, eigen namen en eigen ontwerp. Gebouwd als webgame in TypeScript.
-Alles (gangen, monsters, stad, interface) wordt in code getekend, dus er zijn geen losse afbeeldingen nodig.
+De gangen worden in code getekend; monsters, personen, plekken, voorwerpen en tekentjes zijn geschilderde AI-art (herkomst in `art/SOURCES.md`).
 
 Online spelen: **https://ygdrassil-dungeon.vercel.app**
 
@@ -23,7 +23,9 @@ npm run dev        # open de URL die Vite toont (meestal http://localhost:5173)
 | Q / E | zijstap links / rechts | |
 | Enter / Spatie | iets openen wat voor je staat, zoals een kist (knop Act) | bevestigen (tijdens een ronde: versnellen) |
 | Esc | rugzak-menu (Pack) | terug |
-| C / M | rugzak-menu / kaarteditor | |
+| C / M / H | rugzak-menu / kaarteditor (tools 1–9, 0; N notitie) / hulp | |
+| R / O | in gevechten: vorige ronde herhalen / automatisch vechten | |
+| Vegen | op telefoon: omhoog/omlaag lopen, opzij draaien (knoppen ⇠ ⇢ opzij stappen, ↶ ↷ draaien) | |
 
 De knoppen rechts op het scherm werken ook met muis of touch.
 
@@ -36,7 +38,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Settings** (Pack of System): volume met schuifbalken, gevechtssnelheid, tekstsnelheid en tips. Er is bewust
   geen moeilijkheidsinstelling: iedereen speelt met dezelfde regels, wat eerlijk is voor expedities.
 - **Feedback** (Pack of System): spelers sturen bugs en ideeën rechtstreeks naar de tabel `reports` in Supabase
-  (alleen te lezen in het dashboard). Crashes worden automatisch gemeld vanaf de live site.
+  (alleen te lezen door de eigenaar op `/inbox.html`). Crashes worden automatisch gemeld vanaf de live site.
 - **Mobiel**: op kleine schermen schakelt de game over naar een eigen telefoonindeling (960×440 in plaats van een
   verkleinde 1280×720): grote beweegknoppen, partykaarten onderaan, gevechtsmenu over de hele zijkolom, dialogen die
   scrollen. Veeg over het beeld om te lopen en te draaien; volledig scherm bij de eerste tik.
@@ -67,7 +69,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Nieuw spel = je groep oprichten**: Brynja van de Oath Hall begeleidt je bij het kiezen van klasse, naam en rij,
   met uitleg. De eerste vier eden zijn gratis.
 - Daarna kost elke nieuwe avonturier **goud (300, 600, 1200, …)** én een **Oath Token**. Die vind je bij bazen en
-  prowlers (altijd) en in een paar kisten.
+  prowlers (alleen de eerste keer; niet op expedities) en in een paar kisten.
 - **Grindy**: vijanden geven 70% van hun XP en 75% van hun goud. Doorstomen lukt niet meer; rustig trainen wel.
 - **Tutorials**: korte uitleg van de inwoners de eerste keer dat je iets tegenkomt (stad, eerste stap, kaart, gevecht,
   groei, skillpunten, kisten, bronnen, verzamelen, statuseffecten, versterkingen, gevallen vrienden, prowlers,
@@ -92,7 +94,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 ### Verzamelen (mijlpaal 10)
 
 - Vier **verzamelskills** in elke skillboom: **Forage** (planten), **Mine** (erts), **Fell** (hout) en **Fish** (vis).
-- Elke verdieping heeft **verzamelplekken** (gloed met een teken: ✿ ◆ ♠ ≈). Ga erop staan en kies *Act*; wie in de groep
+- Elke verdieping heeft **verzamelplekken** (geschilderde plek met een medaillon erboven). Ga erop staan en kies *Act*; wie in de groep
   de hoogste rank heeft, verzamelt. Twee pogingen per plek per bezoek; in de stad herstellen de plekken.
 - Hogere rank: meer vondsten (2 vanaf rank 4, 3 vanaf rank 8) en meer kans op zeldzame. Dieper in een hoofdstuk ligt
   zeldzamer spul. Het lawaai lokt soms monsters (10%).
@@ -183,7 +185,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Herberg**: uitrusten voor goud. Herstelt HP en SP, wekt gevallen leden weer tot leven en slaat op.
 - **Winkel**: items (Sap Tonic, Spirit Dew, Homing Feather) en **uitrusting** per klasse.
   Nieuwe wapens en harnassen verschijnen zodra je een diepere verdieping hebt bereikt; je oude stuk ruil je in voor de halve prijs.
-- **Rootdeep**: daal af in de dungeon, op elke verdieping die je al hebt bereikt.
+- **Rootdeep**: daal af in de dungeon, aan het begin van een hoofdstuk dat je al hebt geopend.
 - Terug naar de stad via de **trap omhoog** op de eerste verdieping, of overal met een **Homing Feather** (rugzak-menu).
   Bronnen vullen zich weer bij als je in de stad bent geweest.
 
@@ -196,10 +198,10 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Willekeurige gevechten**: de "Danger"-bol kleurt van blauw via geel naar rood naarmate het volgende gevecht dichterbij komt.
 - **Beurtgevechten** met een party van 4 (Bastion, Strider, Mender, Runecaller): aanvallen, skills (kosten SP), verdedigen, items, vluchten.
   Voorste en achterste rij, zwaktes en resistenties (vuur/vorst/storm), kritieke treffers, Challenge en Iron Formation.
-- **Ervaring en levels**: nieuwe skills op level 3, 4 en 6.
+- **Ervaring en levels**: elk level een skillpunt voor de skillboom van je klasse.
 - **Opwekken in de dungeon**: met Kindling Moss (winkel) of de Mender-skill Rekindle (level 6).
 - **Prowlers** (vanaf verdieping 5): sterke monsters die je ziet in de gang en op de
-  kaart (◆). Ze zetten één stap per stap die jij zet. Patrouilleurs lopen een vaste route, jagers komen op je af als je
+  kaart (oranje oog-medaillon). Ze zetten één stap per stap die jij zet. Patrouilleurs lopen een vaste route, jagers komen op je af als je
   te dichtbij komt (rood). Je moet ze ontwijken of eerst trainen: pas rond level 10 heb je een kleine kans.
   Vluchten lukt in 30% van de gevallen; daarna is de Prowler een paar stappen verdoofd.
   Verslagen Prowlers komen terug als je in de stad bent geweest.
@@ -216,7 +218,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
   Prowler-gevecht en eindbaas. Thema's vloeien in elkaar over.
 - Effecten voor lopen, draaien, muren, menu's, kisten, trappen, bronnen, treffers per element, genezen, opwekken,
   overwinning, nederlaag en level-up.
-- Volume voor muziek en effecten apart: menu **Sound** in de stad of in het Pack-menu.
+- Volume voor muziek en effecten apart: menu **Settings** in de stad (System) of in het Pack-menu, met schuifbalken.
 
 ## Woordenlijst
 
@@ -227,11 +229,12 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 |---|---|
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
 | Hoofdstukken | I: The Greenwood Roots, II: The Drowned Roots |
+| Mythologie | Ymir, Midgard, Asgard, Niflheim, Muspelheim, Jotunheim, Ginnungagap, Heimdall (Noorse mythe, vrij te gebruiken) |
 | Verhaal | **Pact of the Gap** (het pact met de andere werelden), **Wayfinders** (de gezworen avonturiers), **Frost Court** (de werelden die het pact tekenden), ward (een slot van de goden op de weg naar Asgard), Chronicle (verhaal teruglezen), Hallvard (jarl van het eerste pact) |
 | Tekenscherm | The Drafting Table; thema's Greenwood, Frostwood, Emberroot, Tidewater, Coral, Abyss |
 | Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimewood IV, Wyrmroot V, Saltmarsh VI, Kelpwood VII, Coral Vault VIII, Ran's Reach IX, Aegir's Hall X |
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
-| Personages | Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder), Hrodna (gezant van de Frost Court), Eira the Wanderer |
+| Personages | (standaardgroep in tests: Bram, Sela, Wren, Orrin) Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder), Hrodna (gezant van de Frost Court), Eira the Wanderer |
 | Party | Bram, Sela, Wren, Orrin |
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie), Skald (liederen die de groep versterken), Berserker (bijl, veel schade, weinig verdediging), Seeress (vervloekingen), Wolfkin (jager met wolf) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |
@@ -265,7 +268,7 @@ public/art/     Geschilderde sprites (herkomst: art/SOURCES.md)
   net/          Online: accounts, cloud-save, expedities (Supabase)
   ui/           Schermen, menu's, gevechtsweergave, Hornstone en expedities
 server/
-  expedition.ts De expeditie-server (Supabase Edge Function); `npm run build` bundelt hem in dist/server/
+  expedition.ts De expeditie-server (Supabase Edge Function); `npm run build` bundelt hem in `server/build/expedition.js`
 scripts/
   screenshots.cjs  Speelt het spel automatisch in een browser en maakt screenshots
 ```

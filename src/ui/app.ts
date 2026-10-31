@@ -772,11 +772,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           section('Exploring', [
             ['↑ / W', 'Step forward'],
             ['↓ / S', 'Step back'],
-            ['← → / A D', 'Turn'],
-            ['Q / E', 'Side-step'],
-            ['Space / Act', 'Open a chest in front of you'],
-            ['M', 'Map: draw walls, marks and notes'],
-            ['C / Esc', 'Pack: skills, items, party, sound'],
+            ['← → / A D  ↶ ↷', 'Turn'],
+            ['Q / E  ⇠ ⇢', 'Side-step'],
+            ['Swipe', 'Up/down to walk, sideways to turn'],
+            ['Space / Act', 'Open chests, drink from springs, gather'],
+            ['M', 'Map: draw walls, marks and notes (1–9, 0 pick a tool, N a note)'],
+            ['C / Esc', 'Pack: items, skills, Guidebook, Settings'],
             ['H', 'This help'],
           ]),
           section('Fighting', [
@@ -784,6 +785,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             ['← →', 'Pick a target'],
             ['Esc', 'Back to the previous member'],
             ['Enter', 'Speed up the round'],
+            ['R', 'Repeat last round'],
+            ['O', 'Auto battle (Esc or tap to stop)'],
           ]),
           section('Tips', [
             ['Rows', 'The back row takes and deals less melee damage. Archers fight fine from anywhere.'],

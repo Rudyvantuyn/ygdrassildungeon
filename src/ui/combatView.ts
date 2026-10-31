@@ -351,7 +351,7 @@ export class CombatView {
     const items: MenuItem[] = [
       { label: 'Attack', description: 'A basic attack on one enemy.', onSelect: () => this.chooseEnemy((t) => this.setCommand({ kind: 'attack', target: t }), () => this.showCommandMenu()) },
       { label: 'Skills', detail: '▸', description: 'Use a class skill (costs SP).', onSelect: () => this.showSkillMenu() },
-      { label: 'Defend', description: 'Halve damage taken this turn. Acts first.', onSelect: () => this.setCommand({ kind: 'defend' }) },
+      { label: 'Defend', description: 'Halve damage taken this round. Acts first.', onSelect: () => this.setCommand({ kind: 'defend' }) },
       { label: 'Items', detail: '▸', description: 'Use an item from the bag.', onSelect: () => this.showItemMenu() },
       ...(this.lastCommands
         ? [{ label: 'Repeat', detail: 'R', description: 'Everyone does what they did last round (where they still can).', onSelect: () => this.repeat() }]

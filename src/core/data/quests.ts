@@ -121,7 +121,7 @@ export const QUESTS: QuestDef[] = [
     id: 'endTheGnawing',
     title: 'The Gnawing Below',
     giver: 'Sigrid, Warden of Lindholm',
-    text: 'Something gnaws at the roots below the fifth floor, and it is gnawing at our road. End it.',
+    text: 'Something gnaws at the roots on the fifth floor, and it is gnawing at our road. End it.',
     kind: 'boss', target: 'rootgnawer', qty: 1,
     reward: { gold: 3000 },
     minFloor: 4,

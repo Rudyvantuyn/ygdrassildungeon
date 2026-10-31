@@ -196,7 +196,7 @@ export const STORY: StoryScene[] = [
     when: 'town',
     ready: (g) => g.state.deepest >= 3,
     lines: [
-      { speaker: BRYNJA, text: 'You asked why every new oath needs a token. Very well. They are not carved wood. They are shards of Ymir\'s bone.' },
+      { speaker: BRYNJA, text: 'You asked why every oath needs a shard of Ymir\'s bone. Very well. Here is what the Pact does not tell new Wayfinders.' },
       { speaker: BRYNJA, text: 'The realms loved Ymir. They will honour no oath unless it is sworn on a piece of him. That is the Pact\'s first rule.' },
       { speaker: BRYNJA, text: 'The prowlers you meet down there have gorged on his body. A shard of him sits in each of their hearts.' },
       { speaker: BRYNJA, text: 'So every Wayfinder in this hall is sworn to the realms, on the body of their dead. Remember that, the next time you swear someone in.' },

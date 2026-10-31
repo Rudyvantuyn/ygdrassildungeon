@@ -651,7 +651,7 @@ export class Combat {
     for (const e of this.enemies) {
       if (e.def.drop && this.rng.chance(e.def.drop.chance)) drops.push(e.def.drop.item);
     }
-    // Bosses and prowlers always leave an Oath Token: the way to grow the roster.
+    // Guardians, and prowlers the first time they fall, leave an Oath Token: the way to grow the roster.
     if (this.oathToken) drops.push('oathToken');
     for (const item of drops) this.inventory[item] = (this.inventory[item] ?? 0) + 1;
     const materials: string[] = [];

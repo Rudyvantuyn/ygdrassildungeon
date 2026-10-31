@@ -59,6 +59,8 @@ export interface GameState {
   quests: Record<string, QuestState>;
   /** Story scenes already shown. */
   story: string[];
+  /** An expedition's shared game: no Oath Tokens are won here (every expedition starts afresh, so they could be farmed). */
+  expedition?: boolean;
   /** Choices made at the end of story scenes: scene id → option id. */
   choices?: Record<string, string>;
   /** Adventurers ever sworn in at the Oath Hall (the first few are free). */
@@ -419,11 +421,11 @@ export class Game {
   startProwlerCombat(index: number): Combat {
     this.state.fighting = index;
     const paid = this.progress.prowlerTokens?.includes(index) ?? false;
-    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true, oathToken: !paid });
+    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true, oathToken: !paid && !this.state.expedition });
   }
 
   startBossCombat(): Combat {
-    return new Combat(this.state.party, this.floorDef.boss ?? [], this.state.inventory, this.rng, { boss: true });
+    return new Combat(this.state.party, this.floorDef.boss ?? [], this.state.inventory, this.rng, { boss: true, oathToken: !this.state.expedition });
   }
 
   /** Call after a combat is over, with the finished combat. */

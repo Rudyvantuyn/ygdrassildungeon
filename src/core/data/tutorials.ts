@@ -29,10 +29,10 @@ export const TIPS: TipDef[] = [
     speaker: 'sigrid',
     pages: [
       'Move with the arrow keys or the buttons. On a phone you can also swipe the view: up to walk, sideways to turn.',
-      'The danger orb grows brighter as you walk. When it burns, a fight is close.',
+      'The danger orb turns from blue to yellow to red as you walk. Red means a fight is close.',
       'The roots of the Great Tree always lead home: the stairs up take you back toward Lindholm. Turning back in time is no shame.',
-      'But every descent starts at the beginning of a chapter. Only when its guardian falls can you begin from the next one.',
-      'Use Act to open chests, drink from springs and gather. Pack holds your items, skills and options.',
+      'Every descent starts at the beginning of a chapter: the gods\' wards let no one in halfway. Beat its guardian to open the next.',
+      'Use Act to open chests, drink from springs and gather. Pack holds your items, skills, the Guidebook and Settings.',
     ],
   },
   {
@@ -41,7 +41,7 @@ export const TIPS: TipDef[] = [
     speaker: 'ylva',
     pages: [
       'The Rootdeep has never been mapped: before the Pact, nobody was allowed down. The map in the corner fills in where you have walked.',
-      'Open Map to draw walls, floor and marks yourself: chests, springs, danger, notes.',
+      'Open Map to draw walls, floor and marks yourself: stairs, chests, springs, gathering spots, danger and notes.',
       'Change the map mode there: draw everything yourself, let your steps be filled in, or let the map draw itself.',
     ],
   },
@@ -109,7 +109,7 @@ export const TIPS: TipDef[] = [
     speaker: 'aske',
     pages: [
       'Poison hurts every round. Sleep skips turns until you are hit. Paralysis makes you freeze now and then.',
-      'Clearwater or the Mender\'s Cleanse washes them away. Ailments also wear off after a few rounds.',
+      'Clearwater or the Mender\'s Cleanse washes them away. Ailments also wear off after a few rounds, and always end with the fight.',
     ],
   },
   {
@@ -137,9 +137,9 @@ export const TIPS: TipDef[] = [
     speaker: 'sigrid',
     pages: [
       'That shape in the dark is a prowler: a beast that gorged on Ymir\'s flesh and grew far stronger than anything around it.',
-      'Do not fight one until you are much stronger. There is always a way around; some hunt you if you come close.',
+      'Do not fight one until you are much stronger. There is always a way around; some hunt you if you come close. On the map they show as an orange eye.',
       'Running from a prowler works only about one time in three, however many of you try.',
-      'The first time you bring one down, it leaves an Oath Token. It comes back after a while; its token does not.',
+      'The first time you bring one down, it leaves an Oath Token. It is back once you have been to town; its token is not.',
     ],
   },
   {
@@ -147,7 +147,7 @@ export const TIPS: TipDef[] = [
     title: 'A guardian',
     speaker: 'sigrid',
     pages: [
-      'That red sigil marks a guardian: something that rules this part of the Rootdeep.',
+      'That red horned skull marks a guardian: something that rules this part of the Rootdeep.',
       'Rest first, fill your pack, and come at full strength. You cannot flee from a guardian.',
     ],
   },
@@ -175,8 +175,8 @@ export const TIPS: TipDef[] = [
     speaker: 'brynja',
     pages: [
       'Your first party swore for free. Every oath after that costs gold, more each time, and an Oath Token.',
-      'Oath Tokens are shards of Ymir\'s bone. The realms honour no oath sworn without one. Guardians and prowlers carry them, and a few chests hold one.',
-      'Adventurers in the hall can swap into the party at any time.',
+      'Oath Tokens are shards of Ymir\'s bone; the realms honour no oath without one. Guardians, prowlers (once each) and a few chests hold them.',
+      'Adventurers in the hall can swap into the party whenever you are in town.',
     ],
   },
   {
@@ -200,7 +200,8 @@ export const TIPS: TipDef[] = [
     speaker: 'ketil',
     pages: [
       'Every town of the Pact has a Hornstone. Blow it and Wayfinders from other halls answer. Each brings one adventurer; four make an expedition.',
-      'What you find on an expedition is shared when it ends. You need an account to use the horn.',
+      'What you find is shared when it ends; levels and XP always come home. The host may fill empty seats with their own adventurers.',
+      'If the party falls, or everyone leaves mid-fight, the haul is lost. No Oath Tokens are won on expeditions. You need an account to use the horn.',
     ],
   },
 ];

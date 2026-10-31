@@ -3,7 +3,7 @@ import { drawPortrait, type NpcId } from '../render/portraits';
 import { el } from './dom';
 
 export const NPC_NAMES: Record<NpcId, string> = {
-  gerd: 'Gerd, keeper of the Sleeping Stag',
+  gerd: 'Gerd, keeper of The Sleeping Stag',
   hilde: 'Hilde of the shop',
   brynja: 'Brynja, Master of the Oath Hall',
   sigrid: 'Sigrid, Warden of Lindholm',

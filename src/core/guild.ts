@@ -42,7 +42,7 @@ export function registerMember(game: Game, rawName: string, classId: ClassId): s
   if (all.length >= MAX_ROSTER) return `The Oath Hall can hold at most ${MAX_ROSTER} adventurers.`;
   const cost = oathCost(game);
   if (game.state.gold < cost.gold) return `The oath costs ${cost.gold} G.`;
-  if ((game.state.inventory.oathToken ?? 0) < cost.tokens) return 'You need an Oath Token. Bosses and prowlers leave them, and some chests hold one.';
+  if ((game.state.inventory.oathToken ?? 0) < cost.tokens) return 'You need an Oath Token. Guardians leave them, and prowlers the first time they fall; some chests hold one.';
   game.state.gold -= cost.gold;
   game.state.inventory.oathToken = (game.state.inventory.oathToken ?? 0) - cost.tokens;
   game.state.oaths = (game.state.oaths ?? rosterSize(game)) + 1;

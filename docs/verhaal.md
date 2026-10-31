@@ -36,11 +36,12 @@ nog open liggen. De scènes zelf staan in `src/core/data/story.ts`.
 | Latere hoofdstukken (voorstel) | III: Ymirs botten (bergen, grotten). Daarna bijvoorbeeld zijn schedel en hersenen (hemel, wolken), en uiteindelijk Ginnungagap zelf. |
 | De avonturiers | **Wayfinders**: gezworen op het Pact in de Oath Hall. |
 | Oath Tokens | Botsplinters van Ymir. De werelden erkennen geen eed die niet op een stukje van hem gezworen is. |
-| Prowlers | Beesten die van Ymirs vlees vraten; in hun hart zit een splinter van hem (daarom laten ze een Oath Token achter). |
+| Prowlers | Beesten die van Ymirs vlees vraten; in hun hart zit een splinter van hem (daarom laten ze een Oath Token achter, één keer per prowler). |
 | Monsters keren terug | Ymirs lichaam droomt nog: wat erin sterft, groeit terug. |
 | Zelf de kaart tekenen | Voor het Pact mocht niemand naar beneden; de Rootdeep is nooit in kaart gebracht. |
 | Altijd terug naar de stad | De wortels van de Grote Boom leiden altijd naar huis. |
 | Hornstone en expedities | Elke stad die het Pact zwoer heeft een Hornstone; zo komen Wayfinders uit andere hallen samen. |
+| Afdalen per hoofdstuk | De wards van de goden laten niemand halverwege een hoofdstuk binnen: je begint altijd bij het begin van een geopend hoofdstuk. |
 | Bazen | Sommige zijn **wards**: sloten van de spreuk van de goden. In hun hart zit een gouden rune. |
 
 ### Personages

@@ -211,7 +211,7 @@ function run(state: ExpeditionState, user: string, action: Action, now: number, 
       if (seat >= 0) return 'You are already part of this expedition.';
       if (state.seats.length >= MAX_SEATS) return 'This expedition is full.';
       const member = validMember(action.member);
-      if (!member) return 'That adventurer cannot join.';
+      if (!member) return 'That adventurer cannot join: their gear or skills are beyond their level.';
       state.seats.push({ user, player: cleanPlayerName(action.player), member, left: false });
       return null;
     }
@@ -246,7 +246,7 @@ function run(state: ExpeditionState, user: string, action: Action, now: number, 
       for (const raw of action.fill ?? []) {
         if (state.seats.length >= MAX_SEATS) break;
         const member = validMember(raw);
-        if (!member) return 'One of your adventurers cannot join.';
+        if (!member) return 'One of your adventurers cannot join: their gear or skills are beyond their level.';
         if (state.seats.some((s) => s.user === user && s.member.name === member.name)) continue;
         state.seats.push({ user, player: state.seats[0].player, member, left: false });
       }
@@ -259,6 +259,7 @@ function run(state: ExpeditionState, user: string, action: Action, now: number, 
       for (const id of Object.keys(KIT) as ItemId[]) kit[id] = (KIT[id] ?? 0) * players(state).length;
       s.inventory = makeInventory(kit);
       s.story = [];
+      s.expedition = true;
       game.enterFloor(state.startFloor, true);
       state.game = JSON.parse(game.serialize()) as GameState;
       state.phase = 'explore';

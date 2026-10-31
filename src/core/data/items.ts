@@ -19,7 +19,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   sapTonic: { id: 'sapTonic', name: 'Sap Tonic', effect: 'hp', amount: 60, price: 30, description: 'A bitter tonic brewed from tree sap. Restores 60 HP.' },
   tideDraught: { id: 'tideDraught', name: 'Tide Draught', effect: 'hp', amount: 200, price: 110, minFloor: 5, description: 'Kelp and salt boiled into a strong draught. Restores 200 HP.' },
   spiritDew: { id: 'spiritDew', name: 'Spirit Dew', effect: 'sp', amount: 25, price: 70, description: 'Morning dew gathered from the Great Tree. Restores 25 SP.' },
-  clearwater: { id: 'clearwater', name: 'Clearwater', effect: 'cure', amount: 0, price: 40, description: 'Spring water blessed at the roots. Cures poison, sleep and paralysis.' },
+  clearwater: { id: 'clearwater', name: 'Clearwater', effect: 'cure', amount: 0, price: 40, description: 'Spring water blessed at the roots. Cures poison, sleep and paralysis. Only in a fight.' },
   kindlingMoss: {
     id: 'kindlingMoss',
     name: 'Kindling Moss',
@@ -42,7 +42,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     effect: 'token',
     amount: 0,
     price: 0,
-    description: 'A carved token of living root-wood. The Oath Hall needs one to swear in each new adventurer. Found on bosses, prowlers and in some chests.',
+    description: 'A shard of Ymir\'s bone. The Oath Hall needs one to swear in each new adventurer. Guardians, prowlers (the first time they fall) and a few chests hold them.',
   },
 };
 
