@@ -31,6 +31,17 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Hoofdstukken tekenen met trappen en shortcuts (mijlpaal 15)
+
+- De **Drafting Table** (`?maker`) tekent nu hele hoofdstukken: tot vijf verdiepingen als tabbladen.
+- **Genummerde trappen 1–9**: hetzelfde nummer op twee verdiepingen verbindt ze (▼ omlaag, ▲ omhoog). Zo kan een pad
+  ook terug omhoog naar een ander deel van een eerdere verdieping lopen.
+- **Wortelpoorten**: openen alleen vanaf één kant (het gouden pijltje) en blijven daarna voorgoed open: shortcuts
+  voor een volgende run. Met een eigen geschilderde poort en tekentje, en een tip van Torvald.
+- Controles over het hele hoofdstuk (alles bereikbaar, elke trap twee kanten, de eindbaas op de laatste verdieping,
+  een weg om prowlers heen), proefspelen van het hele hoofdstuk en een deelcode per hoofdstuk (`YGC1.`).
+- Hoofdstuk I en II blijven zoals ze zijn; dit is voor hoofdstuk III en verder.
+
 ### Klaar voor spelers (mijlpaal 14)
 
 - **Snellere gevechten**: *Repeat* (R) doet de vorige ronde opnieuw, *Auto* (O) laat de party zelf vechten tot je

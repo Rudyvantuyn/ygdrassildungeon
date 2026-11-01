@@ -1,5 +1,4 @@
 import type { Combat } from '../core/combat';
-import { FLOORS } from '../core/data/floors';
 import { ENEMIES } from '../core/data/enemies';
 import { EQUIPMENT } from '../core/data/equipment';
 import { ITEMS } from '../core/data/items';
@@ -30,7 +29,7 @@ import { TIPS, TIP_BY_ID, type TipDef } from '../core/data/tutorials';
 import { GATHER_KINDS } from '../core/data/gathering';
 import { describeFinds } from '../core/expedition';
 import { unspentPoints } from '../core/skilltree';
-import { toFloorDef, type FloorDesign } from '../core/designer';
+import { toFloorDefs, type ChapterDesign } from '../core/designer';
 import { prefs, setPref, TEXT_SPEED_NAMES, TEXT_SPEED_STEP, type BattleSpeed, type TextSpeed } from './prefs';
 import { sendReport, type ReportKind } from '../net/reports';
 import { choose, markSeen, pendingScene, STORY, type StoryLine, type StoryScene } from '../core/data/story';
@@ -96,7 +95,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private mapEditor: MapEditor | null = null;
   private designer: Designer | null = null;
   /** The floor being test-played from the drafting table (nothing is saved meanwhile). */
-  private trial: FloorDesign | null = null;
+  private trial: ChapterDesign | null = null;
   private story: { lines: StoryLine[]; index: number; shown: number; then: () => void; box: HTMLElement } | null = null;
   private fx: ViewFx | null = null;
   private lastMove = 0;
@@ -501,11 +500,11 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   enterExplore(): void {
-    audio.music(themeFor({ location: 'dungeon', floor: this.trial ? this.trial.monsters : this.game.state.floor }));
+    audio.music(themeFor({ location: 'dungeon', floor: this.trial ? this.trial.floors[this.game.state.floor]?.monsters ?? 0 : this.game.state.floor }));
     // Load this floor's monster art before the first fight.
     const def = this.game.floorDef;
     const ids = [...def.encounters.flatMap((e) => e.enemies), ...(def.boss ?? []), ...def.prowlers.flatMap((p) => p.enemies)];
-    preload([...[...new Set(ids)].map((id) => `monsters/${id}.webp`), 'props/chest.webp', 'props/chest-open.webp', 'props/spring.webp', 'props/stairs-up.webp', 'props/stairs-down.webp', ...gatherKindsOn(this.game.map).map((k) => `props/gather-${k}.webp`)]);
+    preload([...[...new Set(ids)].map((id) => `monsters/${id}.webp`), 'props/chest.webp', 'props/chest-open.webp', 'props/spring.webp', 'props/stairs-up.webp', 'props/stairs-down.webp', ...gatherKindsOn(this.game.map).map((k) => `props/gather-${k}.webp`), ...(this.game.map.tiles.includes('gate') ? ['props/gate.webp'] : [])]);
     this.mode = 'explore';
     this.showSide('explore');
     this.message.classList.add('hidden');
@@ -1028,10 +1027,32 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       case 'emptyChest':
         this.toast('The chest is empty.');
         return;
+      case 'link': {
+        const to = this.game.floors[ev.floor].name;
+        this.confirm(ev.down ? 'Stairs down' : 'Stairs up', ev.down ? `Descend to ${to}?` : `Climb up to ${to}?`, () => {
+          audio.play('stairs');
+          this.game.takeLink();
+          this.save();
+          this.enterExplore();
+          this.toast(`${this.game.floorDef.name} — game saved.`);
+        });
+        return;
+      }
+      case 'gateOpened':
+        audio.play('chest');
+        this.save();
+        this.toast('You pull the roots apart. This way stays open now.');
+        this.tips(['gate'], () => this.resumeExplore());
+        return;
+      case 'gateSealed':
+        audio.play('bump');
+        this.toast('A root gate, grown shut. It can only be opened from the other side.');
+        this.tips(['gate'], () => this.resumeExplore());
+        return;
       case 'stairs':
-        if (this.trial) return this.confirm('Stairs down', 'Your floor ends here. Head back to the drafting table?', () => this.endTrial());
+        if (this.trial && this.game.isLastFloor) return this.confirm('Stairs down', 'Your chapter ends here. Head back to the drafting table?', () => this.endTrial());
         if (this.game.isLastFloor) return;
-        this.confirm('Stairs down', `Descend to ${FLOORS[this.game.state.floor + 1].name}?`, () => {
+        this.confirm('Stairs down', `Descend to ${this.game.floors[this.game.state.floor + 1].name}?`, () => {
           audio.play('stairs');
           this.game.descend();
           this.save();
@@ -1040,9 +1061,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         });
         return;
       case 'upstairs': {
-        if (this.trial) return this.confirm('Stairs up', 'Stop the test and head back to the drafting table?', () => this.endTrial());
+        if (this.trial && this.game.state.floor === 0) return this.confirm('Stairs up', 'Stop the test and head back to the drafting table?', () => this.endTrial());
         const leaving = this.game.state.floor === 0;
-        const text = leaving ? 'Leave the Rootdeep and return to Lindholm?' : `Climb up to ${FLOORS[this.game.state.floor - 1].name}?`;
+        const text = leaving ? 'Leave the Rootdeep and return to Lindholm?' : `Climb up to ${this.game.floors[this.game.state.floor - 1].name}?`;
         this.confirm('Stairs up', text, () => {
           audio.play('stairs');
           this.game.ascend();
@@ -1526,7 +1547,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
   // ── Drafting table ─────────────────────────────────────────────────────────
 
-  private showDesigner(design: FloorDesign = loadDraft()): void {
+  private showDesigner(design: ChapterDesign = loadDraft()): void {
     this.designer = new Designer(design, {
       onTest: (d, level) => this.startTrial(d, level),
       onClose: () => {
@@ -1541,11 +1562,11 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.mode = 'drafting';
   }
 
-  private startTrial(design: FloorDesign, level: number): void {
+  private startTrial(design: ChapterDesign, level: number): void {
     this.designer = null;
     this.closeOverlay();
     this.trial = design;
-    this.game = Game.trial(toFloorDef(design), level, design.monsters, randomSeed());
+    this.game = Game.trial(toFloorDefs(design), level, design.floors[0].monsters, randomSeed());
     this.party.render(this.game.state.party);
     this.enterExplore();
     this.toast(`Testing ${design.name} with a level ${level} party.`);

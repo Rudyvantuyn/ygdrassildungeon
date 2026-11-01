@@ -14,25 +14,37 @@ import {
   NAME_MAX,
   PROWLER_CHOICES,
   THEMES,
-  blankDesign,
+  CHAPTER_FLOORS,
+  GATE_CELLS,
+  LINK_CELLS,
+  blankChapter,
+  blankChapterFloor,
   cellAt,
-  decodeDesign,
-  encodeDesign,
+  chapterProblems,
+  decodeChapter,
+  encodeChapter,
+  isGate,
+  isLink,
   paint,
-  problems,
   resize,
   type Cell,
+  type ChapterDesign,
   type FloorDesign,
+  type GateCell,
+  type LinkCell,
 } from '../core/designer';
 import { el } from './dom';
 
-type Tool = Cell | 'route';
+/** `link` places numbered stairs, `gate` a root gate; the number and side are chosen in the panel. */
+type Tool = Cell | 'route' | 'link' | 'gate';
 
 const TOOLS: { id: Tool; label: string; key: string }[] = [
   { id: '#', label: 'Wall', key: '1' },
   { id: '.', label: 'Floor', key: '2' },
-  { id: 'S', label: 'Start', key: '3' },
-  { id: '>', label: 'Stairs', key: '4' },
+  { id: 'S', label: 'Entrance', key: '3' },
+  { id: 'link', label: 'Stairs 1–9', key: '4' },
+  { id: '>', label: 'Next chapter', key: 'q' },
+  { id: 'gate', label: 'Root gate', key: 'g' },
   { id: 'T', label: 'Chest', key: '5' },
   { id: '~', label: 'Spring', key: '6' },
   { id: 'B', label: 'Boss', key: '7' },
@@ -47,8 +59,11 @@ const TOOLS: { id: Tool; label: string; key: string }[] = [
 const SUGGESTED_LEVEL = [3, 5, 7, 10, 14, 18, 20, 23, 25, 28];
 const ROUTE_COLORS = ['#ff7a4a', '#c58af0', '#6fd3ff', '#f2d14e'];
 
-const DRAFT_KEY = 'ygdrassil-draft-v1';
-const SAVED_KEY = 'ygdrassil-floors-v1';
+const DRAFT_KEY = 'ygdrassil-draft-v2';
+const OLD_DRAFT_KEY = 'ygdrassil-draft-v1';
+const SAVED_KEY = 'ygdrassil-chapters-v1';
+const OLD_SAVED_KEY = 'ygdrassil-floors-v1';
+const GATE_NAMES: Record<GateCell, string> = { n: 'north', e: 'east', s: 'south', w: 'west' };
 const CANVAS = 660;
 
 interface SavedFloor {
@@ -92,10 +107,15 @@ export function isMaker(): boolean {
   }
 }
 
-/** The last drawing, so leaving the table (or a test run) never loses work. */
-export function loadDraft(): FloorDesign {
-  const code = readJson<string | null>(DRAFT_KEY, null);
-  return (code && decodeDesign(code)) || blankDesign();
+/** The last drawing, so leaving the table (or a test run) never loses work. Older single-floor drafts still open. */
+export function loadDraft(): ChapterDesign {
+  const code = readJson<string | null>(DRAFT_KEY, null) ?? readJson<string | null>(OLD_DRAFT_KEY, null);
+  return (code && decodeChapter(code)) || blankChapter();
+}
+
+/** Saved chapters, plus floors saved before chapters existed. */
+function savedList(): SavedFloor[] {
+  return [...readJson<SavedFloor[]>(SAVED_KEY, []), ...readJson<SavedFloor[]>(OLD_SAVED_KEY, [])];
 }
 
 export class Designer {
@@ -109,16 +129,26 @@ export class Designer {
   private readonly prowlerEl: HTMLElement;
   private readonly nameInput: HTMLInputElement;
   private readonly testButton: HTMLButtonElement;
+  private readonly floorTabs: HTMLElement;
+  private floor = 0;
+  private linkNo: LinkCell = '1';
+  private gateSide: GateCell = 'n';
   private tool: Tool = '#';
   private prowler = 0;
   private painting = false;
   private level: number;
   private modal: HTMLElement | null = null;
 
+  /** The floor being drawn. */
+  private get design(): FloorDesign {
+    return this.chapter.floors[this.floor];
+  }
+
   constructor(
-    private design: FloorDesign,
-    private readonly actions: { onTest: (design: FloorDesign, level: number) => void; onClose: () => void },
+    private chapter: ChapterDesign,
+    private readonly actions: { onTest: (chapter: ChapterDesign, level: number) => void; onClose: () => void },
   ) {
+    const design = chapter.floors[0];
     this.level = SUGGESTED_LEVEL[design.monsters] ?? 10;
     this.canvas = el('canvas', { className: 'draft-canvas' });
     this.canvas.width = this.canvas.height = CANVAS;
@@ -136,12 +166,14 @@ export class Designer {
 
     this.nameInput = el('input', { className: 'draft-name' });
     this.nameInput.maxLength = NAME_MAX;
-    this.nameInput.value = design.name;
+    this.nameInput.value = chapter.name;
+    this.nameInput.placeholder = 'Chapter name';
     this.nameInput.addEventListener('keydown', (e) => e.stopPropagation());
     this.nameInput.addEventListener('input', () => {
-      this.design.name = this.nameInput.value;
+      this.chapter.name = this.nameInput.value;
       this.changed();
     });
+    this.floorTabs = el('div', { className: 'draft-floors' });
 
     const tools = el('div', { className: 'draft-tools' });
     for (const t of TOOLS) {
@@ -161,6 +193,7 @@ export class Designer {
 
     this.side = el('div', { className: 'draft-side' }, [
       this.nameInput,
+      this.floorTabs,
       tools,
       this.prowlerEl,
       this.settingsEl,
@@ -168,7 +201,7 @@ export class Designer {
       el('div', { className: 'draft-actions' }, [
         this.testButton,
         this.button('Save', () => this.save()),
-        this.button('My floors', () => this.showSaved()),
+        this.button('My chapters', () => this.showSaved()),
         this.button('Share', () => this.showShare()),
         this.button('New', () => this.newFloor()),
         this.button('Back', () => this.actions.onClose()),
@@ -219,7 +252,14 @@ export class Designer {
     }
     // Only walls and floor are dragged; everything else is placed with a single tap.
     if (!first && this.tool !== '#' && this.tool !== '.') return;
-    if (paint(this.design, x, y, this.tool)) {
+    const cell: Cell = this.tool === 'link' ? this.linkNo : this.tool === 'gate' ? this.gateSide : this.tool;
+    // Tapping numbered stairs or a gate again clears it.
+    if (first && (this.tool === 'link' || this.tool === 'gate') && cellAt(this.design, x, y) === cell) {
+      paint(this.design, x, y, '.');
+      this.changed();
+      return;
+    }
+    if (paint(this.design, x, y, cell)) {
       if (this.tool === 'B' && !this.design.boss) this.design.boss = BOSS_CHOICES[0];
       this.drawGrid();
       if (first && this.tool !== '#' && this.tool !== '.') this.changed();
@@ -276,6 +316,31 @@ export class Designer {
         if (g) {
           ctx.fillStyle = g[1];
           ctx.fillText(g[0], px + size / 2, py + size / 2 + 1);
+        }
+        if (isLink(c)) {
+          // Numbered stairs: the number, with ▼ or ▲ for where its other end lies.
+          const other = this.chapter.floors.findIndex((f, i) => i !== this.floor && f.rows.some((r) => r.includes(c)));
+          ctx.fillStyle = other < 0 ? '#c23a2a' : other > this.floor ? '#b8862a' : '#3f8f4a';
+          ctx.fillRect(px + 2, py + 2, size - 4, size - 4);
+          ctx.fillStyle = '#fff6dc';
+          ctx.fillText(`${c}${other < 0 ? '?' : other > this.floor ? '▼' : '▲'}`, px + size / 2, py + size / 2 + 1);
+        }
+        if (isGate(c)) {
+          // A root gate: bars, and a gold wedge on the side it opens from.
+          ctx.fillStyle = '#5a3e22';
+          for (let i = 1; i <= 3; i++) ctx.fillRect(px + (i * size) / 4 - 2, py + 2, 4, size - 4);
+          ctx.fillRect(px + 2, py + size / 2 - 2, size - 4, 4);
+          ctx.fillStyle = '#f0c040';
+          const side = GATE_CELLS.indexOf(c);
+          const tri: [number, number][][] = [
+            [[px + size / 2, py + 1], [px + size * 0.3, py + size * 0.25], [px + size * 0.7, py + size * 0.25]],
+            [[px + size - 1, py + size / 2], [px + size * 0.75, py + size * 0.3], [px + size * 0.75, py + size * 0.7]],
+            [[px + size / 2, py + size - 1], [px + size * 0.3, py + size * 0.75], [px + size * 0.7, py + size * 0.75]],
+            [[px + 1, py + size / 2], [px + size * 0.25, py + size * 0.3], [px + size * 0.25, py + size * 0.7]],
+          ];
+          ctx.beginPath();
+          tri[side].forEach(([tx, ty], j) => (j ? ctx.lineTo(tx, ty) : ctx.moveTo(tx, ty)));
+          ctx.fill();
         }
       }),
     );
@@ -341,6 +406,31 @@ export class Designer {
 
   private refresh(): void {
     const d = this.design;
+    const c = this.chapter;
+    // Floor tabs: one per floor, plus adding and removing floors.
+    this.floorTabs.innerHTML = '';
+    c.floors.forEach((_, i) => {
+      const tab = this.button(`Floor ${i + 1}`, () => {
+        this.floor = i;
+        this.prowler = 0;
+        this.refresh();
+      }, i === this.floor ? 'tab on' : 'tab');
+      this.floorTabs.append(tab);
+    });
+    if (c.floors.length < CHAPTER_FLOORS) {
+      this.floorTabs.append(this.button('+ Floor', () => {
+        c.floors.push(blankChapterFloor(this.design));
+        this.floor = c.floors.length - 1;
+        this.changed();
+      }, 'tab'));
+    }
+    if (c.floors.length > 1) {
+      this.floorTabs.append(this.button('− This floor', () => {
+        c.floors.splice(this.floor, 1);
+        this.floor = Math.max(0, this.floor - 1);
+        this.changed();
+      }, 'tab'));
+    }
     const cycle = <T,>(list: readonly T[], current: T, dir: number): T => list[(list.indexOf(current) + dir + list.length) % list.length];
 
     this.settingsEl.innerHTML = '';
@@ -370,6 +460,25 @@ export class Designer {
       }),
     );
 
+    if (this.tool === 'link') {
+      this.settingsEl.prepend(
+        this.stepper('Stairs no.', this.linkNo, (dir) => {
+          this.linkNo = cycle(LINK_CELLS, this.linkNo, dir);
+          this.refresh();
+        }),
+        el('p', { className: 'draft-hint', text: 'Place the same number on two floors to join them. ▼ leads down, ▲ up, ? has no other end yet.' }),
+      );
+    }
+    if (this.tool === 'gate') {
+      this.settingsEl.prepend(
+        this.stepper('Opens from', GATE_NAMES[this.gateSide], (dir) => {
+          this.gateSide = cycle(GATE_CELLS, this.gateSide, dir);
+          this.refresh();
+        }),
+        el('p', { className: 'draft-hint', text: 'A root gate opens only for a party standing on the gold side, and then stays open: a shortcut.' }),
+      );
+    }
+
     this.prowlerEl.innerHTML = '';
     this.prowlerEl.classList.toggle('hidden', this.tool !== 'route');
     if (this.tool === 'route') {
@@ -397,7 +506,7 @@ export class Designer {
       this.prowlerEl.append(row);
     }
 
-    const list = problems(d);
+    const list = chapterProblems(c);
     this.problemsEl.innerHTML = '';
     this.problemsEl.classList.toggle('ready', list.length === 0);
     if (list.length === 0) this.problemsEl.append(el('div', { text: 'Ready to play!' }));
@@ -421,21 +530,21 @@ export class Designer {
 
   /** After every edit: keep the draft and update the panel. */
   private changed(): void {
-    writeJson(DRAFT_KEY, encodeDesign(this.design));
+    writeJson(DRAFT_KEY, encodeChapter(this.chapter));
     this.refresh();
   }
 
   // ── Actions ──────────────────────────────────────────────────────────────
 
   private test(): void {
-    if (problems(this.design).length) return;
-    this.actions.onTest(this.design, this.level);
+    if (chapterProblems(this.chapter).length) return;
+    this.actions.onTest(this.chapter, this.level);
   }
 
   private save(): void {
     const saved = readJson<SavedFloor[]>(SAVED_KEY, []);
-    const name = this.design.name.trim() || 'My Floor';
-    const entry = { name, code: encodeDesign(this.design), at: Date.now() };
+    const name = this.chapter.name.trim() || 'My Chapter';
+    const entry = { name, code: encodeChapter(this.chapter), at: Date.now() };
     const i = saved.findIndex((s) => s.name === name);
     if (i >= 0) saved[i] = entry;
     else saved.unshift(entry);
@@ -444,42 +553,43 @@ export class Designer {
   }
 
   private newFloor(): void {
-    this.design = blankDesign();
-    this.nameInput.value = this.design.name;
+    this.chapter = blankChapter();
+    this.floor = 0;
+    this.nameInput.value = this.chapter.name;
     this.prowler = 0;
     this.changed();
   }
 
-  private load(design: FloorDesign): void {
-    this.design = design;
-    this.nameInput.value = design.name;
+  private load(chapter: ChapterDesign): void {
+    this.chapter = chapter;
+    this.floor = 0;
+    this.nameInput.value = chapter.name;
     this.prowler = 0;
-    this.level = SUGGESTED_LEVEL[design.monsters] ?? this.level;
+    this.level = SUGGESTED_LEVEL[chapter.floors[0].monsters] ?? this.level;
     this.closeModal();
     this.changed();
   }
 
   private showSaved(): void {
-    const saved = readJson<SavedFloor[]>(SAVED_KEY, []);
+    const saved = savedList();
     const list = el('div', { className: 'draft-list' });
-    if (!saved.length) list.append(el('p', { text: 'No saved floors yet. Use Save to keep the one you are drawing.' }));
-    saved.forEach((s, i) => {
+    if (!saved.length) list.append(el('p', { text: 'No saved chapters yet. Use Save to keep the one you are drawing.' }));
+    saved.forEach((s) => {
       const open = this.button(s.name, () => {
-        const d = decodeDesign(s.code);
+        const d = decodeChapter(s.code);
         if (d) this.load(d);
       });
       const remove = this.button('✕', () => {
-        saved.splice(i, 1);
-        writeJson(SAVED_KEY, saved);
+        for (const key of [SAVED_KEY, OLD_SAVED_KEY]) writeJson(key, readJson<SavedFloor[]>(key, []).filter((x) => x.code !== s.code));
         this.showSaved();
       }, 'step');
       list.append(el('div', { className: 'draft-row' }, [open, remove]));
     });
-    this.openModal('My floors', [list]);
+    this.openModal('My chapters', [list]);
   }
 
   private showShare(): void {
-    const code = encodeDesign(this.design);
+    const code = encodeChapter(this.chapter);
     const box = el('textarea', { className: 'draft-code' });
     box.value = code;
     box.readOnly = true;
@@ -491,15 +601,15 @@ export class Designer {
       );
     }, 'primary');
     const input = el('textarea', { className: 'draft-code' });
-    input.placeholder = 'Paste a floor code here…';
+    input.placeholder = 'Paste a chapter or floor code here…';
     input.addEventListener('keydown', (e) => e.stopPropagation());
     const load = this.button('Load code', () => {
-      const d = decodeDesign(input.value);
+      const d = decodeChapter(input.value);
       if (d) this.load(d);
-      else this.flash('That is not a floor code.');
+      else this.flash('That is not a chapter or floor code.');
     });
-    this.openModal('Share this floor', [
-      el('p', { text: 'Send this code to a friend, or to the makers of the game to have your floor added.' }),
+    this.openModal('Share this chapter', [
+      el('p', { text: 'Send this code to the makers of the game to have your chapter added, or keep it as a backup.' }),
       box,
       copy,
       el('p', { text: 'Got a code from someone else?' }),

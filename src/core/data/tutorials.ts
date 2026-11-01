@@ -189,6 +189,16 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'gate',
+    title: 'Root gates',
+    speaker: 'torvald',
+    pages: [
+      'Some passages are closed by root gates. They only open from one side: the deep side.',
+      'Once you reach a gate from behind and pull it open, it stays open for good. Next time you walk straight through.',
+      'Deeper chapters wind back on themselves: stairs lead up as well as down. Open gates are your shortcuts.',
+    ],
+  },
+  {
     id: 'quests',
     title: 'The notice board',
     speaker: 'hjalmar',

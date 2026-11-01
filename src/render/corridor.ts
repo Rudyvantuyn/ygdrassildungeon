@@ -168,6 +168,13 @@ export class CorridorRenderer {
           if (!tex) this.floorCell(s, d, pal);
           if (tile === 'stairs' && d > 0) this.stairs(s, d, pal, time);
           if (tile === 'up') this.upStairs(s, d, pal, time);
+          if (tile === 'link') {
+            // Numbered stairs of a drawn chapter: down or up, depending on where the other end is.
+            if (game.linkGoesDown(cell.x, cell.y)) {
+              if (d > 0) this.stairs(s, d, pal, time);
+            } else this.upStairs(s, d, pal, time);
+          }
+          if (tile === 'gate' && d > 0) this.rootGate(s, d, pal, time);
           if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y), pal);
           if (tile === 'spring' && d > 0) this.spring(s, d, time, game.progress.springUsed, pal);
           if (tile === 'boss' && d > 0 && !game.progress.bossDefeated) this.bossSigil(s, d, time);
@@ -751,6 +758,20 @@ export class CorridorRenderer {
     const drawn = drawIcon(ctx, id, x, y, size, false, 1 - fog);
     ctx.restore();
     return drawn;
+  }
+
+  /** A closed root gate filling the passage: the painted gate, or woven root bars until it has loaded. */
+  private rootGate(s: number, d: number, pal: Palette, time: number): void {
+    if (this.billboard('props/gate.webp', s, d, 0.76, pal.fog)) return;
+    const ctx = this.ctx;
+    const z = d + 0.5;
+    const f = this.fog(z);
+    ctx.strokeStyle = mix('#5a3e22', pal.fog, f);
+    ctx.lineWidth = Math.max(2, 14 * this.scaleAt(z));
+    ctx.beginPath();
+    for (let i = -2; i <= 2; i++) this.line([s + i * 0.18, -0.5, z], [s + i * 0.18 + Math.sin(time / 2000 + i) * 0.02, 0.5, z]);
+    for (let j = -1; j <= 1; j++) this.line([s - 0.45, j * 0.3, z], [s + 0.45, j * 0.3 + 0.05, z]);
+    ctx.stroke();
   }
 
   private bossSigil(s: number, d: number, time: number): void {

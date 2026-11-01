@@ -273,10 +273,17 @@ export class CoopSession {
         return;
       case 'stairs':
       case 'upstairs':
+      case 'link':
       case 'spring':
       case 'gatherSpot':
         // Shown after the mirror is updated, so the dialog sees the new position.
         window.setTimeout(() => this.offer(ev), 0);
+        return;
+      case 'gateOpened':
+        this.host.toast('The roots are pulled apart. This way stays open on this expedition.');
+        return;
+      case 'gateSealed':
+        this.host.toast('A root gate, grown shut. It can only be opened from the other side.');
         return;
       case 'nothing':
         return;
@@ -293,6 +300,9 @@ export class CoopSession {
     if (ev.type === 'stairs') {
       if (floor >= FLOORS.length - 1) return;
       this.host.confirm('Stairs down', `Lead everyone down to ${FLOORS[floor + 1].name}?`, () => void this.send({ type: 'descend' }));
+    } else if (ev.type === 'link') {
+      const to = FLOORS[ev.floor]?.name ?? 'the next floor';
+      this.host.confirm(ev.down ? 'Stairs down' : 'Stairs up', `Lead everyone ${ev.down ? 'down' : 'up'} to ${to}?`, () => void this.send({ type: 'link' }));
     } else if (ev.type === 'upstairs') {
       const text = floor === 0 ? 'Lead everyone back to Lindholm? This ends the expedition.' : `Climb up to ${FLOORS[floor - 1].name}?`;
       this.host.confirm('Stairs up', text, () => void this.send({ type: 'ascend' }));

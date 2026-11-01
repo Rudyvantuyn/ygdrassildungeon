@@ -4,9 +4,9 @@
  */
 import { sprite } from './sprites';
 
-export type IconId = 'down' | 'up' | 'chest' | 'spring' | 'danger' | 'note' | 'forage' | 'mine' | 'fell' | 'fish' | 'boss' | 'prowler';
+export type IconId = 'down' | 'up' | 'chest' | 'spring' | 'danger' | 'note' | 'forage' | 'mine' | 'fell' | 'fish' | 'boss' | 'prowler' | 'gate';
 
-export const ICON_IDS: IconId[] = ['down', 'up', 'chest', 'spring', 'danger', 'note', 'forage', 'mine', 'fell', 'fish', 'boss', 'prowler'];
+export const ICON_IDS: IconId[] = ['down', 'up', 'chest', 'spring', 'danger', 'note', 'forage', 'mine', 'fell', 'fish', 'boss', 'prowler', 'gate'];
 
 export function iconPath(id: IconId): string {
   return `icons/${id}.webp`;

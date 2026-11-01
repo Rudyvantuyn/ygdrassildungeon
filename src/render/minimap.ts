@@ -74,6 +74,11 @@ export function drawMinimap(
             if (tile === 'chest') glyph(ctx, px + mid, py + mid, cell, game.isChestOpened(x, y) ? '#9a9a9a' : MARKS.chest.color, MARKS.chest.glyph, 'chest', game.isChestOpened(x, y));
             if (tile === 'spring') glyph(ctx, px + mid, py + mid, cell, game.progress.springUsed ? '#7a9aa8' : MARKS.spring.color, MARKS.spring.glyph, 'spring', game.progress.springUsed);
             if (tile === 'boss' && !game.progress.bossDefeated) glyph(ctx, px + mid, py + mid, cell, '#d0302a', '✸', 'boss');
+            if (tile === 'link') {
+              const down = game.linkGoesDown(x, y);
+              glyph(ctx, px + mid, py + mid, cell, down ? MARKS.down.color : MARKS.up.color, down ? MARKS.down.glyph : MARKS.up.glyph, down ? 'down' : 'up');
+            }
+            if (tile === 'gate') glyph(ctx, px + mid, py + mid, cell, '#7a5a2a', '▥', 'gate');
             if (isGatherTile(tile)) glyph(ctx, px + mid, py + mid, cell, GATHER_KINDS[tile].color, GATHER_KINDS[tile].glyph, tile);
           }
         }

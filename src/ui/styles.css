@@ -2271,3 +2271,23 @@ body.phone .credits .rewards {
 .title-screen.credits {
   background: radial-gradient(ellipse at 50% 40%, rgba(20, 40, 30, 0.96), rgba(3, 6, 8, 0.99));
 }
+
+/* Drafting table: floor tabs of a chapter. */
+.draft-floors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.draft-btn.tab {
+  font-size: 13px;
+  padding: 4px 8px;
+}
+.draft-btn.tab.on {
+  color: #1a1206;
+  background: linear-gradient(#f0cf6a, #b8893f);
+  border-color: #f0cf6a;
+  text-shadow: none;
+}
+.draft-board h2 {
+  font-family: var(--font-title);
+}

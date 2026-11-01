@@ -46,6 +46,11 @@ Add new names there and keep the glossary in sync.
 - **Descents start at a chapter's first floor** (floor 1, 6, 11, …), never mid-chapter. The next chapter opens once
   the previous chapter's final boss is beaten (its stairs are behind the boss). Expeditions follow the same rule
   (`startFloors` / `startFloorFor` in `src/core/data/chapters.ts`). The word "stratum" is an EO term: say "chapter".
+- **From chapter III on, chapters are drawn as a whole** (five floors) at the Drafting Table: numbered stairs (1–9) join
+  any two floors of the chapter (also back up to another part of an earlier floor), and root gates (`n`/`e`/`s`/`w`,
+  the side they open from) are one-way shortcuts that stay open once opened (`progress.gatesOpen`). Chapters I and
+  II stay as they are. The owner draws on a PC and sends a chapter code (`YGC1.`); turn it into floors with
+  `decodeChapter` + `toFloorDefs`.
 - **No difficulty setting**: everyone plays by the same rules, so expeditions stay fair.
 - **The game is meant to be grindy and challenging**: XP and gold come slowly (`XP_RATE`, `GOLD_RATE` in combat.ts);
   the balance tests check that rushing fails and steady training wins.

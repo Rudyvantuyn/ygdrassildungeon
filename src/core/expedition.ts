@@ -91,6 +91,8 @@ export type Action =
   | { type: 'interact' }
   | { type: 'descend' }
   | { type: 'ascend' }
+  /** Take the linked stairs the party stands on (drawn chapters). */
+  | { type: 'link' }
   | { type: 'drink' }
   | { type: 'gather' }
   | { type: 'feather' }
@@ -272,6 +274,7 @@ function run(state: ExpeditionState, user: string, action: Action, now: number, 
     case 'interact':
     case 'descend':
     case 'ascend':
+    case 'link':
     case 'drink':
     case 'gather':
     case 'feather':
@@ -331,6 +334,10 @@ function explore(state: ExpeditionState, action: Action, now: number): string | 
       }
       game.ascend();
       note(state, `The expedition climbs up to ${game.floorDef.name}.`);
+      break;
+    case 'link':
+      if (!game.takeLink()) return 'There are no stairs here.';
+      note(state, `The expedition takes the stairs to ${game.floorDef.name}.`);
       break;
     case 'drink':
       if (!game.drinkSpring()) return 'There is nothing to drink here.';

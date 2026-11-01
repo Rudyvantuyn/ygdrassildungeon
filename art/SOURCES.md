@@ -182,3 +182,6 @@ The stairs and gathering props (2026-10-31) were taken from Canva's 600×600 edi
 | icons/prowler.webp | MAHZf3nfZb8 |
 | icons/danger.webp | MAHZf3vropk |
 | icons/note.webp | MAHZf7CVLTs |
+| gate (root gate, 2026-11-01, editor preview) | MAHZoD5E_hE |
+
+Map icon `icons/gate.webp`: Canva media MAHZoBZAiSs (same medallion prompt as the other icons).

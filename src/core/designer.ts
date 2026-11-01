@@ -19,8 +19,18 @@ export const MAX_ROUTE = 8;
 export const NAME_MAX = 24;
 
 /** The characters a design's rows are made of (the same legend as FloorDef). */
-export type Cell = '#' | '.' | 'S' | '>' | 'T' | '~' | 'B' | 'P' | 'O' | 'W' | 'F';
-const CELLS = new Set<string>(['#', '.', 'S', '>', 'T', '~', 'B', 'P', 'O', 'W', 'F']);
+export type Cell = '#' | '.' | 'S' | '>' | 'T' | '~' | 'B' | 'P' | 'O' | 'W' | 'F' | LinkCell | GateCell;
+/** Numbered stairs: the same number on two floors of a chapter joins them. */
+export type LinkCell = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+/** A root gate that opens only from its north, east, south or west side. */
+export type GateCell = 'n' | 'e' | 's' | 'w';
+export const LINK_CELLS: LinkCell[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+export const GATE_CELLS: GateCell[] = ['n', 'e', 's', 'w'];
+const CELLS = new Set<string>(['#', '.', 'S', '>', 'T', '~', 'B', 'P', 'O', 'W', 'F', ...LINK_CELLS, ...GATE_CELLS]);
+export const isLink = (c: string): c is LinkCell => (LINK_CELLS as string[]).includes(c);
+export const isGate = (c: string): c is GateCell => (GATE_CELLS as string[]).includes(c);
+/** The most floors a chapter has. */
+export const CHAPTER_FLOORS = 5;
 
 export interface ProwlerDesign {
   enemy: string;
@@ -91,7 +101,7 @@ function isBorder(d: FloorDesign, x: number, y: number): boolean {
 export function paint(d: FloorDesign, x: number, y: number, cell: Cell): boolean {
   if (isBorder(d, x, y) || cellAt(d, x, y) === cell) return false;
   if (cellAt(d, x, y) === 'S') return false; // the start can be moved, not erased
-  if (cell === 'S' || cell === '>' || cell === 'B') {
+  if (cell === 'S' || cell === '>' || cell === 'B' || isLink(cell)) {
     d.rows = d.rows.map((row) => row.split(cell).join('.'));
   }
   const row = d.rows[y];
@@ -125,7 +135,7 @@ export function resize(d: FloorDesign, width: number, height: number): void {
 
 function passable(d: FloorDesign, x: number, y: number): boolean {
   const c = cellAt(d, x, y);
-  return c !== '#' && c !== 'T';
+  return c !== '#' && c !== 'T' && !isGate(c);
 }
 
 /** Cells reachable from `from` without entering `avoid`. */
@@ -183,7 +193,12 @@ function find(d: FloorDesign, cell: Cell): [number, number][] {
 }
 
 /** Everything that keeps this design from being played, in plain words. Empty means it is ready. */
-export function problems(d: FloorDesign): string[] {
+/**
+ * `role` says where the floor sits in a chapter: only the first floor has the entrance (S), only the last the
+ * stairs on to the next chapter; reachability across the floors is checked by chapterProblems().
+ */
+export function problems(d: FloorDesign, role: { index: number; count: number } = { index: 0, count: 1 }): string[] {
+  const inChapter = role.count > 1;
   const out: string[] = [];
   const h = d.rows.length;
   const w = d.rows[0]?.length ?? 0;
@@ -198,13 +213,21 @@ export function problems(d: FloorDesign): string[] {
   if (!FLOORS[d.monsters]) out.push('Choose which monsters live here.');
 
   const starts = find(d, 'S');
-  if (starts.length !== 1) {
-    out.push('Place exactly one start (the stairs up).');
-    return [...new Set(out)];
-  }
   const stairs = find(d, '>');
   const bossCells = find(d, 'B');
-  if (stairs.length + bossCells.length === 0) out.push('Give the floor a goal: stairs down, a boss, or both.');
+  if (inChapter) {
+    if (role.index === 0 && starts.length !== 1) out.push('Place exactly one entrance (the stairs up to town) on the first floor.');
+    if (role.index > 0 && starts.length) out.push('Only the first floor has the entrance: link this floor with numbered stairs.');
+    if (stairs.length && role.index !== role.count - 1) out.push('Stairs on to the next chapter belong on the last floor; use numbered stairs between floors.');
+    if (role.index === role.count - 1 && !bossCells.length) out.push('A chapter ends with a guardian: place the boss sigil on the last floor.');
+  } else {
+    if (LINK_CELLS.some((c) => find(d, c).length)) out.push('Numbered stairs only work in a chapter of two floors or more.');
+    if (starts.length !== 1) {
+      out.push('Place exactly one start (the stairs up).');
+      return [...new Set(out)];
+    }
+    if (stairs.length + bossCells.length === 0) out.push('Give the floor a goal: stairs down, a boss, or both.');
+  }
   if (bossCells.length && !d.boss) out.push('Choose which boss waits on the boss sigil.');
   if (d.boss && !bossCells.length) out.push('Place the boss sigil, or choose no boss.');
   if (d.boss && !BOSS_CHOICES.includes(d.boss)) out.push('That boss does not exist.');
@@ -212,6 +235,18 @@ export function problems(d: FloorDesign): string[] {
   if (find(d, '~').length > MAX_SPRINGS) out.push(`At most ${MAX_SPRINGS} springs per floor.`);
   if ((['P', 'O', 'W', 'F'] as Cell[]).reduce((n, c) => n + find(d, c).length, 0) > MAX_GATHER) out.push(`At most ${MAX_GATHER} gathering spots per floor.`);
 
+  // In a chapter, reachability and the way around prowlers are checked over all floors at once.
+  if (inChapter || !starts.length) {
+    if (d.prowlers.length > MAX_PROWLERS) out.push(`At most ${MAX_PROWLERS} prowlers per floor.`);
+    d.prowlers.forEach((p, i) => {
+      const label = ENEMIES[p.enemy]?.name ?? `Prowler ${i + 1}`;
+      if (!PROWLER_CHOICES.includes(p.enemy)) out.push(`Prowler ${i + 1} is not a known prowler.`);
+      if (!p.route.length) out.push(`Give the ${label} a patrol route.`);
+      if (p.route.length > MAX_ROUTE) out.push(`The ${label}'s route has more than ${MAX_ROUTE} points.`);
+      if (p.route.some(([x, y]) => cellAt(d, x, y) !== '.')) out.push(`The ${label}'s route must be on plain floor.`);
+    });
+    return [...new Set(out)];
+  }
   const reachable = reach(d, starts[0]);
   let stranded = 0;
   d.rows.forEach((row, y) =>
@@ -245,7 +280,9 @@ export function problems(d: FloorDesign): string[] {
 
 /** The first open direction around the start, so the party does not begin facing a wall. */
 function startDir(d: FloorDesign): Dir {
-  const [[x, y]] = find(d, 'S');
+  const start = find(d, 'S')[0];
+  if (!start) return 1;
+  const [x, y] = start;
   for (const dir of [1, 2, 0, 3] as Dir[]) if (passable(d, x + DX[dir], y + DY[dir])) return dir;
   return 1;
 }
@@ -331,6 +368,164 @@ export function decodeDesign(code: string): FloorDesign | null {
     };
     if (design.rows.length < MIN_SIZE || design.rows.length > MAX_SIZE) return null;
     return design;
+  } catch {
+    return null;
+  }
+}
+
+// ── Chapters ─────────────────────────────────────────────────────────────────
+
+/** A chapter: up to five floors drawn together, joined by numbered stairs, with root-gate shortcuts. */
+export interface ChapterDesign {
+  version: number;
+  name: string;
+  floors: FloorDesign[];
+}
+
+export const CHAPTER_VERSION = 2;
+const ROMAN = ['I', 'II', 'III', 'IV', 'V'];
+
+export function blankChapter(): ChapterDesign {
+  return { version: CHAPTER_VERSION, name: 'My Chapter', floors: [blankDesign()] };
+}
+
+/** A new floor for the chapter: walled, with no entrance of its own (it is reached by numbered stairs). */
+export function blankChapterFloor(like: FloorDesign): FloorDesign {
+  const d = blankDesign(like.rows[0].length, like.rows.length);
+  d.rows = d.rows.map((row) => row.replace('S', '.'));
+  d.theme = like.theme;
+  d.monsters = like.monsters;
+  return d;
+}
+
+/** The floor names a chapter gets in the game: "Name I", "Name II", … */
+export function floorName(c: ChapterDesign, i: number): string {
+  return `${c.name.trim() || 'My Chapter'} ${ROMAN[i] ?? i + 1}`;
+}
+
+/** Gate character → the side it opens from (0 north, 1 east, 2 south, 3 west). */
+const GATE_DIRS: Record<GateCell, number> = { n: 0, e: 1, s: 2, w: 3 };
+
+type Spot = [number, number, number]; // floor, x, y
+
+/**
+ * Where the party can walk from the entrance on the first floor, over all floors: numbered stairs join floors,
+ * root gates can only be passed coming from their opening side (the first time through), and cells in
+ * `avoid` (per floor) are never entered.
+ */
+function chapterReach(c: ChapterDesign, avoid: Set<string>[] = []): Set<string> {
+  const key = (f: number, x: number, y: number) => `${f}:${x},${y}`;
+  const start = find(c.floors[0], 'S')[0];
+  if (!start) return new Set();
+  const partner = new Map<string, Spot>();
+  for (const id of LINK_CELLS) {
+    const ends: Spot[] = [];
+    c.floors.forEach((d, f) => find(d, id).forEach(([x, y]) => ends.push([f, x, y])));
+    if (ends.length === 2 && ends[0][0] !== ends[1][0]) {
+      partner.set(key(...ends[0]), ends[1]);
+      partner.set(key(...ends[1]), ends[0]);
+    }
+  }
+  const seen = new Set([key(0, ...start)]);
+  const queue: Spot[] = [[0, ...start]];
+  const visit = (n: Spot) => {
+    const k = key(...n);
+    if (seen.has(k) || avoid[n[0]]?.has(`${n[1]},${n[2]}`)) return;
+    seen.add(k);
+    queue.push(n);
+  };
+  while (queue.length) {
+    const [f, x, y] = queue.shift()!;
+    const jump = partner.get(key(f, x, y));
+    if (jump) visit(jump);
+    for (let dir = 0; dir < 4; dir++) {
+      const nx = x + DX[dir];
+      const ny = y + DY[dir];
+      const next = cellAt(c.floors[f], nx, ny);
+      if (next === '#' || next === 'T') continue;
+      // A gate opens only for someone standing on its opening side, i.e. stepping in from there.
+      if (isGate(next) && GATE_DIRS[next] !== (dir + 2) % 4) continue;
+      visit([f, nx, ny]);
+    }
+  }
+  return seen;
+}
+
+/** Everything that keeps the chapter from being played. Empty means it is ready. */
+export function chapterProblems(c: ChapterDesign): string[] {
+  const out: string[] = [];
+  const n = c.floors.length;
+  if (!c.name.trim()) out.push('Give the chapter a name.');
+  if (n < 1 || n > CHAPTER_FLOORS) out.push(`A chapter has 1 to ${CHAPTER_FLOORS} floors.`);
+  if (n === 1) return [...out, ...problems({ ...c.floors[0], name: c.name || c.floors[0].name })];
+  c.floors.forEach((d, i) => {
+    for (const p of problems({ ...d, name: floorName(c, i) }, { index: i, count: n })) out.push(`Floor ${i + 1}: ${p}`);
+  });
+  if (out.length) return [...new Set(out)];
+
+  for (const id of LINK_CELLS) {
+    const on = c.floors.flatMap((d, f) => find(d, id).map(() => f));
+    if (on.length && (on.length !== 2 || on[0] === on[1])) out.push(`Stairs ${id} must appear once on exactly two different floors.`);
+  }
+  if (out.length) return out;
+
+  const reachable = chapterReach(c);
+  c.floors.forEach((d, f) => {
+    let stranded = 0;
+    d.rows.forEach((row, y) =>
+      [...row].forEach((ch, x) => {
+        if (ch === '#') return;
+        if (ch === 'T') {
+          if (![0, 1, 2, 3].some((dir) => reachable.has(`${f}:${x + DX[dir]},${y + DY[dir]}`))) out.push(`Floor ${f + 1}: the chest at ${x},${y} cannot be reached.`);
+        } else if (!reachable.has(`${f}:${x},${y}`)) stranded++;
+      }),
+    );
+    if (stranded) out.push(`Floor ${f + 1}: ${stranded} open ${stranded === 1 ? 'cell cannot' : 'cells cannot'} be reached from the entrance.`);
+  });
+  // House rule: there is always a way to the guardian that avoids every prowler.
+  const last = n - 1;
+  const boss = find(c.floors[last], 'B')[0];
+  if (boss && !reachable.has(`${last}:${boss[0]},${boss[1]}`)) out.push('The guardian on the last floor cannot be reached from the entrance.');
+  else if (boss) {
+    const avoid = c.floors.map((d) => new Set(d.prowlers.flatMap((p) => [...patrolCells(d, p)])));
+    if (!chapterReach(c, avoid).has(`${last}:${boss[0]},${boss[1]}`)) out.push("There must be a way to the guardian that avoids every prowler's patrol.");
+  }
+  return [...new Set(out)];
+}
+
+/** The playable floors of the chapter. Call only when chapterProblems() is empty. */
+export function toFloorDefs(c: ChapterDesign): FloorDef[] {
+  return c.floors.map((d, i) => ({ ...toFloorDef(d), name: c.floors.length === 1 ? c.name.trim() || d.name : floorName(c, i) }));
+}
+
+const CHAPTER_PREFIX = 'YGC1.';
+
+/** A short text that holds the whole chapter, to share or to send to the game's makers. */
+export function encodeChapter(c: ChapterDesign): string {
+  const floor = (d: FloorDesign) => ({ r: d.rows, t: d.theme, m: d.monsters, b: d.boss, p: d.prowlers.map((p) => [p.enemy, p.hunt, p.route]) });
+  const json = JSON.stringify({ v: c.version, n: c.name, f: c.floors.map(floor) });
+  return CHAPTER_PREFIX + toBase64(new TextEncoder().encode(json));
+}
+
+/** Reads a chapter code (or an older single-floor code) back; null if it is not a valid one. */
+export function decodeChapter(code: string): ChapterDesign | null {
+  const text = code.trim().replace(/\s+/g, '');
+  if (text.startsWith(PREFIX)) {
+    const d = decodeDesign(text);
+    return d ? { version: CHAPTER_VERSION, name: d.name, floors: [d] } : null;
+  }
+  if (!text.startsWith(CHAPTER_PREFIX)) return null;
+  try {
+    const raw = JSON.parse(new TextDecoder().decode(fromBase64(text.slice(CHAPTER_PREFIX.length))));
+    if (raw.v !== CHAPTER_VERSION || !Array.isArray(raw.f) || !raw.f.length || raw.f.length > CHAPTER_FLOORS) return null;
+    const floors: FloorDesign[] = [];
+    for (const f of raw.f) {
+      const prowlers = (Array.isArray(f.p) ? f.p : []).map((p: [string, number, [number, number][]]) => ({ enemy: p[0], hunt: p[1], route: p[2] }));
+      const d = decodeDesign(encodeDesign({ version: DESIGN_VERSION, name: String(raw.n ?? ''), rows: f.r, theme: f.t, monsters: f.m, boss: f.b, prowlers }));
+      if (!d) return null;
+      floors.push(d);
+    }
+    return { version: CHAPTER_VERSION, name: String(raw.n ?? '').slice(0, NAME_MAX), floors };
   } catch {
     return null;
   }

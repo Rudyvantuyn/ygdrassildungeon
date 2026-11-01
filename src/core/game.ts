@@ -28,6 +28,8 @@ export interface FloorProgress {
   chart: Chart;
   /** Gathering spots used this visit: cell index → times. */
   gathered?: Record<number, number>;
+  /** Root gates opened (cell indices). They stay open for good: the shortcuts a party has earned. */
+  gatesOpen?: number[];
   /** Prowlers (by index) that already gave their Oath Token: they come back, the token does not. */
   prowlerTokens?: number[];
 }
@@ -93,6 +95,11 @@ export type StepEvent =
   | { type: 'emptyChest' }
   | { type: 'stairs' }
   | { type: 'upstairs' }
+  /** Standing on linked stairs, leading up or down to another floor of the chapter. */
+  | { type: 'link'; down: boolean; floor: number }
+  /** A root gate opened from its own side (it stays open), or one that only opens from the other side. */
+  | { type: 'gateOpened' }
+  | { type: 'gateSealed' }
   | { type: 'spring'; used: boolean }
   /** Standing on a gathering spot. `rank` is the party's best rank in its skill (0 = nobody can). */
   | { type: 'gatherSpot'; kind: GatherKind; left: number; rank: number }
@@ -127,7 +134,7 @@ export class Game {
     readonly floors: readonly FloorDef[] = FLOORS,
   ) {
     this.rng = new Rng(state.rng);
-    this.map = parseFloor(this.floorDef);
+    this.map = this.loadMap();
     // Fill in fields that saves from earlier builds don't have yet.
     state.chartMode ??= 'assisted';
     state.reserve ??= [];
@@ -173,8 +180,8 @@ export class Game {
    * A test run of one floor from the drafting table: a party at `level` wearing the best gear
    * the shop sells by floor `tier`, standing at the floor's start. Nothing of it is saved.
    */
-  static trial(def: FloorDef, level: number, tier: number, seed: number): Game {
-    const game = Game.fresh(seed, [def]);
+  static trial(def: FloorDef | FloorDef[], level: number, tier: number, seed: number): Game {
+    const game = Game.fresh(seed, Array.isArray(def) ? def : [def]);
     const s = game.state;
     for (const m of s.party) {
       m.level = level;
@@ -319,6 +326,11 @@ export class Game {
       events.push({ type: 'upstairs' });
       return events;
     }
+    if (tile === 'link') {
+      const to = this.linkTarget(this.state.x, this.state.y);
+      if (to) events.push({ type: 'link', down: to.floor > this.state.floor, floor: to.floor });
+      return events;
+    }
     if (tile === 'spring') {
       events.push({ type: 'spring', used: this.progress.springUsed });
       return events;
@@ -360,7 +372,7 @@ export class Game {
       return;
     }
     this.state.floor -= 1;
-    this.map = parseFloor(this.floorDef);
+    this.map = this.loadMap();
     const i = this.map.tiles.indexOf('stairs');
     this.state.x = i % this.map.width;
     this.state.y = Math.floor(i / this.map.width);
@@ -378,7 +390,7 @@ export class Game {
     this.state.location = 'dungeon';
     this.state.floor = floor;
     this.state.deepest = Math.max(this.state.deepest, floor);
-    this.map = parseFloor(this.floorDef);
+    this.map = this.loadMap();
     this.state.x = this.map.start.x;
     this.state.y = this.map.start.y;
     this.state.dir = this.map.start.dir;
@@ -508,7 +520,62 @@ export class Game {
     if (spot) return { type: 'gatherSpot', ...spot };
     const ahead = relCell(this.state.x, this.state.y, this.state.dir, 1, 0);
     if (tileAt(this.map, ahead.x, ahead.y) === 'chest') return this.openChest(ahead.x, ahead.y);
+    if (tileAt(this.map, ahead.x, ahead.y) === 'gate') return this.openGate(ahead.x, ahead.y);
     return { type: 'nothing' };
+  }
+
+  /** A root gate opens only for a party standing on its opening side; then it stays open for good. */
+  private openGate(x: number, y: number): StepEvent {
+    const index = y * this.map.width + x;
+    const side = this.map.gates[index];
+    if (this.state.x !== x + DX[side] || this.state.y !== y + DY[side]) return { type: 'gateSealed' };
+    const open = (this.progress.gatesOpen ??= []);
+    if (!open.includes(index)) open.push(index);
+    this.map.tiles[index] = 'gateOpen';
+    return { type: 'gateOpened' };
+  }
+
+  /**
+   * The other end of the linked stairs at (x, y): the cell with the same number on another floor of
+   * the same chapter (a run of five floors), or null.
+   */
+  linkTarget(x: number, y: number): { floor: number; x: number; y: number } | null {
+    const id = this.map.links[y * this.map.width + x];
+    if (!id) return null;
+    const first = this.state.floor - (this.state.floor % FLOORS_PER_CHAPTER);
+    for (let f = first; f < Math.min(this.floors.length, first + FLOORS_PER_CHAPTER); f++) {
+      if (f === this.state.floor) continue;
+      const i = this.floors[f].rows.findIndex((row) => row.includes(id));
+      if (i >= 0) return { floor: f, x: this.floors[f].rows[i].indexOf(id), y: i };
+    }
+    return null;
+  }
+
+  /** Whether linked stairs at (x, y) on this floor lead down (true), up (false), or nowhere (null). */
+  linkGoesDown(x: number, y: number): boolean | null {
+    const to = this.linkTarget(x, y);
+    return to ? to.floor > this.state.floor : null;
+  }
+
+  /** Take the linked stairs the party stands on: to the matching stairs on the other floor. */
+  takeLink(): boolean {
+    const to = this.linkTarget(this.state.x, this.state.y);
+    if (!to) return false;
+    this.state.floor = to.floor;
+    this.state.deepest = Math.max(this.state.deepest, to.floor);
+    this.map = this.loadMap();
+    this.state.x = to.x;
+    this.state.y = to.y;
+    this.state.danger = 0;
+    this.markExplored();
+    return true;
+  }
+
+  /** The current floor's map, with the gates this party has opened standing open. */
+  private loadMap(): FloorMap {
+    const map = parseFloor(this.floorDef);
+    for (const i of this.state.progress[this.state.floor]?.gatesOpen ?? []) if (map.tiles[i] === 'gate') map.tiles[i] = 'gateOpen';
+    return map;
   }
 
   private openChest(x: number, y: number): StepEvent {
