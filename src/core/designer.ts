@@ -398,6 +398,34 @@ export function blankChapterFloor(like: FloorDesign): FloorDesign {
   return d;
 }
 
+/**
+ * Places numbered stairs `id` at (x, y) on floor `from` and on floor `to`, on the same square (stairs go
+ * straight up or down). Any earlier stairs with that number are removed first. Returns false if a square is
+ * on the border.
+ */
+export function placeLink(c: ChapterDesign, id: LinkCell, from: number, to: number, x: number, y: number): boolean {
+  if (from === to || !c.floors[from] || !c.floors[to]) return false;
+  if (isBorder(c.floors[from], x, y) || isBorder(c.floors[to], x, y)) return false;
+  removeLink(c, id);
+  paint(c.floors[from], x, y, id);
+  paint(c.floors[to], x, y, id);
+  return true;
+}
+
+/** Removes numbered stairs `id` from every floor. */
+export function removeLink(c: ChapterDesign, id: LinkCell): void {
+  for (const d of c.floors) d.rows = d.rows.map((row) => row.split(id).join('.'));
+}
+
+/** Resizes every floor of the chapter alike, so stairs keep lining up. */
+export function resizeChapter(c: ChapterDesign, width: number, height: number): void {
+  for (const d of c.floors) resize(d, width, height);
+  // A floor without its own entrance must not get one from resize().
+  c.floors.forEach((d, i) => {
+    if (i > 0 && c.floors.length > 1) d.rows = d.rows.map((row) => row.replace('S', '.'));
+  });
+}
+
 /** The floor names a chapter gets in the game: "Name I", "Name II", … */
 export function floorName(c: ChapterDesign, i: number): string {
   return `${c.name.trim() || 'My Chapter'} ${ROMAN[i] ?? i + 1}`;
@@ -463,9 +491,14 @@ export function chapterProblems(c: ChapterDesign): string[] {
   });
   if (out.length) return [...new Set(out)];
 
+  const w = c.floors[0].rows[0].length;
+  const h = c.floors[0].rows.length;
+  if (c.floors.some((d) => d.rows.length !== h || d.rows[0].length !== w)) return ['All floors of a chapter must be the same size.'];
   for (const id of LINK_CELLS) {
-    const on = c.floors.flatMap((d, f) => find(d, id).map(() => f));
-    if (on.length && (on.length !== 2 || on[0] === on[1])) out.push(`Stairs ${id} must appear once on exactly two different floors.`);
+    const ends = c.floors.flatMap((d, f) => find(d, id).map(([x, y]) => ({ f, x, y })));
+    if (!ends.length) continue;
+    if (ends.length !== 2 || ends[0].f === ends[1].f) out.push(`Stairs ${id} must appear once on exactly two different floors.`);
+    else if (ends[0].x !== ends[1].x || ends[0].y !== ends[1].y) out.push(`Stairs ${id} must sit on the same square on both floors.`);
   }
   if (out.length) return out;
 

@@ -14,15 +14,15 @@ const floor = (rows: string[], extra: Partial<FloorDesign> = {}): FloorDesign =>
 });
 
 /**
- * Floor 1: the entrance, stairs 1 down, and a closed-off room behind a gate (opens from the east) with stairs 2.
- * Floor 2: stairs 1 up, a long way round to stairs 2 back up into that room — and the guardian.
+ * Floor 1: the entrance, stairs 1 down, and a room closed off by a gate (opens from the east) with stairs 2 in it.
+ * Floor 2: stairs 1 up on the same square, a long way round to stairs 2 (same square as on floor 1), and the guardian.
  */
 const chapter = (): ChapterDesign => ({
   version: 2,
   name: 'Bone Roads',
   floors: [
-    floor(['##########', '#S.....1.#', '#.######.#', '#2#......#', '#.e......#', '#.########', '#........#', '##########']),
-    floor(['##########', '#1.......#', '#.######.#', '#.#....#.#', '#.#.B..#.#', '#.####..##', '#2.......#', '##########'], { boss: 'rootgnawer' }),
+    floor(['##########', '#S.....1.#', '#.######.#', '#.#2e....#', '#.####...#', '#........#', '#........#', '##########']),
+    floor(['##########', '#......1.#', '#.######.#', '#.#2..#..#', '#.#.B.#..#', '#.#####..#', '#........#', '##########'], { boss: 'rootgnawer' }),
   ],
 });
 
@@ -31,10 +31,13 @@ describe('drawn chapters', () => {
     expect(chapterProblems(chapter())).toEqual([]);
   });
 
-  it('flags stairs without another end, and an entrance on an inner floor', () => {
+  it('flags stairs without another end, stairs on different squares, and an entrance on an inner floor', () => {
     const c = chapter();
-    c.floors[1].rows[6] = '#........#';
+    c.floors[1].rows[3] = '#.#...#..#';
     expect(chapterProblems(c).some((p) => p.includes('Stairs 2'))).toBe(true);
+    const moved = chapter();
+    moved.floors[1].rows[1] = '#1.......#';
+    expect(chapterProblems(moved)).toContain('Stairs 1 must sit on the same square on both floors.');
     const d = chapter();
     d.floors[1].rows[1] = '#1......S#';
     expect(chapterProblems(d).some((p) => p.includes('Only the first floor'))).toBe(true);
@@ -51,20 +54,21 @@ describe('drawn chapters', () => {
     expect(game.floors.map((f) => f.name)).toEqual(['Bone Roads I', 'Bone Roads II']);
     // Stairs 1 on floor 1 lead down.
     expect(game.linkGoesDown(7, 1)).toBe(true);
-    // The gate at (2,4) cannot be opened from the corridor side (west).
-    Object.assign(game.state, { x: 1, y: 4, dir: 1 });
+    // The gate at (4,3) opens from the east; from inside the room (3,3), its west side, it stays shut.
+    Object.assign(game.state, { x: 3, y: 3, dir: 1 });
     expect(game.interact().type).toBe('gateSealed');
-    // Come up stairs 2 from floor 2 into the room behind it, and open it from the east.
-    Object.assign(game.state, { floor: 1, x: 1, y: 6 });
-    (game as unknown as { map: unknown }).map = (game as unknown as { loadMap(): unknown }).loadMap();
+    // Stairs 1 take the party down onto the same square of floor 2.
+    Object.assign(game.state, { x: 7, y: 1 });
     expect(game.takeLink()).toBe(true);
-    expect([game.state.floor, game.state.x, game.state.y]).toEqual([0, 1, 3]);
-    Object.assign(game.state, { x: 3, y: 4, dir: 3 });
+    expect([game.state.floor, game.state.x, game.state.y]).toEqual([1, 7, 1]);
+    // Back up and open the gate from its own side.
+    expect(game.takeLink()).toBe(true);
+    Object.assign(game.state, { x: 5, y: 3, dir: 3 });
     expect(game.interact().type).toBe('gateOpened');
-    expect(game.map.tiles[4 * 10 + 2]).toBe('gateOpen');
+    expect(game.map.tiles[3 * 10 + 4]).toBe('gateOpen');
     // Still open after a trip to town and back.
     game.returnToTown();
     game.enterFloor(0, true);
-    expect(game.map.tiles[4 * 10 + 2]).toBe('gateOpen');
+    expect(game.map.tiles[3 * 10 + 4]).toBe('gateOpen');
   });
 });

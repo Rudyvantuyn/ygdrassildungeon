@@ -34,8 +34,9 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 ### Hoofdstukken tekenen met trappen en shortcuts (mijlpaal 15)
 
 - De **Drafting Table** (`?maker`) tekent nu hele hoofdstukken: tot vijf verdiepingen als tabbladen.
-- **Genummerde trappen 1–9**: hetzelfde nummer op twee verdiepingen verbindt ze (▼ omlaag, ▲ omhoog). Zo kan een pad
-  ook terug omhoog naar een ander deel van een eerdere verdieping lopen.
+- **Genummerde trappen 1–9**: kies het nummer en *Leads to* (de andere verdieping); tik een vakje en de trap komt op
+  precies hetzelfde vakje van beide verdiepingen (▼ omlaag, ▲ omhoog). Alle verdiepingen van een hoofdstuk zijn even
+  groot. Zo kan een pad ook terug omhoog naar een ander deel van een eerdere verdieping lopen.
 - **Wortelpoorten**: openen alleen vanaf één kant (het gouden pijltje) en blijven daarna voorgoed open: shortcuts
   voor een volgende run. Met een eigen geschilderde poort en tekentje, en een tip van Torvald.
 - Controles over het hele hoofdstuk (alles bereikbaar, elke trap twee kanten, de eindbaas op de laatste verdieping,

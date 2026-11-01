@@ -26,7 +26,9 @@ import {
   isGate,
   isLink,
   paint,
-  resize,
+  placeLink,
+  removeLink,
+  resizeChapter,
   type Cell,
   type ChapterDesign,
   type FloorDesign,
@@ -132,6 +134,8 @@ export class Designer {
   private readonly floorTabs: HTMLElement;
   private floor = 0;
   private linkNo: LinkCell = '1';
+  /** The floor new numbered stairs lead to (null: the next floor, or the one before on the last). */
+  private linkTo: number | null = null;
   private gateSide: GateCell = 'n';
   private tool: Tool = '#';
   private prowler = 0;
@@ -252,9 +256,18 @@ export class Designer {
     }
     // Only walls and floor are dragged; everything else is placed with a single tap.
     if (!first && this.tool !== '#' && this.tool !== '.') return;
-    const cell: Cell = this.tool === 'link' ? this.linkNo : this.tool === 'gate' ? this.gateSide : this.tool;
-    // Tapping numbered stairs or a gate again clears it.
-    if (first && (this.tool === 'link' || this.tool === 'gate') && cellAt(this.design, x, y) === cell) {
+    if (this.tool === 'link') {
+      if (!first) return;
+      // Tapping numbered stairs removes both ends; anywhere else places them here and on the same square below/above.
+      const here = cellAt(this.design, x, y);
+      if (isLink(here)) removeLink(this.chapter, here);
+      else if (!placeLink(this.chapter, this.linkNo, this.floor, this.linkTarget(), x, y)) return;
+      this.changed();
+      return;
+    }
+    const cell: Cell = this.tool === 'gate' ? this.gateSide : this.tool;
+    // Tapping a gate again clears it.
+    if (first && this.tool === 'gate' && cellAt(this.design, x, y) === cell) {
       paint(this.design, x, y, '.');
       this.changed();
       return;
@@ -412,6 +425,7 @@ export class Designer {
     c.floors.forEach((_, i) => {
       const tab = this.button(`Floor ${i + 1}`, () => {
         this.floor = i;
+        this.linkTo = null;
         this.prowler = 0;
         this.refresh();
       }, i === this.floor ? 'tab on' : 'tab');
@@ -461,13 +475,23 @@ export class Designer {
     );
 
     if (this.tool === 'link') {
-      this.settingsEl.prepend(
-        this.stepper('Stairs no.', this.linkNo, (dir) => {
-          this.linkNo = cycle(LINK_CELLS, this.linkNo, dir);
-          this.refresh();
-        }),
-        el('p', { className: 'draft-hint', text: 'Place the same number on two floors to join them. ▼ leads down, ▲ up, ? has no other end yet.' }),
-      );
+      if (c.floors.length < 2) {
+        this.settingsEl.prepend(el('p', { className: 'draft-hint', text: 'Add a second floor (+ Floor) to join floors with stairs.' }));
+      } else {
+        const others = c.floors.map((_, i) => i).filter((i) => i !== this.floor);
+        const to = this.linkTarget();
+        this.settingsEl.prepend(
+          this.stepper('Stairs no.', this.linkNo, (dir) => {
+            this.linkNo = cycle(LINK_CELLS, this.linkNo, dir);
+            this.refresh();
+          }),
+          this.stepper('Leads to', `Floor ${to + 1} ${to > this.floor ? '▼' : '▲'}`, (dir) => {
+            this.linkTo = cycle(others, to, dir);
+            this.refresh();
+          }),
+          el('p', { className: 'draft-hint', text: 'Tap a square: the stairs appear here and on the same square of the other floor. Tap stairs again to remove both ends.' }),
+        );
+      }
     }
     if (this.tool === 'gate') {
       this.settingsEl.prepend(
@@ -524,8 +548,16 @@ export class Designer {
 
   private resize(w: number, h: number): void {
     if (w < MIN_SIZE || h < MIN_SIZE || w > MAX_SIZE || h > MAX_SIZE) return;
-    resize(this.design, w, h);
+    // All floors of a chapter share one size, so stairs line up.
+    resizeChapter(this.chapter, w, h);
     this.changed();
+  }
+
+  /** The floor that new stairs from this floor lead to. */
+  private linkTarget(): number {
+    const n = this.chapter.floors.length;
+    if (this.linkTo !== null && this.linkTo !== this.floor && this.linkTo < n) return this.linkTo;
+    return this.floor + 1 < n ? this.floor + 1 : Math.max(0, this.floor - 1);
   }
 
   /** After every edit: keep the draft and update the panel. */
