@@ -1,3 +1,4 @@
+import { inject } from '@vercel/analytics';
 import { audio } from './audio/audio';
 import { watchErrors } from './net/reports';
 import { App } from './ui/app';
@@ -14,6 +15,8 @@ import './ui/styles.css';
 const root = document.getElementById('app')!;
 const app = new App(root);
 watchErrors(() => app.reportContext());
+// Visitor counts (Vercel Web Analytics: no cookies, no personal data; only on the live site).
+if (__BUILD__ !== 'dev') inject({ mode: 'production' });
 
 /**
  * Scale the stage to fit any window. Small screens (phones) get their own, more compact 960×440 layout
