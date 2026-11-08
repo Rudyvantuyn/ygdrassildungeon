@@ -395,11 +395,16 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'Continue', disabled: !hasSave, onSelect: () => this.loadSave() },
         ...(isMaker() ? [{ label: 'Drafting Table', onSelect: () => this.showDesigner() }] : []),
         { label: 'How to Play', onSelect: () => this.showHelp(() => this.showTitle()) },
+        { label: 'Feedback', onSelect: () => this.showFeedback(() => this.showTitle()) },
         { label: 'Privacy & Terms', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
       ],
       { startIndex: hasSave ? 1 : 0 },
     );
     const screen = el('div', { className: 'title-screen' }, [
+      el('div', { className: 'playtest-badge' }, [
+        el('strong', { text: 'Early playtest' }),
+        el('span', { text: 'Chapters I and II are open. Saves may be reset before release. Found a bug or have an idea? Use Feedback here or in the System menu.' }),
+      ]),
       el('div', { className: 'logo', text: 'YGDRASSIL' }),
       el('div', { className: 'tagline', text: 'The road to Asgard runs through Ymir' }),
       el('div', { className: 'panel dialog' }, [menu.el]),

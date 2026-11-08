@@ -978,6 +978,29 @@ table.stats th.gear {
   color: #f0c060;
 }
 
+.playtest-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  max-width: 300px;
+  padding: 10px 14px;
+  border: 1px solid rgba(240, 192, 96, 0.55);
+  border-radius: 6px;
+  background: rgba(10, 14, 16, 0.78);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+  overflow-wrap: break-word;
+}
+.playtest-badge strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #f0c060;
+  font-family: var(--font-title);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .title-foot {
   position: absolute;
   bottom: 22px;
@@ -2145,6 +2168,13 @@ body.phone .title-screen {
 }
 body.phone .title-foot {
   display: none;
+}
+body.phone .playtest-badge {
+  top: 8px;
+  right: 8px;
+  max-width: 220px;
+  padding: 6px 10px;
+  font-size: 11px;
 }
 
 /* Room for the Skip button beside the story text. */
