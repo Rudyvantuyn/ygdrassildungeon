@@ -232,6 +232,12 @@ De knoppen rechts op het scherm werken ook met muis of touch.
   overwinning, nederlaag en level-up.
 - Volume voor muziek en effecten apart: menu **Settings** in de stad (System) of in het Pack-menu, met schuifbalken.
 
+## Plannen voor later
+
+- **Een echte website** rond de game (alleen tekst en screenshots): home met een Play-knop, "wie ben ik", devlog/nieuws,
+  een Buy Me a Coffee- of Ko-fi-knop, roadmap, contact en de bestaande privacypagina. Met een eigen domeinnaam; de game
+  komt dan op bijvoorbeeld `/play`. Let op: zodra er geld binnenkomt (ook donaties) is Vercel Pro nodig.
+
 ## Woordenlijst
 
 Alle namen in het spel zijn eigen verzinsels. Nieuwe namen voeg je toe in `src/core/data/` en hier.
