@@ -1658,12 +1658,26 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.overlayMenu = null;
   }
 
-  toast(text: string): void {
+  toast(text: string, ms = 2400): void {
     if (this.story) return; // the story box has the stage
     this.toastEl.textContent = text;
     this.toastEl.classList.remove('hidden');
     window.clearTimeout(this.toastTimer);
-    this.toastTimer = window.setTimeout(() => this.toastEl.classList.add('hidden'), 2400);
+    this.toastTimer = window.setTimeout(() => this.toastEl.classList.add('hidden'), ms);
+  }
+
+  /** News that must not be missed: a dialog while exploring, a long toast in the middle of anything else. */
+  notice(title: string, text: string): void {
+    if (this.mode !== 'explore') {
+      this.toast(text, 6000);
+      return;
+    }
+    const ok = () => {
+      this.closeOverlay();
+      this.enterExplore();
+    };
+    const menu = new ListMenu([{ label: 'OK', onSelect: ok }], { onCancel: ok });
+    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: title }), el('p', { text }), menu.el]), menu);
   }
 
   private prowlerName(index: number): string {

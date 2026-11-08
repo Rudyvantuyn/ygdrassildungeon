@@ -212,6 +212,7 @@ export const TIPS: TipDef[] = [
       'Every town of the Pact has a Hornstone. Blow it and Wayfinders from other halls answer. Each brings one adventurer; four make an expedition.',
       'What you find is shared when it ends; levels and XP always come home. The host may fill empty seats with their own adventurers.',
       'If the party falls, or everyone leaves mid-fight, the haul is lost. No Oath Tokens are won on expeditions. You need an account to use the horn.',
+      'Want only your friends? Make the horn private and give them the password. If someone goes quiet for a minute, the next player leads; they can still come back.',
     ],
   },
 ];

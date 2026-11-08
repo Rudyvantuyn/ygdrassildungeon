@@ -9,7 +9,7 @@ import { FLOORS } from '../core/data/floors';
 import { GATHER_KINDS } from '../core/data/gathering';
 import { gatherPrompt } from './gatherView';
 import { ITEMS } from '../core/data/items';
-import { leaderSeat, type Action, type ExpeditionState, type LogEntry } from '../core/expedition';
+import { leaderSeat, PING_MS, type Action, type ExpeditionState, type LogEntry } from '../core/expedition';
 import { Game, type StepEvent } from '../core/game';
 import { online, OnlineError, type ExpeditionRow } from '../net/online';
 import type { RoundDriver } from './combatView';
@@ -17,6 +17,8 @@ import type { RoundDriver } from './combatView';
 export interface CoopHost {
   game: Game;
   toast(text: string): void;
+  /** News that must not be missed (someone left, the lead changed hands). */
+  notice(title: string, text: string): void;
   confirm(title: string, text: string, yes: () => void): void;
   viewFx(kind: 'step' | 'turn' | 'bump' | 'encounter'): void;
   shakeView(): void;
@@ -40,6 +42,7 @@ export class CoopSession {
   private unwatch: (() => void) | null = null;
   private timer = 0;
   private lastTick = 0;
+  private lastPing = 0;
   /** Playback runs one state change at a time, in order. */
   private queue: Promise<void> = Promise.resolve();
   /** Leader's moves waiting to be sent (already shown on screen). */
@@ -182,6 +185,7 @@ export class CoopSession {
   }
 
   private async play(entries: LogEntry[], state: ExpeditionState, row: ExpeditionRow): Promise<void> {
+    for (const entry of entries) this.people(entry);
     const rounds = entries.flatMap((e) => (e.kind === 'round' ? e.events : []));
     if (this.combat) {
       if (rounds.length || state.phase !== 'combat') {
@@ -391,10 +395,32 @@ export class CoopSession {
     Object.assign(this.mirror.state.inventory, state.game!.inventory);
   }
 
+  /** Someone left or came back: tell this player what it means for them. */
+  private people(entry: LogEntry): void {
+    if (entry.kind === 'left' && entry.user !== this.me) {
+      const gone = entry.lost ? `${entry.player} has lost the connection` : `${entry.player} has left the expedition`;
+      if (entry.leader === this.me) {
+        this.host.notice('You lead the way now', `${gone}. You lead the way now: you move the party and decide at stairs, chests and springs. ${entry.player}'s adventurer fights on without them.`);
+      } else if (entry.leader) {
+        this.host.notice('A new leader', `${gone}. ${entry.leaderName} leads the way now. ${entry.player}'s adventurer fights on without them.`);
+      } else {
+        this.host.toast(`${gone}. Their adventurer fights on without them.`);
+      }
+    }
+    if (entry.kind === 'back' && entry.user !== this.me) {
+      this.host.toast(entry.leads ? `${entry.player} is back and leads the way again.` : `${entry.player} is back.`);
+    }
+  }
+
   private tick(): void {
     const s = this.state;
-    if (s.phase !== 'combat' || this.ended) return;
     const now = Date.now();
+    // Check in now and then, so the others know this player is still here.
+    if (!this.ended && now - this.lastPing > PING_MS) {
+      this.lastPing = now;
+      void this.send({ type: 'ping' }, true);
+    }
+    if (s.phase !== 'combat' || this.ended) return;
     if (now < s.deadline + TICK_GRACE_MS || now - this.lastTick < 3000) return;
     this.lastTick = now;
     void this.send({ type: 'tick' }, true);

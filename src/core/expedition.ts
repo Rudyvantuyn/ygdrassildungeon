@@ -26,6 +26,12 @@ export const EXPEDITION_VERSION = 1;
 export const MAX_SEATS = 4;
 /** Time each player has to pick a command before their adventurer acts on their own. */
 export const ROUND_SECONDS = 40;
+/** A player who sends nothing for this long counts as gone (clients check in every few seconds). */
+export const AWAY_MS = 60_000;
+/** In the gathering players wait longer: sharing the code with a friend takes them away from the game. */
+export const LOBBY_AWAY_MS = 180_000;
+/** How often clients check in. */
+export const PING_MS = 10_000;
 /** Entries kept in the log; clients that fall further behind simply resync. */
 const LOG_SIZE = 16;
 /** Supplies the Hornstone hands out per player at the start of an expedition. */
@@ -39,6 +45,10 @@ export interface Seat {
   member: Member;
   /** The player has left; the adventurer now fights on its own. */
   left: boolean;
+  /** The player went quiet (closed the game, lost the connection) rather than leaving; they may come back. */
+  lost?: boolean;
+  /** When the player last sent anything (ms since epoch). */
+  seen?: number;
 }
 
 export type Phase = 'lobby' | 'explore' | 'combat' | 'ended';
@@ -47,7 +57,11 @@ export type EndReason = 'returned' | 'wiped' | 'disbanded';
 export type LogEntry =
   | { seq: number; kind: 'step'; events: StepEvent[] }
   | { seq: number; kind: 'round'; events: CombatEvent[] }
-  | { seq: number; kind: 'note'; text: string };
+  | { seq: number; kind: 'note'; text: string }
+  /** A player left (`lost`: went quiet). `leader` is who leads the way now, if that changed. */
+  | { seq: number; kind: 'left'; user: string; player: string; lost: boolean; leader: string | null; leaderName: string | null }
+  /** A player who went quiet is back. `leads`: they lead the way again. */
+  | { seq: number; kind: 'back'; user: string; player: string; leads: boolean };
 
 /** What one player takes home at the end. */
 export interface Share {
@@ -84,6 +98,8 @@ export interface ExpeditionState {
 export type Action =
   | { type: 'join'; player: string; member: Member }
   | { type: 'leave' }
+  /** "Still here": keeps the player's seat. */
+  | { type: 'ping' }
   /** Host only: set out. `fill` adds more of the host's own adventurers to empty seats. */
   | { type: 'start'; fill?: Member[] }
   | { type: 'turn'; delta: -1 | 1 }
@@ -203,42 +219,31 @@ export function applyAction(state: ExpeditionState, user: string, action: Action
 }
 
 function run(state: ExpeditionState, user: string, action: Action, now: number, seed: number): string | null {
+  if (state.phase === 'ended') return 'This expedition is over.';
+  checkIn(state, user, now);
+  sweep(state, user, now);
+  // The sweep may have ended it (the host of a gathering went quiet).
+  if ((state.phase as Phase) === 'ended') return null;
   const seat = state.seats.findIndex((s) => s.user === user);
   const isLeader = leaderUser(state) === user;
-  if (state.phase === 'ended') return 'This expedition is over.';
 
   switch (action.type) {
+    case 'ping':
+      return null;
+
     case 'join': {
       if (state.phase !== 'lobby') return 'This expedition has already set out.';
       if (seat >= 0) return 'You are already part of this expedition.';
       if (state.seats.length >= MAX_SEATS) return 'This expedition is full.';
       const member = validMember(action.member);
       if (!member) return 'That adventurer cannot join: their gear or skills are beyond their level.';
-      state.seats.push({ user, player: cleanPlayerName(action.player), member, left: false });
+      state.seats.push({ user, player: cleanPlayerName(action.player), member, left: false, seen: now });
       return null;
     }
 
     case 'leave': {
       if (seat < 0) return 'You are not part of this expedition.';
-      if (state.phase === 'lobby') {
-        if (user === state.host) {
-          end(state, 'disbanded');
-          return null;
-        }
-        state.seats = state.seats.filter((s) => s.user !== user);
-        return null;
-      }
-      for (const s of state.seats) if (s.user === user) s.left = true;
-      if (leaderSeat(state) < 0) {
-        // Everybody is gone. Walking out of a fight counts as losing it: no running from a guardian this way.
-        if (state.phase === 'combat') {
-          end(state, 'wiped');
-          note(state, 'Everyone left in the middle of a fight. The Rootdeep keeps what it found.');
-        } else end(state, 'returned');
-        return null;
-      }
-      note(state, `${state.seats[seat].player} has left. Their adventurer fights on alone.`);
-      if (state.phase === 'combat') settleRound(state, now, false);
+      depart(state, user, false, now);
       return null;
     }
 
@@ -250,7 +255,7 @@ function run(state: ExpeditionState, user: string, action: Action, now: number, 
         const member = validMember(raw);
         if (!member) return 'One of your adventurers cannot join: their gear or skills are beyond their level.';
         if (state.seats.some((s) => s.user === user && s.member.name === member.name)) continue;
-        state.seats.push({ user, player: state.seats[0].player, member, left: false });
+        state.seats.push({ user, player: state.seats[0].player, member, left: false, seen: now });
       }
       const game = Game.newGame(seed);
       const s = game.state;
@@ -408,6 +413,75 @@ function checkCommand(state: ExpeditionState, seat: number, cmd: Command): strin
  * Resolves the round once every present player has chosen (or time is up, or `force`).
  * Seats without a command, and seats of players who left, act on their own.
  */
+/** The player is here: note the time, and welcome them back if they had gone quiet. */
+function checkIn(state: ExpeditionState, user: string, now: number): void {
+  const leaderBefore = leaderUser(state);
+  let back: Seat | null = null;
+  for (const s of state.seats) {
+    if (s.user !== user) continue;
+    s.seen = now;
+    if (s.lost) {
+      s.lost = false;
+      s.left = false;
+      back = s;
+    }
+  }
+  if (back) log(state, { kind: 'back', user, player: back.player, leads: leaderUser(state) === user && leaderBefore !== user });
+}
+
+/** Players who have not been heard from for too long count as gone. */
+function sweep(state: ExpeditionState, except: string, now: number): void {
+  const limit = state.phase === 'lobby' ? LOBBY_AWAY_MS : AWAY_MS;
+  for (const user of players(state)) {
+    if (user === except || state.phase === 'ended') continue;
+    const seats = state.seats.filter((s) => s.user === user && !s.left);
+    if (!seats.length) continue;
+    const seen = Math.max(...seats.map((s) => s.seen ?? now));
+    if (now - seen > limit) depart(state, user, true, now);
+  }
+}
+
+/** `user` leaves the expedition (`lost`: they went quiet instead of saying goodbye). */
+function depart(state: ExpeditionState, user: string, lost: boolean, now: number): void {
+  const player = state.seats.find((s) => s.user === user)?.player ?? 'Someone';
+  if (state.phase === 'lobby') {
+    // Without its host a gathering breaks up; anyone else simply gives up their seat.
+    if (user === state.host) {
+      log(state, { kind: 'left', user, player, lost, leader: null, leaderName: null });
+      end(state, 'disbanded');
+      return;
+    }
+    state.seats = state.seats.filter((s) => s.user !== user);
+    log(state, { kind: 'left', user, player, lost, leader: null, leaderName: null });
+    return;
+  }
+  const leaderBefore = leaderUser(state);
+  for (const s of state.seats) {
+    if (s.user !== user) continue;
+    s.left = true;
+    s.lost = lost || undefined;
+  }
+  const leader = leaderUser(state);
+  if (!leader) {
+    // Everybody is gone. Walking out of a fight counts as losing it: no running from a guardian this way.
+    if (state.phase === 'combat') {
+      end(state, 'wiped');
+      note(state, 'Everyone left in the middle of a fight. The Rootdeep keeps what it found.');
+    } else end(state, 'returned');
+    return;
+  }
+  const changed = leader !== leaderBefore;
+  log(state, {
+    kind: 'left',
+    user,
+    player,
+    lost,
+    leader: changed ? leader : null,
+    leaderName: changed ? (state.seats[leaderSeat(state)]?.player ?? null) : null,
+  });
+  if (state.phase === 'combat') settleRound(state, now, false);
+}
+
 function settleRound(state: ExpeditionState, now: number, force: boolean): void {
   const game = Game.fromState(state.game!);
   const combat = game.resumeCombat(state.combat!);

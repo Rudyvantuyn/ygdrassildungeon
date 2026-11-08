@@ -32,9 +32,18 @@ interface Row {
   seq: number;
   members: string[];
   state: ExpeditionState;
+  locked?: boolean;
 }
 
-class Refusal extends Error {}
+class Refusal extends Error {
+  constructor(
+    message: string,
+    /** The expedition is private and the password was missing or wrong. */
+    readonly needsPassword = false,
+  ) {
+    super(message);
+  }
+}
 
 function reply(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
@@ -98,7 +107,31 @@ async function rest(path: string, init: RequestInit = {}): Promise<unknown> {
   return text ? JSON.parse(text) : null;
 }
 
-const COLUMNS = 'id,code,seq,members,state';
+const COLUMNS = 'id,code,seq,members,state,locked';
+
+/** Passwords of private expeditions: 1–24 characters, spaces at the ends ignored. */
+const PASSWORD_MAX = 24;
+function cleanPassword(raw: unknown): string {
+  return typeof raw === 'string' ? raw.trim().slice(0, PASSWORD_MAX) : '';
+}
+
+async function hashPassword(id: string, password: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${id}:${password}`));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Checks the password of a private expedition; open ones need none. */
+async function checkPassword(row: Row, raw: unknown): Promise<void> {
+  if (!row.locked) return;
+  const password = cleanPassword(raw);
+  if (!password) throw new Refusal('This expedition is private. Enter its password.', true);
+  const rows = (await rest(`expedition_secrets?expedition_id=eq.${row.id}&select=hash`)) as { hash: string }[];
+  if (rows[0]?.hash !== (await hashPassword(row.id, password))) {
+    // A short pause makes guessing passwords slow.
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    throw new Refusal('That password is not right.', true);
+  }
+}
 
 async function fetchRow(filter: string): Promise<Row | null> {
   const rows = (await rest(`expeditions?${filter}&select=${COLUMNS}`)) as Row[];
@@ -137,13 +170,19 @@ async function create(user: string, body: Record<string, unknown>): Promise<Row>
   const startFloor = startFloorFor(Math.max(0, Math.min(deepest, Number(body.startFloor) || 0)), deepest);
   const player = cleanPlayerName(body.player);
   const state = createExpedition(user, player, member, startFloor);
+  state.seats[0].seen = Date.now();
+  const password = cleanPassword(body.password);
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const rows = (await rest('expeditions', {
+      const rows = (await rest(`expeditions?select=${COLUMNS}`, {
         method: 'POST',
-        body: JSON.stringify({ code: newCode(), host: user, host_name: player, start_floor: startFloor, ...columns(state, [user]) }),
+        body: JSON.stringify({ code: newCode(), host: user, host_name: player, start_floor: startFloor, locked: !!password, ...columns(state, [user]) }),
       })) as Row[];
-      return rows[0];
+      const row = rows[0];
+      if (password) {
+        await rest('expedition_secrets', { method: 'POST', body: JSON.stringify({ expedition_id: row.id, hash: await hashPassword(row.id, password) }) });
+      }
+      return row;
     } catch (e) {
       // A code that is already taken: try another one.
       if (!String(e).includes('23505')) throw e;
@@ -153,12 +192,13 @@ async function create(user: string, body: Record<string, unknown>): Promise<Row>
 }
 
 /** Loads the row, applies the action and writes it back, retrying if someone else wrote first. */
-async function act(user: string, filter: string, action: Action): Promise<Row> {
+async function act(user: string, filter: string, action: Action, password?: unknown): Promise<Row> {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     const row = await fetchRow(filter);
     if (!row) throw new Refusal('That expedition does not exist.');
     if (action.type !== 'join' && !row.members.includes(user)) throw new Refusal('You are not part of this expedition.');
     if (action.type === 'join') {
+      if (!row.members.includes(user)) await checkPassword(row, password);
       const active = await activeFor(user);
       if (active && active.id !== row.id) throw new Refusal('You are already part of another expedition.');
     }
@@ -191,7 +231,7 @@ Deno.serve(async (req) => {
       case 'join': {
         const code = String(body.code ?? '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
         const action: Action = { type: 'join', player: String(body.player ?? ''), member: body.member as never };
-        row = await act(user, `code=eq.${code}`, action);
+        row = await act(user, `code=eq.${code}`, action, body.password);
         break;
       }
       case 'act': {
@@ -202,9 +242,9 @@ Deno.serve(async (req) => {
       default:
         return reply({ error: 'Unknown request.' }, 400);
     }
-    return reply({ id: row.id, code: row.code, state: row.state });
+    return reply({ id: row.id, code: row.code, state: row.state, locked: !!row.locked });
   } catch (e) {
-    if (e instanceof Refusal) return reply({ error: e.message }, 409);
+    if (e instanceof Refusal) return reply({ error: e.message, needsPassword: e.needsPassword || undefined }, 409);
     console.error(e);
     return reply({ error: 'Something went wrong on the server.' }, 500);
   }

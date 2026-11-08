@@ -5,7 +5,7 @@
 import { CLASSES } from '../core/data/classes';
 import { chapterOf, startFloors } from '../core/data/chapters';
 import { FLOORS } from '../core/data/floors';
-import { claimShare, MAX_SEATS, type ExpeditionState, type Share } from '../core/expedition';
+import { claimShare, MAX_SEATS, PING_MS, type ExpeditionState, type Share } from '../core/expedition';
 import type { Game } from '../core/game';
 import { isAlive } from '../core/party';
 import type { Member } from '../core/types';
@@ -38,6 +38,11 @@ interface Field {
 
 export class Hornstone {
   private unwatch: (() => void) | null = null;
+  /** Checks in with the server while waiting in a gathering. */
+  private pinger = 0;
+  /** The newest gathering news already shown. */
+  private seenSeq = 0;
+  private seenId = '';
 
   constructor(private readonly host: HornstoneHost) {}
 
@@ -145,10 +150,51 @@ export class Hornstone {
     const items: MenuItem[] = starts.map((i) => ({
       label: `Chapter ${chapterOf(i).numeral}: ${chapterOf(i).name}`,
       detail: FLOORS[i].name,
-      onSelect: () => void this.run(() => online.create(member, i, deepest), (row) => this.lobby(row)),
+      onSelect: () => this.choosePrivacy(member, i),
     }));
     items.push({ label: 'Back', onSelect: back });
     this.dialog('Where to?', [el('p', { text: 'An expedition starts at the beginning of a chapter you have reached.' })], new ListMenu(items, { onCancel: back, startIndex: starts.length - 1 }));
+  }
+
+  /** Open to every player, or only to friends who know the password. */
+  private choosePrivacy(member: Member, floor: number): void {
+    const deepest = this.game.state.deepest;
+    const back = () => this.chooseFloor(member);
+    const create = (password?: string) => void this.run(() => online.create(member, floor, deepest, password), (row) => this.lobby(row));
+    const menu = new ListMenu(
+      [
+        { label: 'Open to all', description: 'Anyone can answer your horn.', onSelect: () => create() },
+        {
+          label: 'Private',
+          description: 'Only players who know the password can join. Share it with your friends together with the code.',
+          onSelect: () =>
+            this.form('Private expedition', 'Choose a password (up to 24 characters).', [{ label: 'Password', max: 24 }], 'Sound the Horn', ([password], fail) => {
+              if (!password.trim()) return fail('Enter a password, or go back and choose Open to all.');
+              create(password);
+            }, () => this.choosePrivacy(member, floor)),
+        },
+        { label: 'Back', onSelect: back },
+      ],
+      { onCancel: back },
+    );
+    this.dialog('Who may join?', [], menu);
+  }
+
+  /** Joins an expedition, asking for its password when it turns out to be private. */
+  private async join(code: string, member: Member, password?: string): Promise<void> {
+    this.message('The Hornstone', 'One moment...', false);
+    try {
+      this.lobby(await online.join(code, member, password));
+    } catch (e) {
+      if (e instanceof OnlineError && e.needsPassword) {
+        this.form('A private expedition', password ? e.message : 'Ask the host for the password.', [{ label: 'Password', max: 24 }], 'Join', ([pw], fail) => {
+          if (!pw.trim()) return fail('Enter the password.');
+          void this.join(code, member, pw);
+        }, () => void this.main());
+        return;
+      }
+      this.message('The Hornstone', errorText(e), true, () => void this.main());
+    }
   }
 
   private async browse(): Promise<void> {
@@ -161,9 +207,10 @@ export class Hornstone {
       return this.message('Answer a Horn', errorText(e), true, back);
     }
     const items: MenuItem[] = lobbies.map((l) => ({
-      label: `${l.host_name}`,
+      label: l.locked ? `${l.host_name} · private` : `${l.host_name}`,
       detail: `${l.seats}/${MAX_SEATS} · ${FLOORS[l.start_floor]?.name ?? ''}`,
-      onSelect: () => this.chooseMember('Who answers the horn?', (m) => void this.run(() => online.join(l.code, m), (row) => this.lobby(row))),
+      description: l.locked ? 'A private expedition: you need its password.' : undefined,
+      onSelect: () => this.chooseMember('Who answers the horn?', (m) => void this.join(l.code, m)),
     }));
     if (!items.length) items.push({ label: 'No horns are sounding right now', disabled: true, onSelect: () => {} });
     items.push({ label: 'Listen again', onSelect: () => void this.browse() }, { label: 'Back', onSelect: back });
@@ -173,7 +220,7 @@ export class Hornstone {
   private joinByCode(): void {
     const back = () => void this.main();
     this.form('Join by code', 'Ask the host for the four letters on their screen.', [{ label: 'Code', max: 4 }], 'Next', ([code]) => {
-      this.chooseMember('Who answers the horn?', (m) => void this.run(() => online.join(code, m), (row) => this.lobby(row)));
+      this.chooseMember('Who answers the horn?', (m) => void this.join(code, m));
     }, back);
   }
 
@@ -181,18 +228,41 @@ export class Hornstone {
 
   private lobby(row: ExpeditionRow, index = 0): void {
     const state = row.state;
+    const me = online.userId;
+    // News from before this player came in (or from another gathering) is not news.
+    if (this.seenId !== row.id) {
+      this.seenId = row.id;
+      this.seenSeq = state.phase === 'ended' ? 0 : state.seq;
+    }
+    const news = state.log.filter((e) => e.seq > this.seenSeq);
+    this.seenSeq = Math.max(this.seenSeq, state.seq);
     if (state.phase === 'ended') {
       this.stopWatching();
-      return this.message('The Hornstone', state.result?.reason === 'disbanded' ? 'The host called off the expedition.' : 'This expedition is over.', true, () => void this.main());
+      const hostGone = news.find((e) => e.kind === 'left' && e.user === state.host);
+      const text =
+        state.result?.reason !== 'disbanded'
+          ? 'This expedition is over.'
+          : hostGone?.kind === 'left' && hostGone.lost
+            ? `${hostGone.player}, the host, lost the connection, so the gathering broke up.`
+            : state.host === me
+              ? 'You called off the expedition.'
+              : 'The host called off the expedition.';
+      return this.message('The Hornstone', text, true, () => void this.main());
+    }
+    for (const e of news) {
+      if (e.kind === 'left' && e.user !== me) this.host.toast(e.lost ? `${e.player} lost the connection and gave up their seat.` : `${e.player} left the gathering.`);
     }
     if (state.phase !== 'lobby') {
       this.stopWatching();
       this.host.startExpedition(row);
       return;
     }
-    if (!this.unwatch) this.unwatch = online.watch(row.id, (r) => this.lobby(r, menu.selectedIndex));
+    if (!this.unwatch) {
+      this.unwatch = online.watch(row.id, (r) => this.lobby(r, menu.selectedIndex));
+      // Check in now and then, so a gathering whose players have gone does not wait forever.
+      this.pinger = window.setInterval(() => void online.act(row.id, { type: 'ping' }).catch(() => {}), PING_MS);
+    }
 
-    const me = online.userId;
     const isHost = state.host === me;
     const seats = state.seats.map((s) =>
       el('div', { className: 'seat' }, [
@@ -236,8 +306,14 @@ export class Hornstone {
     this.dialog(
       'Gathering at the Hornstone',
       [
-        el('div', { className: 'lobby-code' }, [el('span', { text: 'Code' }), el('b', { text: row.code })]),
-        el('p', { text: isHost ? 'Share the code with your friends. Set out when everyone is here.' : `Waiting for ${state.seats[0].player} to set out...` }),
+        el('div', { className: 'lobby-code' }, [el('span', { text: row.locked ? 'Code · private' : 'Code' }), el('b', { text: row.code })]),
+        el('p', {
+          text: isHost
+            ? row.locked
+              ? 'Share the code and the password with your friends. Set out when everyone is here.'
+              : 'Share the code with your friends. Set out when everyone is here.'
+            : `Waiting for ${state.seats[0].player} to set out...`,
+        }),
         el('div', { className: 'seats' }, seats),
       ],
       menu,
@@ -248,6 +324,8 @@ export class Hornstone {
   private stopWatching(): void {
     this.unwatch?.();
     this.unwatch = null;
+    window.clearInterval(this.pinger);
+    this.pinger = 0;
   }
 
   // ── Rewards ────────────────────────────────────────────────────────────────

@@ -18,15 +18,21 @@ export interface Lobby {
   host_name: string;
   start_floor: number;
   seats: number;
+  /** Private: joining takes a password. */
+  locked: boolean;
 }
 
 export interface ExpeditionRow {
   id: string;
   code: string;
   state: ExpeditionState;
+  locked?: boolean;
 }
 
-export class OnlineError extends Error {}
+export class OnlineError extends Error {
+  /** The expedition is private and the password was missing or wrong. */
+  needsPassword = false;
+}
 
 class Online {
   private client: SupabaseClient | null = null;
@@ -153,17 +159,22 @@ class Online {
     } catch {
       throw new OnlineError('Could not reach the Hornstone. Check your connection.');
     }
-    const json = (await res.json().catch(() => ({}))) as Partial<ExpeditionRow> & { error?: string };
-    if (!res.ok || !json.state) throw new OnlineError(json.error ?? 'Something went wrong.');
+    const json = (await res.json().catch(() => ({}))) as Partial<ExpeditionRow> & { error?: string; needsPassword?: boolean };
+    if (!res.ok || !json.state) {
+      const error = new OnlineError(json.error ?? 'Something went wrong.');
+      error.needsPassword = !!json.needsPassword;
+      throw error;
+    }
     return json as ExpeditionRow;
   }
 
-  create(member: Member, startFloor: number, deepest: number): Promise<ExpeditionRow> {
-    return this.call({ op: 'create', player: this.playerName, member, startFloor, deepest });
+  /** `password`: makes the expedition private. */
+  create(member: Member, startFloor: number, deepest: number, password?: string): Promise<ExpeditionRow> {
+    return this.call({ op: 'create', player: this.playerName, member, startFloor, deepest, password });
   }
 
-  join(code: string, member: Member): Promise<ExpeditionRow> {
-    return this.call({ op: 'join', code, player: this.playerName, member });
+  join(code: string, member: Member, password?: string): Promise<ExpeditionRow> {
+    return this.call({ op: 'join', code, player: this.playerName, member, password });
   }
 
   act(id: string, action: Action): Promise<ExpeditionRow> {
@@ -174,7 +185,7 @@ class Online {
     const since = new Date(Date.now() - LOBBY_MAX_AGE_MS).toISOString();
     const { data, error } = await this.db
       .from('expeditions')
-      .select('id, code, host_name, start_floor, seats')
+      .select('id, code, host_name, start_floor, seats, locked')
       .eq('phase', 'lobby')
       .gt('updated_at', since)
       .lt('seats', 4)
@@ -199,7 +210,7 @@ class Online {
   }
 
   async fetch(id: string): Promise<ExpeditionRow | null> {
-    const { data } = await this.db.from('expeditions').select('id, code, state').eq('id', id).maybeSingle();
+    const { data } = await this.db.from('expeditions').select('id, code, state, locked').eq('id', id).maybeSingle();
     return (data as ExpeditionRow | null) ?? null;
   }
 

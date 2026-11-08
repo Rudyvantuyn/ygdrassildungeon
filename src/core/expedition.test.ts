@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyAction, claimShare, createExpedition, leaderUser, validMember, type ExpeditionState } from './expedition';
+import { applyAction, AWAY_MS, claimShare, createExpedition, leaderUser, LOBBY_AWAY_MS, validMember, type ExpeditionState } from './expedition';
 import { Game } from './game';
 import { createMember, grantXp, xpForLevel } from './party';
 import type { ClassId, Member } from './types';
@@ -133,6 +133,54 @@ describe('expedition play', () => {
     for (const p of ['p2', 'p3', 'p4']) applyAction(ex, p, { type: 'leave' }, 0);
     expect(ex.phase).toBe('ended');
     expect(ex.result!.reason).toBe('returned');
+  });
+});
+
+describe('players who go quiet', () => {
+  it('hands the lead on when the leader goes quiet, and back when they return', () => {
+    const ex = started();
+    // Everyone but the host keeps checking in.
+    for (const p of ['p2', 'p3', 'p4']) expect(applyAction(ex, p, { type: 'ping' }, AWAY_MS)).toBeNull();
+    expect(leaderUser(ex)).toBe('host'); // not long enough yet
+    expect(applyAction(ex, 'p2', { type: 'ping' }, AWAY_MS + 1)).toBeNull();
+    expect(leaderUser(ex)).toBe('p2');
+    const left = ex.log.find((e) => e.kind === 'left');
+    expect(left).toMatchObject({ kind: 'left', user: 'host', lost: true, leader: 'p2', leaderName: 'Piet' });
+    expect(ex.seats[0]).toMatchObject({ left: true, lost: true });
+    // p2 leads now.
+    expect(applyAction(ex, 'p2', { type: 'turn', delta: 1 }, AWAY_MS + 2)).toBeNull();
+    // The host comes back and leads again.
+    expect(applyAction(ex, 'host', { type: 'ping' }, AWAY_MS + 3)).toBeNull();
+    expect(leaderUser(ex)).toBe('host');
+    expect(ex.log.at(-1)).toMatchObject({ kind: 'back', user: 'host', leads: true });
+  });
+
+  it('tells the others who leads when the leader walks away', () => {
+    const ex = started();
+    expect(applyAction(ex, 'host', { type: 'leave' }, 10)).toBeNull();
+    expect(ex.log.at(-1)).toMatchObject({ kind: 'left', user: 'host', lost: false, leader: 'p2' });
+    // Someone who said goodbye is not welcomed back by a stray message.
+    applyAction(ex, 'host', { type: 'ping' }, 20);
+    expect(leaderUser(ex)).toBe('p2');
+  });
+
+  it('breaks up a gathering whose host has gone quiet, but waits longer there', () => {
+    const ex = createExpedition('host', 'Hana', member('Bram', 'bastion', 3), 0);
+    expect(applyAction(ex, 'host', { type: 'ping' }, 0)).toBeNull();
+    expect(applyAction(ex, 'p2', { type: 'join', player: 'Piet', member: member('Sela', 'strider', 3) }, AWAY_MS * 2)).toBeNull();
+    expect(ex.phase).toBe('lobby');
+    expect(applyAction(ex, 'p2', { type: 'ping' }, LOBBY_AWAY_MS + 1)).toBeNull();
+    expect(ex.phase).toBe('ended');
+    expect(ex.result?.reason).toBe('disbanded');
+    expect(ex.log.find((e) => e.kind === 'left')).toMatchObject({ kind: 'left', user: 'host', lost: true });
+  });
+
+  it('frees the seat of a guest who goes quiet in the gathering', () => {
+    const ex = createExpedition('host', 'Hana', member('Bram', 'bastion', 3), 0);
+    expect(applyAction(ex, 'p2', { type: 'join', player: 'Piet', member: member('Sela', 'strider', 3) }, 0)).toBeNull();
+    expect(applyAction(ex, 'host', { type: 'ping' }, LOBBY_AWAY_MS + 1)).toBeNull();
+    expect(ex.seats.map((s) => s.user)).toEqual(['host']);
+    expect(ex.log.at(-1)).toMatchObject({ kind: 'left', user: 'p2', lost: true });
   });
 });
 
