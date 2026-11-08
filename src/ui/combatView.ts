@@ -337,6 +337,12 @@ export class CombatView {
     void this.execute();
   }
 
+  private hasPreviousMember(): boolean {
+    const party = this.combat.party;
+    for (let i = this.current - 1; i >= 0; i--) if (isAlive(party[i]) && (this.driver?.controls(i) ?? true)) return true;
+    return false;
+  }
+
   private previousMember(): void {
     const party = this.combat.party;
     for (let i = this.current - 1; i >= 0; i--) {
@@ -375,6 +381,10 @@ export class CombatView {
         disabled: !this.combat.canFlee,
         onSelect: () => this.setCommand({ kind: 'flee' }),
       },
+      // Touch screens have no Esc key: offer the way back to the previous member as a row.
+      ...(TOUCH && this.hasPreviousMember()
+        ? [{ label: 'Back', description: "Change the previous member's choice.", onSelect: () => this.previousMember() }]
+        : []),
     ];
     this.showPanel(`${m.name}`, new ListMenu(items, { onCancel: () => this.previousMember(), backRow: false }), '↑↓ choose · Enter confirm · Esc back');
   }
@@ -457,7 +467,7 @@ export class CombatView {
     if (this.commands.some(Boolean)) this.lastCommands = [...this.commands];
     let events: CombatEvent[];
     const round = this.combat.round;
-    const hint = this.auto ? 'Auto · Enter: speed up · Esc: stop' : 'Enter: speed up';
+    const hint = TOUCH ? (this.auto ? 'Auto · tap to stop' : 'Tap to speed up') : this.auto ? 'Auto · Enter: speed up · Esc: stop' : 'Enter: speed up';
     if (this.driver) {
       this.showPanel(`Round ${round}`, null, 'Waiting for the others...');
       events = await this.driver.resolve(this.commands);
@@ -591,8 +601,8 @@ export class CombatView {
     panel.append(el('div', { className: 'cmd-title', text: title }));
     if (menu) panel.append(menu.el);
     panel.append(desc, el('div', { className: 'cmd-hint', text: hint }));
-    if (this.auto) panel.onclick = () => this.stopAuto();
-    else panel.onclick = null;
+    // A tap on the panel stops auto battle, or speeds up a round that is playing out.
+    panel.onclick = this.auto ? () => this.stopAuto() : menu ? null : () => this.playing && (this.fast = true);
     this.statusEl = this.driver?.status ? el('div', { className: 'cmd-timer' }) : null;
     if (this.statusEl) panel.append(this.statusEl);
     this.menu = menu;

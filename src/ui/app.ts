@@ -40,6 +40,9 @@ import { PartyView } from './partyView';
 import { readSave, writeSave } from './storage';
 import { TownView, type TownHost } from './townView';
 
+/** Phones and tablets: the help shows taps instead of keys. */
+const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+
 const VIEW_W = 860;
 const VIEW_H = 520;
 const MAP_SIZE = 270;
@@ -398,6 +401,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'Continue', disabled: !hasSave, onSelect: () => this.loadSave() },
         ...(isMaker() ? [{ label: 'Drafting Table', onSelect: () => this.showDesigner() }] : []),
         { label: 'How to Play', onSelect: () => this.showHelp(() => this.showTitle()) },
+        { label: 'Settings', onSelect: () => this.settings(() => this.showTitle()) },
         { label: 'Feedback', onSelect: () => this.showFeedback(() => this.showTitle()) },
         { label: 'Privacy & Terms', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
       ],
@@ -451,7 +455,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   save(): void {
-    if (this.trial) return;
+    // Never let the title screen's scenery overwrite a real save.
+    if (this.trial || this.game === this.titleGame) return;
     writeSave((this.home ?? this.game).serialize());
   }
 
@@ -783,10 +788,27 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         ...rows.map(([k, v]) => el('div', { className: 'help-row' }, [el('span', { className: 'help-key', text: k }), el('span', { text: v })])),
       ]);
     const menu = new ListMenu([{ label: 'Close', onSelect: back }], { onCancel: back });
-    this.openOverlay(
-      el('div', { className: 'panel dialog wide help' }, [
-        el('h2', { text: 'How to Play' }),
-        el('div', { className: 'help-grid' }, [
+    const touch = TOUCH || document.body.classList.contains('phone');
+    const controls = touch
+      ? [
+          section('Exploring', [
+            ['▲ ▼', 'Step forward or back'],
+            ['↶ ↷', 'Turn left or right'],
+            ['⇠ ⇢', 'Side-step'],
+            ['Swipe', 'Up/down on the view to walk, sideways to turn'],
+            ['Act', 'Open chests, drink from springs, gather'],
+            ['Map', 'Draw walls, marks and notes on your map'],
+            ['Pack', 'Items, skills, Guidebook, Settings, Feedback'],
+          ]),
+          section('Fighting', [
+            ['Commands', 'Tap one, then a target'],
+            ['Back', 'Undo the previous member\'s choice'],
+            ['Tap', 'During a round: speed it up'],
+            ['Repeat', 'Everyone does what they did last round'],
+            ['Auto', 'The party fights on its own; tap to stop'],
+          ]),
+        ]
+      : [
           section('Exploring', [
             ['↑ / W', 'Step forward'],
             ['↓ / S', 'Step back'],
@@ -806,6 +828,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             ['R', 'Repeat last round'],
             ['O', 'Auto battle (Esc or tap to stop)'],
           ]),
+        ];
+    this.openOverlay(
+      el('div', { className: 'panel dialog wide help' }, [
+        el('h2', { text: 'How to Play' }),
+        el('div', { className: 'help-grid' }, [
+          ...controls,
           section('Tips', [
             ['Rows', 'The back row takes and deals less melee damage. Archers fight fine from anywhere.'],
             ['Weakness', 'Most monsters fear one element. Big yellow numbers mean you found it.'],
@@ -1399,7 +1427,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   /** Volume sliders, battle and text speed, and (for the save in hand) tips. */
   settings(back: () => void, start = 0): void {
     const s = this.game.state;
-    const solo = !this.coop && !this.trial;
+    // Tips belong to a saved game, so the title screen leaves them out.
+    const solo = !this.coop && !this.trial && this.game !== this.titleGame;
     /** A 0–100% slider; keys move it in steps of 5. */
     const slider = (kind: 'music' | 'sfx') => {
       const input = el('input', { className: 'slider' });
