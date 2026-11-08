@@ -76,7 +76,8 @@ function when(iso: string): string {
 function contextLine(r: Report): string {
   const c = r.context ?? {};
   const parts: string[] = [];
-  if (c.location === 'town') parts.push('in Lindholm');
+  if (c.location === 'title') parts.push('op het titelscherm');
+  else if (c.location === 'town') parts.push('in Lindholm');
   else if (typeof c.floor === 'number') parts.push(`verdieping ${c.floor + 1}`);
   if (Array.isArray(c.levels)) parts.push(c.levels.join(', '));
   if (c.coop) parts.push('expeditie');

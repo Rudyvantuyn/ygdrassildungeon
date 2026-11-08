@@ -51,6 +51,8 @@ type ViewFx = { kind: 'step' | 'turn' | 'bump' | 'encounter' | 'shake'; start: n
 
 export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   game!: Game;
+  /** The scenery game behind the title screen; replaced as soon as a real game starts. */
+  private titleGame: Game | null = null;
   /** While on an expedition: the player's own game, kept aside (`game` is then the shared one). */
   private home: Game | null = null;
   private coop: CoopSession | null = null;
@@ -384,6 +386,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   showTitle(notice?: string): void {
     audio.music(themeFor({ location: 'title' }));
     this.game = Game.newGame(1); // background scenery only
+    this.titleGame = this.game;
     this.showSide('town');
     this.town.show();
     this.updateHud();
@@ -586,6 +589,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   /** Every tip, to read again. */
   /** Where the player is, sent along with bug and crash reports. */
   reportContext(): Record<string, unknown> {
+    const screen = `${window.innerWidth}x${window.innerHeight}`;
+    // On the title screen the game behind it is only scenery: don't report its party.
+    if (this.game === this.titleGame) return { location: 'title', screen };
     const s = this.game.state;
     return {
       mode: this.mode,
@@ -595,7 +601,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       levels: s.party.map((m) => `${m.classId} ${m.level}`),
       battles: s.battles,
       coop: !!this.coop,
-      screen: `${window.innerWidth}x${window.innerHeight}`,
+      screen,
     };
   }
 
