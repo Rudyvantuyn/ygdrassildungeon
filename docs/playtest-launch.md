@@ -1,6 +1,7 @@
 # Op weg naar de playtest (live-gang)
 
 Live: https://ygdrassil-dungeon.vercel.app
+itch.io: https://rudy-van-tuijn.itch.io/ygdrassil (upload de zip van `npm run build:itch` bij elke update)
 
 ## Stappenplan
 
