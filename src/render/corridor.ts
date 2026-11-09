@@ -19,6 +19,11 @@ import { sprite } from './sprites';
 const EYE = -0.3; // eye at z = 0.3
 const NEAR = 0.06; // closest distance from the eye that is still drawn
 const Z_CLIP = NEAR - EYE;
+/**
+ * Where in its cell a painted prop stands: towards the front, so the stairs, chest or spring in the
+ * cell straight ahead look like they are right in front of you instead of halfway to the next wall.
+ */
+const PROP_Z = 0.3;
 /** Half-width of the front wall one step ahead, as a fraction of the view width. */
 const RING_1 = 0.27;
 const MAX_DEPTH = 7;
@@ -469,10 +474,10 @@ export class CorridorRenderer {
 
   private stairs(s: number, d: number, pal: Palette, time: number): void {
     const ctx = this.ctx;
-    const z = d + 0.5;
+    const z = d + PROP_Z;
     const f = this.fog(z);
     // The painted stairwell, with a warm glow breathing up out of it.
-    if (this.billboard('props/stairs-down.webp', s, d, 0.95, pal.fog, 0.6)) {
+    if (this.billboard('props/stairs-down.webp', s, d, 1.0, pal.fog, 0.6)) {
       const [gx, gy] = this.project([s, 0.42, z]);
       const r = 70 * this.scaleAt(z);
       const pulse = 0.35 + 0.2 * Math.sin(time / 450);
@@ -510,9 +515,9 @@ export class CorridorRenderer {
   /** Stairs going up: a few steps rising towards a soft light from above. */
   private upStairs(s: number, d: number, pal: Palette, time: number): void {
     if (d === 0) return; // standing on it: nothing to see
-    if (this.billboard('props/stairs-up.webp', s, d, 0.85, pal.fog)) return;
+    if (this.billboard('props/stairs-up.webp', s, d, 0.9, pal.fog)) return;
     const ctx = this.ctx;
-    const z = d + 0.5;
+    const z = d + PROP_Z;
     const f = this.fog(z);
     const steps = 4;
     for (let i = 0; i < steps; i++) {
@@ -543,7 +548,7 @@ export class CorridorRenderer {
   private billboard(path: string, s: number, d: number, width: number, fogColor: string, squash = 1): boolean {
     const img = sprite(path);
     if (!img) return false;
-    const z = d + 0.5;
+    const z = d + PROP_Z;
     const f = this.fog(z);
     const [cx, cy] = this.project([s, 0.5, z]);
     const [ex] = this.project([s + width / 2, 0.5, z]);
@@ -566,7 +571,7 @@ export class CorridorRenderer {
   }
 
   private chest(s: number, d: number, opened: boolean, pal: Palette): void {
-    if (d > 0 && this.billboard(opened ? 'props/chest-open.webp' : 'props/chest.webp', s, d, 0.5, pal.fog)) return;
+    if (d > 0 && this.billboard(opened ? 'props/chest-open.webp' : 'props/chest.webp', s, d, 0.56, pal.fog)) return;
     const ctx = this.ctx;
     const z = d + 0.5;
     const f = this.fog(z);
@@ -609,9 +614,9 @@ export class CorridorRenderer {
 
   private spring(s: number, d: number, time: number, used: boolean, pal: Palette): void {
     const ctx = this.ctx;
-    const z = d + 0.5;
+    const z = d + PROP_Z;
     const f = this.fog(z);
-    if (this.billboard('props/spring.webp', s, d, 0.62, pal.fog)) {
+    if (this.billboard('props/spring.webp', s, d, 0.68, pal.fog)) {
       // A soft glow over the water while it can still be drunk from.
       if (used) return;
       const [cx, cy] = this.project([s, 0.36, z]);
@@ -698,10 +703,10 @@ export class CorridorRenderer {
   /** A gathering spot: a soft glow on the floor in the kind's colour, with drifting motes. */
   private gatherSpot(s: number, d: number, kind: GatherKind, time: number, pal: Palette): void {
     const ctx = this.ctx;
-    const z = d + 0.5;
+    const z = d + PROP_Z;
     const f = this.fog(z);
     // The painted spot (herbs, an ore vein, a felled root, a pool) with a small medallion hovering above it.
-    if (this.billboard(`props/gather-${kind}.webp`, s, d, 0.6, pal.fog)) {
+    if (this.billboard(`props/gather-${kind}.webp`, s, d, 0.66, pal.fog)) {
       const [cx, cy] = this.project([s, 0.5, z]);
       const [ex] = this.project([s + 0.3, 0.5, z]);
       const rx = ex - cx;
@@ -764,7 +769,7 @@ export class CorridorRenderer {
   private rootGate(s: number, d: number, pal: Palette, time: number): void {
     if (this.billboard('props/gate.webp', s, d, 0.76, pal.fog)) return;
     const ctx = this.ctx;
-    const z = d + 0.5;
+    const z = d + PROP_Z;
     const f = this.fog(z);
     ctx.strokeStyle = mix('#5a3e22', pal.fog, f);
     ctx.lineWidth = Math.max(2, 14 * this.scaleAt(z));
