@@ -66,8 +66,15 @@ Add new names there and keep the glossary in sync.
   contests are "events" and only come once the game is finished.
 - The game is meant to be released **commercially**: keep everything we ship (art, music, names, code) cleared for
   commercial use, and keep the server authoritative so players cannot cheat.
-- Art direction: **AI-generated art** in one consistent style is the plan for the "fantastic graphics" goal; only use
-  tools/models whose terms allow commercial use, and keep a record of where each asset came from.
+- Art direction (changed after playtest feedback, November 2026): **no AI-generated images**. Players of the genre
+  reject them. The AI art is being replaced, one category at a time, by:
+  - real photos (our own, or CC0 / public domain / CC BY, never share-alike or non-commercial) run through
+    `scripts/photo-to-art.py`, which maps everything onto one shared pixel palette so it reads as one world
+    (places, and with `--texture` the dungeon walls, floors and ceilings);
+  - human-made asset packs whose licence allows commercial use and that are not themselves AI-made
+    (check itch.io's AI tags), e.g. game-icons.net (CC BY 3.0) for the map icons;
+  - for what cannot be photographed (monsters, portraits): human-made packs, commissions or the owner's own drawings.
+  Record every asset in `art/SOURCES.md`, and credit every CC BY author on `public/credits.html`.
 
 ## Working with the owner
 

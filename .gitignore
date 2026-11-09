@@ -6,3 +6,4 @@ screenshots/
 Thumbs.db
 dist-itch/
 ygdrassil-itch.zip
+__pycache__/

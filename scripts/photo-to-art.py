@@ -6,6 +6,9 @@ photos from different places still look like one world.
 
   python3 scripts/photo-to-art.py photo.jpg out.png [--width 320] [--mood warm|cold|neutral] [--patch x,y,w,h ...]
 
+--texture makes a square, seamlessly repeating dungeon texture (wall, floor or ceiling) instead of a 16:9 picture:
+  python3 scripts/photo-to-art.py bark.jpg forest-wall.png --texture --width 128 --mood cold
+
 --patch paints over a modern detail (a sign, a trail mark) with the picture just beside it, before the filter runs.
 Coordinates are fractions of the cropped 16:9 picture, e.g. --patch 0.70,0.08,0.06,0.07.
 
@@ -42,7 +45,59 @@ def nearest(color, palette):
     return min(palette, key=lambda p: (p[0] - r) ** 2 * 3 + (p[1] - g) ** 2 * 4 + (p[2] - b) ** 2 * 2)
 
 
-def convert(src: str, out: str, width: int, mood: str, size: tuple[int, int], patches=()) -> None:
+def save(im: Image.Image, out: str) -> None:
+    # Lossless: dithered pixels survive exactly, and the files come out smaller than lossy ones.
+    if out.endswith('.webp'):
+        im.save(out, 'WEBP', lossless=True, quality=100, method=6)
+    else:
+        im.save(out)
+
+
+def seamless(im: Image.Image) -> Image.Image:
+    """Blend a square picture with itself shifted by half, so that its edges meet without a seam."""
+    n = im.size[0]
+    rolled = Image.new('RGB', (n, n))
+    h = n // 2
+    for (sx, sy), (dx, dy) in [((0, 0), (h, h)), ((h, 0), (0, h)), ((0, h), (h, 0)), ((h, h), (0, 0))]:
+        rolled.paste(im.crop((sx, sy, sx + h, sy + h)), (dx, dy))
+    # Keep the original in the middle and the shifted copy (whose edges wrap cleanly) near the edges.
+    mask = Image.new('L', (n, n))
+    mp = mask.load()
+    for y in range(n):
+        for x in range(n):
+            e = min(x, n - 1 - x, y, n - 1 - y) / (n * 0.25)
+            mp[x, y] = int(255 * max(0.0, min(1.0, e)))
+    return Image.composite(im, rolled, mask)
+
+
+def palettize(im: Image.Image, mood: str, vignette: bool) -> Image.Image:
+    im = ImageEnhance.Contrast(im).enhance(1.25)
+    im = ImageEnhance.Color(im).enhance(1.15)
+    tint = {'warm': (1.08, 0.98, 0.85), 'cold': (0.86, 0.97, 1.1), 'neutral': (1, 1, 1)}[mood]
+    skip = COLD if mood == 'warm' else FIRE if mood == 'cold' else set()
+    palette = [rgb(c) for c in PALETTE if c not in skip]
+    width, height = im.size
+    px = im.load()
+    spread = 26
+    for y in range(height):
+        for x in range(width):
+            r, g, b = px[x, y]
+            d = (BAYER[y % 4][x % 4] / 15 - 0.5) * spread
+            c = (min(255, max(0, r * tint[0] + d)), min(255, max(0, g * tint[1] + d)), min(255, max(0, b * tint[2] + d)))
+            px[x, y] = nearest(c, palette)
+    return im
+
+
+def texture(src: str, out: str, width: int, mood: str) -> None:
+    im = Image.open(src).convert('RGB')
+    w, h = im.size
+    n = min(w, h)
+    im = im.crop(((w - n) // 2, (h - n) // 2, (w - n) // 2 + n, (h - n) // 2 + n)).resize((width * 4, width * 4), Image.LANCZOS)
+    im = seamless(im).filter(ImageFilter.SMOOTH_MORE).resize((width, width), Image.LANCZOS)
+    save(palettize(im, mood, False).resize((512, 512), Image.NEAREST), out)
+
+
+def convert(src: str, out: str, width: int, mood: str, size: tuple[int, int], patches=(), light: float = 1.0) -> None:
     im = Image.open(src).convert('RGB')
     # Crop to 16:9 around the centre.
     target = 16 / 9
@@ -63,6 +118,7 @@ def convert(src: str, out: str, width: int, mood: str, size: tuple[int, int], pa
         im.paste(donor.filter(ImageFilter.GaussianBlur(2)), box[:2])
     height = round(width * 9 / 16)
     im = im.filter(ImageFilter.SMOOTH_MORE).resize((width, height), Image.LANCZOS)
+    im = ImageEnhance.Brightness(im).enhance(light)
     im = ImageEnhance.Contrast(im).enhance(1.25)
     im = ImageEnhance.Color(im).enhance(1.15)
     # Tint towards the mood of the place before the colours are snapped to the palette.
@@ -88,7 +144,7 @@ def convert(src: str, out: str, width: int, mood: str, size: tuple[int, int], pa
             ep[x, y] = int(255 * max(0.0, min(1.0, (max(dx, dy) - 0.7) / 0.3)) * 0.8)
     dark = Image.new('RGB', (width, height), rgb(PALETTE[0]))
     im = Image.composite(dark, im, edge)
-    im.resize(size, Image.NEAREST).save(out)
+    save(im.resize(size, Image.NEAREST), out)
 
 
 if __name__ == '__main__':
@@ -98,6 +154,11 @@ if __name__ == '__main__':
     ap.add_argument('--width', type=int, default=320, help='pixel width before scaling up (smaller = chunkier)')
     ap.add_argument('--mood', choices=['warm', 'cold', 'neutral'], default='neutral')
     ap.add_argument('--patch', action='append', default=[], help='x,y,w,h as fractions of the picture')
+    ap.add_argument('--texture', action='store_true', help='a square, seamlessly repeating texture')
+    ap.add_argument('--light', type=float, default=1.0, help='brightness before the palette, e.g. 0.6 for dusk')
     args = ap.parse_args()
+    if args.texture:
+        texture(args.src, args.out, args.width if args.width != 320 else 128, args.mood)
+        raise SystemExit
     patches = [tuple(float(v) for v in p.split(',')) for p in args.patch]
-    convert(args.src, args.out, args.width, args.mood, (1280, 720), patches)
+    convert(args.src, args.out, args.width, args.mood, (1280, 720), patches, args.light)

@@ -188,6 +188,7 @@ export class TownView {
         { label: 'How to Play', description: 'Controls and tips.', onSelect: () => this.host.showHelp(() => this.system()) },
         { label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.host.showFeedback(() => this.system()) },
         { label: 'Privacy & Terms', description: 'What the game stores about you, and the rules of play (opens a new page).', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
+        { label: 'Credits', description: 'Who made the photos, icons and story (opens a new page).', onSelect: () => window.open('credits.html', '_blank', 'noopener') },
         { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onSelect: () => this.host.confirm('Quit to title', 'Return to the title screen? Anything since your last save is lost.', () => this.host.showTitle(), () => this.system()) },
         { label: 'Back', onSelect: back },
       ],
