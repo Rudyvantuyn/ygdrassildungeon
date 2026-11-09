@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "screenshots": "node scripts/screenshots.cjs",
+    "build:itch": "ITCH=1 vite build && rm -f dist-itch/inbox.html && cd dist-itch && rm -f ../ygdrassil-itch.zip && zip -qr ../ygdrassil-itch.zip .",
     "build:server": "esbuild server/expedition.ts --bundle --format=esm --platform=neutral --target=es2022 --minify --legal-comments=none --outfile=server/build/expedition.js"
   },
   "devDependencies": {

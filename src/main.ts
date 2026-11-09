@@ -16,7 +16,8 @@ const root = document.getElementById('app')!;
 const app = new App(root);
 watchErrors(() => app.reportContext());
 // Visitor counts (Vercel Web Analytics: no cookies, no personal data; only on the live site).
-if (__BUILD__ !== 'dev') inject({ mode: 'production' });
+// Only on our own site: itch.io counts its own visitors.
+if (__BUILD__ !== 'dev' && !__BUILD__.endsWith('-itch')) inject({ mode: 'production' });
 
 /**
  * Scale the stage to fit any window. Small screens (phones) get their own, more compact 960×440 layout

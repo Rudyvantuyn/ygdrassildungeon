@@ -4,3 +4,5 @@ screenshots/
 *.log
 .DS_Store
 Thumbs.db
+dist-itch/
+ygdrassil-itch.zip
