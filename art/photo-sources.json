@@ -63,5 +63,61 @@
     "file": "File:Viking-era_footwear_-_Lofotr_Viking_Museum.jpg",
     "author": "Justin Hall",
     "license": "CC BY 2.0"
+  },
+  {
+    "use": "Frostwood floor",
+    "asset": "dungeon/frostwood-floor.webp",
+    "file": "File:Moscow_-_2026_-_Surface_of_fresh_snow,_Kolomenskoe3.jpg",
+    "author": "Юрий Д.К.",
+    "license": "CC BY 4.0"
+  },
+  {
+    "use": "Frostwood ceiling",
+    "asset": "dungeon/frostwood-ceiling.webp",
+    "file": "File:Icicles_and_snow_in_an_evergreen_bush.JPG",
+    "author": "Tomwsulcer",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Emberroot wall",
+    "asset": "dungeon/emberroot-wall.webp",
+    "file": "File:Surface_of_Yakisugi.jpg",
+    "author": "japanese_craft_construction",
+    "license": "CC BY 2.0"
+  },
+  {
+    "use": "Emberroot ceiling",
+    "asset": "dungeon/emberroot-ceiling.webp",
+    "file": "File:Burnt_Oak_Wood_Structure.jpg",
+    "author": "Twilightroom25",
+    "license": "CC BY 4.0"
+  },
+  {
+    "use": "Tidewater wall",
+    "asset": "dungeon/tidewater-wall.webp",
+    "file": "File:Lynn_Massachusetts_seaweed_and_rocks_near_Atlantic_Ocean.JPG",
+    "author": "Tomwsulcer",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Tidewater floor",
+    "asset": "dungeon/tidewater-floor.webp",
+    "file": "File:Wet_pebbles_(Unsplash).jpg",
+    "author": "Wil Stewart",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Forest wall",
+    "asset": "dungeon/forest-wall.webp",
+    "file": "File:Rough_tree_bark_surface_texture_macro_side_view.jpg",
+    "author": "MacrofyStudio",
+    "license": "CC BY 4.0"
+  },
+  {
+    "use": "Forest floor",
+    "asset": "dungeon/forest-floor.webp",
+    "file": "File:Quercus_rysophylla_leaf_litter_UC_Berkeley_Botanical_Garden.jpg",
+    "author": "Awinch1001",
+    "license": "CC0 1.0"
   }
 ]
