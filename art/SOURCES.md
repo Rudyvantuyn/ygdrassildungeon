@@ -1,6 +1,9 @@
 # Art sources
 
-Every image the game ships, and where it came from. Keep this up to date: the game is meant to be
+Every image the game ships, and where it came from.
+
+**Status (November 2026):** places, dungeon textures, props and map icons are human-made photos, CC BY icons or
+code-drawn sprites. Monsters, hero portraits and NPC portraits are still AI-made and are being replaced. Keep this up to date: the game is meant to be
 released commercially, so each asset needs a known origin and licence.
 
 ## Monsters (`public/art/monsters/<enemy-id>.webp`)
@@ -59,7 +62,7 @@ released commercially, so each asset needs a known origin and licence.
 | drownedJarl | MAHZeZ8maFI |
 | hafgufa | MAHZeZot0-M |
 
-## Town, people and heroes (`public/art/places`, `people`, `heroes`)
+## People and heroes (`public/art/people`, `heroes`), still AI-made, to be replaced
 
 - Generated the same way (Canva AI, 2026-10-30), exported from pages 23–47 of the same Canva design, then resized
   to WebP (places 1280×720, portraits 384×384).
@@ -69,14 +72,6 @@ released commercially, so each asset needs a known origin and licence.
 
 | File | Canva media id |
 |---|---|
-| places/hall.webp | MAHZdfn1nwc |
-| places/shop.webp | MAHZddr7ZWU |
-| places/board.webp | MAHZdX05bKc |
-| places/town.webp | MAHZdQYCk5I |
-| places/inn.webp | MAHZdc4jvHk |
-| places/rootdeep.webp | MAHZdaOmySw |
-| places/hornstone.webp | MAHZdYugJ34 |
-| places/title.webp | MAHZdfaKrjo |
 | people/gerd.webp | MAHZdcF-e90 |
 | people/hilde.webp | MAHZdcM75LI |
 | people/brynja.webp | MAHZdQIM02s |
@@ -108,80 +103,23 @@ released commercially, so each asset needs a known origin and licence.
 The Skald, Berserker, Seeress and Wolfkin portraits were added on 2026-10-30 (pages 89–96 of the same design),
 exported at 1024×1024 and scaled to 384 px WebP.
 
-## Dungeon textures (`public/art/dungeon/<set>-wall|floor|ceiling.webp`)
+## Places (`public/art/places`) and dungeon textures (`public/art/dungeon`)
 
-- Generated with Canva AI (2026-10-30), exported from pages 48–56 of the same Canva design, then made seamless and
-  resized with `scripts/make-tiles.py`. Prompts: *Seamless tileable texture, flat orthographic view, no perspective,
-  no vignette, even lighting, painterly hand-painted dark fantasy game texture: ...* (stone wall with roots and moss /
-  forest floor / root ceiling; frosted versions; charred versions with ember cracks).
+Real photographs from Wikimedia Commons, each under CC0, public domain or CC BY (never share-alike or
+non-commercial), run through `scripts/photo-to-art.py` (cropped, mapped onto the game's one palette with ordered
+dithering; textures made seamless with `--texture`; modern details painted out with `--patch`). The notices on the
+notice board are drawn in code on top of the photo.
 
-| File | Canva media id |
-|---|---|
-| forest-wall | MAHZd3kjK24 |
-| forest-floor | MAHZd2DHrpk |
-| forest-ceiling | MAHZd2HV4hk |
-| frostwood-wall | MAHZd3Ra5Zk |
-| frostwood-floor | MAHZd0TGfR0 |
-| frostwood-ceiling | MAHZd9vA_xk |
-| emberroot-wall | MAHZd3ws7c0 |
-| emberroot-floor | MAHZdyuoIDE |
-| emberroot-ceiling | MAHZd9_u4L8 |
-| tidewater-wall | MAHZeTE52_4 |
-| tidewater-floor | MAHZeWWUgdk |
-| tidewater-ceiling | MAHZefAPiP0 |
-| coral-wall | MAHZeQ9rGaQ |
-| coral-floor | MAHZeWaFT8w |
-| coral-ceiling | MAHZeQs2k9I |
-| abyss-wall | MAHZee2KK7s |
-| abyss-floor | MAHZed0Af8s |
-| abyss-ceiling | MAHZeb0mye8 |
+The full list, with file page, author and licence per asset, is `art/photo-sources.json`; `python3 scripts/credits.py`
+writes it into `public/credits.html`, which the game links from the title screen and the System menu.
 
-## Dungeon props (`public/art/props/<name>.webp`)
+## Dungeon props (`public/art/props`)
 
-- Generated with Canva's AI image generator on 2026-10-30, exported from the art sheet (DAHZbPIDnaM) at
-  1024×1024 and cut out with `scripts/process-art.py`.
-- Style prompt: *Painterly dark-fantasy game prop illustration, centered, isolated on a plain flat dark charcoal
-  background, dramatic top lighting, soft rim light, hand-painted texture, high detail, no text, no border.*
-  followed by a short description of the prop.
-
-| File | Canva media id |
-|---|---|
-| chest | MAHZeb7Z0H4 |
-| chest-open | MAHZeSMxMkQ |
-| spring | MAHZeQ7Kilc |
-| stairs-up | MAHZjB0zcz4 |
-| stairs-down | MAHZjIMpE7Y |
-| gather-forage | MAHZjFuqJ8I |
-| gather-mine | MAHZjNke4v4 |
-| gather-fell | MAHZjD0W7Eo |
-| gather-fish | MAHZjEM0ijo |
-
-The stairs and gathering props (2026-10-31) were taken from Canva's 600×600 editor previews of the second art sheet
-(DAHZjHbNJ9E) and cut out with `scripts/process-art.py`.
+Pixel-art sprites drawn shape by shape in code by `scripts/draw-props.py` (no image generator), in the same palette.
 
 ## Map icons (`public/art/icons`)
 
-- Generated with Canva AI (2026-10-30), commercial use allowed under Canva's terms. Taken from the 200×200 previews,
-  cropped to the medallion, masked round and resized to 128×128 WebP (`down`, `up`, `chest`, `spring`, `danger`, `note`,
-  `forage`, `mine`, `fell`, `fish`, `boss`, `prowler`).
-- Prompt: *Painterly dark-fantasy game map icon: a round carved dark stone medallion with a thin worn gold rim, centered,
-  ... on a plain flat black background. In the middle, glowing ...: [symbol]. Hand-painted texture, strong readable
-  silhouette at small size, no text, no letters, no border outside the medallion.*
-
-| File | Canva media id |
-|---|---|
-| icons/down.webp | MAHZf6oOCho |
-| icons/up.webp | MAHZf2lvAFo |
-| icons/forage.webp | MAHZf6eloGk |
-| icons/mine.webp | MAHZf2JFEv8 |
-| icons/fell.webp | MAHZf3Xk9zU |
-| icons/fish.webp | MAHZfwyoOzs |
-| icons/chest.webp | MAHZf1fGOw4 |
-| icons/spring.webp | MAHZf1zi520 |
-| icons/boss.webp | MAHZf1WGBGg |
-| icons/prowler.webp | MAHZf3nfZb8 |
-| icons/danger.webp | MAHZf3vropk |
-| icons/note.webp | MAHZf7CVLTs |
-| gate (root gate, 2026-11-01, editor preview) | MAHZoD5E_hE |
-
-Map icon `icons/gate.webp`: Canva media MAHZoBZAiSs (same medallion prompt as the other icons).
+Icons from game-icons.net (CC BY 3.0): horned-skull, locked-chest, hazard-sign, axe-in-stump, sprout, mining,
+quill-ink, wolf-head and fountain by Lorc; stairs, hole-ladder, fishing-pole and tree-roots by Delapouite. Recoloured
+and set in pixel medallions (a ring, a dark disc, the icon in its own colour), mapped onto the palette. Credited on
+`public/credits.html`.

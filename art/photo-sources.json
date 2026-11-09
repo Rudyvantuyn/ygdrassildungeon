@@ -119,5 +119,68 @@
     "file": "File:Quercus_rysophylla_leaf_litter_UC_Berkeley_Botanical_Garden.jpg",
     "author": "Awinch1001",
     "license": "CC0 1.0"
+  },
+  {
+    "use": "Frostwood wall",
+    "asset": "dungeon/frostwood-wall.webp",
+    "file": "File:Ice_Texture.jpg",
+    "author": "Jenn Richardson",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Emberroot floor",
+    "asset": "dungeon/emberroot-floor.webp",
+    "file": "File:Volcanic_ash_(April_2009_eruption_of_Mt._Redoubt,_Aleutian_Volcanic_Arc,_Alaska,_USA).jpg",
+    "author": "James St. John",
+    "license": "CC BY 2.0"
+  },
+  {
+    "use": "Coral wall",
+    "asset": "dungeon/coral-wall.webp",
+    "file": "File:Living_on_a_Coral_Reef_(8397328768).jpg",
+    "author": "Laszlo Ilyes",
+    "license": "CC BY 2.0"
+  },
+  {
+    "use": "Coral floor",
+    "asset": "dungeon/coral-floor.webp",
+    "file": "File:Sand_ripples,_Dakhla_Oasis,_Egypt.jpg",
+    "author": "Vyacheslav Argenberg",
+    "license": "CC BY 4.0"
+  },
+  {
+    "use": "Coral ceiling",
+    "asset": "dungeon/coral-ceiling.webp",
+    "file": "File:Big_Turtle_Rock_大亀石_near_the_Yonaguni_Monument.jpg",
+    "author": "Melkov",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Tidewater ceiling",
+    "asset": "dungeon/tidewater-ceiling.webp",
+    "file": "File:Curled_mudcracks_(Black_Rock_Creek_valley,_just_north_of_Black_Rock,_Leucite_Hills,_Wyoming,_USA)_3.jpg",
+    "author": "James St. John",
+    "license": "CC BY 2.0"
+  },
+  {
+    "use": "Abyss wall",
+    "asset": "dungeon/abyss-wall.webp",
+    "file": "File:Sideromelane_(basaltic_lava_flow_surface_of_1969_to_1974_lava_tube_ceiling,_Mauna_Ulu_Lava_Field,_East_Rift_Zone,_Kilauea_Volcano,_Hawaii,_USA)_1_(14838868090).jpg",
+    "author": "James St. John",
+    "license": "CC BY 2.0"
+  },
+  {
+    "use": "Abyss floor",
+    "asset": "dungeon/abyss-floor.webp",
+    "file": "File:Metakomatiite_lava_flow_(Upper_Komatiitic_Unit,_Kidd-Munro_Assemblage,_Neoarchean,_2.711-2.719_Ga;_Pyke_Hill,_near_the_Potter_Mine,_east_of_Timmins,_Ontario,_Canada)_60_(46916108605).jpg",
+    "author": "James St. John",
+    "license": "CC BY 2.0"
+  },
+  {
+    "use": "Abyss ceiling",
+    "asset": "dungeon/abyss-ceiling.webp",
+    "file": "File:Tham_Lot_(cave),_Stalactites,_Ceiling,_Thailand.jpg",
+    "author": "Vyacheslav Argenberg",
+    "license": "CC BY 4.0"
   }
 ]
