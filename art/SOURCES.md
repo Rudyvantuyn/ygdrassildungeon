@@ -3,7 +3,9 @@
 Every image the game ships, and where it came from.
 
 **Status (November 2026):** places, dungeon textures, props and map icons are human-made photos, CC BY icons or
-code-drawn sprites. Monsters, hero portraits and NPC portraits are still AI-made and are being replaced. Keep this up to date: the game is meant to be
+code-drawn sprites. Monsters, hero portraits and NPC portraits are still AI-made and are being replaced.
+
+Keep this up to date: the game is meant to be
 released commercially, so each asset needs a known origin and licence.
 
 ## Monsters (`public/art/monsters/<enemy-id>.webp`)
