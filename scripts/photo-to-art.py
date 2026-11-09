@@ -88,16 +88,17 @@ def palettize(im: Image.Image, mood: str, vignette: bool) -> Image.Image:
     return im
 
 
-def texture(src: str, out: str, width: int, mood: str) -> None:
+def texture(src: str, out: str, width: int, mood: str, light: float = 1.0) -> None:
     im = Image.open(src).convert('RGB')
     w, h = im.size
     n = min(w, h)
     im = im.crop(((w - n) // 2, (h - n) // 2, (w - n) // 2 + n, (h - n) // 2 + n)).resize((width * 4, width * 4), Image.LANCZOS)
     im = seamless(im).filter(ImageFilter.SMOOTH_MORE).resize((width, width), Image.LANCZOS)
+    im = ImageEnhance.Brightness(im).enhance(light)
     save(palettize(im, mood, False).resize((512, 512), Image.NEAREST), out)
 
 
-def convert(src: str, out: str, width: int, mood: str, size: tuple[int, int], patches=(), light: float = 1.0) -> None:
+def convert(src: str, out: str, width: int, mood: str, size: tuple[int, int], patches=(), light: float = 1.0, focus: float = 0.5) -> None:
     im = Image.open(src).convert('RGB')
     # Crop to 16:9 around the centre.
     target = 16 / 9
@@ -107,7 +108,8 @@ def convert(src: str, out: str, width: int, mood: str, size: tuple[int, int], pa
         im = im.crop(((w - nw) // 2, 0, (w - nw) // 2 + nw, h))
     else:
         nh = int(w / target)
-        im = im.crop((0, (h - nh) // 2, w, (h - nh) // 2 + nh))
+        top = int((h - nh) * focus)
+        im = im.crop((0, top, w, top + nh))
     # Cover modern details with the patch of picture just to their left (or right, at the left edge).
     for fx, fy, fw, fh in patches:
         W, H = im.size
@@ -155,10 +157,11 @@ if __name__ == '__main__':
     ap.add_argument('--mood', choices=['warm', 'cold', 'neutral'], default='neutral')
     ap.add_argument('--patch', action='append', default=[], help='x,y,w,h as fractions of the picture')
     ap.add_argument('--texture', action='store_true', help='a square, seamlessly repeating texture')
+    ap.add_argument('--focus', type=float, default=0.5, help='which part of a tall photo to keep: 0 top, 0.5 middle, 1 bottom')
     ap.add_argument('--light', type=float, default=1.0, help='brightness before the palette, e.g. 0.6 for dusk')
     args = ap.parse_args()
     if args.texture:
-        texture(args.src, args.out, args.width if args.width != 320 else 128, args.mood)
+        texture(args.src, args.out, args.width if args.width != 320 else 128, args.mood, args.light)
         raise SystemExit
     patches = [tuple(float(v) for v in p.split(',')) for p in args.patch]
-    convert(args.src, args.out, args.width, args.mood, (1280, 720), patches, args.light)
+    convert(args.src, args.out, args.width, args.mood, (1280, 720), patches, args.light, args.focus)

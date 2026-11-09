@@ -1,6 +1,67 @@
 [
-  { "use": "Title screen", "asset": "places/title.webp", "file": "File:Sequoia_Tree_Groove_at_Sequoia_National_Park.jpg", "author": "?", "license": "CC0 1.0" },
-  { "use": "The Sleeping Stag (inn)", "asset": "places/inn.webp", "file": "File:Inside_Viking_House_in_Rosala_Viking_Center_in_Finland.jpg", "author": "Pöllö", "license": "CC BY 3.0" },
-  { "use": "Entrance to the Rootdeep", "asset": "places/rootdeep.webp", "file": "File:Exposed_tree_roots_on_forest_trail.jpg", "author": "Mar Mkrtchyan", "license": "CC0 1.0" },
-  { "use": "The Oath Hall", "asset": "places/hall.webp", "file": "File:Interior_of_a_reconstructed_Viking_house_in_Hedeby_(Haithabu)_01.jpg", "author": "JuicyTomato56", "license": "CC BY 4.0" }
+  {
+    "use": "Title screen",
+    "asset": "places/title.webp",
+    "file": "File:Sequoia_Tree_Groove_at_Sequoia_National_Park.jpg",
+    "author": "Daniel G. Rego",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "The Sleeping Stag (inn)",
+    "asset": "places/inn.webp",
+    "file": "File:Inside_Viking_House_in_Rosala_Viking_Center_in_Finland.jpg",
+    "author": "Pöllö",
+    "license": "CC BY 3.0"
+  },
+  {
+    "use": "Entrance to the Rootdeep",
+    "asset": "places/rootdeep.webp",
+    "file": "File:Exposed_tree_roots_on_forest_trail.jpg",
+    "author": "Mar Mkrtchyan",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "The Oath Hall",
+    "asset": "places/hall.webp",
+    "file": "File:Interior_of_a_reconstructed_Viking_house_in_Hedeby_(Haithabu)_01.jpg",
+    "author": "JuicyTomato56",
+    "license": "CC BY 4.0"
+  },
+  {
+    "use": "The Notice Board",
+    "asset": "places/board.webp",
+    "file": "File:Old_shed_wall_in_close-up_(Unsplash).jpg",
+    "author": "Zbysiu Rodak",
+    "license": "CC0 1.0",
+    "note": "notices drawn on top"
+  },
+  {
+    "use": "The Hornstone",
+    "asset": "places/hornstone.webp",
+    "file": "File:Runestone_memorial_for_Thomas_E._Brittingham_Jr.,_University_of_Wisconsin-Madison.jpg",
+    "author": "James Steakley",
+    "license": "CC BY 4.0",
+    "note": "plaque painted out"
+  },
+  {
+    "use": "Forest ceiling (chapter I)",
+    "asset": "dungeon/forest-ceiling.webp",
+    "file": "File:A_tangled_mess_(42904180441).jpg",
+    "author": "Sheila Sund",
+    "license": "CC BY 2.0"
+  },
+  {
+    "use": "Lindholm (town)",
+    "asset": "places/town.webp",
+    "file": "File:Lofotr_01.jpg",
+    "author": "Jorge Andrade",
+    "license": "CC BY 2.0"
+  },
+  {
+    "use": "Hilde's Supplies (shop)",
+    "asset": "places/shop.webp",
+    "file": "File:Viking-era_footwear_-_Lofotr_Viking_Museum.jpg",
+    "author": "Justin Hall",
+    "license": "CC BY 2.0"
+  }
 ]
