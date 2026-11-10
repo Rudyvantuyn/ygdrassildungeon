@@ -297,9 +297,9 @@ export class CombatView {
       ctx.translate(shake, lift);
       const chosen = this.target === i;
       // Card: dark panel, bronze rim (gold when targeted).
-      ctx.fillStyle = 'rgba(14,10,7,0.92)';
+      ctx.fillStyle = 'rgba(11,19,27,0.92)';
       ctx.fillRect(x, y, cw, ch);
-      ctx.strokeStyle = chosen ? '#f0cf6a' : '#6b5128';
+      ctx.strokeStyle = chosen ? '#f0cf6a' : '#4d6676';
       ctx.lineWidth = chosen ? 3 : 2;
       ctx.strokeRect(x, y, cw, ch);
       // Thumbnail: the middle of the painting, or the sprite for an enemy without one.

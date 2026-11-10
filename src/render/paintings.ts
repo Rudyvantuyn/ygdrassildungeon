@@ -6,7 +6,7 @@
 import type { EnemyDef } from '../core/data/enemies';
 import { sprite } from './sprites';
 
-export const PAINTED = new Set<string>(['bogling', 'nykur']);
+export const PAINTED = new Set<string>([]);
 
 export function hasPainting(def: EnemyDef): boolean {
   return PAINTED.has(def.id);

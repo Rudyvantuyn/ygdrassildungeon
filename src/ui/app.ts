@@ -411,7 +411,6 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'Settings', onSelect: () => this.settings(() => this.showTitle()) },
         { label: 'Feedback', onSelect: () => this.showFeedback(() => this.showTitle()) },
         { label: 'Privacy & Terms', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
-        { label: 'Credits', onSelect: () => window.open('credits.html', '_blank', 'noopener') },
       ],
       { startIndex: hasSave ? 1 : 0 },
     );
