@@ -61,9 +61,8 @@ const out = 'screenshots';
   await press('Enter'); // Copper Edge -> choose wearer
   await shot('02c-shop-wearer');
   await press('Enter'); // Bram buys it
-  await press('Escape');
-  await press('Escape');
-  await press('Escape');
+  // Back out to the town (one more Escape there would open the menu).
+  for (let i = 0; i < 4 && (await page.evaluate(() => window.ygg.mode)) !== 'town'; i++) await press('Escape');
   await press('ArrowLeft', 2); // Rootdeep card
   await press('Enter');
   await press('Enter'); // first floor
@@ -95,8 +94,7 @@ const out = 'screenshots';
   await press('Enter');
 
   await press('c');
-  await shot('08-pack');
-  await press('Escape');
+  await shot('08-menu');
   await press('Escape');
   await press('m');
   await shot('09-map');

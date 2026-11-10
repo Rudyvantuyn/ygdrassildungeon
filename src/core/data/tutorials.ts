@@ -32,7 +32,7 @@ export const TIPS: TipDef[] = [
       'The danger orb turns from blue to yellow to red as you walk. Red means a fight is close.',
       'The roots of the Great Tree always lead home: the stairs up take you back toward Lindholm. Turning back in time is no shame.',
       'Every descent starts at the beginning of a chapter: the gods\' wards let no one in halfway. Beat its guardian to open the next.',
-      'Use Act to open chests, drink from springs and gather. Pack holds your items, skills, the Guidebook and Settings.',
+      'Use Act to open chests, drink from springs and gather. The menu (Esc or ☰) holds your party, bag, journal and options.',
     ],
   },
   {
@@ -72,7 +72,7 @@ export const TIPS: TipDef[] = [
     title: 'Skill points',
     speaker: 'brynja',
     pages: [
-      'Spend skill points in the Oath Hall (Skills) or down in the Rootdeep (Pack, then Skill tree).',
+      'Spend skill points in the Oath Hall (Skills) or anywhere from the menu (Party, then Skill tree).',
       'Every skill goes from rank 1 to 10 and gets stronger with each rank. Some need a level, or another skill first.',
       'Skills marked ◇ work on their own: they raise a stat for good.',
       'Choose with care: the Oath Hall can let an adventurer unlearn everything, but it costs gold.',
@@ -185,7 +185,7 @@ export const TIPS: TipDef[] = [
     speaker: 'sigrid',
     pages: [
       'Some moments ask you to choose. Every choice is remembered, and the people of the Pact will remember it too.',
-      'There is no wrong answer, only roads. Read the story again, choices and all, in the Chronicle (Pack).',
+      'There is no wrong answer, only roads. Read the story again, choices and all, in the Chronicle (menu, Journal).',
     ],
   },
   {

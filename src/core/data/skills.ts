@@ -13,7 +13,7 @@ export interface SkillDef {
   /** Percent of a normal attack (damage) or of the heal formula. */
   power: number;
   hits: number;
-  /** Usable outside combat from the pack menu. */
+  /** Usable outside combat from the menu (Party, Use a skill). */
   field: boolean;
   /** Chance to inflict an ailment on each enemy hit (or, for kind 'ailment', on each target). */
   inflict?: Inflict;

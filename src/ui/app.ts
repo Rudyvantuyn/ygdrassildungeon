@@ -51,10 +51,13 @@ const MOVE_COOLDOWN = 150;
 
 type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'editor' | 'drafting' | 'story' | 'busy';
 type SidePanel = 'explore' | 'combat' | 'town';
+type MenuTab = 'party' | 'bag' | 'journal' | 'options';
 type ViewFx = { kind: 'step' | 'turn' | 'bump' | 'encounter' | 'shake'; start: number };
 
 export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   game!: Game;
+  private keyHint!: HTMLElement;
+  private actPrompt!: HTMLElement;
   /** The scenery game behind the title screen; replaced as soon as a real game starts. */
   private titleGame: Game | null = null;
   /** While on an expedition: the player's own game, kept aside (`game` is then the shared one). */
@@ -117,7 +120,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     viewCanvas.height = VIEW_H;
     this.message = el('div', { className: 'msg panel hidden' });
     this.toastEl = el('div', { className: 'toast panel hidden' });
-    this.viewWrap = el('div', { id: 'view-wrap' }, [viewCanvas, this.message, this.toastEl]);
+    this.actPrompt = el('button', { id: 'act-prompt', className: 'hidden' });
+    this.actPrompt.addEventListener('click', () => this.onKey(' '));
+    this.viewWrap = el('div', { id: 'view-wrap' }, [viewCanvas, this.message, this.toastEl, this.actPrompt]);
 
     this.floorName = el('div', { id: 'floor-name' });
     this.compass = el('div', { id: 'compass' });
@@ -126,7 +131,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     minimapCanvas.height = MAP_SIZE;
     this.dangerOrb = el('div', { id: 'danger-orb' });
     this.goldEl = el('div', { id: 'gold' });
-    const mapPanel = el('div', { id: 'map-panel', className: 'panel' }, [minimapCanvas]);
+    this.keyHint = el('div', { id: 'key-hint' });
+    const mapPanel = el('div', { id: 'map-panel', className: 'panel' }, [minimapCanvas, this.keyHint]);
     const statusRow = el('div', { id: 'status-row', className: 'panel' }, [
       el('div', { id: 'danger' }, [this.dangerOrb, el('span', { text: 'Danger' })]),
       this.goldEl,
@@ -135,7 +141,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     // Act spans both rows; the grid places the rest around it.
     const buttons: [string, string, string?][] = [
       // Top row: side-step, forward, side-step. Bottom row: turn, back, turn.
-      ['⇠', 'q'], ['▲', 'ArrowUp'], ['⇢', 'e'], ['Act', ' ', 'act'], ['Pack', 'c'],
+      ['⇠', 'q'], ['▲', 'ArrowUp'], ['⇢', 'e'], ['Act', ' ', 'act'], ['Menu', 'c'],
       ['↶', 'ArrowLeft'], ['▼', 'ArrowDown'], ['↷', 'ArrowRight'], ['Map', 'm'],
     ];
     const tips: Record<string, string> = { q: 'Step left', e: 'Step right', ArrowUp: 'Forward', ArrowDown: 'Back', ArrowLeft: 'Turn left', ArrowRight: 'Turn right' };
@@ -148,8 +154,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.commandPanel = el('div', { id: 'command-panel', className: 'panel hidden' });
     this.townPanel = el('div', { id: 'town-panel', className: 'panel hidden' });
     this.explorePanels = [mapPanel, statusRow, controls];
+    // Mouse players open the menu here; on touch screens the Menu button among the controls does it.
+    const menuIcon = el('button', { className: 'menu-icon', text: '☰' });
+    menuIcon.title = 'Menu (Esc)';
+    menuIcon.addEventListener('click', () => this.onKey('c'));
     const side = el('aside', { id: 'side' }, [
-      el('div', { id: 'floor-panel', className: 'panel' }, [this.floorName, this.compass]),
+      el('div', { id: 'floor-panel', className: 'panel' }, [this.floorName, this.compass, menuIcon]),
       mapPanel,
       statusRow,
       controls,
@@ -335,7 +345,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         return true;
       case 'c':
       case 'Escape':
-        this.openPack();
+        this.openMenu();
         return true;
       case 'm':
         this.showMapOverlay();
@@ -377,7 +387,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     switch (k) {
       case 'c':
       case 'Escape':
-        this.openCoopPack();
+        this.openMenu();
         return true;
       case 'm':
         this.showMapOverlay();
@@ -418,7 +428,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const screen = el('div', { className: 'title-screen' }, [
       el('div', { className: 'playtest-badge' }, [
         el('strong', { text: 'Early playtest' }),
-        el('span', { text: 'Chapters I and II are open. Saves may be reset before release. Found a bug or have an idea? Use Feedback here or in the System menu.' }),
+        el('span', { text: 'Chapters I and II are open. Saves may be reset before release. Found a bug or have an idea? Use Feedback here or in the menu (Options).' }),
       ]),
       el('div', { className: 'logo', text: 'YGDRASSIL' }),
       el('div', { className: 'tagline', text: 'The road to Asgard runs through Ymir' }),
@@ -750,42 +760,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: title }), ...body, menu.el]), menu);
   }
 
-  private openCoopPack(): void {
-    const coop = this.coop!;
-    const close = () => {
-      this.closeOverlay();
-      this.enterExplore();
-    };
-    const feathers = this.game.state.inventory.homingFeather ?? 0;
-    const menu = new ListMenu(
-      [
-        { label: 'Party', description: 'View stats and equipment.', onSelect: () => this.partyStatus(() => this.openCoopPack()) },
-        {
-          label: 'Homing Feather',
-          detail: `×${feathers}`,
-          description: coop.isLeader ? 'Take everyone home and end the expedition.' : `Only ${coop.leaderName} can use it.`,
-          disabled: !coop.isLeader || feathers <= 0,
-          onSelect: () =>
-            this.confirm('Homing Feather', 'Take the whole expedition back to Lindholm?', () => {
-              audio.play('spring');
-              coop.useFeather();
-              this.enterExplore();
-            }),
-        },
-        {
-          label: 'Leave the expedition',
-          description: 'Go home alone. Your adventurer fights on without you and comes home with the others.',
-          onSelect: () => this.confirm('Leave', 'Leave the expedition and head home?', () => coop.leave()),
-        },
-        { label: 'Settings', description: 'Sound, battle and text speed.', onSelect: () => this.settings(() => this.openCoopPack()) },
-        { label: 'Close', onSelect: close },
-      ],
-      { onCancel: close },
-    );
-    const desc = el('div', { className: 'menu-desc' });
-    menu.describeInto(desc);
-    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: `Expedition ${coop.code}` }), menu.el, desc]), menu);
-  }
+
 
   // ── Help & credits ─────────────────────────────────────────────────────────
 
@@ -806,7 +781,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             ['Swipe', 'Up/down on the view to walk, sideways to turn'],
             ['Act', 'Open chests, drink from springs, gather'],
             ['Map', 'Draw walls, marks and notes on your map'],
-            ['Pack', 'Items, skills, Guidebook, Settings, Feedback'],
+            ['Menu', 'Party, Bag, Journal and Options: skills, items, the map, settings, feedback'],
           ]),
           section('Fighting', [
             ['Commands', 'Tap one, then a target'],
@@ -825,7 +800,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             ['Swipe', 'Up/down to walk, sideways to turn'],
             ['Space / Act', 'Open chests, drink from springs, gather'],
             ['M', 'Map: draw walls, marks and notes (1–9, 0 pick a tool, N a note)'],
-            ['C / Esc', 'Pack: items, skills, Guidebook, Settings'],
+            ['C / Esc', 'Menu: Party, Bag, Journal, Options'],
             ['H', 'This help'],
           ]),
           section('Fighting', [
@@ -1033,6 +1008,20 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.dangerOrb.style.color = color;
     this.goldEl.textContent = `${g.state.gold} G`;
     this.party.render(g.state.party, { owners: this.coop?.owners });
+    this.keyHint.textContent = prefs.strafeKeys
+      ? 'W S: walk · A D: side-step · Q E: turn · Space: act · M: map · Esc: menu'
+      : 'W S: walk · A D: turn · Q E: side-step · Space: act · M: map · Esc: menu';
+    this.updateActPrompt();
+  }
+
+  /** The action button in the view: only there when there is something to do where the party stands. */
+  private updateActPrompt(): void {
+    const g = this.game;
+    const action = g.state.location === 'dungeon' && this.mode === 'explore' ? g.actionHere() : null;
+    this.actPrompt.classList.toggle('hidden', !action);
+    if (!action) return;
+    const what = action.kind === 'chest' ? 'Open the chest' : action.kind === 'gate' ? 'Open the root gate' : `${GATHER_KINDS[action.gather].verb} here`;
+    this.actPrompt.textContent = TOUCH ? what : `${what}  [Space]`;
   }
 
   // ── Exploration ────────────────────────────────────────────────────────────
@@ -1264,6 +1253,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
   private showSide(panel: SidePanel): void {
     for (const p of this.explorePanels) p.classList.toggle('hidden', panel !== 'explore');
+    if (panel !== 'explore') this.actPrompt.classList.add('hidden');
     this.commandPanel.classList.toggle('hidden', panel !== 'combat');
     this.townPanel.classList.toggle('hidden', panel !== 'town');
   }
@@ -1311,24 +1301,53 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     );
   }
 
-  // ── Pack ───────────────────────────────────────────────────────────────────
+  // ── Menu ───────────────────────────────────────────────────────────────────
 
-  private openPack(): void {
+  /** Opens the menu fresh, on the Party tab (Esc, C, the ☰ button). */
+  openMenu(): void {
+    this.openPack('party');
+  }
+
+  /** The menu tab last shown, so sub-screens come back to it. */
+  private menuTab: MenuTab = 'party';
+
+  /**
+   * The one menu (Esc, C or the ☰ button), the same in town, in the dungeon and on expeditions: four tabs,
+   * each showing only what can be done here. Sub-screens return to it through `openPack()`.
+   */
+  openPack(tab: MenuTab = this.menuTab): void {
+    this.menuTab = tab;
+    const s = this.game.state;
+    const inTown = s.location === 'town' && !this.coop;
+    const coop = this.coop;
     const close = () => {
       this.closeOverlay();
-      this.enterExplore();
+      if (inTown) {
+        this.mode = 'town';
+        this.town.show();
+      } else this.enterExplore();
     };
-    const menu = new ListMenu(
-      [
-        { label: 'Use a skill', description: 'Use a healing skill outside of a fight.', onSelect: () => this.packSkills() },
-        { label: 'Items', description: 'Use an item.', onSelect: () => this.packItems() },
-        { label: 'Party', description: 'View stats and equipment.', onSelect: () => this.partyStatus(() => this.openPack()) },
-        { label: 'Materials', description: 'Monster parts to sell in town.', onSelect: () => this.materialsList(() => this.openPack()) },
-        {
+    const back = () => this.openPack();
+    const quit = (): MenuItem =>
+      coop
+        ? { label: 'Leave the expedition', description: 'Go home alone. Your adventurer fights on without you and comes home with the others.', onSelect: () => this.confirm('Leave', 'Leave the expedition and head home?', () => coop.leave(), back) }
+        : this.trial
+          ? { label: 'End the test', description: 'Back to the drafting table.', onSelect: () => this.endTrial() }
+          : { label: 'Quit to title', description: 'Return to the title screen. Anything since your last save is lost.', onSelect: () => this.confirm('Quit to title', 'Return to the title screen? Anything since your last save is lost.', () => this.showTitle(), back) };
+    const feathers = s.inventory.homingFeather ?? 0;
+    const feather: MenuItem = coop
+      ? {
           label: 'Homing Feather',
-          detail: `×${this.game.state.inventory.homingFeather ?? 0}`,
+          detail: `×${feathers}`,
+          description: coop.isLeader ? 'Take everyone home and end the expedition.' : `Only ${coop.leaderName} can use it.`,
+          disabled: !coop.isLeader || feathers <= 0,
+          onSelect: () => this.confirm('Homing Feather', 'Take the whole expedition back to Lindholm?', () => { audio.play('spring'); coop.useFeather(); this.enterExplore(); }, back),
+        }
+      : {
+          label: 'Homing Feather',
+          detail: `×${feathers}`,
           description: 'Return to Lindholm right away. Saves on arrival.',
-          disabled: (this.game.state.inventory.homingFeather ?? 0) <= 0,
+          disabled: feathers <= 0,
           onSelect: () =>
             this.confirm('Homing Feather', 'Follow the Homing Feather back to Lindholm?', () => {
               audio.play('spring');
@@ -1336,28 +1355,104 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
               this.save();
               this.enterTown();
               this.toast('The feather carries you home. Game saved.');
-            }, () => this.openPack()),
-        },
-        {
-          label: 'Skill tree',
-          detail: this.game.state.party.some((m) => unspentPoints(m) > 0) ? 'points to spend' : undefined,
-          description: 'Spend skill points. Every level brings one; each skill goes up to rank 10.',
-          onSelect: () => this.packSkillTree(),
-        },
-        { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(() => this.openPack()) },
-        { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(() => this.openPack()) },
-        { label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.showFeedback(() => this.openPack()) },
-        { label: 'Settings', description: 'Sound, battle and text speed, tips.', onSelect: () => this.settings(() => this.openPack()) },
-        this.trial
-          ? { label: 'End the test', description: 'Back to the drafting table.', onSelect: () => this.endTrial() }
-          : { label: 'Quit to title', description: 'Unsaved progress since the last save is lost.', onSelect: () => this.confirm('Quit to title', 'Return to the title screen? Anything since your last save is lost.', () => this.showTitle(), () => this.openPack()) },
-        { label: 'Close', onSelect: close },
+            }, back),
+        };
+    const points = s.party.some((m) => unspentPoints(m) > 0);
+    const tabs: Record<MenuTab, MenuItem[]> = {
+      party: [
+        { label: 'Stats & gear', description: 'Everyone\'s stats, weapons and armour.', onSelect: () => this.partyStatus(back) },
+        ...(coop
+          ? []
+          : [
+              { label: 'Skill tree', detail: points ? 'points to spend' : undefined, description: 'Spend skill points. Every level brings one; each skill goes up to rank 10.', onSelect: () => this.packSkillTree() },
+              { label: 'Use a skill', description: 'Use a healing skill outside of a fight.', onSelect: () => this.packSkills() },
+            ]),
       ],
-      { onCancel: close },
+      bag: [
+        ...(coop ? [] : [{ label: 'Items', description: 'Use a potion or tonic on someone.', onSelect: () => this.packItems() }]),
+        ...(inTown ? [] : [feather]),
+        ...(coop ? [] : [{ label: 'Materials', description: 'Monster parts and gathered goods, to sell in town.', onSelect: () => this.materialsList(back) }]),
+      ],
+      journal: [
+        ...(inTown ? [] : [{ label: 'Map', description: 'Your map of this floor: draw walls, marks and notes.', onSelect: () => { this.closeOverlay(); this.showMapOverlay(); } }]),
+        ...(coop
+          ? []
+          : [
+              { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(back) },
+              { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(back) },
+            ]),
+      ],
+      options: [
+        { label: 'Settings', description: 'Sound, speed, keys, map drawing and tips.', onSelect: () => this.settings(back) },
+        ...(coop || this.trial
+          ? []
+          : [
+              inTown
+                ? { label: 'Save', description: 'Save your progress.', onSelect: () => { this.save(); this.toast('Game saved.'); } }
+                : { label: 'Save', description: 'In the Rootdeep the game saves at every stair and spring; in town you can save any time.', disabled: true, onSelect: () => {} },
+            ]),
+        { label: 'Help', description: 'Controls and how to play.', onSelect: () => this.showHelp(back) },
+        ...(coop ? [] : [{ label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.showFeedback(back) }]),
+        { label: 'Privacy & Terms', description: 'What the game stores about you (opens a new page).', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
+        quit(),
+      ],
+    };
+    const order: MenuTab[] = ['party', 'bag', 'journal', 'options'];
+    const names: Record<MenuTab, string> = { party: 'Party', bag: 'Bag', journal: 'Journal', options: 'Options' };
+    const menu = new ListMenu(tabs[tab], { onCancel: close, backRow: false });
+    // ← → (or tapping a tab) switches tabs.
+    const handle = menu.handleKey.bind(menu);
+    const step = (d: number) => {
+      audio.play('menuMove');
+      this.openPack(order[(order.indexOf(tab) + d + order.length) % order.length]);
+    };
+    menu.handleKey = (key: string): boolean => {
+      if (key === 'ArrowLeft' || key === 'ArrowRight') {
+        step(key === 'ArrowLeft' ? -1 : 1);
+        return true;
+      }
+      return handle(key);
+    };
+    const bar = el(
+      'div',
+      { className: 'menu-tabs' },
+      order.map((t) => {
+        const b = el('button', { className: t === tab ? 'on' : '', text: names[t] });
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (t !== tab) this.openPack(t);
+        });
+        return b;
+      }),
     );
+    const head: HTMLElement[] = [];
+    if (tab === 'party') {
+      head.push(
+        el(
+          'div',
+          { className: 'menu-party' },
+          s.party.map((m) => {
+            const c = el('canvas', { className: 'menu-portrait' });
+            c.width = 64;
+            c.height = 64;
+            drawPortrait(c.getContext('2d')!, 64, m.classId, m.name, CLASSES[m.classId].color);
+            const pts = unspentPoints(m);
+            return el('div', { className: 'menu-member' }, [
+              c,
+              el('div', {}, [
+                el('b', { text: m.name }),
+                el('span', { text: `Lv ${m.level} ${CLASSES[m.classId].name} · HP ${m.hp} · SP ${m.sp}` }),
+              ]),
+              el('span', { className: 'menu-points', text: pts ? `${pts} skill point${pts > 1 ? 's' : ''}` : '' }),
+            ]);
+          }),
+        ),
+      );
+    }
     const desc = el('div', { className: 'menu-desc' });
     menu.describeInto(desc);
-    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Pack' }), menu.el, desc]), menu);
+    const hint = el('div', { className: 'menu-hint', text: TOUCH ? 'Tap a tab to switch' : '← → switch tab · ↑↓ choose · Esc close' });
+    this.openOverlay(el('div', { className: 'panel dialog wide game-menu' }, [bar, ...head, menu.el, desc, hint]), menu);
   }
 
   private packSkills(): void {

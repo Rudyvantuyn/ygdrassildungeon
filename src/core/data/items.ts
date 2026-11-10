@@ -34,7 +34,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     effect: 'warp',
     amount: 0,
     price: 120,
-    description: 'Toss it into the air and the wind carries you home to Lindholm. Use it from the pack menu.',
+    description: 'Toss it into the air and the wind carries you home to Lindholm. Use it from the menu (Bag).',
   },
   oathToken: {
     id: 'oathToken',

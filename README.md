@@ -22,7 +22,7 @@ npm run dev        # open de URL die Vite toont (meestal http://localhost:5173)
 | ← / A, → / D | draai links / rechts | doelwit wisselen |
 | Q / E | zijstap links / rechts | |
 | Enter / Spatie | iets openen wat voor je staat, zoals een kist (knop Act) | bevestigen (tijdens een ronde: versnellen) |
-| Esc | rugzak-menu (Pack) | terug |
+| Esc | menu (Party, Bag, Journal, Options) | terug |
 | C / M / H | rugzak-menu / kaarteditor (tools 1–9, 0; N notitie) / hulp | |
 | R / O | in gevechten: vorige ronde herhalen / automatisch vechten | |
 | Vegen | op telefoon: omhoog/omlaag lopen, opzij draaien (knoppen ⇠ ⇢ opzij stappen, ↶ ↷ draaien) | |
@@ -47,9 +47,9 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 - **Snellere gevechten**: *Repeat* (R) doet de vorige ronde opnieuw, *Auto* (O) laat de party zelf vechten tot je
   stopt (Esc of tikken). Gevechtssnelheid Normal / Fast / Fastest.
-- **Settings** (Pack of System): volume met schuifbalken, gevechtssnelheid, tekstsnelheid en tips. Er is bewust
+- **Settings** (menu → Options): volume met schuifbalken, gevechtssnelheid, tekstsnelheid en tips. Er is bewust
   geen moeilijkheidsinstelling: iedereen speelt met dezelfde regels, wat eerlijk is voor expedities.
-- **Feedback** (Pack of System): spelers sturen bugs en ideeën rechtstreeks naar de tabel `reports` in Supabase
+- **Feedback** (menu → Options, of titelscherm): spelers sturen bugs en ideeën rechtstreeks naar de tabel `reports` in Supabase
   (alleen te lezen door de eigenaar op `/inbox.html`). Crashes worden automatisch gemeld vanaf de live site.
 - **Mobiel**: op kleine schermen schakelt de game over naar een eigen telefoonindeling (960×440 in plaats van een
   verkleinde 1280×720): grote beweegknoppen, partykaarten onderaan, gevechtsmenu over de hele zijkolom, dialogen die
@@ -59,7 +59,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
   hoofdstuk gaat pas open als de eindbaas van het vorige verslagen is. Geldt ook voor expedities.
 - **De stad als kaarten**: elke plek in Lindholm is een grote geschilderde kaart om op te tikken.
 - **Feedback-inbox** (`/inbox.html`): alleen voor de eigenaar; lezen, filteren en verwijderen.
-- **Privacy & Terms** (`/privacy.html`, ook via titelscherm en System). Lettertypen zitten nu in de game zelf.
+- **Privacy & Terms** (`/privacy.html`, ook via titelscherm en menu → Options). Lettertypen zitten nu in de game zelf.
 
 ### Het grote verhaal (mijlpaal 13)
 
@@ -73,7 +73,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
   op richting de drie wegen (Asgard, de werelden, of een derde weg); latere scènes reageren erop.
 - Verhaalscènes bij elke verdieping, geheimen die langzaam loskomen (Hallvards vloot, de gouden runen, "de vrouw met
   de lantaarn"), en de spelregels verklaard (Oath Tokens zijn botsplinters van Ymir, prowlers aten van zijn lichaam).
-- **Chronicle** (Pack): lees elke gezien scène terug, met je keuzes.
+- **Chronicle** (menu → Journal): lees elke gezien scène terug, met je keuzes.
 - Vier nieuwe opdrachten van Hrodna en Eira.
 
 ### Je eigen groep, grinden en tutorials (mijlpaal 12)
@@ -85,7 +85,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Grindy**: vijanden geven 70% van hun XP en 75% van hun goud. Doorstomen lukt niet meer; rustig trainen wel.
 - **Tutorials**: korte uitleg van de inwoners de eerste keer dat je iets tegenkomt (stad, eerste stap, kaart, gevecht,
   groei, skillpunten, kisten, bronnen, verzamelen, statuseffecten, versterkingen, gevallen vrienden, prowlers,
-  bazen, herberg, winkel, eden, prikbord, Hornstone). Alles terug te lezen in het **Guidebook** (System of Pack),
+  bazen, herberg, winkel, eden, prikbord, Hornstone). Alles terug te lezen in het **Guidebook** (menu → Journal),
   en tips kunnen uit.
 - `docs/verhaal-briefing.md`: briefing voor de schrijver van het overkoepelende verhaal.
 
@@ -118,7 +118,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - Elk level geeft een **skillpunt** (3 op level 1). Punten gaan in de **skillboom** van de klasse; elke skill heeft
   rank 1 t/m 10. Hogere ranks: meer kracht of genezing, grotere kans op statuseffecten, langere effecten, iets meer SP.
 - Sommige skills vragen een level en een andere skill op een bepaalde rank. **Passieve skills** (◇) verhogen een stat.
-- Punten verdelen in de Oath Hall (**Skills**) of in de dungeon via Pack → **Skill tree**. In de Oath Hall kun je
+- Punten verdelen in de Oath Hall (**Skills**) of overal via menu → Party → **Skill tree**. In de Oath Hall kun je
   tegen betaling alles **afleren** en opnieuw verdelen. Kaarten met ongebruikte punten tonen een ✦.
 - Oude saves en de computerspeler gebruiken een aanbevolen build (`src/core/skilltree.ts`).
 
@@ -230,7 +230,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
   Prowler-gevecht en eindbaas. Thema's vloeien in elkaar over.
 - Effecten voor lopen, draaien, muren, menu's, kisten, trappen, bronnen, treffers per element, genezen, opwekken,
   overwinning, nederlaag en level-up.
-- Volume voor muziek en effecten apart: menu **Settings** in de stad (System) of in het Pack-menu, met schuifbalken.
+- Volume voor muziek en effecten apart: menu → Options → **Settings**, met schuifbalken.
 
 ## Plannen voor later
 
@@ -266,7 +266,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Materialen | Bog Jelly, Dusk Membrane, Briar Quill, Hollow Fang, Puffcap Spores, Bark Shell, Gloam Scale, Heartwood Knot, Rime Pelt, Frost Gill, Ice Carapace, Snowveil Wing, Cinder Feather, Ember Core, Fiend Root, Ash Slab, Grim Tusk, Wraith Silk, Draugr Bone, Blighted Heartwood, Gnawer Fang, Brine Gel, Skerry Plume, Reef Shell, Kelp Cord, Salt Spores, Seahound Fang, Pearl Dust, Coral Chunk, Tideglass, Nykur Mane, Salt Bone, Eel Lantern, Deepmaw Tooth, Foam Silk, Fathom Core, Skerryjaw Fin, Brine Crown, Coil Scale, Jarl's Crown, Hafgufa Pearl; verzameld: Wild Sorrel, Bitterroot, Moonpetal, Copper Nugget, Iron Ore, Starsilver, Ashwood Log, Blackoak Log, Heartoak Burl, River Perch, Rootcarp, Glimmer Trout, Sea Lettuce, Glasswort, Pearl Kelp, Rock Salt, Coral Ore, Deepiron, Driftwood, Drowned Oak, Ghostwood, Silver Sprat, Stormfin, Moonscale Eel |
 | Speciale uitrusting | Briarthorn Spear, Duskweave Cloak, Barkshell Mail, Gloamscale Robe, Heartknot Staff, Elderheart Mail, Rimefang Blade, Snowveil Bow, Embercore Rod, Grimtusk Cleaver, Draugrbone Bow, Wraithsilk Robe, Reefshell Mail, Nacre Robe, Eel Lantern Rod, Skerryjaw Saber, Brinecrown Bow, Coilscale Robe, Jarlguard Plate |
 | Samen spelen | **Hornstone** (ontmoetingssteen), expeditie, Sound the Horn, Answer a Horn, gathering (lobby), share (je deel van de buit) |
-| Menu's | Pack (rugzak-menu in de dungeon), Map (kaarteditor), Notice Board (quests), System, Danger-bol |
+| Menu's | Menu met vier tabs: Party, Bag, Journal, Options (overal hetzelfde); Map (kaarteditor), Notice Board (quests), Danger-bol |
 
 ## Projectstructuur
 

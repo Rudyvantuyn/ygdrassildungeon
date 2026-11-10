@@ -48,6 +48,7 @@ document.body.append(rotate);
 
 // On touch devices the first tap goes full screen (where the browser allows it) and asks for landscape.
 const touch = window.matchMedia('(pointer: coarse)').matches;
+document.body.classList.toggle('touch', touch);
 if (touch && document.documentElement.requestFullscreen) {
   const goFull = () => {
     document.documentElement

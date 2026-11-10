@@ -515,6 +515,20 @@ export class Game {
     return { kind: spot.kind, finds, ambush };
   }
 
+  /**
+   * What the action button would do here, without doing it: gather at a spot, open the chest or the root
+   * gate straight ahead. Null when there is nothing to do (the UI then hides the button on PC).
+   */
+  actionHere(): { kind: 'gather'; gather: GatherKind; left: number } | { kind: 'chest' } | { kind: 'gate' } | null {
+    const spot = this.gatherSpotHere();
+    if (spot && spot.left > 0) return { kind: 'gather', gather: spot.kind, left: spot.left };
+    const ahead = relCell(this.state.x, this.state.y, this.state.dir, 1, 0);
+    const tile = tileAt(this.map, ahead.x, ahead.y);
+    if (tile === 'chest' && !this.isChestOpened(ahead.x, ahead.y)) return { kind: 'chest' };
+    if (tile === 'gate') return { kind: 'gate' };
+    return null;
+  }
+
   interact(): StepEvent {
     const spot = this.gatherSpotHere();
     if (spot) return { type: 'gatherSpot', ...spot };

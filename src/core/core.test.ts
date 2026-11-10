@@ -692,3 +692,28 @@ describe('Oath Hall (party management)', () => {
     expect(copy.state.reserve.map((m) => m.name)).toEqual(['Orrin', 'Wren']);
   });
 });
+
+describe('action button', () => {
+  it('names a closed chest ahead, and nothing once it is open', () => {
+    const game = Game.newGame(7);
+    game.enterFloor(0);
+    const m = game.map;
+    let found = false;
+    for (let i = 0; i < m.tiles.length && !found; i++) {
+      if (m.tiles[i] !== 'chest') continue;
+      const x = i % m.width;
+      const y = Math.floor(i / m.width);
+      for (let dir = 0; dir < 4 && !found; dir++) {
+        const ax = x - DX[dir];
+        const ay = y - DY[dir];
+        if (tileAt(m, ax, ay) !== 'floor') continue;
+        Object.assign(game.state, { x: ax, y: ay, dir });
+        expect(game.actionHere()).toEqual({ kind: 'chest' });
+        game.interact();
+        expect(game.actionHere()).toBeNull();
+        found = true;
+      }
+    }
+    expect(found).toBe(true);
+  });
+});

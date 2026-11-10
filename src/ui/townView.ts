@@ -42,6 +42,8 @@ export interface TownHost {
   enterDungeon(): void;
   showTitle(): void;
   partyStatus(back: () => void): void;
+  /** The one menu: party, bag, journal, options. */
+  openMenu(): void;
   settings(back: () => void): void;
   showFeedback(back: () => void): void;
   showHelp(back: () => void): void;
@@ -78,7 +80,7 @@ export class TownView {
     return this.host.game;
   }
 
-  /** Builds the town screen: a large painted card for every place, plus Party, Settings and System. */
+  /** Builds the town screen: a large painted card for every place, and the menu button in the header. */
   show(): void {
     const s = this.game.state;
     const places: Place[] = [
@@ -89,12 +91,7 @@ export class TownView {
       { spot: 'board', name: 'The Notice Board', detail: this.boardBadge() || 'Requests', description: 'Requests from the people of Lindholm. Finished work pays well.', onSelect: () => this.host.tips(['quests'], () => this.board()) },
       { spot: 'horn', name: 'The Hornstone', detail: 'Play together', description: 'Sound the horn to descend together with players from other halls.', onSelect: () => this.host.tips(['hornstone'], () => this.host.openHornstone()) },
     ];
-    const buttons: Place[] = [
-      { spot: null, name: 'Party', detail: '', description: 'Stats and equipment of everyone in the party.', onSelect: () => this.host.partyStatus(() => this.back()) },
-      { spot: null, name: 'Settings', detail: '', description: 'Sound, battle and text speed, tips.', onSelect: () => this.host.settings(() => this.back()) },
-      { spot: null, name: 'System', detail: '', description: 'Save, help, feedback, and quit to the title screen.', onSelect: () => this.system() },
-    ];
-    const all = [...places, ...buttons];
+    const all = places;
     const nodes: HTMLElement[] = [];
     const desc = el('div', { className: 'town-desc' });
     const select = (i: number) => {
@@ -120,27 +117,35 @@ export class TownView {
       node.addEventListener('click', () => activate(i));
       nodes.push(node);
     }
+    const menuButton = el('button', { className: 'menu-button', text: '☰ Menu' });
+    menuButton.title = 'Party, bag, journal and options (Esc)';
+    menuButton.addEventListener('click', () => {
+      audio.play('menuSelect');
+      this.host.openMenu();
+    });
     this.grid.replaceChildren(
       el('div', { className: 'town-head' }, [
         el('div', { className: 'town-name', text: 'Lindholm' }),
         desc,
         el('div', { className: 'town-gold', text: `${s.gold} G` }),
+        menuButton,
       ]),
-      el('div', { className: 'town-cards' }, nodes.slice(0, places.length)),
-      el('div', { className: 'town-buttons' }, nodes.slice(places.length)),
+      el('div', { className: 'town-cards' }, nodes),
     );
     select(Math.min(this.lastIndex, all.length - 1));
     const cols = 3;
     this.menu = {
       handleKey: (key: string): boolean => {
         const i = this.lastIndex;
-        const onCards = i < places.length;
         let next = i;
         if (key === 'ArrowRight' || key === 'd' || key === 'D') next = i + 1;
         else if (key === 'ArrowLeft' || key === 'a' || key === 'A') next = i - 1;
-        else if (key === 'ArrowDown' || key === 's' || key === 'S') next = onCards ? (i + cols < places.length ? i + cols : places.length + Math.min(i % cols, buttons.length - 1)) : i;
-        else if (key === 'ArrowUp' || key === 'w' || key === 'W') next = onCards ? i - cols : places.length - cols + Math.min(i - places.length, cols - 1);
-        else if (key === 'Enter' || key === ' ' || key === 'z' || key === 'Z') {
+        else if (key === 'ArrowDown' || key === 's' || key === 'S') next = i + cols < places.length ? i + cols : i;
+        else if (key === 'ArrowUp' || key === 'w' || key === 'W') next = i - cols;
+        else if (key === 'Escape' || key === 'c' || key === 'C') {
+          this.host.openMenu();
+          return true;
+        } else if (key === 'Enter' || key === ' ' || key === 'z' || key === 'Z') {
           activate(i);
           return true;
         } else return false;
@@ -176,24 +181,6 @@ export class TownView {
       { onCancel: back },
     );
     this.dialog('The Sleeping Stag', [npcSays('gerd', `"Welcome, explorers! A warm bed and a hot meal for ${cost} gold."`)], menu);
-  }
-
-  private system(): void {
-    const back = () => this.back();
-    const menu = new ListMenu(
-      [
-        { label: 'Save', description: 'Save your progress.', onSelect: () => { this.host.save(); this.back(); this.host.toast('Game saved.'); } },
-        { label: 'Settings', description: 'Sound, battle and text speed, tips.', onSelect: () => this.host.settings(() => this.system()) },
-        { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.host.showGuidebook(() => this.system()) },
-        { label: 'How to Play', description: 'Controls and tips.', onSelect: () => this.host.showHelp(() => this.system()) },
-        { label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.host.showFeedback(() => this.system()) },
-        { label: 'Privacy & Terms', description: 'What the game stores about you, and the rules of play (opens a new page).', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
-        { label: 'Quit to title', description: 'Return to the title screen. Unsaved progress is lost.', onSelect: () => this.host.confirm('Quit to title', 'Return to the title screen? Anything since your last save is lost.', () => this.host.showTitle(), () => this.system()) },
-        { label: 'Back', onSelect: back },
-      ],
-      { onCancel: back },
-    );
-    this.dialog('System', [], menu, true);
   }
 
   // ── Notice board ───────────────────────────────────────────────────────────
