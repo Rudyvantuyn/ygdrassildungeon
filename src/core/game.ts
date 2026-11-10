@@ -521,7 +521,8 @@ export class Game {
    */
   actionHere(): { kind: 'gather'; gather: GatherKind; left: number } | { kind: 'chest' } | { kind: 'gate' } | null {
     const spot = this.gatherSpotHere();
-    if (spot && spot.left > 0) return { kind: 'gather', gather: spot.kind, left: spot.left };
+    // Only when someone in the party has learned this gathering skill (rank 0 can't gather).
+    if (spot && spot.left > 0 && spot.rank > 0) return { kind: 'gather', gather: spot.kind, left: spot.left };
     const ahead = relCell(this.state.x, this.state.y, this.state.dir, 1, 0);
     const tile = tileAt(this.map, ahead.x, ahead.y);
     if (tile === 'chest' && !this.isChestOpened(ahead.x, ahead.y)) return { kind: 'chest' };
