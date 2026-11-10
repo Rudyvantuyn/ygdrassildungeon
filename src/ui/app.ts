@@ -1,3 +1,4 @@
+import type { ChartMode } from '../core/chart';
 import type { Combat } from '../core/combat';
 import { ENEMIES } from '../core/data/enemies';
 import { EQUIPMENT } from '../core/data/equipment';
@@ -30,7 +31,7 @@ import { GATHER_KINDS } from '../core/data/gathering';
 import { describeFinds } from '../core/expedition';
 import { unspentPoints } from '../core/skilltree';
 import { toFloorDefs, type ChapterDesign } from '../core/designer';
-import { prefs, setPref, TEXT_SPEED_NAMES, TEXT_SPEED_STEP, type BattleSpeed, type TextSpeed } from './prefs';
+import { movementKey, prefs, setPref, TEXT_SPEED_NAMES, TEXT_SPEED_STEP, type BattleSpeed, type TextSpeed } from './prefs';
 import { sendReport, type ReportKind } from '../net/reports';
 import { choose, markSeen, pendingScene, STORY, type StoryLine, type StoryScene } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
@@ -302,7 +303,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   private exploreKey(key: string): boolean {
-    const k = key.length === 1 ? key.toLowerCase() : key;
+    const k = movementKey(key.length === 1 ? key.toLowerCase() : key);
     if (this.coop) return this.coopKey(k);
     const move = (fn: () => void) => {
       if (this.now - this.lastMove < MOVE_COOLDOWN) return true;
@@ -819,8 +820,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           section('Exploring', [
             ['↑ / W', 'Step forward'],
             ['↓ / S', 'Step back'],
-            ['← → / A D  ↶ ↷', 'Turn'],
-            ['Q / E  ⇠ ⇢', 'Side-step'],
+            [prefs.strafeKeys ? '← → / Q E  ↶ ↷' : '← → / A D  ↶ ↷', 'Turn'],
+            [prefs.strafeKeys ? 'A / D  ⇠ ⇢' : 'Q / E  ⇠ ⇢', 'Side-step'],
             ['Swipe', 'Up/down to walk, sideways to turn'],
             ['Space / Act', 'Open chests, drink from springs, gather'],
             ['M', 'Map: draw walls, marks and notes (1–9, 0 pick a tool, N a note)'],
@@ -1503,11 +1504,24 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       s.tipsOff = v === 'off';
       this.save();
     });
+    const keys = choices<'turn' | 'step'>([['turn', 'Turn'], ['step', 'Side-step']], () => (prefs.strafeKeys ? 'step' : 'turn'), (v) => setPref('strafeKeys', v === 'step'));
+    const chart = choices<ChartMode>(
+      [['assisted', 'Assisted'], ['manual', 'Manual'], ['auto', 'Auto']],
+      () => s.chartMode,
+      (v) => {
+        s.chartMode = v;
+        this.save();
+      },
+    );
     const items: MenuItem[] = [
       { label: 'Music', description: 'Drag the slider, or use ← →.', control: music.control, onAdjust: music.onAdjust, onSelect: () => music.onAdjust(1) },
       { label: 'Effects', description: 'Drag the slider, or use ← →.', control: sfx.control, onAdjust: sfx.onAdjust, onSelect: () => sfx.onAdjust(1) },
       { label: 'Battle speed', description: 'How fast the rounds of a fight play out. Enter during a round speeds it up even more.', control: battle.control, onAdjust: battle.onAdjust, onSelect: battle.cycle },
       { label: 'Text speed', description: 'How fast story lines appear.', control: text.control, onAdjust: text.onAdjust, onSelect: text.cycle },
+      { label: 'A / D keys', description: 'Turn: A and D turn, Q and E side-step. Side-step: the other way round. The arrow keys always turn.', control: keys.control, onAdjust: keys.onAdjust, onSelect: keys.cycle },
+      ...(solo
+        ? [{ label: 'Map drawing', description: 'Assisted: your steps fill in, you draw walls and marks. Manual: you draw everything. Auto: the map draws itself.', control: chart.control, onAdjust: chart.onAdjust, onSelect: chart.cycle }]
+        : []),
       ...(solo ? [{ label: 'Tips', description: 'Whether tips appear when something new comes up.', control: tips.control, onAdjust: tips.onAdjust, onSelect: tips.cycle }] : []),
       { label: 'Back', onSelect: back },
     ];

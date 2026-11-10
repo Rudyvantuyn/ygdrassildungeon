@@ -1,14 +1,16 @@
-/** Settings that belong to this device rather than to a save: how fast fights and text play. */
+/** Settings that belong to this device rather than to a save: how fast fights and text play, key layout. */
 export type BattleSpeed = 1 | 2 | 3;
 export type TextSpeed = 'slow' | 'normal' | 'fast' | 'instant';
 
 export interface Prefs {
   battleSpeed: BattleSpeed;
   textSpeed: TextSpeed;
+  /** A and D side-step and Q and E turn (instead of the other way round). */
+  strafeKeys: boolean;
 }
 
 const KEY = 'ygdrassil-prefs';
-const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal' };
+const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false };
 
 export const BATTLE_SPEED_NAMES: Record<BattleSpeed, string> = { 1: 'Normal', 2: 'Fast', 3: 'Fastest' };
 export const TEXT_SPEED_NAMES: Record<TextSpeed, string> = { slow: 'Slow', normal: 'Normal', fast: 'Fast', instant: 'Instant' };
@@ -32,4 +34,10 @@ export function setPref<K extends keyof Prefs>(key: K, value: Prefs[K]): void {
   } catch {
     // Private mode: the setting lasts for this session only.
   }
+}
+
+/** With strafeKeys on, A/D and Q/E swap roles (A/D side-step, Q/E turn). Arrow keys always turn. */
+export function movementKey(k: string): string {
+  if (!prefs.strafeKeys) return k;
+  return ({ a: 'q', d: 'e', q: 'a', e: 'd' } as Record<string, string>)[k] ?? k;
 }
