@@ -157,7 +157,8 @@ export class CombatView {
         if (k >= 1) return;
       }
       const flashing = time < fx.flashUntil;
-      if (flashing && Math.floor(time / 60) % 2 === 0) alpha *= 0.25;
+      // A hit dims the enemy once and shakes it; no blinking (flicker can hurt sensitive players).
+      if (flashing) alpha *= 0.5;
       const shake = flashing ? Math.sin(time / 18) * 8 : 0;
       const lunge = time < fx.lungeUntil ? 1 + 0.08 * Math.sin(((fx.lungeUntil - time) / 400) * Math.PI) : 1;
 
@@ -288,7 +289,7 @@ export class CombatView {
         if (k >= 1) return;
       }
       const flashing = time < fx.flashUntil;
-      if (flashing && Math.floor(time / 60) % 2 === 0) alpha *= 0.35;
+      if (flashing) alpha *= 0.55;
       const shake = flashing ? Math.sin(time / 18) * 6 : 0;
       const lift = time < fx.lungeUntil ? -10 * Math.sin(((fx.lungeUntil - time) / 400) * Math.PI) : 0;
       ctx.save();

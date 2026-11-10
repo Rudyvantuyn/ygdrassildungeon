@@ -249,10 +249,17 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       ctx.fillStyle = `rgba(0,0,0,${(fx.kind === 'turn' ? 0.5 : 0.35) * (1 - k)})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     } else if (fx.kind === 'encounter') {
+      // No flashing (it can hurt players sensitive to flicker): the view darkens in one smooth sweep,
+      // with a red glow closing in from the edges.
       const k = t / 700;
       if (k >= 1) return void (this.fx = null);
-      const flicker = Math.floor(t / 70) % 2 === 0;
-      ctx.fillStyle = flicker ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.6)';
+      const ease = k * k * (3 - 2 * k);
+      const glow = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, VIEW_H * (0.75 - 0.5 * ease), VIEW_W / 2, VIEW_H / 2, VIEW_W * 0.75);
+      glow.addColorStop(0, 'rgba(60,0,0,0)');
+      glow.addColorStop(1, `rgba(90,10,6,${0.75 * ease})`);
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      ctx.fillStyle = `rgba(0,0,0,${0.55 * ease})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     } else if (t > 260) {
       this.fx = null;
