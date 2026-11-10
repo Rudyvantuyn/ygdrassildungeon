@@ -10,7 +10,8 @@ import type { Mods } from '../core/combat';
 import type { ModStat } from '../core/types';
 import type { ItemId } from '../core/types';
 import type { CorridorRenderer } from '../render/corridor';
-import { drawMonster } from '../render/monsters';
+import { drawMonster, monsterSprite } from '../render/monsters';
+import { hasPainting, monsterPainting } from '../render/paintings';
 import { audio, type Sfx } from '../audio/audio';
 import type { Ailment, Element } from '../core/types';
 import { el, floater } from './dom';
@@ -127,6 +128,11 @@ export class CombatView {
 
   draw(ctx: CanvasRenderingContext2D, w: number, h: number, time: number): void {
     this.time = time;
+    if (this.painted()) {
+      if (this.statusEl && this.driver?.status) this.statusEl.textContent = this.driver.status();
+      this.drawPainted(ctx, w, h, time);
+      return;
+    }
     // The party stands still during a fight: draw the corridor once and reuse the picture.
     if (!this.backdrop) {
       this.host.corridor.draw(this.host.game, time);
@@ -228,6 +234,164 @@ export class CombatView {
     });
   }
 
+  /** A fight against painted monsters: the painting fills the view, each enemy has a card below it. */
+  private painted(): boolean {
+    return this.combat.enemies.some((e) => hasPainting(e.def));
+  }
+
+  /** The enemy whose painting is shown: the one being targeted, else the first one still standing with a painting. */
+  private focusEnemy(): number {
+    if (this.target !== null && hasPainting(this.combat.enemies[this.target].def)) return this.target;
+    const alive = this.combat.enemies.findIndex((e, i) => hasPainting(e.def) && this.fx[i].dyingSince === null);
+    return alive >= 0 ? alive : 0;
+  }
+
+  private cardBox(i: number, w: number, h: number): { x: number; y: number; cw: number; ch: number } {
+    const n = this.combat.enemies.length;
+    const cw = Math.min(200, (w - 40) / n - 12);
+    const ch = 92;
+    const x = w / 2 + (i - (n - 1) / 2) * (cw + 12) - cw / 2;
+    return { x, y: h - ch - 16, cw, ch };
+  }
+
+  private drawPainted(ctx: CanvasRenderingContext2D, w: number, h: number, time: number): void {
+    const focus = this.combat.enemies[this.focusEnemy()];
+    const img = monsterPainting(focus.def);
+    ctx.fillStyle = '#0b0907';
+    ctx.fillRect(0, 0, w, h);
+    if (img) {
+      // Cover the view, keeping the painting's proportions.
+      const k = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+      const dw = img.naturalWidth * k;
+      const dh = img.naturalHeight * k;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+      ctx.imageSmoothingEnabled = true;
+    }
+    if (this.combat.boss || this.combat.prowler) {
+      ctx.fillStyle = this.combat.boss ? 'rgba(60,0,0,0.25)' : 'rgba(60,24,0,0.22)';
+      ctx.fillRect(0, 0, w, h);
+    }
+    const shadow = ctx.createLinearGradient(0, h - 170, 0, h);
+    shadow.addColorStop(0, 'rgba(0,0,0,0)');
+    shadow.addColorStop(1, 'rgba(0,0,0,0.75)');
+    ctx.fillStyle = shadow;
+    ctx.fillRect(0, h - 170, w, 170);
+
+    this.combat.enemies.forEach((enemy, i) => {
+      const fx = this.fx[i];
+      const { x, y, cw, ch } = this.cardBox(i, w, h);
+      let alpha = 1;
+      if (fx.dyingSince !== null) {
+        const k = Math.min(1, (time - fx.dyingSince) / 550);
+        alpha = 1 - k;
+        if (k >= 1) return;
+      }
+      const flashing = time < fx.flashUntil;
+      if (flashing && Math.floor(time / 60) % 2 === 0) alpha *= 0.35;
+      const shake = flashing ? Math.sin(time / 18) * 6 : 0;
+      const lift = time < fx.lungeUntil ? -10 * Math.sin(((fx.lungeUntil - time) / 400) * Math.PI) : 0;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(shake, lift);
+      const chosen = this.target === i;
+      // Card: dark panel, bronze rim (gold when targeted).
+      ctx.fillStyle = 'rgba(14,10,7,0.92)';
+      ctx.fillRect(x, y, cw, ch);
+      ctx.strokeStyle = chosen ? '#f0cf6a' : '#6b5128';
+      ctx.lineWidth = chosen ? 3 : 2;
+      ctx.strokeRect(x, y, cw, ch);
+      // Thumbnail: the middle of the painting, or the sprite for an enemy without one.
+      const t = 64;
+      const tx = x + 10;
+      const ty = y + (ch - t) / 2;
+      ctx.fillStyle = '#000';
+      ctx.fillRect(tx, ty, t, t);
+      const pic = monsterPainting(enemy.def);
+      if (pic) {
+        const side = Math.min(pic.naturalWidth, pic.naturalHeight);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(pic, (pic.naturalWidth - side) / 2, (pic.naturalHeight - side) / 2, side, side, tx, ty, t, t);
+        ctx.imageSmoothingEnabled = true;
+      } else {
+        const spr = monsterSprite(enemy.def);
+        if (spr) {
+          const k = Math.min(t / spr.naturalWidth, t / spr.naturalHeight);
+          ctx.drawImage(spr, tx + (t - spr.naturalWidth * k) / 2, ty + (t - spr.naturalHeight * k) / 2, spr.naturalWidth * k, spr.naturalHeight * k);
+        }
+      }
+      ctx.strokeStyle = '#d6a95c';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(tx + 0.5, ty + 0.5, t - 1, t - 1);
+      // Name, health, ailment and stat changes.
+      const ix = tx + t + 10;
+      const iw = x + cw - ix - 10;
+      ctx.font = '700 15px Cinzel, Georgia, serif';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = chosen ? '#f0cf6a' : '#efe4cc';
+      let name = enemy.name;
+      while (name.length > 3 && ctx.measureText(name).width > iw) name = name.slice(0, -2) + '…';
+      ctx.fillText(name, ix, y + 28);
+      this.hpBar(ctx, ix, y + 40, iw, i, enemy.maxHp);
+      const ailment = this.enemyAilment[i];
+      const mods = modText(enemy.mods);
+      ctx.font = '800 12px "Nunito Sans", sans-serif';
+      if (ailment) {
+        const badge = AILMENT_BADGE[ailment];
+        ctx.fillStyle = badge.color;
+        ctx.fillRect(ix, y + 58, 40, 17);
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.fillText(badge.short, ix + 20, y + 71);
+      }
+      if (mods) {
+        ctx.fillStyle = '#f0e0b0';
+        ctx.textAlign = 'left';
+        ctx.fillText(mods, ailment ? ix + 46 : ix, y + 71);
+      }
+      ctx.restore();
+      if (chosen) {
+        // The arrow above the chosen card.
+        const ax = x + cw / 2;
+        const ay = y - 8 + Math.sin(time / 160) * 4;
+        ctx.fillStyle = '#f0cf6a';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(ax - 14, ay - 16);
+        ctx.lineTo(ax + 14, ay - 16);
+        ctx.lineTo(ax, ay);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+      }
+    });
+  }
+
+  /** An enemy's health bar: a dark trough with a bronze rim, gold to red as it empties. */
+  private hpBar(ctx: CanvasRenderingContext2D, x: number, top: number, bw: number, i: number, maxHp: number): void {
+    const ratio = Math.max(0, this.enemyHp[i] / maxHp);
+    ctx.beginPath();
+    ctx.roundRect(x - 3, top - 2, bw + 6, 12, 6);
+    ctx.fillStyle = '#6b5128';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(x - 2, top - 1, bw + 4, 10, 5);
+    ctx.fillStyle = '#0c0907';
+    ctx.fill();
+    if (ratio > 0) {
+      const fill = ctx.createLinearGradient(0, top, 0, top + 8);
+      const [hi, mid, lo] = ratio > 0.5 ? ['#ffcf6a', '#d88a26', '#7a4410'] : ratio > 0.25 ? ['#ffa070', '#d8562a', '#7a2410'] : ['#ff8a7a', '#e0302a', '#8a0a06'];
+      fill.addColorStop(0, hi);
+      fill.addColorStop(0.55, mid);
+      fill.addColorStop(1, lo);
+      ctx.beginPath();
+      ctx.roundRect(x, top, Math.max(8, bw * ratio), 8, 4);
+      ctx.fillStyle = fill;
+      ctx.fill();
+    }
+  }
+
   private layout(i: number): { x: number; ground: number; u: number } {
     const n = this.combat.enemies.length;
     const spacing = Math.min(260, 780 / n);
@@ -240,6 +404,14 @@ export class CombatView {
     const size = this.combat.enemies[i].def.art.size;
     // The view canvas may be shown smaller than it is drawn (the phone layout): map canvas to stage coordinates.
     const view = document.getElementById('view') as HTMLCanvasElement | null;
+    if (view && this.painted()) {
+      // Damage numbers rise from the enemy's card.
+      const box = this.cardBox(i, view.width, view.height);
+      const tl = stagePoint(view, 0, 0);
+      const br = stagePoint(view, 1, 1);
+      const k = (br.x - tl.x) / view.width;
+      return { x: tl.x + (box.x + box.cw / 2) * k, y: tl.y + (box.y - 10) * k };
+    }
     if (!view) return { x: 20 + x, y: 20 + ground - u * size * 0.5 };
     const tl = stagePoint(view, 0, 0);
     const br = stagePoint(view, 1, 1);

@@ -9,6 +9,9 @@ photos from different places still look like one world.
 --texture makes a square, seamlessly repeating dungeon texture (wall, floor or ceiling) instead of a 16:9 picture:
   python3 scripts/photo-to-art.py bark.jpg forest-wall.png --texture --width 128 --mood cold
 
+--painting makes a monster painting for the fight view (860x520, the view's shape) from public-domain art:
+  python3 scripts/photo-to-art.py nokken.jpg public/art/paintings/bogling.webp --painting --crop 0.06,0.07,0.94,0.88
+
 --patch paints over a modern detail (a sign, a trail mark) with the picture just beside it, before the filter runs.
 Coordinates are fractions of the cropped 16:9 picture, e.g. --patch 0.70,0.08,0.06,0.07.
 
@@ -98,6 +101,26 @@ def texture(src: str, out: str, width: int, mood: str, light: float = 1.0) -> No
     save(palettize(im, mood, False).resize((512, 512), Image.NEAREST), out)
 
 
+def painting(src: str, out: str, mood: str, light: float, crop, focus: float) -> None:
+    im = Image.open(src).convert('RGB')
+    w, h = im.size
+    if crop:
+        im = im.crop((int(crop[0] * w), int(crop[1] * h), int(crop[2] * w), int(crop[3] * h)))
+        w, h = im.size
+    target = 860 / 520
+    if w / h > target:
+        nw = int(h * target)
+        left = int((w - nw) * focus)
+        im = im.crop((left, 0, left + nw, h))
+    else:
+        nh = int(w / target)
+        top = int((h - nh) * focus)
+        im = im.crop((0, top, w, top + nh))
+    im = im.filter(ImageFilter.SMOOTH_MORE).resize((215, 130), Image.LANCZOS)
+    im = ImageEnhance.Brightness(im).enhance(light)
+    save(palettize(im, mood, False).resize((860, 520), Image.NEAREST), out)
+
+
 def convert(src: str, out: str, width: int, mood: str, size: tuple[int, int], patches=(), light: float = 1.0, focus: float = 0.5) -> None:
     im = Image.open(src).convert('RGB')
     # Crop to 16:9 around the centre.
@@ -157,9 +180,15 @@ if __name__ == '__main__':
     ap.add_argument('--mood', choices=['warm', 'cold', 'neutral'], default='neutral')
     ap.add_argument('--patch', action='append', default=[], help='x,y,w,h as fractions of the picture')
     ap.add_argument('--texture', action='store_true', help='a square, seamlessly repeating texture')
+    ap.add_argument('--painting', action='store_true', help='a monster painting for the fight view (860x520)')
+    ap.add_argument('--crop', default='', help='x0,y0,x1,y1 fractions to cut from the source first (e.g. to drop a frame)')
     ap.add_argument('--focus', type=float, default=0.5, help='which part of a tall photo to keep: 0 top, 0.5 middle, 1 bottom')
     ap.add_argument('--light', type=float, default=1.0, help='brightness before the palette, e.g. 0.6 for dusk')
     args = ap.parse_args()
+    if args.painting:
+        crop = [float(v) for v in args.crop.split(',')] if args.crop else None
+        painting(args.src, args.out, args.mood, args.light, crop, args.focus)
+        raise SystemExit
     if args.texture:
         texture(args.src, args.out, args.width if args.width != 320 else 128, args.mood, args.light)
         raise SystemExit
