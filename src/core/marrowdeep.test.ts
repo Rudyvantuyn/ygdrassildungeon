@@ -52,3 +52,13 @@ describe('drafting table examples', () => {
     expect(chapterProblems(three).some((p) => /theme|monsters/i.test(p))).toBe(false);
   });
 });
+
+describe('chapter III first draft', () => {
+  it('loads and is ready to play', async () => {
+    const { MARROWDEEP_DRAFT } = await import('./data/marrowdeep-draft');
+    const { decodeChapter, chapterProblems } = await import('./designer');
+    const c = decodeChapter(MARROWDEEP_DRAFT);
+    expect(c?.floors).toHaveLength(5);
+    expect(chapterProblems(c!)).toEqual([]);
+  });
+});

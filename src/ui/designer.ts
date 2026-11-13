@@ -3,6 +3,7 @@
  * and share them as a code.
  */
 import { MAX_LEVEL } from '../core/party';
+import { MARROWDEEP_DRAFT } from '../core/data/marrowdeep-draft';
 import { ENEMIES } from '../core/data/enemies';
 import { chapterOf } from '../core/data/chapters';
 import { DESIGN_FLOORS as FLOORS } from '../core/data/marrowdeep';
@@ -641,7 +642,8 @@ export class Designer {
       el('p', { text: 'Look at how the chapters in the game are built, or start chapter III with everything already set up.' }),
       el('div', { className: 'draft-row' }, [this.button('Chapter I: The Greenwood Roots (floors 1–5)', pick(() => rootdeepChapter(0, 'The Greenwood Roots')))]),
       el('div', { className: 'draft-row' }, [this.button('Chapter II: The Drowned Roots (floors 6–10)', pick(() => rootdeepChapter(5, 'The Drowned Roots')))]),
-      el('div', { className: 'draft-row' }, [this.button('Start chapter III: The Marrowdeep', pick(() => marrowdeepTemplate()), 'primary')]),
+      el('div', { className: 'draft-row' }, [this.button('Start chapter III: The Marrowdeep (empty)', pick(() => marrowdeepTemplate()), 'primary')]),
+      el('div', { className: 'draft-row' }, [this.button('Chapter III: first draft, ready to reshape', pick(() => decodeChapter(MARROWDEEP_DRAFT) ?? marrowdeepTemplate()), 'primary')]),
       el('p', {
         text: 'Chapters I and II were made before numbered stairs existed: every floor has its own entrance and stairs down. From chapter III on, only the first floor has an entrance, and floors are joined by numbered stairs (also back up) and root gates.',
       }),
