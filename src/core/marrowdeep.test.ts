@@ -62,3 +62,18 @@ describe('chapter III first draft', () => {
     expect(chapterProblems(c!)).toEqual([]);
   });
 });
+
+describe('chapter III draft rules', () => {
+  it('keeps every numbered stair in a nook, never in a passage', async () => {
+    const { MARROWDEEP_DRAFT } = await import('./data/marrowdeep-draft');
+    const { decodeChapter } = await import('./designer');
+    const c = decodeChapter(MARROWDEEP_DRAFT)!;
+    for (const [f, d] of c.floors.entries()) {
+      d.rows.forEach((row, y) => [...row].forEach((ch, x) => {
+        if (!/[1-9]/.test(ch)) return;
+        const openSides = [[0, -1], [1, 0], [0, 1], [-1, 0]].filter(([dx, dy]) => !'#T'.includes(d.rows[y + dy][x + dx]) && !'nesw'.includes(d.rows[y + dy][x + dx])).length;
+        expect(openSides, `stairs ${ch} on floor ${f + 1}`).toBe(1);
+      }));
+    }
+  });
+});
