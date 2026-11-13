@@ -2674,3 +2674,42 @@ button:hover {
 body { word-spacing: 0.18em; }
 .member-class, .story-box.narrator .story-text p, .dialog .npc-line p, .story-choice .muted, em, i { font-style: normal; }
 .dialog .npc-line p, .story-box.narrator .story-text p { color: #d8e2ec; }
+
+/* Bestiary */
+.beast .beast-pic {
+  display: block;
+  height: 150px;
+  margin: 6px auto 10px;
+  image-rendering: pixelated;
+}
+
+.beast-elements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 10px;
+}
+
+.beast-el {
+  padding: 3px 8px;
+  border: 1px solid var(--rim-dark, #4d6a86);
+  font-size: 14px;
+}
+
+.beast-el.weak {
+  color: #10233a;
+  background: var(--gold);
+}
+
+.beast-el.resists {
+  color: var(--muted);
+}
+
+.beast-el.unknown {
+  color: var(--muted);
+  border-style: dashed;
+}
+
+.beast .muted {
+  color: var(--muted);
+}

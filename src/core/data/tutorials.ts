@@ -202,6 +202,16 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'bestiary',
+    title: 'The bestiary',
+    speaker: 'ylva',
+    pages: [
+      'Every beast you meet goes in here. I keep one too: you learn to read the hills that way.',
+      'Defeat one and you will know its strength and what it leaves behind.',
+      'Its weaknesses only show once you have tried them: hit it with fire, frost or storm and see what happens.',
+    ],
+  },
+  {
     id: 'quests',
     title: 'The notice board',
     speaker: 'hjalmar',

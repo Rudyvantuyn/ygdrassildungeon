@@ -1,6 +1,7 @@
 import type { ChartMode } from '../core/chart';
 import type { Combat } from '../core/combat';
 import { ENEMIES } from '../core/data/enemies';
+import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
 import { EQUIPMENT } from '../core/data/equipment';
 import { ITEMS } from '../core/data/items';
 import { MATERIALS } from '../core/data/materials';
@@ -700,6 +701,63 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     input.focus();
   }
 
+  /** The bestiary: monsters met so far, one page each. */
+  showBestiary(back: () => void, start = 0): void {
+    const book = this.game.state.bestiary ?? {};
+    const rows = bestiaryOrder();
+    const seen = rows.filter((r) => book[r.def.id]?.seen).length;
+    const items: MenuItem[] = rows.map((r, i) => {
+      const e = book[r.def.id];
+      if (!e?.seen) return { label: '???', detail: '', description: `Not met yet. Lives on floor ${r.floors.join(', ')}.`, disabled: true, onSelect: () => {} };
+      const tag = r.kind === 'boss' ? ' ♛' : r.kind === 'prowler' ? ' ☠' : '';
+      return {
+        label: `${r.def.name}${tag}`,
+        detail: e.defeated ? `×${e.defeated}` : 'seen',
+        description: `Floor ${r.floors.join(', ')} · ${e.defeated ? `defeated ${e.defeated}` : 'not defeated yet'}`,
+        onSelect: () => this.showBeast(r.def.id, () => this.showBestiary(back, i)),
+      };
+    });
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back, startIndex: start });
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    this.openOverlay(
+      el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Bestiary' }), el('p', { className: 'gold-line', text: `${seen} of ${rows.length} monsters met` }), menu.el, desc]),
+      menu,
+    );
+  }
+
+  private showBeast(id: string, back: () => void): void {
+    const row = bestiaryOrder().find((r) => r.def.id === id)!;
+    const def = row.def;
+    const e = this.game.state.bestiary?.[id];
+    const known = (e?.defeated ?? 0) > 0;
+    const pic = el('img', { className: 'beast-pic' });
+    pic.src = `art/monsters/${id}.webp`;
+    pic.alt = def.name;
+    const lines: HTMLElement[] = [];
+    const kind = row.kind === 'boss' ? 'Guardian of the chapter' : row.kind === 'prowler' ? 'Prowler: roams the floor, best avoided' : 'Monster';
+    lines.push(el('p', { text: `${kind} · floor ${row.floors.join(', ')} · met ${e?.seen ?? 0}, defeated ${e?.defeated ?? 0}` }));
+    const ELEMENT_NAMES = { phys: 'Physical', fire: 'Fire', frost: 'Frost', storm: 'Storm' } as const;
+    const WORDS = { weak: 'weak!', resists: 'resists', normal: 'normal', unknown: '?' } as const;
+    lines.push(
+      el('div', { className: 'beast-elements' }, ELEMENTS.map((x) => {
+        const k = elementKnown(def, e, x);
+        return el('span', { className: `beast-el ${k}`, text: `${ELEMENT_NAMES[x]}: ${WORDS[k]}` });
+      })),
+    );
+    if (known) {
+      lines.push(el('p', { text: `HP ${def.hp} · ATK ${def.atk} · DEF ${def.def} · MAG ${def.mag} · RES ${def.res} · SPD ${def.spd}${def.ranged ? ' · reaches the back row' : ''}` }));
+      if (def.skills?.length) lines.push(el('p', { text: `Uses: ${def.skills.map((x) => x.name).join(', ')}` }));
+      const leaves = [def.material && MATERIALS[def.material.id]?.name, def.drop && ITEMS[def.drop.item]?.name].filter(Boolean);
+      if (leaves.length) lines.push(el('p', { text: `Leaves behind: ${leaves.join(', ')}` }));
+    } else {
+      lines.push(el('p', { className: 'muted', text: 'Defeat one to learn its strength and what it leaves behind. Weaknesses show as you try each element on it.' }));
+    }
+    const menu = new ListMenu([{ label: 'Back', onSelect: back }], { onCancel: back });
+    this.openOverlay(el('div', { className: 'panel dialog wide beast' }, [el('h2', { text: def.name }), pic, ...lines, menu.el]), menu);
+  }
+
   showGuidebook(back: () => void, start = 0): void {
     const items: MenuItem[] = TIPS.map((tip, i) => ({
       label: tip.title,
@@ -1392,6 +1450,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           : [
               { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(back) },
               { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(back) },
+              { label: 'Bestiary', description: 'Every monster you have met: where it lives, what it leaves behind, and the weaknesses you have found.', onSelect: () => this.tips(['bestiary'], () => this.showBestiary(back)) },
             ]),
       ],
       options: [

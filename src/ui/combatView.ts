@@ -3,6 +3,7 @@ import { ITEMS, usableInCombat } from '../core/data/items';
 import type { SkillDef } from '../core/data/skills';
 import type { Game } from '../core/game';
 import { isAlive, knownSkills, memberStats } from '../core/party';
+import { noteEvents, noteSeen } from '../core/bestiary';
 import { rankOf, skillFor } from '../core/skilltree';
 import { chooseCommands } from '../core/tactics';
 import { pluralName } from '../core/quests';
@@ -104,6 +105,7 @@ export class CombatView {
   }
 
   async start(): Promise<void> {
+    noteSeen((this.host.game.state.bestiary ??= {}), this.combat.enemies.map((e) => e.def.id));
     this.syncParty();
     this.renderParty();
     // "2 Boglings and a Duskwing" rather than "Bogling A, Bogling B, Duskwing".
@@ -650,6 +652,7 @@ export class CombatView {
       this.showPanel(`Round ${round}`, null, hint);
       events = this.combat.resolveRound(this.commands);
     }
+    noteEvents((this.host.game.state.bestiary ??= {}), this.combat.enemies.map((e) => e.def.id), events);
     for (const ev of events) await this.play(ev);
 
     this.playing = false;

@@ -6,6 +6,7 @@ import type { QuestState } from './quests';
 import { DX, DY, isGatherTile, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
 import { createStartingParty, fullRestore, isAlive, xpForLevel } from './party';
 import { EQUIPMENT_LIST } from './data/equipment';
+import type { Bestiary } from './bestiary';
 import { autoSpend, clampRanks, fullScaleRank, rankOf } from './skilltree';
 import { GATHER_AMBUSH, GATHER_KINDS, GATHER_TABLES, GATHER_USES, type GatherKind } from './data/gathering';
 import { FLOORS_PER_CHAPTER, startFloors } from './data/chapters';
@@ -58,6 +59,8 @@ export interface GameState {
   sold: Record<string, number>;
   /** Enemies defeated, by enemy id (for quests). */
   kills: Record<string, number>;
+  /** What the party has learnt about each monster. */
+  bestiary?: Bestiary;
   quests: Record<string, QuestState>;
   /** Story scenes already shown. */
   story: string[];
@@ -144,6 +147,7 @@ export class Game {
     state.materials ??= {};
     state.sold ??= {};
     state.kills ??= {};
+    state.bestiary ??= {};
     state.quests ??= {};
     state.story ??= [];
     state.choices ??= {};
