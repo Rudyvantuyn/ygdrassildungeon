@@ -252,8 +252,11 @@ export class Designer {
   private pointer(e: PointerEvent, first: boolean): void {
     const rect = this.canvas.getBoundingClientRect();
     const size = this.cellSize;
-    const x = Math.floor((((e.clientX - rect.left) / rect.width) * CANVAS) / size);
-    const y = Math.floor((((e.clientY - rect.top) / rect.height) * CANVAS) / size);
+    // The grid is centred on the canvas (a floor that is not square leaves a margin): take that off first.
+    const ox = Math.floor((CANVAS - size * this.design.rows[0].length) / 2);
+    const oy = Math.floor((CANVAS - size * this.design.rows.length) / 2);
+    const x = Math.floor((((e.clientX - rect.left) / rect.width) * CANVAS - ox) / size);
+    const y = Math.floor((((e.clientY - rect.top) / rect.height) * CANVAS - oy) / size);
     if (y < 0 || y >= this.design.rows.length || x < 0 || x >= this.design.rows[0].length) return;
     if (this.tool === 'route') {
       if (first) this.routePoint(x, y);
