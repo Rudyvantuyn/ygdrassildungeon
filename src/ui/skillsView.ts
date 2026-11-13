@@ -1,7 +1,7 @@
 /** The skill tree screen: spend skill points, one rank at a time. Used from the Oath Hall and the pack. */
 import { CLASSES } from '../core/data/classes';
 import { SKILLS, type SkillDef } from '../core/data/skills';
-import { MAX_RANK, rankOf, rankedSkill, raiseBlocker, raiseSkill, unspentPoints } from '../core/skilltree';
+import { fullScaleRank, maxRankOf, rankOf, rankedSkill, raiseBlocker, raiseSkill, unspentPoints } from '../core/skilltree';
 import type { Member, SkillId, Stats } from '../core/types';
 import { audio } from '../audio/audio';
 import { el } from './dom';
@@ -12,6 +12,11 @@ const STAT_NAMES: Record<keyof Stats, string> = { hp: 'max HP', sp: 'max SP', at
 /** What a skill does at one rank, in a few words. */
 export function rankEffect(skill: SkillDef, rank: number): string {
   if (skill.passive) return `+${skill.passive.perRank * rank}% ${STAT_NAMES[skill.passive.stat]}`;
+  if (skill.kind === 'gather') {
+    const p = fullScaleRank(skill.id, rank);
+    const finds = 1 + (p >= 4 ? 1 : 0) + (p >= 8 ? 1 : 0);
+    return `${finds} find${finds === 1 ? '' : 's'} per try · rare finds ${Math.round((0.03 + 0.015 * p) * 100)}% or more`;
+  }
   const s = rankedSkill(skill, rank);
   const parts: string[] = [];
   if (s.kind === 'phys' || s.kind === 'magic') parts.push(`power ${s.power}%`);
@@ -40,11 +45,11 @@ export function showSkillTree(host: SkillsHost, m: Member, back: () => void, sta
     const blocker = raiseBlocker(m, id);
     const locked = rank === 0 && !!blocker && blocker !== 'No skill points left.';
     const now = rank > 0 ? `Rank ${rank}: ${rankEffect(def, rank)}` : 'Not learnt yet.';
-    const next = rank < MAX_RANK ? `Rank ${rank + 1}: ${rankEffect(def, rank + 1)}` : '';
+    const next = rank < maxRankOf(def.id) ? `Rank ${rank + 1}: ${rankEffect(def, rank + 1)}` : '';
     const need = blocker && blocker !== 'Mastered.' ? ` (${blocker})` : '';
     return {
       label: `${def.passive ? '◇ ' : ''}${def.name}`,
-      detail: locked ? 'locked' : `${rank}/${MAX_RANK}`,
+      detail: locked ? 'locked' : `${rank}/${maxRankOf(def.id)}`,
       description: [def.description, now, next && `Next — ${next}${need}`].filter(Boolean).join('\n'),
       disabled: !!blocker,
       onSelect: () => {

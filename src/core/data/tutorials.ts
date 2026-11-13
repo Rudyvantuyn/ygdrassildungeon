@@ -119,6 +119,9 @@ export const TIPS: TipDef[] = [
     pages: [
       'Some skills raise or lower attack, defence, magic or resistance for a few rounds.',
       'You see them as ATK▲ or DEF▼ on the cards and under foes. Plus 20% attack means 20% more damage.',
+      'They do not stack: each stat holds one effect. The stronger one stays, and casting again makes it last longer.',
+      'So two attack songs on one fighter are wasted. Spread them out: attack on the hitters, defence on the front row.',
+      'A magic boost on a healer makes their heals stronger too.',
     ],
   },
   {

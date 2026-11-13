@@ -24,6 +24,8 @@ export interface AutoplayResult {
   battles: number;
   levels: number[];
   bossRounds: number;
+  /** Gold left at the end (to see whether money still matters). */
+  gold: number;
 }
 
 function fight(game: Game, combat: Combat): number {
@@ -277,5 +279,6 @@ function result(game: Game, diedOnFloor: number | null, bossRounds: number): Aut
     battles: game.state.battles,
     levels: game.state.party.map((m) => m.level),
     bossRounds,
+    gold: game.state.gold,
   };
 }

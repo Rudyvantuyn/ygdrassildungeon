@@ -14,6 +14,9 @@ interface Afflictable {
   mods?: Mods;
 }
 
+/** Power of the wolf's bite after a Wolfkin's plain attack, as a percent of a normal attack. */
+export const WOLF_BITE = 55;
+
 export type Mods = Partial<Record<ModStat, { amount: number; turns: number }>>;
 
 /**
@@ -267,6 +270,14 @@ export class Combat {
         if (target < 0) return;
         events.push({ type: 'act', side: 'party', actor: i, text: `${m.name} attacks!` });
         this.hitEnemy(i, target, 100, 'phys', 'phys', events);
+        // A Wolfkin never fights alone: the wolf bites the same foe after every plain attack.
+        if (m.classId === 'wolfkin') {
+          const bite = this.enemies[target].hp > 0 ? target : this.retargetEnemy(target);
+          if (bite >= 0) {
+            events.push({ type: 'info', text: 'The wolf bites too!' });
+            this.hitEnemy(i, bite, WOLF_BITE, 'phys', 'phys', events);
+          }
+        }
         return;
       }
 
@@ -315,7 +326,8 @@ export class Combat {
           else this.clearAilment('party', t, events);
         } else if (skill.kind === 'heal') {
           const targets = skill.target === 'allAllies' ? this.livingParty() : [this.retargetAlly(cmd.target)];
-          const amount = healAmount(m, skill.power);
+          // A magic buff on the healer (a Skald's song, say) strengthens heals just like it strengthens spells.
+          const amount = Math.round(healAmount(m, skill.power) * Math.max(0.2, 1 + (this.status[i].mods?.mag?.amount ?? 0) / 100));
           for (const t of targets) {
             if (t < 0) continue;
             const healed = healMember(this.party[t], amount);
@@ -332,6 +344,7 @@ export class Combat {
           }
         } else if (skill.kind === 'buff' || skill.kind === 'debuff') {
           const enemiesHit = skill.kind === 'debuff';
+          let kept = false;
           const targets = enemiesHit
             ? skill.target === 'allEnemies' ? this.livingEnemies() : [this.retargetEnemy(cmd.target)]
             : skill.target === 'allAllies' ? this.livingParty() : skill.target === 'self' ? [i] : [this.retargetAlly(cmd.target)];
@@ -341,13 +354,14 @@ export class Combat {
             unit.mods ??= {};
             for (const mod of skill.mods ?? []) {
               const old = unit.mods[mod.stat];
-              // The stronger effect wins; casting again refreshes it.
-              const amount = old && Math.abs(old.amount) > Math.abs(mod.amount) && Math.sign(old.amount) === Math.sign(mod.amount) ? old.amount : mod.amount;
-              unit.mods[mod.stat] = { amount, turns: skill.turns ?? 3 };
+              // One effect per stat: the stronger one stays, and casting again refreshes how long it lasts.
+              const keep = !!old && Math.abs(old.amount) > Math.abs(mod.amount) && Math.sign(old.amount) === Math.sign(mod.amount);
+              if (keep) kept = true;
+              unit.mods[mod.stat] = { amount: keep ? old.amount : mod.amount, turns: skill.turns ?? 3 };
             }
           }
           const who = enemiesHit ? (skill.target === 'allEnemies' ? 'The enemies' : this.enemies[targets[0]]?.name ?? 'The enemy') : skill.target === 'allAllies' ? 'The party' : this.party[targets[0]]?.name ?? m.name;
-          events.push({ type: 'info', text: `${who}: ${(skill.mods ?? []).map((x) => `${STAT_WORDS[x.stat]} ${x.amount > 0 ? 'up' : 'down'}`).join(', ')}.` });
+          events.push({ type: 'info', text: `${who}: ${(skill.mods ?? []).map((x) => `${STAT_WORDS[x.stat]} ${x.amount > 0 ? 'up' : 'down'}`).join(', ')}.${kept ? ' (A stronger effect was already active: it stays, and now lasts longer.)' : ''}` });
         } else if (skill.kind === 'challenge') {
           this.status[i].taunt = skill.turns ?? 2;
           events.push({ type: 'info', text: `The enemies glare at ${m.name}.` });

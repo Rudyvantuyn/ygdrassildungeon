@@ -159,6 +159,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['gloamMoth', 'hollowHound'], weight: 2 },
       { enemies: ['rootColossus', 'puffcap'], weight: 1 },
       { enemies: ['gloamMoth', 'gloamMoth'], weight: 1 },
+      { enemies: ['duskwing', 'hollowHound', 'hollowHound', 'duskwing'], weight: 1 },
     ],
     chests: [{ item: 'sapTonic', qty: 3 }, { gold: 200 }],
     prowlers: [],
@@ -201,6 +202,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['rimeshell', 'frostcap'], weight: 2 },
       { enemies: ['hrimwolf', 'snowveil'], weight: 2 },
       { enemies: ['snowveil', 'snowveil'], weight: 1 },
+      { enemies: ['hrimwolf', 'hrimwolf', 'hrimwolf', 'hrimwolf'], weight: 1 },
     ],
     chests: [{ item: 'spiritDew', qty: 3 }, { gold: 450 }],
     prowlers: [],
@@ -244,6 +246,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['rootfiend'], weight: 3 },
       { enemies: ['ashenColossus'], weight: 1 },
       { enemies: ['rootfiend', 'emberling'], weight: 1 },
+      { enemies: ['cinderwing', 'cinderwing', 'cinderwing', 'cinderwing'], weight: 1 },
     ],
     chests: [{ item: 'sapTonic', qty: 4 }, { gold: 900 }],
     // The first prowlers. The west side of the floor always offers a way around them.
@@ -292,6 +295,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['reefclaw'], weight: 2 },
       { enemies: ['skerrywing', 'skerrywing'], weight: 2 },
       { enemies: ['reefclaw', 'skerrywing'], weight: 1 },
+      { enemies: ['brineling', 'brineling', 'brineling'], weight: 1 },
     ],
     chests: [{ item: 'tideDraught', qty: 3 }, { gold: 1400 }],
     prowlers: [],
@@ -334,6 +338,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['seahound'], weight: 3 },
       { enemies: ['seahound', 'brinecap'], weight: 2 },
       { enemies: ['kelpStrangler', 'skerrywing'], weight: 1 },
+      { enemies: ['brineling', 'seahound', 'seahound', 'brineling'], weight: 1 },
     ],
     chests: [{ item: 'spiritDew', qty: 4 }, { item: 'oathToken', qty: 1 }],
     // The Skerryjaw patrols the south passage; the east shaft goes around it.
@@ -377,6 +382,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['tidecaller', 'seahound'], weight: 2 },
       { enemies: ['tidecaller', 'pearlmoth'], weight: 2 },
       { enemies: ['coralback', 'tidecaller'], weight: 1 },
+      { enemies: ['brineling', 'seahound', 'seahound', 'brineling'], weight: 1 },
     ],
     chests: [{ item: 'kindlingMoss', qty: 2 }, { gold: 2400 }],
     prowlers: [],
@@ -421,6 +427,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['gloomEel', 'gloomEel'], weight: 2 },
       { enemies: ['saltwight'], weight: 2 },
       { enemies: ['nykur', 'pearlmoth'], weight: 1 },
+      { enemies: ['seahound', 'nykur', 'nykur', 'seahound'], weight: 1 },
     ],
     chests: [{ item: 'tideDraught', qty: 5 }, { item: 'oathToken', qty: 1 }],
     // Two prowlers: the south-west hall and the east hall. The middle passages lead around both.
@@ -468,6 +475,7 @@ export const FLOORS: FloorDef[] = [
       { enemies: ['fathomstone'], weight: 2 },
       { enemies: ['deepmaw', 'wavemaid'], weight: 2 },
       { enemies: ['fathomstone', 'gloomEel'], weight: 1 },
+      { enemies: ['deepmaw', 'seahound', 'seahound', 'deepmaw'], weight: 1 },
     ],
     chests: [{ item: 'kindlingMoss', qty: 3 }, { gold: 4500 }],
     // A Tidecoil hunts the east pocket; the Brine Draugr guards the hall before the boss.

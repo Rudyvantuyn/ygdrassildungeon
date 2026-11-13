@@ -1,5 +1,5 @@
 /** Settings that belong to this device rather than to a save: how fast fights and text play, key layout. */
-export type BattleSpeed = 1 | 2 | 3;
+export type BattleSpeed = 0 | 1 | 2 | 3;
 export type TextSpeed = 'slow' | 'normal' | 'fast' | 'instant';
 
 export interface Prefs {
@@ -12,7 +12,7 @@ export interface Prefs {
 const KEY = 'ygdrassil-prefs';
 const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false };
 
-export const BATTLE_SPEED_NAMES: Record<BattleSpeed, string> = { 1: 'Normal', 2: 'Fast', 3: 'Fastest' };
+export const BATTLE_SPEED_NAMES: Record<BattleSpeed, string> = { 0: 'Slow', 1: 'Normal', 2: 'Fast', 3: 'Fastest' };
 export const TEXT_SPEED_NAMES: Record<TextSpeed, string> = { slow: 'Slow', normal: 'Normal', fast: 'Fast', instant: 'Instant' };
 /** Letters revealed per tick of the story typewriter (Infinity shows the whole line at once). */
 export const TEXT_SPEED_STEP: Record<TextSpeed, number> = { slow: 1, normal: 2, fast: 4, instant: Infinity };

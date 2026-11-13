@@ -18,6 +18,7 @@ import {
   itemsForSale,
   canEquip,
   equipmentForSale,
+  specialGearInProgress,
   innCost,
   netPrice,
   restAtInn,
@@ -490,6 +491,16 @@ export class TownView {
         onSelect: () => this.chooseWearer(e, i),
       };
     });
+    // Special gear Hilde has started on shows greyed out, with how much more she needs.
+    for (const { gear, remaining } of specialGearInProgress(this.game)) {
+      items.push({
+        label: `☆ ${gear.name}`,
+        detail: `${remaining} more ${MATERIALS[gear.requires!.material].name}`,
+        description: `${bonusText(gear)} · ${gear.slot} · Sell ${remaining} more ${MATERIALS[gear.requires!.material].name} and Hilde can forge it.`,
+        disabled: true,
+        onSelect: () => {},
+      });
+    }
     const menu = new ListMenu(items, { onCancel: () => this.shop(1), startIndex: start });
     this.dialog('Equipment', [this.goldLine()], menu, true);
   }

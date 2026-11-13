@@ -7,6 +7,30 @@ import { SKILLS, type SkillDef } from './data/skills';
 import type { ClassId, Member, SkillId, Stats } from './types';
 
 export const MAX_RANK = 10;
+
+/**
+ * Skills whose extra ranks would add little (gathering, taunts, guards, cures) top out at 5:
+ * rank 5 then works like rank 10 of the others.
+ */
+const SHORT_KINDS = new Set(['gather', 'challenge', 'guard', 'cure']);
+
+export function maxRankOf(id: SkillId): number {
+  return SHORT_KINDS.has(SKILLS[id]?.kind) ? 5 : MAX_RANK;
+}
+
+/** Rank on the 1–10 scale, so a 5-rank skill at rank 5 counts as fully trained. */
+export function fullScaleRank(id: SkillId, rank: number): number {
+  return Math.round((rank * MAX_RANK) / maxRankOf(id));
+}
+
+/** Lowers ranks above a skill's maximum (saves from before 5-rank skills); the points come back. */
+export function clampRanks(m: Member): void {
+  if (!m.skills) return;
+  for (const [id, rank] of Object.entries(m.skills)) {
+    const max = maxRankOf(id as SkillId);
+    if ((rank ?? 0) > max) m.skills[id as SkillId] = max;
+  }
+}
 /** Points an adventurer starts with at level 1. */
 export const START_POINTS = 3;
 
@@ -34,7 +58,7 @@ export function treeEntry(classId: ClassId, id: SkillId): TreeEntry | undefined 
 export function raiseBlocker(m: Member, id: SkillId): string | null {
   const entry = treeEntry(m.classId, id);
   if (!entry) return 'Not a skill of this class.';
-  if (rankOf(m, id) >= MAX_RANK) return 'Mastered.';
+  if (rankOf(m, id) >= maxRankOf(id)) return 'Mastered.';
   if (m.level < entry.level) return `Needs level ${entry.level}.`;
   if (entry.requires && rankOf(m, entry.requires[0]) < entry.requires[1]) {
     return `Needs ${SKILLS[entry.requires[0]].name} rank ${entry.requires[1]}.`;
@@ -59,7 +83,7 @@ export function validSkills(classId: ClassId, level: number, skills: unknown): s
   let total = 0;
   for (const [id, rank] of Object.entries(skills)) {
     const entry = treeEntry(classId, id as SkillId);
-    if (!entry || typeof rank !== 'number' || !Number.isInteger(rank) || rank < 0 || rank > MAX_RANK) return false;
+    if (!entry || typeof rank !== 'number' || !Number.isInteger(rank) || rank < 0 || rank > maxRankOf(id as SkillId)) return false;
     if (rank > 0 && level < entry.level) return false;
     if (rank > 0 && entry.requires && ((skills as Record<string, number>)[entry.requires[0]] ?? 0) < entry.requires[1]) return false;
     total += rank;
@@ -69,7 +93,7 @@ export function validSkills(classId: ClassId, level: number, skills: unknown): s
 
 /** A skill as it works at `rank`: stronger hits and heals, surer ailments, longer effects; a little more SP. */
 export function rankedSkill(def: SkillDef, rank: number): SkillDef {
-  const r = Math.max(1, Math.min(MAX_RANK, rank)) - 1;
+  const r = Math.max(1, Math.min(MAX_RANK, fullScaleRank(def.id, rank))) - 1;
   const out: SkillDef = { ...def };
   if (def.kind === 'phys' || def.kind === 'magic' || def.kind === 'heal') {
     out.power = Math.round(def.power * (1 + 0.05 * r));

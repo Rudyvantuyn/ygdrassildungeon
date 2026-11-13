@@ -24,7 +24,7 @@ import { stagePoint } from './stagePoint';
 const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
 
 /** How much faster each battle speed plays. */
-const SPEED_FACTOR = { 1: 1, 2: 1.8, 3: 3 } as const;
+const SPEED_FACTOR = { 0: 0.55, 1: 1, 2: 1.8, 3: 3 } as const;
 
 export interface CombatHost {
   game: Game;
@@ -396,8 +396,8 @@ export class CombatView {
 
   private layout(i: number): { x: number; ground: number; u: number } {
     const n = this.combat.enemies.length;
-    const spacing = Math.min(260, 780 / n);
-    const u = this.combat.boss ? 215 : n >= 3 ? 190 : 220;
+    const spacing = Math.min(260, 800 / n);
+    const u = this.combat.boss ? 215 : n >= 5 ? 135 : n >= 4 ? 160 : n >= 3 ? 190 : 220;
     return { x: 430 + (i - (n - 1) / 2) * spacing, ground: 455, u };
   }
 

@@ -25,7 +25,7 @@ describe('gathering', () => {
     const game = onSpot(1, 'O');
     expect(game.interact()).toMatchObject({ type: 'gatherSpot', kind: 'mine', rank: 0 });
     expect(game.gather()).toBeNull();
-    game.state.party[0].skills = { ...game.state.party[0].skills, mine: 3 };
+    game.state.party[0].skills = { ...game.state.party[0].skills, mine: 1 };
     for (let i = 0; i < GATHER_USES; i++) {
       const found = game.gather();
       expect(found?.finds.length).toBe(1);

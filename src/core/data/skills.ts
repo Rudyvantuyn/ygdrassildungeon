@@ -417,8 +417,9 @@ export const SKILLS: Record<SkillId, SkillDef> = {
   }),
   // ── Wolfkin ────────────────────────────────────────────────────────────────
   fangStrike: skill({
-    id: 'fangStrike', name: 'Fang Strike', sp: 4, target: 'enemy', kind: 'phys', power: 140,
-    description: 'Your wolf lunges for the throat of one enemy.',
+    id: 'fangStrike', name: 'Fang Strike', sp: 3, target: 'enemy', kind: 'phys', power: 125,
+    inflict: { ailment: 'poison', chance: 0.5 },
+    description: 'Your wolf sinks its teeth in deep. Cheap, and the wound may fester (poison).',
   }),
   packHunt: skill({
     id: 'packHunt', name: 'Pack Hunt', sp: 6, target: 'enemy', kind: 'phys', power: 80, hits: 2,

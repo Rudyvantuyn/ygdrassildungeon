@@ -7,7 +7,7 @@ import { Rng } from './rng';
 import { autoSpend } from './skilltree';
 import { makeInventory } from './data/items';
 
-/** A party at `level` wearing the best gear the shop sells by floor index `tier`. */
+/** A party at `level` wearing the best regular gear the shop sells by floor index `tier` (no special gear: that takes extra hunting). */
 function trainedParty(level: number, tier: number) {
   const party = createStartingParty();
   for (const m of party) {
@@ -16,7 +16,7 @@ function trainedParty(level: number, tier: number) {
     m.skills = {};
     autoSpend(m);
     for (const slot of ['weapon', 'armor'] as const) {
-      m[slot] = EQUIPMENT_LIST.filter((e) => e.slot === slot && e.tier <= tier && e.classes.includes(m.classId)).sort((a, b) => b.price - a.price)[0]?.id;
+      m[slot] = EQUIPMENT_LIST.filter((e) => e.slot === slot && !e.requires && e.tier <= tier && e.classes.includes(m.classId)).sort((a, b) => b.price - a.price)[0]?.id;
     }
   }
   fullRestore(party);
@@ -74,6 +74,9 @@ describe('balance (computer player)', { timeout: 60_000 }, () => {
     const avgLevel = trained.reduce((sum, r) => sum + r.levels[0], 0) / trained.length;
     expect(avgLevel).toBeGreaterThan(26);
     expect(avgLevel).toBeLessThan(37);
+    // Money still matters at the end of chapter II: what is left after buying gear is a few pieces' worth, not a fortune.
+    const avgGold = trained.reduce((sum, r) => sum + r.gold, 0) / trained.length;
+    expect(avgGold).toBeLessThan(20_000);
   });
 });
 

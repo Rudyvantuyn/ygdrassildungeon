@@ -117,9 +117,9 @@ describe('dungeon movement', () => {
     expect(game.interact().type).toBe('chest');
     expect(game.state.inventory.sapTonic).toBe(before + 2);
     expect(game.interact().type).toBe('emptyChest');
-    expect(game.step(1, 0)).toEqual([{ type: 'chestAhead', opened: true }]);
-    game.turn(1);
-    expect(game.interact().type).toBe('nothing');
+    // Once it is empty, the party can step over it.
+    expect(game.step(1, 0)).toEqual([{ type: 'moved' }]);
+    expect(game.state.x).toBe(chest.x);
   });
 
   it('descends the stairs to the next floor', () => {

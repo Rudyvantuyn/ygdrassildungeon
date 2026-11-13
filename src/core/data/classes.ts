@@ -192,6 +192,6 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       ...GATHERING,
     ],
     color: '#a0a890',
-    description: 'A hunter who fights side by side with a great grey wolf. Quick, tough and hard to shake off.',
+    description: 'A hunter who fights side by side with a great grey wolf. The wolf bites after every plain attack, so a Wolfkin needs little SP.',
   },
 };

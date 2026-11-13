@@ -6,7 +6,7 @@ import type { QuestState } from './quests';
 import { DX, DY, isGatherTile, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
 import { createStartingParty, fullRestore, isAlive, xpForLevel } from './party';
 import { EQUIPMENT_LIST } from './data/equipment';
-import { autoSpend, rankOf } from './skilltree';
+import { autoSpend, clampRanks, fullScaleRank, rankOf } from './skilltree';
 import { GATHER_AMBUSH, GATHER_KINDS, GATHER_TABLES, GATHER_USES, type GatherKind } from './data/gathering';
 import { FLOORS_PER_CHAPTER, startFloors } from './data/chapters';
 import { STORY } from './data/story';
@@ -149,6 +149,7 @@ export class Game {
     if (!Number.isInteger(state.deepest) || state.deepest < 0) state.deepest = 0;
     // Number the oaths of adventurers from before oaths were numbered.
     [...state.party, ...state.reserve].forEach((m, i) => (m.oath ??= i + 1));
+    [...state.party, ...state.reserve].forEach(clampRanks);
     // Difficulty settings existed briefly; everyone plays by the same rules (fair for expeditions).
     delete (state as { difficulty?: unknown }).difficulty;
     state.oaths ??= state.party.length + state.reserve.length;
@@ -278,6 +279,11 @@ export class Game {
     return this.progress.explored[y * this.map.width + x] === '1';
   }
 
+  /** Whether the party can walk onto a cell: an emptied chest can be stepped over. */
+  canEnter(x: number, y: number): boolean {
+    return isPassable(this.map, x, y) || (tileAt(this.map, x, y) === 'chest' && this.isChestOpened(x, y));
+  }
+
   isChestOpened(x: number, y: number): boolean {
     const index = this.map.chests.findIndex((c) => c.x === x && c.y === y);
     return this.progress.openedChests.includes(index);
@@ -292,7 +298,7 @@ export class Game {
   step(forward: number, right: number): StepEvent[] {
     const { x, y, dir } = this.state;
     const next = relCell(x, y, dir, forward, right);
-    if (!isPassable(this.map, next.x, next.y)) {
+    if (!this.canEnter(next.x, next.y)) {
       if (tileAt(this.map, next.x, next.y) === 'chest') return [{ type: 'chestAhead', opened: this.isChestOpened(next.x, next.y) }];
       return [{ type: 'bump' }];
     }
@@ -483,6 +489,11 @@ export class Game {
     return Math.max(0, ...this.state.party.filter(isAlive).map((m) => rankOf(m, GATHER_KINDS[kind].skill)));
   }
 
+  /** The best gathering rank on the 1–10 scale the finds are worked out on. */
+  private gatherPower(kind: GatherKind): number {
+    return fullScaleRank(GATHER_KINDS[kind].skill, this.gatherRank(kind));
+  }
+
   gatherSpotHere(): { kind: GatherKind; left: number; rank: number } | null {
     const tile = this.tileHere();
     if (!isGatherTile(tile)) return null;
@@ -501,12 +512,13 @@ export class Game {
     this.progress.gathered = { ...this.progress.gathered, [index]: GATHER_USES - spot.left + 1 };
     const table = GATHER_TABLES[Math.min(GATHER_TABLES.length - 1, Math.floor(this.depth / FLOORS_PER_CHAPTER))][spot.kind];
     const inChapter = this.depth % FLOORS_PER_CHAPTER;
-    const count = 1 + (spot.rank >= 4 ? 1 : 0) + (spot.rank >= 8 ? 1 : 0);
+    const power = this.gatherPower(spot.kind);
+    const count = 1 + (power >= 4 ? 1 : 0) + (power >= 8 ? 1 : 0);
     const finds: string[] = [];
     for (let i = 0; i < count; i++) {
       const roll = this.rng.next();
-      const rare = 0.03 + 0.015 * spot.rank + 0.015 * inChapter;
-      const uncommon = rare + 0.22 + 0.02 * spot.rank + 0.03 * inChapter;
+      const rare = 0.03 + 0.015 * power + 0.015 * inChapter;
+      const uncommon = rare + 0.22 + 0.02 * power + 0.03 * inChapter;
       const id = roll < rare ? table[2] : roll < uncommon ? table[1] : table[0];
       finds.push(id);
       this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
@@ -634,7 +646,7 @@ export class Game {
       y += DY[this.state.dir];
       if (x < 0 || y < 0 || x >= this.map.width || y >= this.map.height) break;
       cells[y * this.map.width + x] = '1';
-      if (!isPassable(this.map, x, y)) break;
+      if (!this.canEnter(x, y)) break;
     }
     this.progress.explored = cells.join('');
   }

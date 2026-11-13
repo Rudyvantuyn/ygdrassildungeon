@@ -1591,7 +1591,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     };
     const music = slider('music');
     const sfx = slider('sfx');
-    const battle = choices<BattleSpeed>([[1, 'Normal'], [2, 'Fast'], [3, 'Fastest']], () => prefs.battleSpeed, (v) => setPref('battleSpeed', v));
+    const battle = choices<BattleSpeed>([[0, 'Slow'], [1, 'Normal'], [2, 'Fast'], [3, 'Fastest']], () => prefs.battleSpeed, (v) => setPref('battleSpeed', v));
     const text = choices<TextSpeed>(
       (Object.keys(TEXT_SPEED_NAMES) as TextSpeed[]).map((v) => [v, TEXT_SPEED_NAMES[v]]),
       () => prefs.textSpeed,

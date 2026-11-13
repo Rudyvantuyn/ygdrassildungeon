@@ -10,7 +10,8 @@ import { Game } from './game';
 import { createStartingParty, memberStats } from './party';
 import { acceptQuest, boardQuests, questProgress, questStage, turnInQuest } from './quests';
 import { Rng } from './rng';
-import { equipmentForSale, sellMaterial, unlocksFrom } from './town';
+import { equipmentForSale, sellMaterial, specialGearInProgress, unlocksFrom } from './town';
+import { createMember } from './party';
 
 const nothing = (): (Command | null)[] => [null, null, null, null];
 
@@ -125,6 +126,43 @@ describe('materials and the shop', () => {
     expect(equipmentForSale(game).some((e) => e.id === 'briarthornSpear')).toBe(true);
     expect(sellMaterial(game, 'bogJelly', 1)).toBe(0);
   });
+
+  it('shows special gear that is started but not finished', () => {
+    const game = Game.newGame(1);
+    game.state.materials.briarQuill = 6;
+    expect(specialGearInProgress(game)).toEqual([]);
+    sellMaterial(game, 'briarQuill', 2);
+    expect(specialGearInProgress(game).find((g) => g.gear.id === 'briarthornSpear')?.remaining).toBe(3);
+    sellMaterial(game, 'briarQuill', 3);
+    expect(specialGearInProgress(game).some((g) => g.gear.id === 'briarthornSpear')).toBe(false);
+  });
+});
+
+describe('player report fixes', () => {
+  it('a magic buff on the healer strengthens their heals', () => {
+    const party = [createMember('Saga', 'skald'), ...createStartingParty().slice(1)];
+    party[0].skills = { restfulTune: 1 };
+    party[0].sp = 99;
+    const heal = (buff: number) => {
+      const combat = new Combat(party.map((m) => ({ ...m, hp: 1 })), ['bogling'], makeInventory(), new Rng(3));
+      combat.enemies[0].def = { ...combat.enemies[0].def, atk: 0, skills: [] };
+      if (buff) combat.status[0].mods = { mag: { amount: buff, turns: 3 } };
+      const events = combat.resolveRound([{ kind: 'skill', skill: 'restfulTune', target: 0 }, null, null, null]);
+      return events.find((e) => e.type === 'heal' && e.target === 1);
+    };
+    const plain = heal(0);
+    const buffed = heal(30);
+    expect(plain && buffed && plain.type === 'heal' && buffed.type === 'heal' && buffed.amount > plain.amount).toBe(true);
+  });
+
+  it('an emptied chest can be walked over, a full one cannot', () => {
+    const game = Game.newGame(1);
+    game.enterFloor(0, true);
+    const c = game.map.chests[0];
+    expect(game.canEnter(c.x, c.y)).toBe(false);
+    game.progress.openedChests.push(0);
+    expect(game.canEnter(c.x, c.y)).toBe(true);
+  });
 });
 
 describe('quests', () => {
@@ -149,9 +187,9 @@ describe('quests', () => {
   it('gather quests take the materials when handed in', () => {
     const game = Game.newGame(1);
     acceptQuest(game, 'quillsForSpears');
-    game.state.materials.briarQuill = 4;
+    game.state.materials.bogJelly = 4;
     expect(turnInQuest(game, 'quillsForSpears')).toBe(true);
-    expect(game.state.materials.briarQuill).toBe(1);
+    expect(game.state.materials.bogJelly).toBe(1);
   });
 
   it('reach and boss quests follow progress, and deeper quests appear later', () => {

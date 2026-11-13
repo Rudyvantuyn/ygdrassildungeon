@@ -35,6 +35,14 @@ export function equipmentForSale(game: Game): EquipDef[] {
   return EQUIPMENT_LIST.filter((e) => e.tier <= game.state.deepest && (!e.requires || (game.state.sold[e.requires.material] ?? 0) >= e.requires.qty));
 }
 
+/** Special gear Hilde has started on: some of its material is sold, not yet enough. */
+export function specialGearInProgress(game: Game): { gear: EquipDef; remaining: number }[] {
+  return EQUIPMENT_LIST.filter((e) => e.requires && e.tier <= game.state.deepest)
+    .map((gear) => ({ gear, sold: game.state.sold[gear.requires!.material] ?? 0 }))
+    .filter(({ gear, sold }) => sold > 0 && sold < gear.requires!.qty)
+    .map(({ gear, sold }) => ({ gear, remaining: gear.requires!.qty - sold }));
+}
+
 /** Sells `qty` of a carried material. Returns the gold earned (0 if there was nothing to sell). */
 export function sellMaterial(game: Game, id: string, qty = 1): number {
   const have = game.state.materials[id] ?? 0;
