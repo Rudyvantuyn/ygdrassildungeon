@@ -75,8 +75,10 @@ Add new names there and keep the glossary in sync.
     (check itch.io's AI tags), e.g. game-icons.net (CC BY 3.0) for the map icons;
   - for what cannot be photographed (monsters, portraits): human-made packs, commissions or the owner's own drawings.
   Record every asset in `art/SOURCES.md`, and credit every CC BY author on a credits page.
-  Monsters are shown as public-domain paintings and plates (`art/painting-sources.json`, `src/render/paintings.ts`);
-  `python3 scripts/credits.py` writes the photo and painting tables into `public/credits.html`.
+  The owner chose (November 2026): town, dungeon and fights may each have their own look as long as it feels like one
+  game, and **pixel art** is the way. Monsters are CC0 pixel art from the Dungeon Crawl Stone Soup tiles
+  (`scripts/monster-tiles.json` maps enemy id to tile); add new monsters from that set. `python3 scripts/credits.py`
+  writes the photo table into `public/credits.html`. Still AI-made: the hero and NPC portraits (to replace next).
 
 ## Working with the owner
 
