@@ -7,6 +7,7 @@ import type { Game } from '../core/game';
 import { mix, shade, withAlpha } from './color';
 import { drawMonster } from './monsters';
 import { sprite } from './sprites';
+import { prefs } from '../ui/prefs';
 
 /**
  * First-person grid view, drawn with the painter's algorithm.
@@ -54,19 +55,39 @@ export class CorridorRenderer {
     this.cy = h * 0.5;
   }
 
-  private patterns = new Map<HTMLImageElement, CanvasPattern>();
-  private mips = new Map<HTMLImageElement, HTMLCanvasElement[]>();
+  private patterns = new Map<CanvasImageSource, CanvasPattern>();
+  private mips = new Map<CanvasImageSource, HTMLCanvasElement[]>();
+  /** Softened copies of the textures, for the calm dungeon look. */
+  private calm = new Map<HTMLImageElement, HTMLCanvasElement>();
   /** Floor and ceiling look the same from every cell (the party always stands in a cell's middle), so they are drawn once per floor. */
   private planeCache: { key: string; canvas: HTMLCanvasElement } | null = null;
+
+  /** A texture as the player wants to see it: as painted, or calmed (less contrast, colour and grain). */
+  private look(img: HTMLImageElement): CanvasImageSource {
+    if (!prefs.calmTextures) return img;
+    let c = this.calm.get(img);
+    if (!c) {
+      c = document.createElement('canvas');
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const g = c.getContext('2d')!;
+      g.filter = 'blur(2px) contrast(62%) saturate(70%) brightness(92%)';
+      // Draw it three times over itself, offset by the tile size, so the blur wraps round and the tile stays seamless.
+      for (const dx of [-c.width, 0, c.width]) for (const dy of [-c.height, 0, c.height]) g.drawImage(img, dx, dy);
+      this.calm.set(img, c);
+    }
+    return c;
+  }
 
   /** The floor's painted textures, once all three have loaded. */
   private textureSet(pal: Palette): TextureSet | null {
     if (!pal.textures) return null;
-    const wall = sprite(`dungeon/${pal.textures}-wall.webp`);
-    const floor = sprite(`dungeon/${pal.textures}-floor.webp`);
-    const ceiling = sprite(`dungeon/${pal.textures}-ceiling.webp`);
-    if (!wall || !floor || !ceiling) return null;
-    const pattern = (img: HTMLImageElement) => {
+    const wallImg = sprite(`dungeon/${pal.textures}-wall.webp`);
+    const floorImg = sprite(`dungeon/${pal.textures}-floor.webp`);
+    const ceilingImg = sprite(`dungeon/${pal.textures}-ceiling.webp`);
+    if (!wallImg || !floorImg || !ceilingImg) return null;
+    const wall = this.look(wallImg);
+    const pattern = (img: CanvasImageSource) => {
       let p = this.patterns.get(img);
       if (!p) {
         p = this.ctx.createPattern(img, 'repeat')!;
@@ -78,7 +99,7 @@ export class CorridorRenderer {
     if (!wallMips) {
       wallMips = [];
       let source: CanvasImageSource = wall;
-      for (let size = wall.naturalWidth; size >= 32; size = Math.floor(size / 2)) {
+      for (let size = wallImg.naturalWidth; size >= 32; size = Math.floor(size / 2)) {
         const c = document.createElement('canvas');
         c.width = c.height = size;
         const g = c.getContext('2d')!;
@@ -89,7 +110,7 @@ export class CorridorRenderer {
       }
       this.mips.set(wall, wallMips);
     }
-    return { wall: wallMips, floor: pattern(floor), ceiling: pattern(ceiling), size: floor.naturalWidth };
+    return { wall: wallMips, floor: pattern(this.look(floorImg)), ceiling: pattern(this.look(ceilingImg)), size: floorImg.naturalWidth };
   }
 
   /** The smallest wall mip that is still at least `px` pixels big. */
@@ -107,7 +128,7 @@ export class CorridorRenderer {
     const tex = this.textureSet(pal);
 
     if (tex) {
-      const key = `${pal.textures}|${pal.fog}`;
+      const key = `${pal.textures}|${pal.fog}|${prefs.calmTextures}`;
       if (this.planeCache?.key !== key) {
         const canvas = this.planeCache?.canvas ?? document.createElement('canvas');
         canvas.width = w;

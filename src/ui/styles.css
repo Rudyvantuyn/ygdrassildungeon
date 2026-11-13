@@ -2733,3 +2733,31 @@ body { word-spacing: 0.18em; }
   height: 18px;
   margin-right: 5px;
 }
+
+/* Drawing on the small map while walking */
+#map-pen {
+  display: flex;
+  gap: 4px;
+  margin: 6px 0 2px;
+}
+
+#map-pen button {
+  flex: 1;
+  padding: 3px 0;
+  font-size: 13px;
+}
+
+#map-pen button.on {
+  color: #10233a;
+  background: var(--gold);
+}
+
+#minimap.drawable {
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* Phones: the small map is too small to draw on; the Map button opens the full map. */
+body.phone #map-pen {
+  display: none;
+}

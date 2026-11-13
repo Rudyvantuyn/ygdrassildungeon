@@ -42,6 +42,7 @@ export const TIPS: TipDef[] = [
     pages: [
       'The Rootdeep has never been mapped: before the Pact, nobody was allowed down. The map in the corner fills in where you have walked.',
       'Open Map to draw walls, floor and marks yourself: stairs, chests, springs, gathering spots, danger and notes.',
+      'You can also draw on the small map while you walk: pick Wall, Floor or Erase under it and draw with the mouse or a finger.',
       'Not one for drawing? Choose Auto under Map drawing in Settings (or on the map itself) and the map draws itself. Manual leaves everything to you.',
     ],
   },

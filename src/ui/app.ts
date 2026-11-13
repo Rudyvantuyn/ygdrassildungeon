@@ -24,6 +24,7 @@ import { Hornstone, shareLines, type HornstoneHost } from './hornstone';
 import { online, type ExpeditionRow } from '../net/online';
 import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
+import { SideMapPen } from './sideMap';
 import { Designer, isMaker, loadDraft } from './designer';
 import { memberPicker, showSkillTree } from './skillsView';
 import { gatherPrompt } from './gatherView';
@@ -104,6 +105,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private overlayMenu: ListMenu | null = null;
   private combatView: CombatView | null = null;
   private mapEditor: MapEditor | null = null;
+  private mapPen!: SideMapPen;
   private designer: Designer | null = null;
   /** The floor being test-played from the drafting table (nothing is saved meanwhile). */
   private trial: ChapterDesign | null = null;
@@ -134,7 +136,16 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.dangerOrb = el('div', { id: 'danger-orb' });
     this.goldEl = el('div', { id: 'gold' });
     this.keyHint = el('div', { id: 'key-hint' });
-    const mapPanel = el('div', { id: 'map-panel', className: 'panel' }, [minimapCanvas, this.keyHint]);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const host = this;
+    this.mapPen = new SideMapPen(minimapCanvas, MAP_SIZE, {
+      get game() {
+        return host.game ?? null;
+      },
+      canDraw: () => this.mode === 'explore' && this.game?.state.location === 'dungeon' && this.game.state.chartMode !== 'auto',
+      changed: () => {},
+    });
+    const mapPanel = el('div', { id: 'map-panel', className: 'panel' }, [minimapCanvas, this.mapPen.el, this.keyHint]);
     const statusRow = el('div', { id: 'status-row', className: 'panel' }, [
       el('div', { id: 'danger' }, [this.dangerOrb, el('span', { text: 'Danger' })]),
       this.goldEl,
@@ -254,6 +265,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.drawFx(time);
     if (this.mode === 'editor') this.mapEditor?.draw(time);
     if (this.game && this.mode !== 'combat' && this.game.state.location === 'dungeon') drawMinimap(this.minimap, MAP_SIZE, this.game, time);
+    this.mapPen.update();
   }
 
   private drawFx(time: number): void {
@@ -1681,6 +1693,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.save();
     });
     const keys = choices<'turn' | 'step'>([['turn', 'Turn'], ['step', 'Side-step']], () => (prefs.strafeKeys ? 'step' : 'turn'), (v) => setPref('strafeKeys', v === 'step'));
+    const look = choices<'detailed' | 'calm'>([['detailed', 'Detailed'], ['calm', 'Calm']], () => (prefs.calmTextures ? 'calm' : 'detailed'), (v) => setPref('calmTextures', v === 'calm'));
     const chart = choices<ChartMode>(
       [['assisted', 'Assisted'], ['manual', 'Manual'], ['auto', 'Auto']],
       () => s.chartMode,
@@ -1694,6 +1707,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       { label: 'Effects', description: 'Drag the slider, or use ← →.', control: sfx.control, onAdjust: sfx.onAdjust, onSelect: () => sfx.onAdjust(1) },
       { label: 'Battle speed', description: 'How fast the rounds of a fight play out. Enter during a round speeds it up even more.', control: battle.control, onAdjust: battle.onAdjust, onSelect: battle.cycle },
       { label: 'Text speed', description: 'How fast story lines appear.', control: text.control, onAdjust: text.onAdjust, onSelect: text.cycle },
+      { label: 'Dungeon look', description: 'Detailed: walls and floors as painted. Calm: softer, with less contrast and grain, if the dungeon feels busy or makes you dizzy.', control: look.control, onAdjust: look.onAdjust, onSelect: look.cycle },
       { label: 'A / D keys', description: 'Turn: A and D turn, Q and E side-step. Side-step: the other way round. The arrow keys always turn.', control: keys.control, onAdjust: keys.onAdjust, onSelect: keys.cycle },
       ...(solo
         ? [{ label: 'Map drawing', description: 'Assisted: your steps fill in, you draw walls and marks. Manual: you draw everything. Auto: the map draws itself.', control: chart.control, onAdjust: chart.onAdjust, onSelect: chart.cycle }]

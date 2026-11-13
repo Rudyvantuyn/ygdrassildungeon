@@ -7,10 +7,12 @@ export interface Prefs {
   textSpeed: TextSpeed;
   /** A and D side-step and Q and E turn (instead of the other way round). */
   strafeKeys: boolean;
+  /** Softer dungeon walls, floor and ceiling (less contrast and grain), for players who find them busy. */
+  calmTextures: boolean;
 }
 
 const KEY = 'ygdrassil-prefs';
-const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false };
+const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false, calmTextures: false };
 
 export const BATTLE_SPEED_NAMES: Record<BattleSpeed, string> = { 0: 'Slow', 1: 'Normal', 2: 'Fast', 3: 'Fastest' };
 export const TEXT_SPEED_NAMES: Record<TextSpeed, string> = { slow: 'Slow', normal: 'Normal', fast: 'Fast', instant: 'Instant' };
