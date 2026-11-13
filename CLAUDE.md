@@ -75,10 +75,8 @@ Add new names there and keep the glossary in sync.
     (check itch.io's AI tags), e.g. game-icons.net (CC BY 3.0) for the map icons;
   - for what cannot be photographed (monsters, portraits): human-made packs, commissions or the owner's own drawings.
   Record every asset in `art/SOURCES.md`, and credit every CC BY author on a credits page.
-  **On hold (owner, November 2026):** the replacement art is not shipped yet; the owner will pick it up later. The
-  work is kept in git history: photo places, photo textures, game-icons.net icons and pixel props in commits
-  2e18446..108fd37 (with `art/photo-sources.json`, `public/credits.html`), painted monster fights in b79cd63
-  (`src/render/paintings.ts`, currently with no painted monsters). Restore with `git checkout <commit> -- <paths>`.
+  Monsters are shown as public-domain paintings and plates (`art/painting-sources.json`, `src/render/paintings.ts`);
+  `python3 scripts/credits.py` writes the photo and painting tables into `public/credits.html`.
 
 ## Working with the owner
 

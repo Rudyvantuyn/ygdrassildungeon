@@ -422,6 +422,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'Settings', onSelect: () => this.settings(() => this.showTitle()) },
         { label: 'Feedback', onSelect: () => this.showFeedback(() => this.showTitle()) },
         { label: 'Privacy & Terms', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
+        { label: 'Credits', onSelect: () => window.open('credits.html', '_blank', 'noopener') },
       ],
       { startIndex: hasSave ? 1 : 0 },
     );
@@ -1394,6 +1395,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'Help', description: 'Controls and how to play.', onSelect: () => this.showHelp(back) },
         ...(coop ? [] : [{ label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.showFeedback(back) }]),
         { label: 'Privacy & Terms', description: 'What the game stores about you (opens a new page).', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
+        { label: 'Credits', description: 'The photographers, artists and icon makers whose work is in the game (opens a new page).', onSelect: () => window.open('credits.html', '_blank', 'noopener') },
         quit(),
       ],
     };
