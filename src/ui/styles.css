@@ -1453,8 +1453,54 @@ table.stats thead th {
   box-sizing: border-box;
 }
 
-.feedback-input:focus {
+.feedback-input:focus,
+.feedback-contact:focus {
   outline: none;
+}
+
+.feedback-contact {
+  width: 100%;
+  margin-top: 10px;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  padding: 8px 12px;
+  color: var(--text);
+  background: #0a1013;
+  border: 1px solid var(--border-hi);
+  box-sizing: border-box;
+}
+
+.feedback-why {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* The Wayfinders' Stone */
+.stone-intro {
+  font-style: normal;
+  color: #d8e2ec;
+}
+
+.stone-names {
+  list-style: none;
+  margin: 10px 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.stone-names li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rim-dark, #4d6a86);
+}
+
+.stone-names b {
+  color: var(--gold);
+}
+
+.stone-empty {
+  color: var(--muted);
 }
 
 /* ── Phones ─────────────────────────────────────────────────────────────── */

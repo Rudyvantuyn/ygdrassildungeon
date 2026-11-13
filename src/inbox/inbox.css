@@ -175,3 +175,19 @@ pre {
   word-break: break-all;
   font-size: 12px;
 }
+
+.report .contact {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.stone {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid #4d6a86;
+}
+
+.stone summary {
+  cursor: pointer;
+  font-weight: 700;
+}

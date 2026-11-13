@@ -30,6 +30,7 @@ import type { TownSpot } from '../render/town';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import { npcFromName, npcSays } from './npc';
+import { fetchHonors } from '../net/reports';
 import { bindNameField, suggestName } from './founding';
 
 export interface TownHost {
@@ -186,6 +187,18 @@ export class TownView {
 
   // ── Notice board ───────────────────────────────────────────────────────────
 
+  /** The Wayfinders' Stone: players the makers thanked by name (loaded from the server). */
+  private async stone(boardIndex: number): Promise<void> {
+    const back = () => this.board(boardIndex);
+    const honors = await fetchHonors();
+    const lines: HTMLElement[] = [el('p', { className: 'stone-intro', text: '"They walked the Rootdeep first, and told us where it bit. Lindholm remembers." — Sigrid' })];
+    if (honors === null) lines.push(el('p', { className: 'stone-empty', text: 'The carvings are too dark to read from here. (The stone needs a connection.)' }));
+    else if (honors.length === 0) lines.push(el('p', { className: 'stone-empty', text: 'The stone is still bare. Send feedback with your name: yours could be the first carved here.' }));
+    else lines.push(el('ul', { className: 'stone-names' }, honors.map((h) => el('li', {}, [el('b', { text: h.name }), ...(h.note ? [el('span', { text: ` — ${h.note}` })] : [])]))));
+    const menu = new ListMenu([{ label: 'Back', onSelect: back }], { onCancel: back });
+    this.dialog("The Wayfinders' Stone", lines, menu, true);
+  }
+
   private boardBadge(): string {
     const quests = boardQuests(this.game);
     const ready = quests.filter((q) => questStage(this.game, q) === 'ready').length;
@@ -211,6 +224,7 @@ export class TownView {
       onSelect: () => this.questDetail(q, i),
     }));
     if (items.length === 0) items.push({ label: 'No requests right now', disabled: true, onSelect: () => {} });
+    items.push({ label: "The Wayfinders' Stone", description: 'A stone beside the board, carved with the names of those who made the Rootdeep better.', onSelect: () => void this.stone(items.length - 1) });
     items.push({ label: 'Leave', onSelect: back });
     const menu = new ListMenu(items, { onCancel: back, startIndex: start });
     this.dialog('The Notice Board', [el('p', { className: 'gold-line', text: `Requests completed: ${done}` })], menu, true);

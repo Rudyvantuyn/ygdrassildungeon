@@ -180,6 +180,11 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.view = viewCanvas.getContext('2d')!;
     this.minimap = minimapCanvas.getContext('2d')!;
     this.corridor = new CorridorRenderer(this.view, VIEW_W, VIEW_H);
+    // Count time played while the game is in view (not on the title screen); it goes along with feedback.
+    window.setInterval(() => {
+      if (document.visibilityState !== 'visible' || !this.game || this.game === this.titleGame || this.mode === 'title') return;
+      this.game.state.playSeconds = (this.game.state.playSeconds ?? 0) + 10;
+    }, 10_000);
     this.party = new PartyView(partyEl);
     this.town = new TownView(this, this.townGrid);
 
@@ -624,6 +629,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       pos: [s.x, s.y],
       levels: s.party.map((m) => `${m.classId} ${m.level}`),
       battles: s.battles,
+      minutesPlayed: Math.round((s.playSeconds ?? 0) / 60),
       coop: !!this.coop,
       screen,
     };
@@ -659,6 +665,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private writeFeedback(kind: ReportKind, title: string, back: () => void): void {
     const input = el('textarea', { className: 'feedback-input' });
     input.maxLength = 4000;
+    const contact = el('input', { className: 'feedback-contact' });
+    contact.maxLength = 80;
+    contact.placeholder = 'Your name or Reddit/itch name (optional)';
+    contact.addEventListener('keydown', (e) => e.stopPropagation());
     input.placeholder = kind === 'bug' ? 'What happened? What did you expect?' : 'Tell us...';
     const status = el('p', { className: 'form-error' });
     let sending = false;
@@ -668,7 +678,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       if (sending) return;
       sending = true;
       status.textContent = 'Sending...';
-      const ok = await sendReport(kind, text, this.reportContext());
+      const ok = await sendReport(kind, text, this.reportContext(), contact.value);
       sending = false;
       if (!ok) return void (status.textContent = 'Could not send it. Check your connection and try again.');
       back();
@@ -685,7 +695,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       ],
       { onCancel: () => this.showFeedback(back) },
     );
-    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: title }), input, status, menu.el]), menu);
+    const why = el('p', { className: 'feedback-why', text: 'Leave a name if you would like a reply, or to be thanked on the Wayfinders\' Stone in Lindholm. Only the makers see it.' });
+    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: title }), input, contact, why, status, menu.el]), menu);
     input.focus();
   }
 

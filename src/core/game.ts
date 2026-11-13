@@ -77,6 +77,8 @@ export interface GameState {
   progress: FloorProgress[];
   steps: number;
   battles: number;
+  /** Seconds played with the game in view (shown to the makers with feedback). */
+  playSeconds?: number;
   cleared: boolean;
   /** Prowler the current fight is against, if any. */
   fighting?: number | null;

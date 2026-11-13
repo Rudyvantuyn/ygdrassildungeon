@@ -6,12 +6,12 @@ import { SUPABASE_KEY, SUPABASE_URL } from './online';
 
 export type ReportKind = 'bug' | 'idea' | 'other' | 'error';
 
-export async function sendReport(kind: ReportKind, message: string, context: Record<string, unknown> = {}): Promise<boolean> {
+export async function sendReport(kind: ReportKind, message: string, context: Record<string, unknown> = {}, contact = ''): Promise<boolean> {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/reports`, {
       method: 'POST',
       headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-      body: JSON.stringify({ kind, message: message.slice(0, 4000), context, version: __BUILD__ }),
+      body: JSON.stringify({ kind, message: message.slice(0, 4000), context, version: __BUILD__, contact: contact.trim().slice(0, 80) || null }),
     });
     return res.ok;
   } catch {
@@ -42,4 +42,19 @@ export function watchErrors(context: () => Record<string, unknown>): void {
     const r: unknown = e.reason;
     report(r instanceof Error ? r.message : String(r), r instanceof Error ? r.stack : undefined);
   });
+}
+
+export interface Honor {
+  name: string;
+  note: string | null;
+}
+
+/** The names on the Wayfinders' Stone: players the makers chose to thank. Null when offline. */
+export async function fetchHonors(): Promise<Honor[] | null> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/honors?select=name,note&order=created_at.asc`, { headers: { apikey: SUPABASE_KEY } });
+    return res.ok ? ((await res.json()) as Honor[]) : null;
+  } catch {
+    return null;
+  }
 }
