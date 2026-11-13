@@ -35,3 +35,20 @@ describe('chapter III, prepared for the drafting table', () => {
     for (const e of EQUIPMENT_LIST) if (e.requires) expect(MATERIALS[e.requires.material], e.id).toBeDefined();
   });
 });
+
+describe('drafting table examples', () => {
+  it('shows chapters I and II as they are, and starts chapter III fully set up and drawable', async () => {
+    const { rootdeepChapter, marrowdeepTemplate, chapterProblems, decodeChapter, encodeChapter } = await import('./designer');
+    const one = rootdeepChapter(0, 'The Greenwood Roots');
+    expect(one.floors).toHaveLength(5);
+    expect(one.floors[2].boss).toBe('blightedElder');
+    expect(rootdeepChapter(5, 'The Drowned Roots').floors[4].prowlers.length).toBeGreaterThan(0);
+    const three = marrowdeepTemplate();
+    expect(three.floors.map((f) => f.monsters)).toEqual([10, 11, 12, 13, 14]);
+    expect(three.floors.every((f) => f.theme === 'marrow')).toBe(true);
+    expect([three.floors[2].boss, three.floors[4].boss]).toEqual(['ribwarden', 'hrungnir']);
+    // It survives a share code round trip, and only asks for what still has to be drawn.
+    expect(decodeChapter(encodeChapter(three))?.floors[4].boss).toBe('hrungnir');
+    expect(chapterProblems(three).some((p) => /theme|monsters/i.test(p))).toBe(false);
+  });
+});

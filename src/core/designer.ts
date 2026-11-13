@@ -533,6 +533,34 @@ export function toFloorDefs(c: ChapterDesign): FloorDef[] {
   return c.floors.map((d, i) => ({ ...toFloorDef(d), name: c.floors.length === 1 ? c.name.trim() || d.name : floorName(c, i) }));
 }
 
+/** A chapter of the Rootdeep as a design (floors `first`..`first`+4), to look at or learn from at the drafting table. */
+export function rootdeepChapter(first: number, name: string): ChapterDesign {
+  const floors = FLOORS.slice(first, first + CHAPTER_FLOORS).map((f, i): FloorDesign => ({
+    version: DESIGN_VERSION,
+    name: f.name,
+    rows: [...f.rows],
+    theme: f.palette.textures ?? THEMES[0].id,
+    monsters: first + i,
+    boss: f.boss?.[0] ?? null,
+    prowlers: f.prowlers.map((p) => ({ enemy: p.enemies[0], route: p.route.map(([x, y]) => [x, y] as [number, number]), hunt: p.hunt })),
+  }));
+  return { version: CHAPTER_VERSION, name, floors };
+}
+
+/**
+ * Where chapter III begins: five empty floors of one size, with the Marrowdeep's look, monsters and guardians
+ * already chosen (the Ribwarden on the third floor, Hrungnir on the fifth). Only the first floor has an entrance.
+ */
+export function marrowdeepTemplate(width = 20, height = 16): ChapterDesign {
+  const first = blankDesign(width, height);
+  first.theme = 'marrow';
+  first.monsters = 10;
+  const floors = [first, ...[1, 2, 3, 4].map((i) => ({ ...blankChapterFloor(first), monsters: 10 + i }))];
+  floors[2].boss = 'ribwarden';
+  floors[4].boss = 'hrungnir';
+  return { version: CHAPTER_VERSION, name: 'The Marrowdeep', floors };
+}
+
 const CHAPTER_PREFIX = 'YGC1.';
 
 /** A short text that holds the whole chapter, to share or to send to the game's makers. */

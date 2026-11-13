@@ -18,6 +18,8 @@ import {
   GATE_CELLS,
   LINK_CELLS,
   blankChapter,
+  marrowdeepTemplate,
+  rootdeepChapter,
   blankChapterFloor,
   cellAt,
   chapterProblems,
@@ -36,6 +38,7 @@ import {
   type LinkCell,
 } from '../core/designer';
 import { el } from './dom';
+import { shade } from '../render/color';
 
 /** `link` places numbered stairs, `gate` a root gate; the number and side are chosen in the panel. */
 type Tool = Cell | 'route' | 'link' | 'gate';
@@ -58,7 +61,7 @@ const TOOLS: { id: Tool; label: string; key: string }[] = [
 ];
 
 /** Party level suggested for testing a floor with the monsters of Rootdeep floor i. */
-const SUGGESTED_LEVEL = [3, 5, 7, 10, 14, 18, 20, 23, 25, 28];
+const SUGGESTED_LEVEL = [3, 5, 7, 10, 14, 18, 20, 23, 25, 28, 37, 39, 41, 43, 45];
 const ROUTE_COLORS = ['#ff7a4a', '#c58af0', '#6fd3ff', '#f2d14e'];
 
 const DRAFT_KEY = 'ygdrassil-draft-v2';
@@ -206,6 +209,7 @@ export class Designer {
         this.testButton,
         this.button('Save', () => this.save()),
         this.button('My chapters', () => this.showSaved()),
+        this.button('Examples', () => this.showExamples()),
         this.button('Share', () => this.showShare()),
         this.button('New', () => this.newFloor()),
         this.button('Back', () => this.actions.onClose()),
@@ -308,7 +312,7 @@ export class Designer {
       [...row].forEach((c, x) => {
         const px = ox + x * size;
         const py = oy + y * size;
-        ctx.fillStyle = c === '#' ? pal.wall : '#d8c9a4';
+        ctx.fillStyle = c === '#' ? wallInk(pal.wall) : '#d8c9a4';
         ctx.fillRect(px, py, size, size);
         if (c === '#') {
           ctx.fillStyle = 'rgba(0,0,0,0.25)';
@@ -620,6 +624,24 @@ export class Designer {
     this.openModal('My chapters', [list]);
   }
 
+  /** The Rootdeep's own chapters to look at, and the starting point for chapter III. */
+  private showExamples(): void {
+    const pick = (make: () => ChapterDesign) => () => {
+      if (!confirm('This replaces what you are drawing now. Save it first (Save) if you want to keep it. Continue?')) return;
+      this.load(make());
+    };
+    const list = el('div', { className: 'draft-list' }, [
+      el('p', { text: 'Look at how the chapters in the game are built, or start chapter III with everything already set up.' }),
+      el('div', { className: 'draft-row' }, [this.button('Chapter I: The Greenwood Roots (floors 1–5)', pick(() => rootdeepChapter(0, 'The Greenwood Roots')))]),
+      el('div', { className: 'draft-row' }, [this.button('Chapter II: The Drowned Roots (floors 6–10)', pick(() => rootdeepChapter(5, 'The Drowned Roots')))]),
+      el('div', { className: 'draft-row' }, [this.button('Start chapter III: The Marrowdeep', pick(() => marrowdeepTemplate()), 'primary')]),
+      el('p', {
+        text: 'Chapters I and II were made before numbered stairs existed: every floor has its own entrance and stairs down. From chapter III on, only the first floor has an entrance, and floors are joined by numbered stairs (also back up) and root gates.',
+      }),
+    ]);
+    this.openModal('Examples', [list]);
+  }
+
   private showShare(): void {
     const code = encodeChapter(this.chapter);
     const box = el('textarea', { className: 'draft-code' });
@@ -667,4 +689,11 @@ export class Designer {
     this.el.append(note);
     window.setTimeout(() => note.remove(), 1800);
   }
+}
+
+/** Walls drawn dark enough to stand out from the pale floor cells, even for pale stone like the Marrowdeep's. */
+function wallInk(color: string): string {
+  const n = parseInt(color.slice(1), 16);
+  const lum = (0.3 * ((n >> 16) & 255) + 0.59 * ((n >> 8) & 255) + 0.11 * (n & 255)) / 255;
+  return lum > 0.45 ? shade(color, -0.55) : color;
 }
