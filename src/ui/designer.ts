@@ -4,7 +4,7 @@
  */
 import { ENEMIES } from '../core/data/enemies';
 import { chapterOf } from '../core/data/chapters';
-import { FLOORS } from '../core/data/floors';
+import { DESIGN_FLOORS as FLOORS } from '../core/data/marrowdeep';
 import {
   BOSS_CHOICES,
   MAX_PROWLERS,

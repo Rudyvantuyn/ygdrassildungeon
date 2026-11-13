@@ -69,6 +69,25 @@ const list: EquipDef[] = [
   { id: 'abyssRod', name: 'Abyss Rod', slot: 'weapon', classes: CASTERS, tier: 9, price: 6500, bonus: { mag: 46 } },
   { id: 'leviathanMail', name: 'Leviathan Mail', slot: 'armor', classes: MAIL, tier: 9, price: 6900, bonus: { def: 43 } },
   { id: 'tidesongRobe', name: 'Tidesong Robe', slot: 'armor', classes: CASTERS, tier: 9, price: 6300, bonus: { def: 26, res: 35 } },
+  // Tier 10 — after reaching the eleventh floor (Chapter III)
+  { id: 'bonebreakerAxe', name: 'Bonebreaker Axe', slot: 'weapon', classes: BLADES, tier: 10, price: 9500, bonus: { atk: 62 } },
+  { id: 'marrowBow', name: 'Marrow Bow', slot: 'weapon', classes: ['strider'], tier: 10, price: 9300, bonus: { atk: 59, spd: 5 } },
+  { id: 'runeboneRod', name: 'Runebone Rod', slot: 'weapon', classes: CASTERS, tier: 10, price: 9100, bonus: { mag: 53 } },
+  { id: 'cairnplateMail', name: 'Cairnplate Mail', slot: 'armor', classes: MAIL, tier: 10, price: 9600, bonus: { def: 50 } },
+  { id: 'chalkweaveRobe', name: 'Chalkweave Robe', slot: 'armor', classes: CASTERS, tier: 10, price: 8900, bonus: { def: 30, res: 40 } },
+  // Tier 12 — after reaching the thirteenth floor
+  { id: 'giantsteelBlade', name: 'Giantsteel Blade', slot: 'weapon', classes: BLADES, tier: 12, price: 13000, bonus: { atk: 70 } },
+  { id: 'stormhornBow', name: 'Stormhorn Bow', slot: 'weapon', classes: ['strider'], tier: 12, price: 12800, bonus: { atk: 66, spd: 6 } },
+  { id: 'quartzheartRod', name: 'Quartzheart Rod', slot: 'weapon', classes: CASTERS, tier: 12, price: 12500, bonus: { mag: 60 } },
+  { id: 'cragPlate', name: 'Crag Plate', slot: 'armor', classes: ['bastion'], tier: 12, price: 13200, bonus: { def: 56, spd: -1 } },
+  { id: 'cragleatherCoat', name: 'Cragleather Coat', slot: 'armor', classes: ['strider'], tier: 12, price: 12600, bonus: { def: 50, spd: 2 } },
+  { id: 'echoweaveRobe', name: 'Echoweave Robe', slot: 'armor', classes: CASTERS, tier: 12, price: 12300, bonus: { def: 34, res: 46 } },
+  // Tier 14 — after reaching the fifteenth floor
+  { id: 'jotunCleaver', name: 'Jotun Cleaver', slot: 'weapon', classes: BLADES, tier: 14, price: 17000, bonus: { atk: 80 } },
+  { id: 'skyrenderBow', name: 'Skyrender Bow', slot: 'weapon', classes: ['strider'], tier: 14, price: 16800, bonus: { atk: 76, spd: 6 } },
+  { id: 'starmarrowRod', name: 'Starmarrow Rod', slot: 'weapon', classes: CASTERS, tier: 14, price: 16500, bonus: { mag: 69 } },
+  { id: 'mountainheartMail', name: 'Mountainheart Mail', slot: 'armor', classes: MAIL, tier: 14, price: 17200, bonus: { def: 62 } },
+  { id: 'runeveilRobe', name: 'Runeveil Robe', slot: 'armor', classes: CASTERS, tier: 14, price: 16200, bonus: { def: 39, res: 53 } },
   // Special gear, unlocked by selling materials. It should always beat the shop gear of the next floor down:
   // that is the reward for hunting a kind of monster on purpose.
   { id: 'briarthornSpear', name: 'Briarthorn Spear', slot: 'weapon', classes: BLADES, tier: 0, price: 220, bonus: { atk: 11 }, requires: { material: 'briarQuill', qty: 5 } },
@@ -99,6 +118,22 @@ const list: EquipDef[] = [
   { id: 'deepironMail', name: 'Deepiron Mail', slot: 'armor', classes: MAIL, tier: 6, price: 5600, bonus: { def: 41 }, requires: { material: 'deepiron', qty: 3 } },
   { id: 'ghostwoodRod', name: 'Ghostwood Rod', slot: 'weapon', classes: CASTERS, tier: 6, price: 5400, bonus: { mag: 44, spd: 2 }, requires: { material: 'ghostwood', qty: 3 } },
   { id: 'moonscaleBow', name: 'Moonscale Bow', slot: 'weapon', classes: ['strider'], tier: 6, price: 5600, bonus: { atk: 48, spd: 5 }, requires: { material: 'moonscaleEel', qty: 3 } },
+  // Chapter III special gear (monster parts, then rare finds).
+  { id: 'knucklebonesAxe', name: 'Knucklebone Axe', slot: 'weapon', classes: BLADES, tier: 10, price: 9000, bonus: { atk: 72 }, requires: { material: 'gnawedKnuckle', qty: 6 } },
+  { id: 'chalksilkRobe', name: 'Chalksilk Robe', slot: 'armor', classes: CASTERS, tier: 10, price: 8800, bonus: { def: 36, res: 48 }, requires: { material: 'chalkSilk', qty: 6 } },
+  { id: 'wingboneBow', name: 'Wingbone Bow', slot: 'weapon', classes: ['strider'], tier: 10, price: 9000, bonus: { atk: 68, spd: 7 }, requires: { material: 'hollowWingbone', qty: 5 } },
+  { id: 'ramhornMail', name: 'Ramhorn Mail', slot: 'armor', classes: MAIL, tier: 11, price: 10500, bonus: { def: 58 }, requires: { material: 'curledHorn', qty: 5 } },
+  { id: 'cairnwardCloak', name: 'Cairnward Cloak', slot: 'armor', classes: ALL, tier: 11, price: 10000, bonus: { def: 40, res: 40 }, requires: { material: 'cairnDust', qty: 5 } },
+  { id: 'crystalmarrowRod', name: 'Crystalmarrow Rod', slot: 'weapon', classes: CASTERS, tier: 12, price: 12000, bonus: { mag: 71 }, requires: { material: 'marrowCrystal', qty: 5 } },
+  { id: 'trollhideMail', name: 'Trollhide Mail', slot: 'armor', classes: MAIL, tier: 13, price: 15000, bonus: { def: 64 }, requires: { material: 'rimeHide', qty: 6 } },
+  { id: 'ribwardenPlate', name: 'Ribwarden Plate', slot: 'armor', classes: ['bastion'], tier: 12, price: 16000, bonus: { def: 68, res: 10 }, requires: { material: 'wardenRib', qty: 1 } },
+  { id: 'giantstoothCleaver', name: "Giant's-Tooth Cleaver", slot: 'weapon', classes: BLADES, tier: 13, price: 18000, bonus: { atk: 86 }, requires: { material: 'giantsTooth', qty: 1 } },
+  { id: 'ossuaryBow', name: 'Ossuary Bow', slot: 'weapon', classes: ['strider'], tier: 14, price: 18000, bonus: { atk: 84, spd: 7 }, requires: { material: 'ossuaryFang', qty: 1 } },
+  { id: 'heartstoneRod', name: 'Heartstone Rod', slot: 'weapon', classes: CASTERS, tier: 14, price: 19000, bonus: { mag: 78, spd: 2 }, requires: { material: 'heartstoneShard', qty: 1 } },
+  { id: 'glimmercapRobe', name: 'Glimmercap Robe', slot: 'armor', classes: CASTERS, tier: 11, price: 11000, bonus: { def: 37, res: 50 }, requires: { material: 'glimmercap', qty: 3 } },
+  { id: 'runequartzBlade', name: 'Runequartz Blade', slot: 'weapon', classes: BLADES, tier: 11, price: 11500, bonus: { atk: 74 }, requires: { material: 'runeQuartz', qty: 3 } },
+  { id: 'ironrootBow', name: 'Ironroot Bow', slot: 'weapon', classes: ['strider'], tier: 11, price: 11500, bonus: { atk: 71, spd: 7 }, requires: { material: 'ironroot', qty: 3 } },
+  { id: 'paleeelMail', name: 'Pale-Eel Mail', slot: 'armor', classes: MAIL, tier: 11, price: 11500, bonus: { def: 59, spd: 1 }, requires: { material: 'paleEel', qty: 3 } },
 ];
 
 export const EQUIPMENT: Record<string, EquipDef> = Object.fromEntries(list.map((e) => [e.id, e]));

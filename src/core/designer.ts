@@ -5,7 +5,8 @@
  */
 import { DX, DY } from './dungeon';
 import { ENEMIES } from './data/enemies';
-import { FLOORS, type FloorDef, type Palette } from './data/floors';
+import type { FloorDef, Palette } from './data/floors';
+import { DESIGN_FLOORS as FLOORS } from './data/marrowdeep';
 import type { Dir } from './types';
 
 export const DESIGN_VERSION = 1;
@@ -65,6 +66,7 @@ export const THEMES: ThemeDef[] = (() => {
     tidewater: 'Tidewater',
     coral: 'Coral',
     abyss: 'Abyss',
+    marrow: 'Marrowdeep',
   };
   const seen = new Map<string, ThemeDef>();
   for (const f of FLOORS) {

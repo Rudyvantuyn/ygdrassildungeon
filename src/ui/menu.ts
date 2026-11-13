@@ -51,7 +51,7 @@ export class ListMenu {
       row.children[0].textContent = item.label;
       if (item.icon) {
         const img = document.createElement('img');
-        img.className = 'menu-icon';
+        img.className = 'el-icon';
         img.src = item.icon;
         img.alt = '';
         row.children[0].prepend(img);

@@ -182,5 +182,26 @@
     "file": "File:Tham_Lot_(cave),_Stalactites,_Ceiling,_Thailand.jpg",
     "author": "Vyacheslav Argenberg",
     "license": "CC BY 4.0"
+  },
+  {
+    "use": "Marrowdeep wall",
+    "asset": "dungeon/marrow-wall.webp",
+    "file": "File:Cave_cricket_%26_coralloids_(Mary%27s_Vineyard,_Boone_Avenue,_Mammoth_Cave,_Kentucky,_USA)_(24204194358).jpg",
+    "author": "James St. John",
+    "license": "CC BY 2.0"
+  },
+  {
+    "use": "Marrowdeep floor",
+    "asset": "dungeon/marrow-floor.webp",
+    "file": "File:Orton_Scar_Limestone_Pavement.jpg",
+    "author": "Northernhenge",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Marrowdeep ceiling",
+    "asset": "dungeon/marrow-ceiling.webp",
+    "file": "File:Tham_Lot_(cave),_Stalactites,_Ceiling,_Thailand.jpg",
+    "author": "Vyacheslav Argenberg",
+    "license": "CC BY 4.0"
   }
 ]

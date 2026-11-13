@@ -744,7 +744,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       el('div', { className: 'beast-elements' }, ELEMENTS.map((x) => {
         const k = elementKnown(def, e, x);
         const chip = el('span', { className: `beast-el ${k}`, text: `${ELEMENT_NAMES[x]}: ${WORDS[k]}` });
-        const img = el('img', { className: 'menu-icon' });
+        const img = el('img', { className: 'el-icon' });
         img.src = elementIcon(x);
         chip.prepend(img);
         return chip;

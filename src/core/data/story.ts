@@ -384,7 +384,7 @@ export const STORY: StoryScene[] = [
     id: 'hafgufaFallen',
     title: 'The first ward',
     when: 'victory',
-    ready: (g) => g.state.cleared,
+    ready: beaten(9),
     lines: [
       { speaker: NARRATOR, text: 'The Hafgufa sinks into the black water, and the golden rune on its back cracks in two.' },
       { speaker: NARRATOR, text: 'Far, far above, beyond the roots and the sky, a horn sounds. Once. Long and low. Somebody up there heard the ward break.' },
@@ -395,7 +395,7 @@ export const STORY: StoryScene[] = [
     id: 'firstWard',
     title: 'The broken ward',
     when: 'town',
-    ready: (g) => g.state.cleared,
+    ready: beaten(9),
     lines: [
       { speaker: SIGRID, text: 'The wells run sweet again. And the whole town heard that horn in its sleep. What have we started?' },
       { speaker: HRODNA, text: 'The first ward of the gods\' spell. Broken by human hands. The Court has waited an age for this. Give me the shard.' },
@@ -434,7 +434,7 @@ export const STORY: StoryScene[] = [
     id: 'chapterTwoEnd',
     title: 'What lies beneath',
     when: 'town',
-    ready: (g) => g.state.cleared && g.state.story.includes('firstWard'),
+    ready: (g) => beaten(9)(g) && g.state.story.includes('firstWard'),
     lines: [
       { speaker: SIGRID, text: 'Beneath the blood-sea, the road goes on. Into Ymir\'s bones. Wards still stand. More than one, I think.' },
       { speaker: SIGRID, text: 'Somewhere at the bottom lies the Gap, and a road to Asgard. Hallvard found it. Someone made sure he never came home.' },
@@ -445,14 +445,183 @@ export const STORY: StoryScene[] = [
     id: 'sealedStair',
     title: 'The sealed stair',
     when: 'floor',
-    ready: (g) => g.state.cleared && g.state.floor === 9,
+    // Only while chapter III is not yet open.
+    ready: (g) => beaten(9)(g) && g.state.floor === 9 && g.floors.length <= 10,
     lines: [
       { speaker: NARRATOR, text: 'Behind the Hafgufa\'s resting place, a stair winds down into bone-white stone. Ymir\'s bones, waiting.' },
       { speaker: NARRATOR, text: 'A second ward seals it, a wall of cold gold light. It does not yield. Not yet.' },
       { speaker: NARRATOR, text: 'To be continued in Chapter III.' },
     ],
   },
+
+  // ── Chapter III: the Marrowdeep ────────────────────────────────────────────
+  // A proposal written while Thijs is busy (see docs/verhaal.md): he may change any of it.
+  {
+    id: 'marrowGate',
+    title: "Ymir's bones",
+    when: 'floor',
+    ready: on(10),
+    lines: [
+      { speaker: NARRATOR, text: 'The second ward lets you through. Below the blood-sea the walls turn pale and hard: not stone, but bone that became stone.' },
+      { speaker: NARRATOR, text: 'Every sound comes back to you twice. Somewhere deep below, something very large is breathing in its sleep.' },
+    ],
+  },
+  {
+    id: 'guideRealms',
+    title: 'A guide from the Court',
+    when: 'floor',
+    ready: (g) => on(10)(g) && road(g) === 'realms',
+    lines: [
+      { speaker: NARRATOR, text: 'A frost giant waits at the foot of the stair, stooped under the low ceiling. Kolbein, a stonewright of Jotunheim.' },
+      { speaker: 'Kolbein, stonewright', text: 'The envoy sends me. My people cut these roads when Ymir was still loved. I will walk with you to the first stair, and no further.' },
+    ],
+  },
+  {
+    id: 'guideAsgard',
+    title: "The wanderer's flame",
+    when: 'floor',
+    ready: (g) => on(10)(g) && road(g) === 'asgard',
+    lines: [
+      { speaker: NARRATOR, text: 'In your pack you find a small flame in a glass, wrapped in cloth. You do not remember packing it.' },
+      { speaker: NARRATOR, text: 'A note in a neat hand: "It will not go out down there. Nothing of mine does. — E."' },
+    ],
+  },
+  {
+    id: 'guideMidgard',
+    title: "Brynja's chalk",
+    when: 'floor',
+    ready: (g) => on(10)(g) && road(g) === 'midgard',
+    lines: [
+      { speaker: NARRATOR, text: 'Brynja gave you a bag of chalk before you left. "Mark every turn. Lindholm will make its own map of the bones, for no one else."' },
+      { speaker: NARRATOR, text: 'Your first mark on the white wall looks very small. You make it anyway.' },
+    ],
+  },
+  {
+    id: 'giantsStair',
+    title: "The giants' road",
+    when: 'floor',
+    ready: on(11),
+    lines: [
+      { speaker: NARRATOR, text: 'Steps as tall as a man climb and fall through the bone. Giants carved them, long before the war, to trade with the deep.' },
+      { speaker: NARRATOR, text: 'Runes on the walls give the names of places. Many are scratched out. Someone wanted this road forgotten.' },
+    ],
+  },
+  {
+    id: 'ribvault',
+    title: 'The rib hall',
+    when: 'floor',
+    ready: on(12),
+    lines: [
+      { speaker: NARRATOR, text: 'A hall between ribs, each as wide as a longship. In the middle, something coiled of bone lifts its head. A golden rune burns on its chest.' },
+    ],
+  },
+  {
+    id: 'ribwardenFallen',
+    title: 'The carved rune',
+    when: 'victory',
+    ready: beaten(12),
+    lines: [
+      { speaker: NARRATOR, text: 'The Ribwarden falls apart into a heap of bones. The rib with the rune stays standing, alone.' },
+      { speaker: NARRATOR, text: 'Up close you see it: the rune did not grow there. It was carved. With a chisel of gold, by a patient hand.' },
+    ],
+  },
+  {
+    id: 'boneNails',
+    title: 'Nails in a coffin',
+    when: 'town',
+    ready: beaten(12),
+    lines: [
+      { speaker: SIGRID, text: 'Carved into his own bones. The gods built their wards out of Ymir himself.' },
+      { speaker: HRODNA, text: 'Nails in a coffin. Each ward holds him down, and Asgard shut. We always suspected. Now we know.' },
+      { speaker: ASKE, text: 'Then every ward we break, we pull a nail. Forgive me for asking what nobody wants asked: what happens when the last one comes out?' },
+      { speaker: EIRA, text: 'Nothing good, healer. Nothing good at all.' },
+    ],
+  },
+  {
+    id: 'echoHollows',
+    title: 'The light that stays',
+    when: 'floor',
+    ready: on(13),
+    lines: [
+      { speaker: NARRATOR, text: 'A cold wind howls through the hollows, and your torches gutter and die. For a while there is only the dark, and the echoes.' },
+      { speaker: NARRATOR, text: 'Far ahead, one small light burns steady. A lantern that does not flicker. When you reach the spot, there is no one there.' },
+    ],
+  },
+  {
+    id: 'hrungnirsRest',
+    title: 'The sleeping giant',
+    when: 'floor',
+    ready: on(14),
+    lines: [
+      { speaker: NARRATOR, text: 'A giant lies in the deepest vault, grown into the floor. In his open chest a heart of stone beats, slow as a season.' },
+      { speaker: NARRATOR, text: 'A golden rune is cut into the heart. The third ward. Whoever made it did not let him die first.' },
+    ],
+  },
+  {
+    id: 'hrungnirFallen',
+    title: 'The third ward',
+    when: 'victory',
+    ready: beaten(14),
+    lines: [
+      { speaker: NARRATOR, text: 'Hrungnir sinks back into the stone with a sound like a mountain sighing. The rune on his heart splits.' },
+      { speaker: NARRATOR, text: 'The horn above sounds again. Twice now. And a raven lands on the broken heart, looks at you for a long moment, and flies up into the dark.' },
+    ],
+  },
+  {
+    id: 'secondWard',
+    title: 'The stone heart',
+    when: 'town',
+    ready: beaten(14),
+    lines: [
+      { speaker: HRODNA, text: 'Hrungnir. The strongest of us, the first to stand for Ymir. They made a lock of his heart. Give it back to his people.' },
+      { speaker: EIRA, text: 'A raven saw you. Asgard knows your faces now. Let me take the heart home: a gift buys more patience than a threat.' },
+      { speaker: BRYNJA, text: 'Or bury it here, under the Oath Hall. Every oath we swear on it will remember what was done to him.' },
+    ],
+    choice: {
+      prompt: 'What happens to the stone heart?',
+      options: [
+        {
+          id: 'hrodna', label: 'Return it to the giants', leaning: 'realms',
+          reply: [
+            { speaker: HRODNA, text: 'Jotunheim will sing of this for a hundred winters. And it will remember who carried the heart home.' },
+          ],
+        },
+        {
+          id: 'eira', label: 'Let Eira bring it "home"', leaning: 'asgard',
+          reply: [
+            { speaker: EIRA, text: 'Home. Yes. You understand more than you know.' },
+            { speaker: NARRATOR, text: 'That night a raven sits on the Oath Hall roof until dawn. Nobody sees it leave.' },
+          ],
+        },
+        {
+          id: 'bury', label: 'Bury it under the Oath Hall', leaning: 'midgard',
+          reply: [
+            { speaker: BRYNJA, text: 'Then Lindholm keeps its own oaths, on its own stone. Let the realms and the gods both come and ask.' },
+            { speaker: ASKE, text: 'I will say a word over it. Someone should, after all this time.' },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'chapterThreeEnd',
+    title: 'Eyes in the deep',
+    when: 'town',
+    ready: (g) => beaten(14)(g) && g.state.story.includes('secondWard'),
+    lines: [
+      { speaker: SIGRID, text: 'Three wards broken. Ravens over Lindholm every morning now. Asgard is watching the road we are making.' },
+      { speaker: SIGRID, text: 'Below the bones lies something else. Hrodna will not say what. Eira just smiles. Rest, Wayfinders. We are close to something.' },
+    ],
+  },
 ];
+
+/** The road the party's choices lean toward most; a tie goes to Midgard's own third way. */
+function road(g: Game): Leaning {
+  const l = leanings(g);
+  if (l.realms > l.asgard && l.realms > l.midgard) return 'realms';
+  if (l.asgard > l.realms && l.asgard > l.midgard) return 'asgard';
+  return 'midgard';
+}
 
 export const SCENE_BY_ID: Record<string, StoryScene> = Object.fromEntries(STORY.map((s) => [s.id, s]));
 

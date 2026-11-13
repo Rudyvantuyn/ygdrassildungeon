@@ -33,7 +33,8 @@ nog open liggen. De scènes zelf staan in `src/core/data/story.ts`.
 | De Grote Boom en de Rootdeep | De wortels van de Grote Boom lopen door Ymirs lichaam omlaag naar waar Ginnungagap was. Als er nog een weg naar Asgard bestaat, ligt die daar. |
 | Hoofdstuk I (bos, 1–5) | Ymirs haar (de bossen) en vlees (de aarde). Vanuit Niflheim kruipt ijs omhoog, vanuit Muspelheim hitte. |
 | Hoofdstuk II (zee, 6–10) | Ymirs bloed: de zee onder de wereld. |
-| Latere hoofdstukken (voorstel) | III: Ymirs botten (bergen, grotten). Daarna bijvoorbeeld zijn schedel en hersenen (hemel, wolken), en uiteindelijk Ginnungagap zelf. |
+| Hoofdstuk III (bot, 11–15): **The Marrowdeep** | Ymirs botten: gangen van bot dat steen werd, de oude handelswegen van de reuzen, de Ribvault, Echo Hollows en Hrungnirs rustplaats. *Voorstel, geschreven terwijl Thijs geen tijd heeft; hij mag alles aanpassen.* |
+| Latere hoofdstukken (voorstel) | Daarna bijvoorbeeld zijn schedel en hersenen (hemel, wolken), en uiteindelijk Ginnungagap zelf. |
 | De avonturiers | **Wayfinders**: gezworen op het Pact in de Oath Hall. |
 | Oath Tokens | Botsplinters van Ymir. De werelden erkennen geen eed die niet op een stukje van hem gezworen is. |
 | Prowlers | Beesten die van Ymirs vlees vraten; in hun hart zit een splinter van hem (daarom laten ze een Oath Token achter, één keer per prowler). |
@@ -42,7 +43,7 @@ nog open liggen. De scènes zelf staan in `src/core/data/story.ts`.
 | Altijd terug naar de stad | De wortels van de Grote Boom leiden altijd naar huis. |
 | Hornstone en expedities | Elke stad die het Pact zwoer heeft een Hornstone; zo komen Wayfinders uit andere hallen samen. |
 | Afdalen per hoofdstuk | De wards van de goden laten niemand halverwege een hoofdstuk binnen: je begint altijd bij het begin van een geopend hoofdstuk. |
-| Bazen | Sommige zijn **wards**: sloten van de spreuk van de goden. In hun hart zit een gouden rune. |
+| Bazen | Sommige zijn **wards**: sloten van de spreuk van de goden. In hun hart zit een gouden rune. Hoofdstuk III onthult dat de goden die runen *in Ymirs eigen botten* kerfden: elke ward is een spijker in zijn graf. |
 
 ### Personages
 
@@ -66,6 +67,25 @@ nog open liggen. De scènes zelf staan in `src/core/data/story.ts`.
 5. **Het rot.** Was het van Asgard (om de weg te blokkeren) of van de werelden (om Lindholm wanhopig genoeg te maken
    voor het Pact)? Dit staat nog open.
 
+### Hoofdstuk III (voorstel, november 2026)
+
+Thijs had geen tijd; dit is een voorstel in zijn lijn. Alles mag hij veranderen.
+
+- **Aankomst** reageert op de weg die de speler tot nu toe koos (meeste keuzes; gelijkspel telt als Midgard):
+  werelden: **Kolbein**, een steenhouwer-reus uit Jotunheim, gidst tot de eerste trap; Asgard: een vlam van Eira in een
+  glas ("Nothing of mine goes out"); Midgard: Brynja's krijt, Lindholm maakt zijn eigen kaart.
+- **The Giant's Stair**: handelswegen van de reuzen van vóór de oorlog; plaatsnamen zijn weggekrast.
+- **The Ribwarden** (tussenbaas, verdieping 13): de rune op zijn rib is **gekerfd** met een gouden beitel. De goden
+  bouwden hun wards uit Ymir zelf: "spijkers in een graf". Aske vraagt wat er gebeurt als de laatste eruit is
+  (nieuw geheim: wordt Ymir wakker?).
+- **Echo Hollows**: alle fakkels doven; ver vooruit brandt één lantaarn die niet flakkert, maar er is niemand (hint Eira).
+- **Hrungnir, the Stone-Hearted** (eindbaas, derde ward): de sterkste reus, de eerste die voor Ymir opstond. De goden
+  maakten van zijn stenen hart een slot, zonder hem eerst te laten sterven. Na zijn val klinkt de hoorn twee keer en
+  vliegt er een **raaf** weg: Asgard heeft nu ogen in de diepte.
+- **Keuze 4: het stenen hart**: terug naar de reuzen (realms), Eira brengt het "naar huis" (asgard), of begraven onder
+  de Oath Hall (midgard).
+- Open voor Thijs: wie de raven stuurt (Odin?), wat er onder de botten ligt, en wanneer Eira ontmaskerd wordt.
+
 ### Keuzes (de drie wegen)
 
 Op drie momenten kiest de speler. Dat wordt opgeslagen (`state.choices`) en telt op richting **asgard**, **realms**
@@ -76,14 +96,14 @@ of **midgard** (de derde weg):
 | Na de Blighted Elder: de gouden rune | aan Hrodna | aan Eira | in de Oath Hall |
 | Na de Drowned Jarl: Hallvards logboek | aan Hrodna | Eira verbrandt het | zelf lezen (je leert over de lantaarn) |
 | Na de Hafgufa: scherf van de ward | aan Hrodna | aan Eira ("iemand zal blij zijn hem terug te zien") | verborgen in Lindholm |
+| Na Hrungnir: het stenen hart (voorstel) | terug naar de reuzen | Eira brengt het "naar huis" | begraven onder de Oath Hall |
 
 Na de eerste keuze volgt in hoofdstuk II een korte scène die erop reageert. Latere hoofdstukken moeten er ook op
 reageren. Uiteindelijk kunnen de drie uitkomsten van Thijs hier vandaan vertakken.
 
 ## 3. Wat nog van Thijs nodig is (voor hoofdstuk III en verder)
 
-1. **Hoofdstuk III**: het thema (voorstel: Ymirs botten, de bergen en de oude reuzenwegen), de baas, en wat daar
-   onthuld wordt.
+1. **Hoofdstuk III**: er staat nu een voorstel in de game (zie hierboven). Graag zijn oordeel en aanpassingen.
 2. **Wanneer en hoe Eira ontmaskerd wordt**, en wie ze echt is: een godin, een dienares van Heimdall, of iets anders.
 3. **Wie stuurde de Rootgnawer en het rot?** Asgard, Hel, of allebei.
 4. **Hoeveel wards er zijn**, en of elk hoofdstuk er één breekt.

@@ -39,5 +39,16 @@
  "brineDraugr": "undead/drowned_soul",
  "tidecoil": "animals/sea_snake_new",
  "drownedJarl": "undead/wight_king",
- "hafgufa": "aquatic/kraken_head_new"
+ "hafgufa": "aquatic/kraken_head_new",
+ "marrowgnaw": "animals/grey_rat",
+ "bonewing": "undead/skeletons/skeleton_bat",
+ "chalkCrawler": "animals/spider",
+ "stonehorn": "animals/yak_new",
+ "cairnWight": "undead/skeletal_warrior_new",
+ "shardling": "nonliving/crystal_guardian",
+ "rimeTroll": "iron_troll",
+ "bergrisi": "hill_giant_new",
+ "ossuaryHound": "undead/skeletons/skeleton_quadruped_large_new",
+ "ribwarden": "undead/bone_dragon_new",
+ "hrungnir": "frost_giant_new"
 }

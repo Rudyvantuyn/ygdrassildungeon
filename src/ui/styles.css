@@ -2715,7 +2715,7 @@ body { word-spacing: 0.18em; }
 }
 
 /* Element pictures before menu labels and in the bestiary */
-.menu-icon {
+.el-icon {
   width: 22px;
   height: 22px;
   margin-right: 8px;
@@ -2728,7 +2728,7 @@ body { word-spacing: 0.18em; }
   align-items: center;
 }
 
-.beast-el .menu-icon {
+.beast-el .el-icon {
   width: 18px;
   height: 18px;
   margin-right: 5px;

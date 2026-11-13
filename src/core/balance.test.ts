@@ -101,3 +101,47 @@ describe('prowler balance', () => {
     });
   }
 });
+
+/** Win rate of a trained party in a single fight from full health. */
+function fightWinRate(ids: string[], level: number, tier: number, opts: { boss?: boolean; prowler?: boolean }, fights = 80): number {
+  let wins = 0;
+  for (let seed = 1; seed <= fights; seed++) {
+    const combat = new Combat(trainedParty(level, tier), ids, makeInventory({ sapTonic: 3, spiritDew: 1, kindlingMoss: 0, homingFeather: 0 }), new Rng(seed), opts);
+    for (let r = 0; r < 100 && !combat.outcome; r++) combat.resolveRound(chooseCommands(combat));
+    if (combat.outcome === 'victory') wins++;
+  }
+  return wins / fights;
+}
+
+// Chapter III (the Marrowdeep) is prepared before its floors are drawn, so it is checked fight by fight.
+// A party reaches it around level 37 with tier 9-10 gear. Measured on purpose (November 2026):
+// Ribwarden 41% at 38, 72% at 40; Hrungnir 7% at 38, 71% at 44; Bergrisi 16/44/63% and Ossuary Hound 5/31/74% at 38/44/48.
+describe('chapter III balance', { timeout: 120_000 }, () => {
+  it('its monsters are a step up from chapter II, but a fresh party on arrival still wins them', () => {
+    expect(fightWinRate(['rimeTroll', 'shardling'], 37, 10, {})).toBeGreaterThanOrEqual(0.85);
+    expect(fightWinRate(['stonehorn', 'stonehorn', 'marrowgnaw', 'marrowgnaw'], 37, 10, {})).toBeGreaterThanOrEqual(0.8);
+    expect(fightWinRate(['rimeTroll', 'shardling'], 30, 9, {})).toBeLessThan(0.85);
+  });
+
+  it('the Ribwarden (middle of the chapter) is a fair fight around level 39', () => {
+    const early = fightWinRate(['ribwarden'], 38, 10, { boss: true });
+    expect(early).toBeGreaterThanOrEqual(0.25);
+    expect(early).toBeLessThanOrEqual(0.6);
+    expect(fightWinRate(['ribwarden'], 40, 12, { boss: true })).toBeGreaterThanOrEqual(0.6);
+  });
+
+  it('Hrungnir (end of the chapter) needs real training: hopeless on arrival, won around level 44', () => {
+    expect(fightWinRate(['hrungnir'], 38, 10, { boss: true })).toBeLessThanOrEqual(0.15);
+    expect(fightWinRate(['hrungnir'], 44, 12, { boss: true })).toBeGreaterThanOrEqual(0.6);
+  });
+
+  for (const id of ['bergrisi', 'ossuaryHound']) {
+    it(`${id}: hopeless on arrival, risky at 44, beatable at 48`, () => {
+      expect(fightWinRate([id], 38, 10, { prowler: true })).toBeLessThanOrEqual(0.2);
+      const at44 = fightWinRate([id], 44, 12, { prowler: true });
+      expect(at44).toBeGreaterThanOrEqual(0.08);
+      expect(at44).toBeLessThanOrEqual(0.55);
+      expect(fightWinRate([id], 48, 14, { prowler: true })).toBeGreaterThanOrEqual(0.6);
+    });
+  }
+});
