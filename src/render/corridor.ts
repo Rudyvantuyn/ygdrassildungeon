@@ -19,11 +19,6 @@ import { sprite } from './sprites';
 const EYE = -0.3; // eye at z = 0.3
 const NEAR = 0.06; // closest distance from the eye that is still drawn
 const Z_CLIP = NEAR - EYE;
-/**
- * Where in its cell a painted prop stands: towards the front, so the stairs, chest or spring in the
- * cell straight ahead look like they are right in front of you instead of halfway to the next wall.
- */
-const PROP_Z = 0.3;
 /** Half-width of the front wall one step ahead, as a fraction of the view width. */
 const RING_1 = 0.27;
 const MAX_DEPTH = 7;
@@ -171,37 +166,22 @@ export class CorridorRenderer {
           }
         } else {
           if (!tex) this.floorCell(s, d, pal);
-          const C = (globalThis as { PROP_CONCEPT?: string }).PROP_CONCEPT;
-          if ((C === 'B' || C === 'C') && d > 0 && ['stairs', 'chest', 'spring'].includes(tile)) {
-            const opened = tile === 'chest' && game.isChestOpened(cell.x, cell.y);
-            const name = tile === 'chest' ? (opened ? 'chest-open' : 'chest') : tile;
-            const width = tile === 'chest' ? 0.6 : tile === 'spring' ? 0.72 : 0.8;
-            this.billboard(`props/${C}/${name}.webp`, s, d, width, pal.fog);
-            continue;
+          if (d > 0) {
+            // Everything standing in the corridor is modelled in 3D from the floor's own stone and drawn at a
+            // third of the resolution, so it has the same chunky pixels as the walls around it.
+            const down = tile === 'stairs' || (tile === 'link' && game.linkGoesDown(cell.x, cell.y));
+            const up = tile === 'up' || (tile === 'link' && !down);
+            if (down || up || tile === 'chest' || tile === 'spring' || tile === 'gate' || isGatherTile(tile)) {
+              this.pixelated(() => {
+                if (down) this.stairs(s, d, pal, time);
+                else if (up) this.upStairs(s, d, pal, time);
+                else if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y), pal);
+                else if (tile === 'spring') this.spring(s, d, time, game.progress.springUsed, pal);
+                else if (tile === 'gate') this.rootGate(s, d, pal, time);
+                else if (isGatherTile(tile)) this.gatherSpot(s, d, tile, time, pal);
+              });
+            }
           }
-          if (C === 'B' || C === 'C') {
-            if (tile === 'up') { this.upStairs(s, d, pal, time); continue; }
-          }
-          if (C === 'A' && d > 0 && ['stairs', 'up', 'chest', 'spring'].includes(tile)) {
-            this.pixelated(() => {
-              if (tile === 'stairs') { this.stairs(s, d, pal, time); this.curb(s, d, pal); }
-              if (tile === 'up') this.upStairs(s, d, pal, time);
-              if (tile === 'chest') this.chest3d(s, d, game.isChestOpened(cell.x, cell.y), pal);
-              if (tile === 'spring') this.well3d(s, d, time, game.progress.springUsed, pal);
-            });
-            continue;
-          }
-          if (tile === 'stairs' && d > 0) this.stairs(s, d, pal, time);
-          if (tile === 'up') this.upStairs(s, d, pal, time);
-          if (tile === 'link') {
-            // Numbered stairs of a drawn chapter: down or up, depending on where the other end is.
-            if (game.linkGoesDown(cell.x, cell.y)) {
-              if (d > 0) this.stairs(s, d, pal, time);
-            } else this.upStairs(s, d, pal, time);
-          }
-          if (tile === 'gate' && d > 0) this.rootGate(s, d, pal, time);
-          if (tile === 'chest') this.chest(s, d, game.isChestOpened(cell.x, cell.y), pal);
-          if (tile === 'spring' && d > 0) this.spring(s, d, time, game.progress.springUsed, pal);
           if (tile === 'boss' && d > 0 && !game.progress.bossDefeated) this.bossSigil(s, d, time);
           if (isGatherTile(tile) && d > 0) this.gatherSpot(s, d, tile, time, pal);
           const prowler = d > 0 ? game.prowlerAt(cell.x, cell.y) : -1;
@@ -538,7 +518,6 @@ export class CorridorRenderer {
     const steps = 6;
     const rise = 0.07;
     const run = (z1 - z0) / steps;
-    const edge = Math.max(1, 2 * this.scaleAt(d + 0.5));
     for (let k = 0; k < steps; k++) {
       const zFar = z1 - k * run;
       const zNear = zFar - run;
@@ -546,8 +525,7 @@ export class CorridorRenderer {
       // Tread, then the drop to the next step down (it faces you).
       this.poly([[x0, top, zNear], [x1, top, zNear], [x1, top, zFar], [x0, top, zFar]]);
       this.stoneFill(pal, zFar, 0.12 + k * 0.1);
-      const concept = !!(globalThis as { PROP_CONCEPT?: string }).PROP_CONCEPT;
-      if (concept) {
+      {
         ctx.fillStyle = `rgba(232,220,192,${0.2 * (1 - k / steps) * (1 - f)})`;
         ctx.fill();
         ctx.beginPath();
@@ -555,13 +533,9 @@ export class CorridorRenderer {
         ctx.strokeStyle = `rgba(232,220,192,${0.45 * (1 - k / steps) * (1 - f)})`;
         ctx.lineWidth = 3;
         ctx.stroke();
-      } else {
-        ctx.strokeStyle = `rgba(0,0,0,${0.55 + k * 0.05})`;
-        ctx.lineWidth = edge;
-        ctx.stroke();
       }
       this.poly([[x0, top, zNear], [x1, top, zNear], [x1, top + rise, zNear], [x0, top + rise, zNear]]);
-      this.stoneFill(pal, zNear, concept ? 0.75 : 0.5 + k * 0.07);
+      this.stoneFill(pal, zNear, 0.75);
     }
     // The far wall of the stairwell, above the first step.
     this.poly([[x0, 0.5, z1], [x1, 0.5, z1], [x1, 0.5 + rise, z1], [x0, 0.5 + rise, z1]]);
@@ -581,6 +555,7 @@ export class CorridorRenderer {
     ctx.strokeStyle = mix('#0a0a0a', pal.fog, f, 0.9);
     ctx.lineWidth = Math.max(1, 5 * this.scaleAt(d + 0.5));
     ctx.stroke();
+    this.curb(s, d, pal);
   }
 
   /** Stairs going up: solid stone steps climbing to a pale light at the ceiling. */
@@ -606,12 +581,10 @@ export class CorridorRenderer {
       }
       this.poly([[x0, top, za], [x1, top, za], [x1, top, za + run], [x0, top, za + run]]);
       this.stoneFill(pal, za, 0.05);
-      if ((globalThis as { PROP_CONCEPT?: string }).PROP_CONCEPT) {
-        ctx.fillStyle = `rgba(232,220,192,${0.18 * (1 - this.fog(za))})`;
-        ctx.fill();
-      }
+      ctx.fillStyle = `rgba(232,220,192,${0.18 * (1 - this.fog(za))})`;
+      ctx.fill();
       this.poly([[x0, top, za], [x1, top, za], [x1, top + rise, za], [x0, top + rise, za]]);
-      this.stoneFill(pal, za, (globalThis as { PROP_CONCEPT?: string }).PROP_CONCEPT ? 0.7 : 0.45 + k * 0.03);
+      this.stoneFill(pal, za, 0.7);
       ctx.strokeStyle = 'rgba(0,0,0,0.6)';
       ctx.lineWidth = edge;
       ctx.stroke();
@@ -626,123 +599,6 @@ export class CorridorRenderer {
     glow.addColorStop(1, 'rgba(220,240,255,0)');
     ctx.fillStyle = glow;
     ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
-  }
-
-  /**
-   * A painted prop standing on the floor at the middle of cell (s, d), `width` cells wide,
-   * darkened by the fog like everything else. Returns false while the sprite is still loading.
-   */
-  private billboard(path: string, s: number, d: number, width: number, fogColor: string, squash = 1): boolean {
-    const img = sprite(path);
-    if (!img) return false;
-    const z = d + PROP_Z;
-    const f = this.fog(z);
-    const [cx, cy] = this.project([s, 0.5, z]);
-    const [ex] = this.project([s + width / 2, 0.5, z]);
-    const w = Math.round((ex - cx) * 2);
-    const h = Math.round(((w * img.naturalHeight) / img.naturalWidth) * squash);
-    if (w < 2 || h < 2) return true;
-    const off = this.scratch(Math.max(w, h));
-    const octx = off.getContext('2d')!;
-    octx.clearRect(0, 0, w, h);
-    // Pixel art: scale with hard edges.
-    octx.imageSmoothingEnabled = false;
-    octx.drawImage(img, 0, 0, w, h);
-    if (f > 0.02) {
-      octx.globalCompositeOperation = 'source-atop';
-      octx.fillStyle = withAlpha(fogColor, f);
-      octx.fillRect(0, 0, w, h);
-      octx.globalCompositeOperation = 'source-over';
-    }
-    // The sprites have a little padding below the feet, so sink them in slightly.
-    this.ctx.imageSmoothingEnabled = false;
-    this.ctx.drawImage(off, 0, 0, w, h, cx - w / 2, cy - h * 0.94, w, h);
-    this.ctx.imageSmoothingEnabled = true;
-    return true;
-  }
-
-  private chest(s: number, d: number, opened: boolean, pal: Palette): void {
-    if (d > 0 && this.billboard(opened ? 'props/chest-open.webp' : 'props/chest.webp', s, d, 0.56, pal.fog)) return;
-    const ctx = this.ctx;
-    const z = d + 0.5;
-    const f = this.fog(z);
-    const wd = 0.22;
-    const dp = 0.14;
-    const top = opened ? 0.33 : 0.28;
-    const wood = mix('#8a5a2b', '#000000', f);
-    const dark = mix('#5a3a1b', '#000000', f);
-    const gold = mix('#e8c25a', '#000000', f);
-    // Front
-    this.poly([[s - wd, top, z - dp], [s + wd, top, z - dp], [s + wd, 0.5, z - dp], [s - wd, 0.5, z - dp]]);
-    ctx.fillStyle = wood;
-    ctx.fill();
-    // Lid
-    if (opened) {
-      this.poly([[s - wd, top, z + dp], [s + wd, top, z + dp], [s + wd, top - 0.16, z + dp + 0.02], [s - wd, top - 0.16, z + dp + 0.02]]);
-      ctx.fillStyle = dark;
-      ctx.fill();
-      this.poly([[s - wd, top, z - dp], [s + wd, top, z - dp], [s + wd, top, z + dp], [s - wd, top, z + dp]]);
-      ctx.fillStyle = '#100a05';
-      ctx.fill();
-    } else {
-      this.poly([[s - wd, top, z - dp], [s + wd, top, z - dp], [s + wd, top - 0.04, z + dp], [s - wd, top - 0.04, z + dp]]);
-      ctx.fillStyle = dark;
-      ctx.fill();
-      // Lock
-      const [lx, ly] = this.project([s, top + 0.06, z - dp]);
-      ctx.fillStyle = gold;
-      const r = 14 * this.scaleAt(z);
-      ctx.fillRect(lx - r / 2, ly - r / 2, r, r);
-    }
-    // Bands
-    ctx.beginPath();
-    this.line([s - wd * 0.6, top, z - dp], [s - wd * 0.6, 0.5, z - dp]);
-    this.line([s + wd * 0.6, top, z - dp], [s + wd * 0.6, 0.5, z - dp]);
-    ctx.strokeStyle = gold;
-    ctx.lineWidth = Math.max(1, 6 * this.scaleAt(z));
-    ctx.stroke();
-  }
-
-  private spring(s: number, d: number, time: number, used: boolean, pal: Palette): void {
-    const ctx = this.ctx;
-    const z = d + PROP_Z;
-    const f = this.fog(z);
-    if (this.billboard('props/spring.webp', s, d, 0.68, pal.fog)) {
-      // A soft glow over the water while it can still be drunk from.
-      if (used) return;
-      const [cx, cy] = this.project([s, 0.36, z]);
-      const r = 110 * this.scaleAt(z);
-      const pulse = 0.3 + 0.15 * Math.sin(time / 300);
-      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-      glow.addColorStop(0, `rgba(120,230,255,${pulse * (1 - f)})`);
-      glow.addColorStop(1, 'rgba(120,230,255,0)');
-      ctx.fillStyle = glow;
-      ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-      return;
-    }
-    const [cx, cy] = this.project([s, 0.5, z]);
-    const [ex] = this.project([s + 0.36, 0.5, z]);
-    const rx = ex - cx;
-    const ry = rx * 0.32;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-    ctx.fillStyle = mix(used ? '#3a5a6a' : '#3fb6d8', '#000000', f);
-    ctx.fill();
-    ctx.strokeStyle = mix('#a8e8f8', '#000000', f, 0.8);
-    ctx.lineWidth = Math.max(1, 4 * this.scaleAt(z));
-    ctx.stroke();
-    if (!used) {
-      const shimmer = 0.4 + 0.3 * Math.sin(time / 300);
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx * 0.55, ry * 0.5, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(220,250,255,${shimmer * (1 - f)})`;
-      ctx.stroke();
-      const glow = ctx.createRadialGradient(cx, cy - ry, 0, cx, cy - ry, rx * 1.4);
-      glow.addColorStop(0, `rgba(120,220,255,${0.35 * (1 - f)})`);
-      glow.addColorStop(1, 'rgba(120,220,255,0)');
-      ctx.fillStyle = glow;
-      ctx.fillRect(cx - rx * 1.4, cy - ry - rx * 1.4, rx * 2.8, rx * 2.8);
-    }
   }
 
   /** A prowler: the monster's dark silhouette wrapped in a smouldering aura. */
@@ -791,59 +647,6 @@ export class CorridorRenderer {
     return this.scratchCanvas;
   }
 
-  /** A gathering spot: a soft glow on the floor in the kind's colour, with drifting motes. */
-  private gatherSpot(s: number, d: number, kind: GatherKind, time: number, pal: Palette): void {
-    const ctx = this.ctx;
-    const z = d + PROP_Z;
-    const f = this.fog(z);
-    // The painted spot (herbs, an ore vein, a felled root, a pool) with a small medallion hovering above it.
-    if (this.billboard(`props/gather-${kind}.webp`, s, d, 0.66, pal.fog, kind === 'fish' ? 0.45 : 1)) {
-      const [cx, cy] = this.project([s, 0.5, z]);
-      const [ex] = this.project([s + 0.3, 0.5, z]);
-      const rx = ex - cx;
-      const bob = Math.sin(time / 500 + s) * rx * 0.08;
-      this.floatingIcon(kind, cx, cy - rx * 1.85 + bob, rx * 0.6, f, GATHER_KINDS[kind].color);
-      return;
-    }
-    const [cx, cy] = this.project([s, 0.5, z]);
-    const [ex] = this.project([s + 0.36, 0.5, z]);
-    const rx = ex - cx;
-    const color = GATHER_KINDS[kind].color;
-    const pulse = 0.7 + 0.3 * Math.sin(time / 420 + s * 3);
-    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx * 1.4);
-    glow.addColorStop(0, withAlpha(color, 0.9 * pulse * (1 - f)));
-    glow.addColorStop(1, withAlpha(color, 0));
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(1, 0.35);
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(0, 0, rx * 1.4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    for (let i = 0; i < 5; i++) {
-      const t = (time / 1800 + i / 5) % 1;
-      const ang = i * 2.4 + s;
-      const mx = cx + Math.cos(ang) * rx * 0.6;
-      const my = cy - t * rx * 1.6;
-      ctx.fillStyle = withAlpha(color, (1 - t) * 0.9 * (1 - f));
-      ctx.beginPath();
-      ctx.arc(mx, my, Math.max(1.5, rx * 0.08), 0, Math.PI * 2);
-      ctx.fill();
-    }
-    // A floating medallion above the spot, so it reads from a distance.
-    const bob = Math.sin(time / 500 + s) * rx * 0.08;
-    if (this.floatingIcon(kind, cx, cy - rx * 1.15 + bob, rx * 0.95, f, color)) return;
-    ctx.font = `bold ${Math.max(10, Math.round(rx * 0.7))}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = color;
-    ctx.shadowBlur = rx * 0.4;
-    ctx.fillStyle = withAlpha(color, 0.95 * (1 - f));
-    ctx.fillText(GATHER_KINDS[kind].glyph, cx, cy - rx * 1.1 + bob);
-    ctx.shadowBlur = 0;
-  }
-
   /** A painted icon hovering in the corridor, with a soft glow; fades with the fog. False until it has loaded. */
   private floatingIcon(id: IconId, x: number, y: number, size: number, fog: number, glowColor: string): boolean {
     const ctx = this.ctx;
@@ -856,17 +659,224 @@ export class CorridorRenderer {
     return drawn;
   }
 
-  /** A closed root gate filling the passage: the painted gate, or woven root bars until it has loaded. */
-  private rootGate(s: number, d: number, pal: Palette, time: number): void {
-    if (this.billboard('props/gate.webp', s, d, 0.76, pal.fog)) return;
+  /** A gathering spot, modelled like the other props, with the kind's medallion hovering above it. */
+  private gatherSpot(s: number, d: number, kind: GatherKind, time: number, pal: Palette): void {
     const ctx = this.ctx;
-    const z = d + PROP_Z;
-    const f = this.fog(z);
-    ctx.strokeStyle = mix('#5a3e22', pal.fog, f);
-    ctx.lineWidth = Math.max(2, 14 * this.scaleAt(z));
+    const cz = d + 0.5;
+    const f = this.fog(cz);
+    if (kind === 'forage') this.herbs(s, cz, pal);
+    else if (kind === 'mine') this.oreRock(s, cz, time, pal);
+    else if (kind === 'fell') this.stump(s, cz, pal);
+    else this.pool(s, cz, time, pal);
+    const [cx, cy] = this.project([s, 0.5, cz]);
+    const [ex] = this.project([s + 0.3, 0.5, cz]);
+    const rx = ex - cx;
+    const bob = Math.sin(time / 500 + s) * rx * 0.08;
+    if (!this.floatingIcon(kind, cx, cy - rx * 1.75 + bob, rx * 0.6, f, GATHER_KINDS[kind].color)) {
+      ctx.fillStyle = withAlpha(GATHER_KINDS[kind].color, 1 - f);
+      ctx.fillRect(cx - 4, cy - rx * 1.75 - 4, 8, 8);
+    }
+  }
+
+  /** A flat disc on the floor, as a polygon. */
+  private disc(x: number, z: number, rx: number, rz: number, y = 0.5, n = 18): P3[] {
+    return Array.from({ length: n }, (_, i): P3 => [x + Math.cos((i / n) * Math.PI * 2) * rx, y, z + Math.sin((i / n) * Math.PI * 2) * rz]);
+  }
+
+  /** Herbs: a mossy mound with ferns and a cluster of mushrooms. */
+  private herbs(s: number, cz: number, pal: Palette): void {
+    this.face(this.disc(s, cz, 0.32, 0.22), '#1e2a16', cz, pal);
+    this.face(this.disc(s, cz, 0.24, 0.15, 0.49), '#2f4220', cz, pal);
+    // Fern fronds fanning out behind the mushrooms.
+    for (let i = 0; i < 7; i++) {
+      const a = Math.PI * (0.12 + (i / 6) * 0.76);
+      const bx = s + Math.cos(a) * 0.05, tipX = s + Math.cos(a) * 0.3, tipY = 0.5 - Math.sin(a) * 0.26;
+      this.face([[bx - 0.02, 0.5, cz + 0.06], [tipX, tipY, cz + 0.08], [bx + 0.02, 0.5, cz + 0.06]], i % 2 ? '#4a6a2c' : '#6f8f3a', cz, pal);
+    }
+    const shrooms: [number, number, number, number][] = [[-0.13, 0.04, 0.17, 0.095], [0.11, 0.02, 0.22, 0.12], [0.0, -0.07, 0.11, 0.08], [0.23, -0.05, 0.08, 0.06], [-0.23, -0.06, 0.07, 0.055]];
+    for (const [dx, dz, h, r] of shrooms) {
+      const x = s + dx, z = cz + dz, top = 0.5 - h;
+      this.face([[x - r * 0.28, top, z], [x + r * 0.28, top, z], [x + r * 0.28, 0.5, z], [x - r * 0.28, 0.5, z]], '#c2b98c', z, pal);
+      const cap: P3[] = [];
+      for (let i = 0; i <= 8; i++) {
+        const a = (i / 8) * Math.PI;
+        cap.push([x + Math.cos(a) * r, top - Math.sin(a) * r * 0.75, z]);
+      }
+      this.face(cap, '#a8461f', z, pal);
+      this.face(cap.slice(2, 7).map(([px, py, pz]): P3 => [x + (px - x) * 0.6, top - (top - py) * 1.0 - 0.003, pz]), '#e2672a', z, pal);
+      this.face([[x - r * 0.2, top - r * 0.45, z], [x - r * 0.05, top - r * 0.45, z], [x - r * 0.05, top - r * 0.3, z], [x - r * 0.2, top - r * 0.3, z]], '#e8dcc0', z, pal);
+      this.poly(cap);
+      this.ctx.strokeStyle = mix('#3a1610', pal.fog, this.fog(z));
+      this.ctx.lineWidth = 2;
+      this.ctx.stroke();
+    }
+  }
+
+  /** An ore rock: a boulder with gold veins that glint. */
+  private oreRock(s: number, cz: number, time: number, pal: Palette): void {
+    const ctx = this.ctx;
+    const f = this.fog(cz);
+    const z0 = cz - 0.08, z1 = cz + 0.18;
+    const front: [number, number][] = [[-0.32, 0.5], [-0.36, 0.3], [-0.22, 0.12], [0.0, 0.05], [0.2, 0.1], [0.35, 0.28], [0.31, 0.5]];
+    this.face(this.disc(s, cz + 0.04, 0.4, 0.22), '#0b0907', cz, pal);
+    // Top: the upper edge pulled back, so the rock has a lit top.
+    const ridge = front.slice(1, 6);
+    this.poly([...ridge.map(([x, y]): P3 => [s + x, y, z0]), ...ridge.slice().reverse().map(([x, y]): P3 => [s + x * 0.8, y + 0.03, z1])]);
+    this.stoneFill(pal, cz, 0.0);
+    ctx.fillStyle = `rgba(194,185,140,${0.5 * (1 - f)})`;
+    ctx.fill();
+    this.poly(front.map(([x, y]): P3 => [s + x, y, z0]));
+    this.stoneFill(pal, z0, 0.1);
+    ctx.fillStyle = `rgba(115,112,82,${0.45 * (1 - f)})`;
+    ctx.fill();
+    ctx.strokeStyle = mix('#0b0907', pal.fog, f);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    // Veins
+    const veins: [number, number][][] = [[[-0.25, 0.4], [-0.12, 0.3], [-0.02, 0.33], [0.1, 0.22]], [[0.02, 0.46], [0.12, 0.38], [0.24, 0.36]], [[-0.18, 0.22], [-0.08, 0.18]]];
     ctx.beginPath();
-    for (let i = -2; i <= 2; i++) this.line([s + i * 0.18, -0.5, z], [s + i * 0.18 + Math.sin(time / 2000 + i) * 0.02, 0.5, z]);
-    for (let j = -1; j <= 1; j++) this.line([s - 0.45, j * 0.3, z], [s + 0.45, j * 0.3 + 0.05, z]);
+    for (const v of veins) for (let i = 0; i + 1 < v.length; i++) this.line([s + v[i][0], v[i][1], z0 - 0.002], [s + v[i + 1][0], v[i + 1][1], z0 - 0.002]);
+    ctx.strokeStyle = mix('#d6a95c', pal.fog, f);
+    ctx.lineWidth = 7;
+    ctx.stroke();
+    ctx.strokeStyle = mix('#f0cf6a', pal.fog, f);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    // Glints
+    for (let i = 0; i < 3; i++) {
+      const v = veins[i][1];
+      const a = Math.max(0, Math.sin(time / 300 + i * 2.1));
+      const [gx, gy] = this.project([s + v[0], v[1], z0]);
+      ctx.fillStyle = `rgba(255,248,220,${a * (1 - f)})`;
+      ctx.fillRect(gx - 9, gy - 3, 18, 6);
+      ctx.fillRect(gx - 3, gy - 9, 6, 18);
+    }
+    // Rubble
+    for (const [dx, dz, r] of [[-0.36, -0.12, 0.04], [0.38, -0.1, 0.035], [0.2, -0.16, 0.03]]) {
+      this.poly([[s + dx - r, 0.5, cz + dz], [s + dx + r, 0.5, cz + dz], [s + dx + r * 0.6, 0.5 - r * 1.2, cz + dz], [s + dx - r * 0.7, 0.5 - r, cz + dz]]);
+      this.stoneFill(pal, cz, 0.2);
+    }
+  }
+
+  /** A felled tree: a stump with its rings showing, roots and chips around it. */
+  private stump(s: number, cz: number, pal: Palette): void {
+    const ctx = this.ctx;
+    const f = this.fog(cz);
+    const R = 0.2, top = 0.3, N = 16;
+    const at = (r: number, a: number, y: number): P3 => [s + Math.cos(a) * r, y, cz + Math.sin(a) * r * 0.9];
+    this.face(this.disc(s, cz, 0.36, 0.26), '#0b0907', cz, pal);
+    // Roots spreading over the floor.
+    for (let i = 0; i < 5; i++) {
+      const a = Math.PI * (0.85 + (i / 4) * 1.3);
+      this.face([at(R * 0.8, a - 0.25, 0.5), at(R * 2.0, a, 0.5), at(R * 0.8, a + 0.25, 0.5), at(R * 0.95, a, 0.44)], '#3a281a', cz, pal);
+    }
+    // Bark, only the half facing us.
+    for (let i = 0; i < N; i++) {
+      const a0 = (i / N) * Math.PI * 2, a1 = ((i + 1) / N) * Math.PI * 2;
+      if (Math.sin((a0 + a1) / 2) > 0) continue;
+      const lit = 0.5 - 0.5 * Math.cos((a0 + a1) / 2 + 0.6);
+      const ragged = 0.012 * Math.sin(i * 2.7);
+      this.face([at(R, a0, top + ragged), at(R, a1, top - ragged), at(R, a1, 0.5), at(R, a0, 0.5)], mix('#241a12', '#6b4a2c', lit), cz, pal);
+    }
+    // The cut face with its rings.
+    this.face(this.disc(s, cz, R, R * 0.9, top, N), '#d6a95c', cz, pal);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = mix('#8a6238', pal.fog, f);
+    for (const k of [0.75, 0.5, 0.25]) {
+      this.poly(this.disc(s, cz, R * k, R * 0.9 * k, top, N));
+      ctx.stroke();
+    }
+    this.poly(this.disc(s, cz, R, R * 0.9, top, N));
+    ctx.strokeStyle = mix('#241a12', pal.fog, f);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    // Chips
+    for (const [dx, dz] of [[-0.3, -0.15], [0.27, -0.2], [0.05, -0.27], [-0.12, -0.3]]) {
+      this.face([[s + dx, 0.5, cz + dz], [s + dx + 0.05, 0.5, cz + dz + 0.01], [s + dx + 0.04, 0.5, cz + dz + 0.04], [s + dx - 0.01, 0.5, cz + dz + 0.03]], '#ad8248', cz, pal);
+    }
+  }
+
+  /** A fishing pool: dark water in the floor, a stone edge, reeds at the back and a fish circling. */
+  private pool(s: number, cz: number, time: number, pal: Palette): void {
+    const ctx = this.ctx;
+    const f = this.fog(cz);
+    // Reeds at the back.
+    for (let i = 0; i < 9; i++) {
+      const x = s - 0.3 + (i / 8) * 0.6, z = cz + 0.22 + (i % 3) * 0.02, hgt = 0.18 + ((i * 37) % 10) / 60;
+      const sway = Math.sin(time / 900 + i) * 0.015;
+      ctx.beginPath();
+      this.line([x, 0.5, z], [x + sway, 0.5 - hgt, z]);
+      ctx.strokeStyle = mix(i % 2 ? '#4a6a2c' : '#6f8f3a', pal.fog, f);
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      if (i % 2 === 0) this.face([[x + sway - 0.012, 0.5 - hgt, z], [x + sway + 0.012, 0.5 - hgt, z], [x + sway + 0.012, 0.5 - hgt + 0.05, z], [x + sway - 0.012, 0.5 - hgt + 0.05, z]], '#4f3a26', z, pal);
+    }
+    this.face(this.disc(s, cz, 0.36, 0.24), '#0e1c24', cz, pal);
+    this.face(this.disc(s, cz, 0.3, 0.19, 0.5), '#183140', cz, pal);
+    // A fish's shadow circling under the surface.
+    const a = time / 1400;
+    const fx = s + Math.cos(a) * 0.15, fz = cz + Math.sin(a) * 0.09;
+    this.face(this.disc(fx, fz, 0.05, 0.025, 0.5, 8), '#0e1c24', cz, pal);
+    for (let k = 0; k < 2; k++) {
+      const t = (time / 1700 + k * 0.5) % 1;
+      this.poly(this.disc(s, cz, 0.06 + 0.2 * t, 0.04 + 0.13 * t));
+      ctx.strokeStyle = `rgba(159,207,212,${(1 - t) * 0.7 * (1 - f)})`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    // Edge stones on the near side.
+    for (let i = 0; i < 7; i++) {
+      const ang = Math.PI * (1.05 + (i / 6) * 0.9);
+      const x = s + Math.cos(ang) * 0.36, z = cz + Math.sin(ang) * 0.24, r = 0.045 + (i % 2) * 0.015;
+      this.poly([[x - r, 0.5, z], [x + r, 0.5, z], [x + r * 0.7, 0.5 - r * 0.9, z], [x - r * 0.8, 0.5 - r * 0.8, z]]);
+      this.stoneFill(pal, z, 0.1);
+    }
+  }
+
+  /** A closed root gate: twisted roots grown across the passage, bound together, with a glowing knot. */
+  private rootGate(s: number, d: number, pal: Palette, time: number): void {
+    const ctx = this.ctx;
+    const z = d + 0.5;
+    const f = this.fog(z);
+    const bar = (x: number, w: number, phase: number): P3[] => {
+      const left: P3[] = [], right: P3[] = [];
+      for (let i = 0; i <= 10; i++) {
+        const y = -0.5 + i / 10;
+        const wob = Math.sin(i * 0.9 + phase) * 0.025;
+        left.push([x + wob - w, y, z]);
+        right.push([x + wob + w, y, z]);
+      }
+      return [...left, ...right.reverse()];
+    };
+    for (let i = -2; i <= 2; i++) {
+      const x = s + i * 0.19;
+      this.face(bar(x, 0.045, i * 1.7), '#3a281a', z, pal);
+      this.face(bar(x - 0.015, 0.02, i * 1.7), '#6b4a2c', z, pal);
+      this.poly(bar(x, 0.045, i * 1.7));
+      ctx.strokeStyle = mix('#0b0907', pal.fog, f);
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+    for (const y of [-0.22, 0.2]) {
+      this.poly([[s - 0.48, y - 0.03, z - 0.01], [s + 0.48, y + 0.01, z - 0.01], [s + 0.48, y + 0.06, z - 0.01], [s - 0.48, y + 0.03, z - 0.01]]);
+      ctx.fillStyle = mix('#4f3a26', pal.fog, f);
+      ctx.fill();
+      ctx.strokeStyle = mix('#0b0907', pal.fog, f);
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+    const [kx, ky] = this.project([s, 0, z - 0.02]);
+    const r = 34 * this.scaleAt(z);
+    const pulse = 0.55 + 0.25 * Math.sin(time / 500);
+    const glow = ctx.createRadialGradient(kx, ky, 0, kx, ky, r * 2.2);
+    glow.addColorStop(0, `rgba(240,207,106,${pulse * 0.6 * (1 - f)})`);
+    glow.addColorStop(1, 'rgba(240,207,106,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(kx - r * 2.2, ky - r * 2.2, r * 4.4, r * 4.4);
+    ctx.beginPath();
+    ctx.arc(kx, ky, r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(240,207,106,${(0.6 + 0.4 * pulse) * (1 - f)})`;
+    ctx.lineWidth = Math.max(3, r * 0.3);
     ctx.stroke();
   }
 
@@ -907,7 +917,7 @@ export class CorridorRenderer {
     this.floatingIcon('boss', cx, cy - rx * 1.25 + bob, rx * 1.05, f, '#ff5a40');
   }
 
-  // ── Concept A: pixel-3D props ─────────────────────────────────────────────
+  // ── Props, modelled in 3D ──────────────────────────────────────────────────
 
   private lowCanvas: HTMLCanvasElement | null = null;
   /** Draws fn into a canvas at a third of the resolution, then scales it up with hard pixel edges. */
@@ -954,7 +964,7 @@ export class CorridorRenderer {
 
 
   /** A wooden chest with iron bands and a rounded lid, modelled in 3D. */
-  private chest3d(s: number, d: number, opened: boolean, pal: Palette): void {
+  private chest(s: number, d: number, opened: boolean, pal: Palette): void {
     const ctx = this.ctx;
     const z0 = d + 0.28, z1 = d + 0.62, xa = s - 0.3, xb = s + 0.3, yb = 0.5, yt = 0.27;
     const zc = (z0 + z1) / 2, f = this.fog(zc);
@@ -1006,7 +1016,7 @@ export class CorridorRenderer {
   }
 
   /** A round stone basin of spring water with a carved standing stone behind it. */
-  private well3d(s: number, d: number, time: number, used: boolean, pal: Palette): void {
+  private spring(s: number, d: number, time: number, used: boolean, pal: Palette): void {
     const ctx = this.ctx;
     const cz = d + 0.5, R = 0.3, r = 0.24, yt = 0.33, yw = 0.37, yb = 0.5, N = 20;
     const f = this.fog(cz);

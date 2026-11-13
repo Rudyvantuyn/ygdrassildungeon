@@ -2,8 +2,8 @@
 
 Every image the game ships, and where it came from.
 
-**Status (November 2026):** places, dungeon textures, props and map icons are human-made photos, CC BY icons or
-code-drawn sprites. Monsters are CC0 pixel art (Dungeon Crawl Stone Soup). Hero portraits and NPC portraits are still AI-made and are being replaced. Keep this up to date: the game is meant to be
+**Status (November 2026):** places and dungeon textures are human-made photos, map icons are CC BY icons, and the
+dungeon props are modelled in code. Monsters are CC0 pixel art (Dungeon Crawl Stone Soup). Hero portraits and NPC portraits are still AI-made and are being replaced. Keep this up to date: the game is meant to be
 released commercially, so each asset needs a known origin and licence.
 
 ## Monsters (`public/art/monsters/<enemy-id>.webp`)
@@ -64,11 +64,11 @@ notice board are drawn in code on top of the photo.
 The full list, with file page, author and licence per asset, is `art/photo-sources.json`; `python3 scripts/credits.py`
 writes it into `public/credits.html`, which the game links from the title screen and the System menu.
 
-## Dungeon props (`public/art/props`)
+## Dungeon props
 
-Chests, the spring, gathering spots and the root gate are Dungeon Crawl Stone Soup tiles (CC0), like the monsters;
-`scripts/prop-tiles.json` says which tile is which. Stairs are not images: the renderer builds them in 3D from the
-floor's own wall texture (`stairs` / `upStairs` in `src/render/corridor.ts`).
+Chests, springs, stairs, gathering spots and root gates are not images: the renderer models them in 3D in code, from
+the floor's own wall texture and the shared palette, and draws them at a third of the resolution so they get the same
+chunky pixels as the walls (`src/render/corridor.ts`). Nothing to credit.
 
 ## Map icons (`public/art/icons`)
 
