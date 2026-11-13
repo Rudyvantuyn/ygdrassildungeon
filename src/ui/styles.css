@@ -21,8 +21,8 @@
   --corner-tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cg transform='rotate(90 11 11)'%3E%3Cpath d='M1.5 21V6.5a5 5 0 0 1 5-5H21' fill='none' stroke='%2393aebd' stroke-width='2'/%3E%3Cpath d='M5.5 21V9.5a4 4 0 0 1 4-4H21' fill='none' stroke='%23384e5c' stroke-width='1'/%3E%3Crect x='3.2' y='3.2' width='4.6' height='4.6' transform='rotate(45 5.5 5.5)' fill='%23f0cf6a'/%3E%3C/g%3E%3C/svg%3E");
   --corner-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cg transform='rotate(180 11 11)'%3E%3Cpath d='M1.5 21V6.5a5 5 0 0 1 5-5H21' fill='none' stroke='%2393aebd' stroke-width='2'/%3E%3Cpath d='M5.5 21V9.5a4 4 0 0 1 4-4H21' fill='none' stroke='%23384e5c' stroke-width='1'/%3E%3Crect x='3.2' y='3.2' width='4.6' height='4.6' transform='rotate(45 5.5 5.5)' fill='%23f0cf6a'/%3E%3C/g%3E%3C/svg%3E");
   --corner-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cg transform='rotate(270 11 11)'%3E%3Cpath d='M1.5 21V6.5a5 5 0 0 1 5-5H21' fill='none' stroke='%2393aebd' stroke-width='2'/%3E%3Cpath d='M5.5 21V9.5a4 4 0 0 1 4-4H21' fill='none' stroke='%23384e5c' stroke-width='1'/%3E%3Crect x='3.2' y='3.2' width='4.6' height='4.6' transform='rotate(45 5.5 5.5)' fill='%23f0cf6a'/%3E%3C/g%3E%3C/svg%3E");
-  --font-title: 'Cinzel', Georgia, serif;
-  --font-ui: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-title: 'Pixelify Sans', monospace;
+  --font-ui: 'Pixelify Sans', monospace;
 }
 
 * {
@@ -1112,7 +1112,7 @@ table.stats thead th {
 }
 
 .lobby-code b {
-  font-family: Cinzel, Georgia, serif;
+  font-family: var(--font-title);
   font-size: 44px;
   letter-spacing: 0.3em;
   color: var(--gold);
@@ -2461,3 +2461,170 @@ body.phone #act-prompt {
 body.phone .menu-party {
   display: none;
 }
+
+/* ══ Pixel windows ═══════════════════════════════════════════════════════════
+ * Classic dungeon-crawler windows to sit with the pixel-art monsters: flat colour, hard square edges and a light
+ * inner rim, one pixel font, no gradients, glows, rounded corners or ornaments.
+ */
+:root {
+  --font-title: 'Pixelify Sans', monospace;
+  --font-ui: 'Pixelify Sans', monospace;
+  --win: #10233a;
+  --win-dark: #0a1626;
+  --rim: #c8d4e0;
+  --rim-dark: #4d6a86;
+  --select: #2f5f8f;
+}
+
+body {
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+.panel {
+  background: var(--win);
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 2px var(--rim), inset 0 0 0 4px var(--rim-dark);
+}
+
+#view-wrap {
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: 0 0 0 2px var(--rim), 0 0 0 4px #000;
+}
+
+.dialog h2 {
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  text-shadow: 2px 2px 0 #000;
+}
+.dialog h2::after {
+  display: none;
+}
+
+h1, h2, h3, .logo, .tagline, .town-name, .town-card-name, .member-name, .cmd-title {
+  text-shadow: 2px 2px 0 #000 !important;
+  filter: none !important;
+}
+.logo {
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  color: var(--gold) !important;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-shadow: 4px 4px 0 #000 !important;
+}
+
+/* Menus: a plain highlighted row and a ▶ cursor. */
+.menu-item {
+  border-radius: 0;
+  font-weight: 600;
+  text-shadow: 1px 1px 0 #000;
+}
+.menu-item.selected {
+  background: var(--select);
+  border-color: var(--rim);
+  box-shadow: none;
+}
+.menu-item.selected::before {
+  content: '▶';
+  width: auto;
+  height: auto;
+  background: none;
+  transform: none;
+  box-shadow: none;
+  left: 9px;
+  font-size: 12px;
+  color: var(--gold);
+}
+
+button,
+.btn {
+  border-radius: 0;
+  background: var(--win-dark);
+  border: 2px solid var(--rim-dark);
+  box-shadow: none;
+  font-weight: 600;
+  text-shadow: 1px 1px 0 #000;
+}
+button:hover {
+  background: var(--select);
+  border-color: var(--rim);
+  color: #fff;
+}
+.choice-set .choice.on,
+.menu-tabs button.on {
+  background: var(--gold);
+  border-color: #fff3c4;
+  color: #1a1206;
+}
+
+/* HP and SP: flat, square bars. */
+.bar {
+  border-radius: 0;
+  background: #000;
+  border: 2px solid #000;
+  box-shadow: 0 0 0 1px var(--rim-dark);
+}
+.bar > i {
+  border-radius: 0;
+  box-shadow: none;
+}
+.bar > i::after {
+  display: none;
+}
+.bar.hp > i { background: #c8402c; }
+.bar.hp.low > i { background: #d88a26; }
+.bar.hp.crit > i { background: #ff3a2a; }
+.bar.sp > i { background: #2f8fd8; }
+.bar > span {
+  font-weight: 600;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Party cards, town cards, portraits: square edges, no glow. */
+.member,
+.member.active,
+.town-card,
+.town-head,
+.msg,
+.toast,
+#act-prompt,
+.menu-member,
+.portrait,
+.menu-portrait {
+  border-radius: 0 !important;
+}
+.member.active {
+  transform: translateY(-6px);
+  box-shadow: inset 0 0 0 2px var(--gold), inset 0 0 0 4px var(--rim-dark);
+}
+.town-card {
+  border: 2px solid #000;
+  box-shadow: inset 0 0 0 2px var(--rim-dark);
+}
+.town-card.selected,
+.town-card:hover {
+  box-shadow: inset 0 0 0 3px var(--gold);
+}
+.town-head {
+  background: var(--win);
+  border: 2px solid #000;
+  box-shadow: inset 0 0 0 2px var(--rim);
+}
+#act-prompt {
+  box-shadow: 0 0 0 2px #000;
+  border-color: var(--gold);
+  background: var(--win);
+}
+.menu-tabs button {
+  font-size: 18px;
+}
+
+/* Pixel fonts have no italic and a very narrow space. */
+body { word-spacing: 0.18em; }
+.member-class, .story-box.narrator .story-text p, .dialog .npc-line p, .story-choice .muted, em, i { font-style: normal; }
+.dialog .npc-line p, .story-box.narrator .story-text p { color: #d8e2ec; }

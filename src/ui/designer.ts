@@ -301,7 +301,7 @@ export class Designer {
     const ox = Math.floor((CANVAS - size * d.rows[0].length) / 2);
     const oy = Math.floor((CANVAS - size * d.rows.length) / 2);
     const center = (x: number, y: number): [number, number] => [ox + x * size + size / 2, oy + y * size + size / 2];
-    ctx.font = `bold ${Math.floor(size * 0.62)}px Cinzel, serif`;
+    ctx.font = `bold ${Math.floor(size * 0.62)}px "Pixelify Sans", monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     d.rows.forEach((row, y) =>

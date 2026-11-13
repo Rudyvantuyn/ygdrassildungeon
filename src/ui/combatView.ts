@@ -197,14 +197,14 @@ export class CombatView {
         const mods = modText(enemy.mods);
         if (mods) {
           // Next to the ailment badge when there is one, else in its place.
-          ctx.font = '800 12px "Nunito Sans", sans-serif';
+          ctx.font = '700 12px "Pixelify Sans", monospace';
           ctx.textAlign = ailment ? 'left' : 'center';
           ctx.fillStyle = '#f0e0b0';
           ctx.fillText(mods, ailment ? x + 28 : x, ground + 41);
         }
         if (ailment) {
           const badge = AILMENT_BADGE[ailment];
-          ctx.font = '800 13px "Nunito Sans", sans-serif';
+          ctx.font = '700 13px "Pixelify Sans", monospace';
           ctx.textAlign = 'center';
           ctx.fillStyle = badge.color;
           ctx.fillRect(x - 22, ground + 28, 44, 18);
@@ -225,7 +225,7 @@ export class CombatView {
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
-        ctx.font = '800 20px Cinzel, Georgia, serif';
+        ctx.font = '700 20px "Pixelify Sans", monospace';
         ctx.textAlign = 'center';
         ctx.lineWidth = 4;
         ctx.strokeText(enemy.name, x, top - 26);
@@ -328,7 +328,7 @@ export class CombatView {
       // Name, health, ailment and stat changes.
       const ix = tx + t + 10;
       const iw = x + cw - ix - 10;
-      ctx.font = '700 15px Cinzel, Georgia, serif';
+      ctx.font = '700 15px "Pixelify Sans", monospace';
       ctx.textAlign = 'left';
       ctx.fillStyle = chosen ? '#f0cf6a' : '#efe4cc';
       let name = enemy.name;
@@ -337,7 +337,7 @@ export class CombatView {
       this.hpBar(ctx, ix, y + 40, iw, i, enemy.maxHp);
       const ailment = this.enemyAilment[i];
       const mods = modText(enemy.mods);
-      ctx.font = '800 12px "Nunito Sans", sans-serif';
+      ctx.font = '700 12px "Pixelify Sans", monospace';
       if (ailment) {
         const badge = AILMENT_BADGE[ailment];
         ctx.fillStyle = badge.color;

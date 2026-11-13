@@ -182,7 +182,7 @@ function drawSign(ctx: CanvasRenderingContext2D, x: number, ground: number, labe
     }
     ctx.restore();
     ctx.save();
-    ctx.font = '800 16px Cinzel, Georgia, serif';
+    ctx.font = '700 16px "Pixelify Sans", monospace';
     ctx.textAlign = 'center';
     ctx.fillStyle = lit ? '#f0cf6a' : '#c9c0a8';
     ctx.fillText(label, x, ground - 100);
@@ -247,7 +247,7 @@ function drawSign(ctx: CanvasRenderingContext2D, x: number, ground: number, labe
   }
   // Hanging sign
   const sy = top - (spot === 'rootdeep' ? 50 : 70);
-  ctx.font = '800 22px Cinzel, Georgia, serif';
+  ctx.font = '700 22px "Pixelify Sans", monospace';
   const tw = ctx.measureText(label).width + 28;
   ctx.fillStyle = lit ? '#f0cf6a' : '#8a7444';
   ctx.fillRect(x - 1, sy - 22, 2, 22);
@@ -315,7 +315,7 @@ function drawHornstone(ctx: CanvasRenderingContext2D, x: number, ground: number,
   ctx.fill();
   ctx.fillStyle = lit ? '#c8a050' : '#7a6438';
   ctx.fillRect(x + 28, top + 52, 4, 10);
-  ctx.font = '800 15px Cinzel, Georgia, serif';
+  ctx.font = '700 15px "Pixelify Sans", monospace';
   ctx.textAlign = 'center';
   ctx.fillStyle = lit ? '#f0cf6a' : '#c9c0a8';
   ctx.fillText(label, x + 8, top - 14);
@@ -396,7 +396,7 @@ export function drawTownScene(
   if (caption && showCaption) {
     ctx.save();
     ctx.globalAlpha = before ? k : 1;
-    ctx.font = '800 26px Cinzel, Georgia, serif';
+    ctx.font = '700 26px "Pixelify Sans", monospace';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.shadowColor = 'rgba(0,0,0,0.9)';
