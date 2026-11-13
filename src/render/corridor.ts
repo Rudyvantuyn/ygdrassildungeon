@@ -171,6 +171,26 @@ export class CorridorRenderer {
           }
         } else {
           if (!tex) this.floorCell(s, d, pal);
+          const C = (globalThis as { PROP_CONCEPT?: string }).PROP_CONCEPT;
+          if ((C === 'B' || C === 'C') && d > 0 && ['stairs', 'chest', 'spring'].includes(tile)) {
+            const opened = tile === 'chest' && game.isChestOpened(cell.x, cell.y);
+            const name = tile === 'chest' ? (opened ? 'chest-open' : 'chest') : tile;
+            const width = tile === 'chest' ? 0.6 : tile === 'spring' ? 0.72 : 0.8;
+            this.billboard(`props/${C}/${name}.webp`, s, d, width, pal.fog);
+            continue;
+          }
+          if (C === 'B' || C === 'C') {
+            if (tile === 'up') { this.upStairs(s, d, pal, time); continue; }
+          }
+          if (C === 'A' && d > 0 && ['stairs', 'up', 'chest', 'spring'].includes(tile)) {
+            this.pixelated(() => {
+              if (tile === 'stairs') { this.stairs(s, d, pal, time); this.curb(s, d, pal); }
+              if (tile === 'up') this.upStairs(s, d, pal, time);
+              if (tile === 'chest') this.chest3d(s, d, game.isChestOpened(cell.x, cell.y), pal);
+              if (tile === 'spring') this.well3d(s, d, time, game.progress.springUsed, pal);
+            });
+            continue;
+          }
           if (tile === 'stairs' && d > 0) this.stairs(s, d, pal, time);
           if (tile === 'up') this.upStairs(s, d, pal, time);
           if (tile === 'link') {
@@ -526,11 +546,22 @@ export class CorridorRenderer {
       // Tread, then the drop to the next step down (it faces you).
       this.poly([[x0, top, zNear], [x1, top, zNear], [x1, top, zFar], [x0, top, zFar]]);
       this.stoneFill(pal, zFar, 0.12 + k * 0.1);
-      ctx.strokeStyle = `rgba(0,0,0,${0.55 + k * 0.05})`;
-      ctx.lineWidth = edge;
-      ctx.stroke();
+      const concept = !!(globalThis as { PROP_CONCEPT?: string }).PROP_CONCEPT;
+      if (concept) {
+        ctx.fillStyle = `rgba(232,220,192,${0.2 * (1 - k / steps) * (1 - f)})`;
+        ctx.fill();
+        ctx.beginPath();
+        this.line([x0, top, zNear], [x1, top, zNear]);
+        ctx.strokeStyle = `rgba(232,220,192,${0.45 * (1 - k / steps) * (1 - f)})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      } else {
+        ctx.strokeStyle = `rgba(0,0,0,${0.55 + k * 0.05})`;
+        ctx.lineWidth = edge;
+        ctx.stroke();
+      }
       this.poly([[x0, top, zNear], [x1, top, zNear], [x1, top + rise, zNear], [x0, top + rise, zNear]]);
-      this.stoneFill(pal, zNear, 0.5 + k * 0.07);
+      this.stoneFill(pal, zNear, concept ? 0.75 : 0.5 + k * 0.07);
     }
     // The far wall of the stairwell, above the first step.
     this.poly([[x0, 0.5, z1], [x1, 0.5, z1], [x1, 0.5 + rise, z1], [x0, 0.5 + rise, z1]]);
@@ -575,8 +606,12 @@ export class CorridorRenderer {
       }
       this.poly([[x0, top, za], [x1, top, za], [x1, top, za + run], [x0, top, za + run]]);
       this.stoneFill(pal, za, 0.05);
+      if ((globalThis as { PROP_CONCEPT?: string }).PROP_CONCEPT) {
+        ctx.fillStyle = `rgba(232,220,192,${0.18 * (1 - this.fog(za))})`;
+        ctx.fill();
+      }
       this.poly([[x0, top, za], [x1, top, za], [x1, top + rise, za], [x0, top + rise, za]]);
-      this.stoneFill(pal, za, 0.45 + k * 0.03);
+      this.stoneFill(pal, za, (globalThis as { PROP_CONCEPT?: string }).PROP_CONCEPT ? 0.7 : 0.45 + k * 0.03);
       ctx.strokeStyle = 'rgba(0,0,0,0.6)';
       ctx.lineWidth = edge;
       ctx.stroke();
@@ -749,7 +784,7 @@ export class CorridorRenderer {
 
   private scratch(size: number): HTMLCanvasElement {
     if (!this.scratchCanvas) this.scratchCanvas = document.createElement('canvas');
-    if (this.scratchCanvas.width < size) {
+    if (this.scratchCanvas.width < size || this.scratchCanvas.height < size) {
       this.scratchCanvas.width = size;
       this.scratchCanvas.height = size;
     }
@@ -870,6 +905,165 @@ export class CorridorRenderer {
     // The guardian's medallion hovers over the sigil, so it reads from a distance.
     const bob = Math.sin(time / 450 + s) * rx * 0.06;
     this.floatingIcon('boss', cx, cy - rx * 1.25 + bob, rx * 1.05, f, '#ff5a40');
+  }
+
+  // ── Concept A: pixel-3D props ─────────────────────────────────────────────
+
+  private lowCanvas: HTMLCanvasElement | null = null;
+  /** Draws fn into a canvas at a third of the resolution, then scales it up with hard pixel edges. */
+  private pixelated(fn: () => void): void {
+    const P = 3;
+    const lw = Math.ceil(this.w / P), lh = Math.ceil(this.h / P);
+    const low = (this.lowCanvas ??= document.createElement('canvas'));
+    if (low.width !== lw) { low.width = lw; low.height = lh; }
+    const g = low.getContext('2d')!;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, lw, lh);
+    g.setTransform(1 / P, 0, 0, 1 / P, 0, 0);
+    g.imageSmoothingEnabled = false;
+    const self = this as unknown as { ctx: CanvasRenderingContext2D };
+    const real = self.ctx;
+    self.ctx = g;
+    try { fn(); } finally { self.ctx = real; }
+    real.imageSmoothingEnabled = false;
+    real.drawImage(low, 0, 0, lw, lh, 0, 0, lw * P, lh * P);
+    real.imageSmoothingEnabled = true;
+  }
+
+  private face(points: P3[], color: string, z: number, pal: Palette): void {
+    this.poly(points);
+    this.ctx.fillStyle = mix(color, pal.fog, this.fog(z));
+    this.ctx.fill();
+  }
+
+  /** A raised stone curb around a stairwell, so the opening reads from afar. */
+  private curb(s: number, d: number, pal: Palette): void {
+    const x0 = s - 0.46, x1 = s + 0.46, z0 = d + 0.06, z1 = d + 0.96, t = 0.06, hgt = 0.035;
+    const top = 0.5 - hgt;
+    this.poly([[x0, top, z1 - t], [x1, top, z1 - t], [x1, top, z1], [x0, top, z1]]);
+    this.stoneFill(pal, z1, 0.1);
+    for (const [a, b] of [[x0, x0 + t], [x1 - t, x1]]) {
+      this.poly([[a, top, z0], [b, top, z0], [b, top, z1], [a, top, z1]]);
+      this.stoneFill(pal, d + 0.5, 0.0);
+    }
+    this.poly([[x0, top, z0], [x1, top, z0], [x1, top, z0 + t], [x0, top, z0 + t]]);
+    this.stoneFill(pal, z0, 0.0);
+    this.poly([[x0, top, z0], [x1, top, z0], [x1, 0.5, z0], [x0, 0.5, z0]]);
+    this.stoneFill(pal, z0, 0.35);
+  }
+
+
+  /** A wooden chest with iron bands and a rounded lid, modelled in 3D. */
+  private chest3d(s: number, d: number, opened: boolean, pal: Palette): void {
+    const ctx = this.ctx;
+    const z0 = d + 0.28, z1 = d + 0.62, xa = s - 0.3, xb = s + 0.3, yb = 0.5, yt = 0.27;
+    const zc = (z0 + z1) / 2, f = this.fog(zc);
+    this.poly([[xa - 0.05, yb, z0 - 0.04], [xb + 0.05, yb, z0 - 0.04], [xb + 0.05, yb, z1 + 0.05], [xa - 0.05, yb, z1 + 0.05]]);
+    ctx.fillStyle = `rgba(0,0,0,${0.45 * (1 - f)})`;
+    ctx.fill();
+    if (s !== 0) {
+      const xs = s < 0 ? xb : xa;
+      this.face([[xs, yt, z0], [xs, yt, z1], [xs, yb, z1], [xs, yb, z0]], '#3a281a', zc, pal);
+    }
+    const R = (z1 - z0) / 2;
+    const seg = 6;
+    const lidPt = (a: number, x: number): P3 => [x, yt - Math.sin(a) * R * 0.75, zc + Math.cos(a) * R];
+    if (opened) {
+      this.face([[xa, yt, z0], [xb, yt, z0], [xb, yt, z1], [xa, yt, z1]], '#0b0907', zc, pal);
+      this.face([[xa, yt, z1], [xb, yt, z1], [xb, yt - 0.28, z1 + 0.04], [xa, yt - 0.28, z1 + 0.04]], '#4f3a26', z1, pal);
+    } else {
+      for (let i = 0; i < seg; i++) {
+        const a0 = (i / seg) * Math.PI, a1 = ((i + 1) / seg) * Math.PI;
+        const lit = Math.sin((a0 + a1) / 2 + 0.5);
+        const col = mix('#4f3a26', '#ad8248', Math.max(0, lit));
+        this.face([lidPt(a0, xa), lidPt(a0, xb), lidPt(a1, xb), lidPt(a1, xa)], col, zc, pal);
+        ctx.strokeStyle = mix('#241a12', pal.fog, f);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      for (const bx of [xa + 0.06, xb - 0.06]) {
+        for (let i = 0; i < seg; i++) {
+          const a0 = (i / seg) * Math.PI, a1 = ((i + 1) / seg) * Math.PI;
+          this.face([lidPt(a0, bx - 0.025), lidPt(a0, bx + 0.025), lidPt(a1, bx + 0.025), lidPt(a1, bx - 0.025)], i > 2 ? '#737052' : '#3b3a2c', zc, pal);
+        }
+      }
+    }
+    this.face([[xa, yt, z0], [xb, yt, z0], [xb, yb, z0], [xa, yb, z0]], '#6b4a2c', z0, pal);
+    ctx.beginPath();
+    for (const y of [0.37, 0.44]) this.line([xa, y, z0], [xb, y, z0]);
+    ctx.strokeStyle = mix('#3a281a', pal.fog, f);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    for (const bx of [xa + 0.06, xb - 0.06]) this.face([[bx - 0.025, yt, z0], [bx + 0.025, yt, z0], [bx + 0.025, yb, z0], [bx - 0.025, yb, z0]], '#55533e', z0, pal);
+    if (!opened) {
+      this.face([[s - 0.045, yt - 0.01, z0 - 0.005], [s + 0.045, yt - 0.01, z0 - 0.005], [s + 0.045, yt + 0.08, z0 - 0.005], [s - 0.045, yt + 0.08, z0 - 0.005]], '#d6a95c', z0, pal);
+      this.face([[s - 0.01, yt + 0.025, z0 - 0.006], [s + 0.01, yt + 0.025, z0 - 0.006], [s + 0.01, yt + 0.06, z0 - 0.006], [s - 0.01, yt + 0.06, z0 - 0.006]], '#17110b', z0, pal);
+    }
+    this.poly([[xa, yt, z0], [xb, yt, z0], [xb, yb, z0], [xa, yb, z0]]);
+    ctx.strokeStyle = mix('#17110b', pal.fog, f);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  /** A round stone basin of spring water with a carved standing stone behind it. */
+  private well3d(s: number, d: number, time: number, used: boolean, pal: Palette): void {
+    const ctx = this.ctx;
+    const cz = d + 0.5, R = 0.3, r = 0.24, yt = 0.33, yw = 0.37, yb = 0.5, N = 20;
+    const f = this.fog(cz);
+    const at = (rad: number, a: number, y: number): P3 => [s + Math.cos(a) * rad, y, cz + Math.sin(a) * rad];
+    const sz = cz + R + 0.02;
+    this.poly([[s - 0.1, 0.5, sz], [s + 0.1, 0.5, sz], [s + 0.09, -0.02, sz], [s, -0.08, sz], [s - 0.09, -0.02, sz]]);
+    this.stoneFill(pal, sz, 0.0);
+    ctx.fillStyle = `rgba(194,185,140,${0.25 * (1 - f)})`;
+    ctx.fill();
+    ctx.strokeStyle = mix('#0b0907', pal.fog, f);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    const glowA = used ? 0 : 0.6 + 0.3 * Math.sin(time / 400);
+    ctx.beginPath();
+    this.line([s, 0.02, sz], [s, 0.26, sz]);
+    this.line([s, 0.08, sz], [s - 0.045, 0.03, sz]);
+    this.line([s, 0.08, sz], [s + 0.045, 0.03, sz]);
+    this.line([s, 0.16, sz], [s - 0.045, 0.11, sz]);
+    this.line([s, 0.16, sz], [s + 0.045, 0.11, sz]);
+    ctx.strokeStyle = used ? mix('#241a12', pal.fog, f) : `rgba(159,207,212,${glowA * (1 - f)})`;
+    ctx.lineWidth = 9;
+    ctx.stroke();
+    for (let i = 0; i < N; i++) {
+      const a0 = (i / N) * Math.PI * 2, a1 = ((i + 1) / N) * Math.PI * 2;
+      if (Math.sin((a0 + a1) / 2) < 0) continue;
+      this.poly([at(r, a0, yt), at(r, a1, yt), at(r, a1, yw), at(r, a0, yw)]);
+      this.stoneFill(pal, cz, 0.6);
+    }
+    this.poly(Array.from({ length: N }, (_, i) => at(r, (i / N) * Math.PI * 2, yw)));
+    ctx.fillStyle = mix(used ? '#183140' : '#3a6f80', pal.fog, f);
+    ctx.fill();
+    if (!used) {
+      for (let k = 0; k < 2; k++) {
+        const t = ((time / 1600 + k * 0.5) % 1);
+        this.poly(Array.from({ length: N }, (_, i) => at(r * (0.2 + 0.75 * t), (i / N) * Math.PI * 2, yw)));
+        ctx.strokeStyle = `rgba(159,207,212,${(1 - t) * 0.8 * (1 - f)})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+    }
+    for (let i = 0; i < N; i++) {
+      const a0 = (i / N) * Math.PI * 2, a1 = ((i + 1) / N) * Math.PI * 2;
+      this.poly([at(r, a0, yt), at(R, a0, yt), at(R, a1, yt), at(r, a1, yt)]);
+      this.stoneFill(pal, cz, 0.0);
+      ctx.fillStyle = `rgba(232,220,192,${0.22 * (1 - f)})`;
+      ctx.fill();
+    }
+    for (let i = 0; i < N; i++) {
+      const a0 = (i / N) * Math.PI * 2, a1 = ((i + 1) / N) * Math.PI * 2;
+      if (Math.sin((a0 + a1) / 2) > 0) continue;
+      this.poly([at(R, a0, yt), at(R, a1, yt), at(R, a1, yb), at(R, a0, yb)]);
+      this.stoneFill(pal, cz, 0.25 + 0.3 * Math.abs(Math.cos((a0 + a1) / 2)));
+    }
+    this.poly(Array.from({ length: N }, (_, i) => at(R, (i / N) * Math.PI * 2, yt)));
+    ctx.strokeStyle = mix('#0b0907', pal.fog, f, 0.7);
+    ctx.lineWidth = 2;
+    ctx.stroke();
   }
 }
 
