@@ -115,10 +115,16 @@ async function render(session: Session): Promise<void> {
   };
 
   // The Wayfinders' Stone in Lindholm: names the owner chose to thank, visible to every player.
-  const carve = async (suggested: string) => {
+  const carve = async (suggested: string, r?: Report) => {
     const name = prompt('Naam op het erebord (zoals spelers hem zien, max. 40 tekens):', suggested)?.trim();
     if (!name) return;
-    const note = prompt('Korte regel erbij, in het Engels (mag leeg), bijv. "tested chapters I–II, 532 battles":', '')?.trim();
+    // Suggest the playtime and battles from the report, so the stone shows them as a badge.
+    const c = r?.context ?? {};
+    const bits = [
+      typeof c.minutesPlayed === 'number' && c.minutesPlayed > 0 ? `${Math.max(1, Math.round(c.minutesPlayed / 60))}h played` : '',
+      typeof c.battles === 'number' && c.battles > 0 ? `${c.battles} battles` : '',
+    ].filter(Boolean);
+    const note = prompt('Korte regel erbij, in het Engels (mag leeg):', bits.join(', '))?.trim();
     const { error: err } = await db.from('honors').insert({ name: name.slice(0, 40), note: note ? note.slice(0, 160) : null });
     if (err) alert(`Toevoegen mislukt: ${err.message}`);
     void render(session);
@@ -171,7 +177,7 @@ async function render(session: Session): Promise<void> {
     const del = h('button', { className: 'danger small', textContent: 'Verwijder' });
     del.onclick = () => void remove([r.id]);
     const honor = h('button', { className: 'quiet small', textContent: 'Op het erebord' });
-    honor.onclick = () => void carve(r.contact ?? '');
+    honor.onclick = () => void carve(r.contact ?? '', r);
     const stack = typeof r.context?.stack === 'string' ? h('details', {}, [h('summary', { textContent: 'Technische details' }), h('pre', { textContent: r.context.stack })]) : '';
     return h('article', { className: `report ${r.kind}` }, [
       h('header', {}, [box, h('span', { className: `tag ${r.kind}`, textContent: KIND_NAMES[r.kind] }), h('time', { textContent: when(r.created_at) }), honor, del]),
