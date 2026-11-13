@@ -5,6 +5,7 @@ import { fullScaleRank, maxRankOf, rankOf, rankedSkill, raiseBlocker, raiseSkill
 import type { Member, SkillId, Stats } from '../core/types';
 import { audio } from '../audio/audio';
 import { el } from './dom';
+import { ELEMENT_NAMES, elementIcon } from './elements';
 import { ListMenu, type MenuItem } from './menu';
 
 const STAT_NAMES: Record<keyof Stats, string> = { hp: 'max HP', sp: 'max SP', atk: 'attack', def: 'defence', mag: 'magic', res: 'resistance', spd: 'speed' };
@@ -19,7 +20,7 @@ export function rankEffect(skill: SkillDef, rank: number): string {
   }
   const s = rankedSkill(skill, rank);
   const parts: string[] = [];
-  if (s.kind === 'phys' || s.kind === 'magic') parts.push(`power ${s.power}%`);
+  if (s.kind === 'phys' || s.kind === 'magic') parts.push(`${ELEMENT_NAMES[s.element].toLowerCase()} · power ${s.power}%${s.hits > 1 ? ` ×${s.hits}` : ''}`);
   if (s.kind === 'heal') parts.push(`healing ${s.power}%`);
   if (s.kind === 'revive') parts.push(`wakes with ${s.power}% HP`);
   for (const mod of s.mods ?? []) parts.push(`${mod.amount > 0 ? '+' : ''}${mod.amount}% ${STAT_NAMES[mod.stat]}`);
@@ -49,6 +50,7 @@ export function showSkillTree(host: SkillsHost, m: Member, back: () => void, sta
     const need = blocker && blocker !== 'Mastered.' ? ` (${blocker})` : '';
     return {
       label: `${def.passive ? '◇ ' : ''}${def.name}`,
+      icon: def.kind === 'phys' || def.kind === 'magic' ? elementIcon(def.element) : undefined,
       detail: locked ? 'locked' : `${rank}/${maxRankOf(def.id)}`,
       description: [def.description, now, next && `Next — ${next}${need}`].filter(Boolean).join('\n'),
       disabled: !!blocker,

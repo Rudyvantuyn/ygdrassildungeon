@@ -50,6 +50,7 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
       }
       case 'strider':
         if (living.length >= 3 && canUse(i, 'scatterVolley')) return { kind: 'skill', skill: 'scatterVolley', target: -1 };
+        if (combat.enemies[weakest].def.weak.includes('fire') && canUse(i, 'emberArrow')) return { kind: 'skill', skill: 'emberArrow', target: weakest };
         if ((combat.boss || combat.enemies[weakest].def.weak.includes('storm')) && canUse(i, 'galePiercer')) return { kind: 'skill', skill: 'galePiercer', target: weakest };
         if (combat.boss && canUse(i, 'twinFang')) return { kind: 'skill', skill: 'twinFang', target: weakest };
         break;

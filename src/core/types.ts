@@ -30,6 +30,9 @@ export type ModStat = 'atk' | 'def' | 'mag' | 'res';
 export type ItemId = 'sapTonic' | 'tideDraught' | 'spiritDew' | 'clearwater' | 'kindlingMoss' | 'homingFeather' | 'oathToken';
 
 export type SkillId =
+  | 'emberArrow'
+  | 'rimeFang'
+  | 'thunderVerse'
   | 'challenge'
   | 'bulwarkBash'
   | 'ironFormation'

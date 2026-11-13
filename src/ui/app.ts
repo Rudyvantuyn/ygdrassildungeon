@@ -2,6 +2,7 @@ import type { ChartMode } from '../core/chart';
 import type { Combat } from '../core/combat';
 import { ENEMIES } from '../core/data/enemies';
 import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
+import { ELEMENT_NAMES, elementIcon } from './elements';
 import { EQUIPMENT } from '../core/data/equipment';
 import { ITEMS } from '../core/data/items';
 import { MATERIALS } from '../core/data/materials';
@@ -738,12 +739,15 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const lines: HTMLElement[] = [];
     const kind = row.kind === 'boss' ? 'Guardian of the chapter' : row.kind === 'prowler' ? 'Prowler: roams the floor, best avoided' : 'Monster';
     lines.push(el('p', { text: `${kind} · floor ${row.floors.join(', ')} · met ${e?.seen ?? 0}, defeated ${e?.defeated ?? 0}` }));
-    const ELEMENT_NAMES = { phys: 'Physical', fire: 'Fire', frost: 'Frost', storm: 'Storm' } as const;
     const WORDS = { weak: 'weak!', resists: 'resists', normal: 'normal', unknown: '?' } as const;
     lines.push(
       el('div', { className: 'beast-elements' }, ELEMENTS.map((x) => {
         const k = elementKnown(def, e, x);
-        return el('span', { className: `beast-el ${k}`, text: `${ELEMENT_NAMES[x]}: ${WORDS[k]}` });
+        const chip = el('span', { className: `beast-el ${k}`, text: `${ELEMENT_NAMES[x]}: ${WORDS[k]}` });
+        const img = el('img', { className: 'menu-icon' });
+        img.src = elementIcon(x);
+        chip.prepend(img);
+        return chip;
       })),
     );
     if (known) {

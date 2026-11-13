@@ -67,3 +67,14 @@ describe('new classes', () => {
     expect(back.enemies[0].mods?.def?.amount).toBeLessThan(0);
   });
 });
+
+describe('elements', () => {
+  it('every element can be dealt by at least two classes, so any party can find a weakness', async () => {
+    const { CLASSES } = await import('./data/classes');
+    const { SKILLS } = await import('./data/skills');
+    for (const element of ['fire', 'frost', 'storm'] as const) {
+      const classes = Object.values(CLASSES).filter((c) => c.skills.some((e) => SKILLS[e.skill]?.element === element && (SKILLS[e.skill].kind === 'phys' || SKILLS[e.skill].kind === 'magic')));
+      expect(classes.length, element).toBeGreaterThanOrEqual(2);
+    }
+  });
+});

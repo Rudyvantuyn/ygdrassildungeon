@@ -73,6 +73,7 @@ chunky pixels as the walls (`src/render/corridor.ts`). Nothing to credit.
 ## Map icons (`public/art/icons`)
 
 Icons from game-icons.net (CC BY 3.0): horned-skull, locked-chest, hazard-sign, axe-in-stump, sprout, mining,
-quill-ink, wolf-head and fountain by Lorc; stairs, hole-ladder, fishing-pole and tree-roots by Delapouite. Recoloured
+quill-ink, wolf-head and fountain by Lorc, and for the four elements broadsword, small-fire, snowflake-2 and
+lightning-helix by Lorc (`public/art/icons/el-*.webp`); stairs, hole-ladder, fishing-pole and tree-roots by Delapouite. Recoloured
 and set in pixel medallions (a ring, a dark disc, the icon in its own colour), mapped onto the palette. Credited on
 `public/credits.html`.

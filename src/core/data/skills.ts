@@ -162,6 +162,10 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     power: 0,
     description: 'Wash away poison, sleep and paralysis from one ally.',
   }),
+  emberArrow: skill({
+    id: 'emberArrow', name: 'Ember Arrow', sp: 5, target: 'enemy', kind: 'phys', element: 'fire', power: 120,
+    description: 'An arrow wrapped in burning pitch. Fire damage to one enemy.',
+  }),
   venomArrow: skill({
     id: 'venomArrow',
     name: 'Venom Arrow',
@@ -337,6 +341,10 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     mods: [{ stat: 'atk', amount: 22 }],
     description: 'A rousing battle song. Raises the attack of the whole party.',
   }),
+  thunderVerse: skill({
+    id: 'thunderVerse', name: 'Thunder Verse', sp: 7, target: 'allEnemies', kind: 'magic', element: 'storm', power: 70,
+    description: 'A verse that calls down the storm. Storm damage to every enemy.',
+  }),
   shieldHymn: skill({
     id: 'shieldHymn', name: 'Shieldhymn', sp: 6, target: 'allAllies', kind: 'buff', power: 0, turns: 3,
     mods: [{ stat: 'def', amount: 20 }],
@@ -420,6 +428,10 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     id: 'fangStrike', name: 'Fang Strike', sp: 3, target: 'enemy', kind: 'phys', power: 125,
     inflict: { ailment: 'poison', chance: 0.5 },
     description: 'Your wolf sinks its teeth in deep. Cheap, and the wound may fester (poison).',
+  }),
+  rimeFang: skill({
+    id: 'rimeFang', name: 'Rime Fang', sp: 5, target: 'enemy', kind: 'phys', element: 'frost', power: 130,
+    description: 'Your wolf bites with jaws cold as a winter lake. Frost damage to one enemy.',
   }),
   packHunt: skill({
     id: 'packHunt', name: 'Pack Hunt', sp: 6, target: 'enemy', kind: 'phys', power: 80, hits: 2,

@@ -2713,3 +2713,23 @@ body { word-spacing: 0.18em; }
 .beast .muted {
   color: var(--muted);
 }
+
+/* Element pictures before menu labels and in the bestiary */
+.menu-icon {
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+  vertical-align: -5px;
+  image-rendering: pixelated;
+}
+
+.beast-el {
+  display: inline-flex;
+  align-items: center;
+}
+
+.beast-el .menu-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+}

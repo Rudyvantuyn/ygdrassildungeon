@@ -450,7 +450,7 @@ const list: EnemyDef[] = [
   {
     id: 'brineDraugr',
     name: 'Brine Draugr',
-    hp: 15000, atk: 148, def: 78, mag: 70, res: 50, spd: 22,
+    hp: 15600, atk: 148, def: 78, mag: 70, res: 50, spd: 22,
     xp: 1550, gold: 910,
     weak: ['fire'], resist: ['frost'],
     skills: [

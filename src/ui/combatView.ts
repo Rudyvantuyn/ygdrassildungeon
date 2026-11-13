@@ -4,6 +4,7 @@ import type { SkillDef } from '../core/data/skills';
 import type { Game } from '../core/game';
 import { isAlive, knownSkills, memberStats } from '../core/party';
 import { noteEvents, noteSeen } from '../core/bestiary';
+import { elementIcon } from './elements';
 import { rankOf, skillFor } from '../core/skilltree';
 import { chooseCommands } from '../core/tactics';
 import { pluralName } from '../core/quests';
@@ -569,6 +570,7 @@ export class CombatView {
     const m = this.combat.party[this.current];
     const items: MenuItem[] = knownSkills(m).map((skill) => ({
       label: skill.name,
+      icon: skill.kind === 'phys' || skill.kind === 'magic' ? elementIcon(skill.element) : undefined,
       detail: `Rk ${rankOf(m, skill.id)} · ${skill.sp} SP`,
       description: skill.description,
       disabled: m.sp < skill.sp,
@@ -682,6 +684,7 @@ export class CombatView {
           const cls = ev.weak ? 'weak' : ev.resist ? 'resist' : '';
           floater(this.host.floaters, x, y, `${ev.amount}${ev.crit ? '!' : ''}`, cls);
           if (ev.weak) floater(this.host.floaters, x, y - 46, 'WEAK', 'weak small');
+          else if (ev.resist) floater(this.host.floaters, x, y - 46, 'RESIST', 'resist small');
         } else {
           audio.play(ev.crit ? 'crit' : 'hurt');
           this.partyHp[ev.target] = ev.hp;

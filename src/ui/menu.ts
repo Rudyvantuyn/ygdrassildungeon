@@ -3,6 +3,8 @@ import { audio } from '../audio/audio';
 export interface MenuItem {
   label: string;
   detail?: string;
+  /** A small picture before the label (an element, say), as an image path. */
+  icon?: string;
   description?: string;
   disabled?: boolean;
   onSelect: () => void;
@@ -47,6 +49,13 @@ export class ListMenu {
       row.className = 'menu-item' + (item.disabled ? ' disabled' : '');
       row.innerHTML = `<span></span>${item.detail && !item.control ? '<span class="detail"></span>' : ''}`;
       row.children[0].textContent = item.label;
+      if (item.icon) {
+        const img = document.createElement('img');
+        img.className = 'menu-icon';
+        img.src = item.icon;
+        img.alt = '';
+        row.children[0].prepend(img);
+      }
       if (item.control) {
         row.classList.add('has-control');
         row.append(item.control);
