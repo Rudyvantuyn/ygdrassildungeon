@@ -2,6 +2,7 @@
  * The drafting table: a screen to draw your own floors, check them, test-play them
  * and share them as a code.
  */
+import { MAX_LEVEL } from '../core/party';
 import { ENEMIES } from '../core/data/enemies';
 import { chapterOf } from '../core/data/chapters';
 import { DESIGN_FLOORS as FLOORS } from '../core/data/marrowdeep';
@@ -473,7 +474,7 @@ export class Designer {
         this.changed();
       }),
       this.stepper('Test level', String(this.level), (dir) => {
-        this.level = Math.max(1, Math.min(40, this.level + dir));
+        this.level = Math.max(1, Math.min(MAX_LEVEL, this.level + dir));
         this.refresh();
       }),
     );
