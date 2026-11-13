@@ -444,7 +444,9 @@ export class Designer {
       }, 'tab'));
     }
     if (c.floors.length > 1) {
-      this.floorTabs.append(this.button('− This floor', () => {
+      this.floorTabs.append(this.button(`✕ Delete floor ${this.floor + 1}`, () => {
+        if (!confirm(`Delete floor ${this.floor + 1} and everything drawn on it? Stairs that led to it are removed too.`)) return;
+        for (const id of LINK_CELLS) if (c.floors[this.floor].rows.some((row) => row.includes(id))) removeLink(c, id);
         c.floors.splice(this.floor, 1);
         this.floor = Math.max(0, this.floor - 1);
         this.changed();
@@ -616,7 +618,8 @@ export class Designer {
         const d = decodeChapter(s.code);
         if (d) this.load(d);
       });
-      const remove = this.button('✕', () => {
+      const remove = this.button('✕ Delete', () => {
+        if (!confirm(`Delete the saved chapter "${s.name}"?`)) return;
         for (const key of [SAVED_KEY, OLD_SAVED_KEY]) writeJson(key, readJson<SavedFloor[]>(key, []).filter((x) => x.code !== s.code));
         this.showSaved();
       }, 'step');
