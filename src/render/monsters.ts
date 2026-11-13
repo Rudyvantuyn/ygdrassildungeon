@@ -4,7 +4,7 @@ import { sprite } from './sprites';
 
 type Ctx = CanvasRenderingContext2D;
 
-/** The painted sprite of an enemy (art/monsters/<id>.webp). */
+/** The pixel-art sprite of an enemy (art/monsters/<id>.webp; Dungeon Crawl Stone Soup tiles, CC0). */
 export function monsterSprite(def: EnemyDef): HTMLImageElement | null {
   return sprite(`monsters/${def.id}.webp`);
 }
@@ -33,6 +33,8 @@ export function drawMonster(ctx: Ctx, def: EnemyDef, x: number, groundY: number,
     // Slow breathing
     const breath = Math.sin(t / 520) * 0.018;
     ctx.scale(1 - breath * 0.5, 1 + breath);
+    // Pixel art: keep the pixels sharp when scaling.
+    ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, -w / 2, -h + s * 0.04, w, h);
   } else {
     SHAPES[art.shape](ctx, s, art.color, art.accent, t);

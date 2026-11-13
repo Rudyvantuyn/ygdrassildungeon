@@ -15,13 +15,7 @@ for p in json.load(open('art/photo-sources.json')):
     lic = p['license']
     rows.append(f'        <tr><td>{html.escape(p["use"])}</td><td><a href="{url}">{html.escape(title)}</a></td>'
                 f'<td>{html.escape(p["author"])}</td><td><a href="{LICENSES.get(lic, "#")}">{html.escape(lic)}</a></td></tr>')
-prow = []
-for p in json.load(open('art/painting-sources.json')):
-    url = 'https://commons.wikimedia.org/wiki/' + urllib.parse.quote(p['file'])
-    prow.append(f'        <tr><td>{html.escape(p["use"])}</td><td><a href="{url}">{html.escape(p["work"])}</a></td>'
-                f'<td>{html.escape(p["author"])}</td><td>Public domain</td></tr>')
 page = open('public/credits.html').read()
-page = re.sub(r'(<!-- PAINTINGS -->).*?(\n      </table>)', lambda m: m.group(1) + '\n' + '\n'.join(prow) + m.group(2), page, flags=re.S)
 page = re.sub(r'(<!-- PHOTOS -->).*?(\n      </table>)', lambda m: m.group(1) + '\n' + '\n'.join(rows) + m.group(2), page, flags=re.S)
 open('public/credits.html', 'w').write(page)
-print(len(rows), 'photos and', len(prow), 'paintings credited')
+print(len(rows), 'photos credited')

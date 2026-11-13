@@ -317,6 +317,7 @@ export class CombatView {
       } else {
         const spr = monsterSprite(enemy.def);
         if (spr) {
+          ctx.imageSmoothingEnabled = false;
           const k = Math.min(t / spr.naturalWidth, t / spr.naturalHeight);
           ctx.drawImage(spr, tx + (t - spr.naturalWidth * k) / 2, ty + (t - spr.naturalHeight * k) / 2, spr.naturalWidth * k, spr.naturalHeight * k);
         }

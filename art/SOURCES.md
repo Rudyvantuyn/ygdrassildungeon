@@ -3,64 +3,15 @@
 Every image the game ships, and where it came from.
 
 **Status (November 2026):** places, dungeon textures, props and map icons are human-made photos, CC BY icons or
-code-drawn sprites. Monsters, hero portraits and NPC portraits are still AI-made and are being replaced. Keep this up to date: the game is meant to be
+code-drawn sprites. Monsters are CC0 pixel art (Dungeon Crawl Stone Soup). Hero portraits and NPC portraits are still AI-made and are being replaced. Keep this up to date: the game is meant to be
 released commercially, so each asset needs a known origin and licence.
 
 ## Monsters (`public/art/monsters/<enemy-id>.webp`)
 
-- Generated with Canva's AI image generator (account of the project owner), on 2026-10-29/30.
-  Canva's terms grant the user the rights to use generated output, including commercially; check the
-  current terms before release.
-- All images were exported at 1200×1200 from the Canva design "Ygdrassil monster art sheet"
-  (DAHZbPIDnaM), then processed with `scripts/process-art.py` (background removed, cropped, 560 px WebP).
-  Chapter II monsters (brineling … hafgufa) were generated on 2026-10-30 and exported at 1024×1024.
-- Shared style prompt: *Painterly dark-fantasy game monster illustration, full body, centered, isolated
-  on a plain flat dark charcoal background, Norse folklore mood, dramatic top lighting, soft rim light,
-  hand-painted texture, high detail, no text, no border.* followed by a short description of the creature.
-
-| Enemy id | Canva media id |
-|---|---|
-| ashenColossus | MAHZc45NhbE |
-| blightedElder | MAHZc5-Jigs |
-| bogling | MAHZayw3CTQ |
-| briarGnawer | MAHZc093TR4 |
-| cinderwing | MAHZc3LVWtA |
-| duskwing | MAHZc4Jcw6w |
-| emberling | MAHZcwYn9kE |
-| fenwraith | MAHZc2e2c8g |
-| frostcap | MAHZcwqR540 |
-| gloamMoth | MAHZc1bJA0E |
-| hollowHound | MAHZc_zTOEk |
-| hrimwolf | MAHZcyCOdTE |
-| puffcap | MAHZc2PLmh0 |
-| rimeshell | MAHZc0cTCvU |
-| rootColossus | MAHZc57b7-Q |
-| rootDraugr | MAHZc-ZrC3k |
-| rootfiend | MAHZc5gWoa4 |
-| rootgnawer | MAHZc38RjEs |
-| shellbark | MAHZc6FbP0Y |
-| snowveil | MAHZc-j_m-4 |
-| grimtusk | MAHZc-q9TLM |
-| brineling | MAHZeU6lHPo |
-| skerrywing | MAHZeZj4RVc |
-| reefclaw | MAHZeZuuERo |
-| kelpStrangler | MAHZecN5iJw |
-| brinecap | MAHZef_T8bs |
-| pearlmoth | MAHZefp6fNU |
-| coralback | MAHZea9sWbk |
-| tidecaller | MAHZefEYeEY |
-| nykur | MAHZeXcnQoM |
-| seahound | MAHZeRS56i0 |
-| saltwight | MAHZeQ1CHQk |
-| gloomEel | MAHZeWD8D2U |
-| deepmaw | MAHZeVe93sI |
-| wavemaid | MAHZeRt_dnM |
-| fathomstone | MAHZeTHHISI |
-| skerryjaw | MAHZeeEVoFs |
-| brineDraugr | MAHZeTp3IDI |
-| tidecoil | MAHZefZiBNw |
-| drownedJarl | MAHZeZ8maFI |
-| hafgufa | MAHZeZot0-M |
+Pixel art from the Dungeon Crawl Stone Soup tiles (https://opengameart.org/content/dungeon-crawl-32x32-tiles),
+CC0 (no rights reserved, commercial use allowed, no credit required; credited on `public/credits.html` anyway).
+Each 32×32 tile is cropped and scaled up 12× with hard pixel edges. Which tile is which monster:
+`scripts/monster-tiles.json` (enemy id → path under `monster/` in the "Dungeon Crawl Stone Soup Full" download).
 
 ## People and heroes (`public/art/people`, `heroes`), still AI-made, to be replaced
 
