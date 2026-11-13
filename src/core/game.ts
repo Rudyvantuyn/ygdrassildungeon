@@ -638,12 +638,11 @@ export class Game {
   private markExplored(): void {
     if (this.state.chartMode === 'assisted') setTerrain(this.chart, this.state.y * this.map.width + this.state.x, 'floor');
     const cells = this.progress.explored.split('');
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        const x = this.state.x + dx;
-        const y = this.state.y + dy;
-        if (x >= 0 && y >= 0 && x < this.map.width && y < this.map.height) cells[y * this.map.width + x] = '1';
-      }
+    // The party's own square and the four beside it: what is visible without peeking round a corner.
+    for (const [dx, dy] of [[0, 0], [0, -1], [1, 0], [0, 1], [-1, 0]]) {
+      const x = this.state.x + dx;
+      const y = this.state.y + dy;
+      if (x >= 0 && y >= 0 && x < this.map.width && y < this.map.height) cells[y * this.map.width + x] = '1';
     }
     // Also map the corridor straight ahead while it stays open (what you can see).
     let { x, y } = this.state;

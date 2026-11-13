@@ -22,12 +22,14 @@ describe('chapter III, prepared for the drafting table', () => {
     }
   });
 
-  it('is offered at the drafting table but not yet played', () => {
-    expect(FLOORS).toHaveLength(10);
+  it('is part of the Rootdeep now, and follows every rule of a drawn chapter', async () => {
+    const { rootdeepChapter, chapterProblems } = await import('./designer');
+    expect(FLOORS).toHaveLength(15);
     expect(DESIGN_FLOORS).toHaveLength(15);
     expect(THEMES.some((t) => t.id === 'marrow')).toBe(true);
     expect(BOSS_CHOICES).toEqual(expect.arrayContaining(['ribwarden', 'hrungnir']));
     expect(PROWLER_CHOICES).toEqual(expect.arrayContaining(['bergrisi', 'ossuaryHound']));
+    expect(chapterProblems(rootdeepChapter(10, 'The Marrowdeep'))).toEqual([]);
   });
 
   it('has gathering finds and gear for every material it asks for', () => {

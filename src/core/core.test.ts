@@ -37,7 +37,8 @@ function reachable(map: ReturnType<typeof parseFloor>): Set<string> {
 }
 
 describe('floor data', () => {
-  FLOORS.forEach((def, index) => {
+  // Chapters I and II: every floor stands on its own (entrance, stairs down). Chapter III is checked as a whole below.
+  FLOORS.slice(0, 10).forEach((def, index) => {
     it(`${def.name} is valid and fully reachable`, () => {
       const map = parseFloor(def);
       const reach = reachable(map);
@@ -58,6 +59,7 @@ describe('floor data', () => {
       }
       const isLast = index === FLOORS.length - 1;
       expect(map.tiles.includes('stairs')).toBe(!isLast);
+      void index;
       expect(map.tiles.includes('boss')).toBe(!!def.boss);
       expect(map.chests.length).toBe(def.chests.length);
       for (const group of def.encounters) for (const id of group.enemies) expect(ENEMIES[id], id).toBeDefined();
@@ -419,7 +421,8 @@ describe('prowlers', () => {
 
   it('every prowler floor has a way to the stairs or boss that stays clear of all prowlers', () => {
     saved.forEach((prowlers, f) => {
-      if (prowlers.length === 0) return;
+      // Drawn chapters (III on) are checked by chapterProblems(), across their floors.
+      if (prowlers.length === 0 || f >= 10) return;
       const def = { ...FLOORS[f], prowlers };
       const map = parseFloor(def);
       const key = (x: number, y: number) => y * map.width + x;

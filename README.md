@@ -144,11 +144,10 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 - **Hoofdstuk II, The Drowned Roots** (verdieping 6–10): een zee onder de wereld. 15 nieuwe monsters, de prowlers
   Skerryjaw, Brine Draugr en Tidecoil, de tussenbaas **The Drowned Jarl** (verdieping 8) en de eindbaas
   **The Hafgufa** (verdieping 10). Gemaakt voor een groep rond level 18–30; het maximumlevel is nu 40.
-- **Hoofdstuk III, The Marrowdeep** (verdieping 11–15, voorbereid): Ymirs botten. 7 nieuwe monsters, de prowlers
+- **Hoofdstuk III, The Marrowdeep** (verdieping 11–15): Ymirs botten, het eerste getekende hoofdstuk (genummerde trappen, wortelpoorten als shortcut naar de trap, trappen terug omhoog naar afgesloten hoekjes met een kist). 7 nieuwe monsters, de prowlers
   Bergrisi en Ossuary Hound, de tussenbaas **The Ribwarden** en de eindbaas **Hrungnir, the Stone-Hearted**, eigen
   texturen, uitrusting, verzamelvondsten, opdrachten en verhaal (met keuze 4). Gemaakt voor een groep rond level 37–46;
-  het maximumlevel is nu 60. De verdiepingen worden getekend in de Drafting Table (thema *Marrowdeep*, monsters van
-  verdieping 11–15); tot die code binnen is, is het hoofdstuk niet speelbaar (`src/core/data/marrowdeep.ts`).
+  het maximumlevel is nu 60. Het ontwerp staat ook als voorbeeld in de Drafting Table (`src/core/data/marrowdeep-draft.ts`).
 - Nieuw: uitrusting in drie niveaus plus speciale uitrusting, de **Tide Draught** (200 HP), een skill per klasse
   (Rampart Crash, Gale Piercer, Wellspring, Thunderhead), acht quests, verhaalscènes en vijf muziekthema's.
 - Oude saves krijgen de nieuwe verdiepingen er vanzelf bij.
@@ -251,7 +250,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Onderwerp | Namen |
 |---|---|
 | Wereld | De stad **Lindholm**, de dungeon **de Rootdeep** onder **de Grote Boom** (Great Tree) |
-| Hoofdstukken | I: The Greenwood Roots, II: The Drowned Roots, III: The Marrowdeep (voorbereid; wacht op de getekende verdiepingen) |
+| Hoofdstukken | I: The Greenwood Roots, II: The Drowned Roots, III: The Marrowdeep |
 | Mythologie | Ymir, Midgard, Asgard, Niflheim, Muspelheim, Jotunheim, Ginnungagap, Heimdall (Noorse mythe, vrij te gebruiken) |
 | Verhaal | **Pact of the Gap** (het pact met de andere werelden), **Wayfinders** (de gezworen avonturiers), **Frost Court** (de werelden die het pact tekenden), ward (een slot van de goden op de weg naar Asgard), Chronicle (verhaal teruglezen), Hallvard (jarl van het eerste pact) |
 | Tekenscherm | The Drafting Table; thema's Greenwood, Frostwood, Emberroot, Tidewater, Coral, Abyss |

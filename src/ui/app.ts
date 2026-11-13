@@ -1200,7 +1200,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       case 'gatherSpot': {
         if (!this.game.state.tips?.includes('gather') && !this.game.state.tipsOff && !this.trial) return this.tips(['gather'], () => this.handleStep(ev));
         const message = gatherPrompt(ev);
-        if (!message.ask) return this.toast(message.text);
+        if (!message.ask) {
+          // Nobody can gather here (or it is used up): just say so. Close the tip first if one was showing,
+          // or the player is left in a window that only repeats this message.
+          if (this.mode === 'overlay') this.resumeExplore();
+          return this.toast(message.text);
+        }
         this.confirm(GATHER_KINDS[ev.kind].verb, message.text, () => {
           const found = this.game.gather();
           if (!found) return;

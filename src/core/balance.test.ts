@@ -66,10 +66,10 @@ describe('balance (computer player)', { timeout: 60_000 }, () => {
   });
 
   it('the Hafgufa (end of chapter II) needs even more', () => {
-    const some = seeds.slice(0, 12).map((s) => autoplay(s, { town: true, grindBattles: 20 }));
-    expect(count(some, (r) => r.cleared)).toBeLessThanOrEqual(8);
-    const trained = seeds.slice(0, 12).map((s) => autoplay(s, { town: true, grindBattles: 40 }));
-    expect(count(trained, (r) => r.cleared)).toBeGreaterThanOrEqual(10);
+    const some = seeds.slice(0, 12).map((s) => autoplay(s, { floors: 10, town: true, grindBattles: 20 }));
+    expect(count(some, (r) => r.bossesDefeated >= 4)).toBeLessThanOrEqual(8);
+    const trained = seeds.slice(0, 12).map((s) => autoplay(s, { floors: 10, town: true, grindBattles: 40 }));
+    expect(count(trained, (r) => r.bossesDefeated >= 4)).toBeGreaterThanOrEqual(10);
     // Paced for a party around level 30; level 40 stays out of reach for now.
     const avgLevel = trained.reduce((sum, r) => sum + r.levels[0], 0) / trained.length;
     expect(avgLevel).toBeGreaterThan(26);
