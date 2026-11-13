@@ -66,7 +66,9 @@ writes it into `public/credits.html`, which the game links from the title screen
 
 ## Dungeon props (`public/art/props`)
 
-Pixel-art sprites drawn shape by shape in code by `scripts/draw-props.py` (no image generator), in the same palette.
+Chests, the spring, gathering spots and the root gate are Dungeon Crawl Stone Soup tiles (CC0), like the monsters;
+`scripts/prop-tiles.json` says which tile is which. Stairs are not images: the renderer builds them in 3D from the
+floor's own wall texture (`stairs` / `upStairs` in `src/render/corridor.ts`).
 
 ## Map icons (`public/art/icons`)
 

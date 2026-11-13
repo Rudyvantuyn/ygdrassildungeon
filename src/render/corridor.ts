@@ -472,73 +472,125 @@ export class CorridorRenderer {
     ctx.fill();
   }
 
-  private stairs(s: number, d: number, pal: Palette, time: number): void {
+  /**
+   * Fills the current path with this floor's wall texture (so stairs are built from the same stone as the
+   * corridor), darkened by `dark` (0–1) and by the fog at depth z. Falls back to a flat colour.
+   */
+  private stoneFill(pal: Palette, z: number, dark: number, base = pal.wall): void {
     const ctx = this.ctx;
-    const z = d + PROP_Z;
+    const tex = this.textureSet(pal);
     const f = this.fog(z);
-    // The painted stairwell, with a warm glow breathing up out of it.
-    if (this.billboard('props/stairs-down.webp', s, d, 1.0, pal.fog, 0.6)) {
-      const [gx, gy] = this.project([s, 0.42, z]);
-      const r = 70 * this.scaleAt(z);
-      const pulse = 0.35 + 0.2 * Math.sin(time / 450);
-      const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
-      glow.addColorStop(0, `rgba(255,190,110,${pulse * (1 - f)})`);
-      glow.addColorStop(1, 'rgba(255,190,110,0)');
-      ctx.fillStyle = glow;
-      ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
-      return;
+    if (tex) {
+      const px = Math.max(16, 260 * this.scaleAt(z));
+      const img = this.wallFor(tex, px);
+      const pattern = ctx.createPattern(img, 'repeat')!;
+      const k = px / img.width;
+      pattern.setTransform(new DOMMatrix([k, 0, 0, k, 0, 0]));
+      ctx.fillStyle = pattern;
+      ctx.fill();
+      ctx.fillStyle = `rgba(0,0,0,${Math.min(0.92, dark)})`;
+      ctx.fill();
+      if (f > 0.02) {
+        ctx.fillStyle = withAlpha(pal.fog, f);
+        ctx.fill();
+      }
+    } else {
+      ctx.fillStyle = mix(shade(base, -dark), pal.fog, f);
+      ctx.fill();
     }
-    // Dark opening with steps going down
-    this.poly([[s - 0.32, 0.5, z - 0.3], [s + 0.32, 0.5, z - 0.3], [s + 0.32, 0.5, z + 0.3], [s - 0.32, 0.5, z + 0.3]]);
-    ctx.fillStyle = mix('#050505', pal.fog, f * 0.6);
-    ctx.fill();
-    ctx.beginPath();
-    for (let i = 1; i < 4; i++) {
-      const zz = z - 0.3 + i * 0.15;
-      this.line([s - 0.32, 0.5, zz], [s + 0.32, 0.5, zz]);
-    }
-    ctx.strokeStyle = mix('#8a7a5a', pal.fog, f, 0.9);
-    ctx.lineWidth = Math.max(1, 3 * this.scaleAt(d));
-    ctx.stroke();
-    // Glow marker
-    const [gx, gy] = this.project([s, 0.38, z]);
-    const r = 60 * this.scaleAt(z);
-    const pulse = 0.55 + 0.25 * Math.sin(time / 400);
-    const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
-    glow.addColorStop(0, `rgba(255,220,140,${pulse * (1 - f)})`);
-    glow.addColorStop(1, 'rgba(255,220,140,0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(gx - r, gy - r, r * 2, r * 2);    const bob = Math.sin(time / 500 + s) * r * 0.05;
-    this.floatingIcon('down', gx, gy - r * 1.1 + bob, r * 1.25, f, '#ffcf7a');
   }
 
-  /** Stairs going up: a few steps rising towards a soft light from above. */
+  /** Stairs going down: a stone stairwell in the floor, steps sinking into the dark, a warm glow from below. */
+  private stairs(s: number, d: number, pal: Palette, time: number): void {
+    const ctx = this.ctx;
+    const x0 = s - 0.4;
+    const x1 = s + 0.4;
+    const z0 = d + 0.12;
+    const z1 = d + 0.9;
+    const f = this.fog(d + 0.5);
+    // The opening, as seen on the floor: everything below it is clipped to it.
+    this.poly([[x0, 0.5, z0], [x1, 0.5, z0], [x1, 0.5, z1], [x0, 0.5, z1]]);
+    ctx.save();
+    ctx.clip();
+    ctx.fillStyle = mix('#020202', pal.fog, f * 0.5);
+    ctx.fill();
+    // The steps start at the far rim and go down towards you, so their treads face up into view.
+    const steps = 6;
+    const rise = 0.07;
+    const run = (z1 - z0) / steps;
+    const edge = Math.max(1, 2 * this.scaleAt(d + 0.5));
+    for (let k = 0; k < steps; k++) {
+      const zFar = z1 - k * run;
+      const zNear = zFar - run;
+      const top = 0.5 + (k + 1) * rise;
+      // Tread, then the drop to the next step down (it faces you).
+      this.poly([[x0, top, zNear], [x1, top, zNear], [x1, top, zFar], [x0, top, zFar]]);
+      this.stoneFill(pal, zFar, 0.12 + k * 0.1);
+      ctx.strokeStyle = `rgba(0,0,0,${0.55 + k * 0.05})`;
+      ctx.lineWidth = edge;
+      ctx.stroke();
+      this.poly([[x0, top, zNear], [x1, top, zNear], [x1, top + rise, zNear], [x0, top + rise, zNear]]);
+      this.stoneFill(pal, zNear, 0.5 + k * 0.07);
+    }
+    // The far wall of the stairwell, above the first step.
+    this.poly([[x0, 0.5, z1], [x1, 0.5, z1], [x1, 0.5 + rise, z1], [x0, 0.5 + rise, z1]]);
+    this.stoneFill(pal, z1, 0.6);
+    // Warm light breathing up out of the dark.
+    const [gx, gy] = this.project([s, 0.5 + rise * steps, z0 + run]);
+    const r = 120 * this.scaleAt(d + 0.5);
+    const pulse = 0.35 + 0.15 * Math.sin(time / 450);
+    const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
+    glow.addColorStop(0, `rgba(255,180,90,${pulse * (1 - f)})`);
+    glow.addColorStop(1, 'rgba(255,180,90,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
+    ctx.restore();
+    // A stone rim around the opening.
+    this.poly([[x0, 0.5, z0], [x1, 0.5, z0], [x1, 0.5, z1], [x0, 0.5, z1]]);
+    ctx.strokeStyle = mix('#0a0a0a', pal.fog, f, 0.9);
+    ctx.lineWidth = Math.max(1, 5 * this.scaleAt(d + 0.5));
+    ctx.stroke();
+  }
+
+  /** Stairs going up: solid stone steps climbing to a pale light at the ceiling. */
   private upStairs(s: number, d: number, pal: Palette, time: number): void {
     if (d === 0) return; // standing on it: nothing to see
-    if (this.billboard('props/stairs-up.webp', s, d, 0.9, pal.fog)) return;
     const ctx = this.ctx;
-    const z = d + PROP_Z;
-    const f = this.fog(z);
-    const steps = 4;
-    for (let i = 0; i < steps; i++) {
-      const z0 = z - 0.35 + i * 0.17;
-      const top = 0.5 - (i + 1) * 0.09;
-      this.poly([[s - 0.3, top, z0], [s + 0.3, top, z0], [s + 0.3, top + 0.09, z0], [s - 0.3, top + 0.09, z0]]);
-      ctx.fillStyle = mix(shade(pal.wall, 0.1 - i * 0.05), pal.fog, f);
-      ctx.fill();
-      this.poly([[s - 0.3, top, z0], [s + 0.3, top, z0], [s + 0.3, top, z0 + 0.17], [s - 0.3, top, z0 + 0.17]]);
-      ctx.fillStyle = mix(shade(pal.wall, 0.25), pal.fog, f);
-      ctx.fill();
+    const x0 = s - 0.42;
+    const x1 = s + 0.42;
+    const steps = 6;
+    const zStart = d + 0.1;
+    const run = 0.85 / steps;
+    const rise = 0.075;
+    const edge = Math.max(1, 2 * this.scaleAt(d + 0.5));
+    // From the far (high) steps to the near (low) ones, so nearer steps cover the ones behind.
+    for (let k = steps - 1; k >= 0; k--) {
+      const za = zStart + k * run;
+      const top = 0.5 - (k + 1) * rise;
+      // The side facing the middle of the view, for stairs off to one side.
+      if (s !== 0) {
+        const xs = s < 0 ? x1 : x0;
+        this.poly([[xs, top, za], [xs, top, d + 1], [xs, 0.5, d + 1], [xs, 0.5, za]]);
+        this.stoneFill(pal, za, 0.55);
+      }
+      this.poly([[x0, top, za], [x1, top, za], [x1, top, za + run], [x0, top, za + run]]);
+      this.stoneFill(pal, za, 0.05);
+      this.poly([[x0, top, za], [x1, top, za], [x1, top + rise, za], [x0, top + rise, za]]);
+      this.stoneFill(pal, za, 0.45 + k * 0.03);
+      ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+      ctx.lineWidth = edge;
+      ctx.stroke();
     }
-    const [gx, gy] = this.project([s, -0.3, z + 0.3]);
-    const r = 90 * this.scaleAt(z);
-    const pulse = 0.4 + 0.2 * Math.sin(time / 500);
+    // Pale daylight falling from above.
+    const [gx, gy] = this.project([s, -0.45, d + 0.95]);
+    const r = 110 * this.scaleAt(d + 0.5);
+    const pulse = 0.3 + 0.12 * Math.sin(time / 500);
+    const f = this.fog(d + 0.5);
     const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
-    glow.addColorStop(0, `rgba(200,255,210,${pulse * (1 - f)})`);
-    glow.addColorStop(1, 'rgba(200,255,210,0)');
+    glow.addColorStop(0, `rgba(220,240,255,${pulse * (1 - f)})`);
+    glow.addColorStop(1, 'rgba(220,240,255,0)');
     ctx.fillStyle = glow;
-    ctx.fillRect(gx - r, gy - r, r * 2, r * 2);    const [ix, iy] = this.project([s, 0.05, z]);
-    this.floatingIcon('up', ix, iy + Math.sin(time / 500 + s) * r * 0.04, r * 0.75, f, '#c8ffd2');
+    ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
   }
 
   /**
@@ -558,6 +610,8 @@ export class CorridorRenderer {
     const off = this.scratch(Math.max(w, h));
     const octx = off.getContext('2d')!;
     octx.clearRect(0, 0, w, h);
+    // Pixel art: scale with hard edges.
+    octx.imageSmoothingEnabled = false;
     octx.drawImage(img, 0, 0, w, h);
     if (f > 0.02) {
       octx.globalCompositeOperation = 'source-atop';
@@ -566,7 +620,9 @@ export class CorridorRenderer {
       octx.globalCompositeOperation = 'source-over';
     }
     // The sprites have a little padding below the feet, so sink them in slightly.
+    this.ctx.imageSmoothingEnabled = false;
     this.ctx.drawImage(off, 0, 0, w, h, cx - w / 2, cy - h * 0.94, w, h);
+    this.ctx.imageSmoothingEnabled = true;
     return true;
   }
 
@@ -706,7 +762,7 @@ export class CorridorRenderer {
     const z = d + PROP_Z;
     const f = this.fog(z);
     // The painted spot (herbs, an ore vein, a felled root, a pool) with a small medallion hovering above it.
-    if (this.billboard(`props/gather-${kind}.webp`, s, d, 0.66, pal.fog)) {
+    if (this.billboard(`props/gather-${kind}.webp`, s, d, 0.66, pal.fog, kind === 'fish' ? 0.45 : 1)) {
       const [cx, cy] = this.project([s, 0.5, z]);
       const [ex] = this.project([s + 0.3, 0.5, z]);
       const rx = ex - cx;

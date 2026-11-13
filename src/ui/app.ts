@@ -536,7 +536,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     // Load this floor's monster art before the first fight.
     const def = this.game.floorDef;
     const ids = [...def.encounters.flatMap((e) => e.enemies), ...(def.boss ?? []), ...def.prowlers.flatMap((p) => p.enemies)];
-    preload([...[...new Set(ids)].map((id) => `monsters/${id}.webp`), 'props/chest.webp', 'props/chest-open.webp', 'props/spring.webp', 'props/stairs-up.webp', 'props/stairs-down.webp', ...gatherKindsOn(this.game.map).map((k) => `props/gather-${k}.webp`), ...(this.game.map.tiles.includes('gate') ? ['props/gate.webp'] : [])]);
+    preload([...[...new Set(ids)].map((id) => `monsters/${id}.webp`), 'props/chest.webp', 'props/chest-open.webp', 'props/spring.webp', ...gatherKindsOn(this.game.map).map((k) => `props/gather-${k}.webp`), ...(this.game.map.tiles.includes('gate') ? ['props/gate.webp'] : [])]);
     this.mode = 'explore';
     this.showSide('explore');
     this.message.classList.add('hidden');

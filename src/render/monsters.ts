@@ -27,7 +27,10 @@ export function drawMonster(ctx: Ctx, def: EnemyDef, x: number, groundY: number,
   const img = monsterSprite(def);
   if (img) {
     // Fit into a box about as tall as the shape would be, and not too wide.
-    const scale = Math.min((s * 1.25) / img.naturalHeight, (s * 1.7) / img.naturalWidth);
+    // Big bosses stay big, but always fit in the view (with room above for the name and arrow).
+    const maxH = ctx.canvas.height * 0.68;
+    const maxW = ctx.canvas.width * 0.8;
+    const scale = Math.min((s * 1.25) / img.naturalHeight, (s * 1.7) / img.naturalWidth, maxH / img.naturalHeight, maxW / img.naturalWidth);
     const w = img.naturalWidth * scale;
     const h = img.naturalHeight * scale;
     // Slow breathing
