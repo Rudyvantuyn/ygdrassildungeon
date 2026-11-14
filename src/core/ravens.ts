@@ -36,7 +36,7 @@ export const PROWLER_CHANCE = 0.15;
 /** Fleeing a prowler is always this chance, as in the dungeon. */
 export const PROWLER_FLEE = 0.3;
 /** Share of monster parts the scouts manage to carry home. */
-export const PARTS_KEPT = 0.5;
+export const PARTS_KEPT = 0.75;
 /** The Inn's healer costs this many nights at the Inn, per wounded adventurer. */
 export const HEALER_NIGHTS = 3;
 

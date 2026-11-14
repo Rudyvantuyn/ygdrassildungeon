@@ -128,7 +128,7 @@ describe('Raven Runs balance', { timeout: 120_000 }, () => {
     expect(outcomes(trained(TEAM, 30, 9), 10, 'overnight').filter((r) => r.outcome === 'routed').length).toBeGreaterThanOrEqual(25);
   });
 
-  it('an overnight run is worth less than a short stretch of play', () => {
+  it('an overnight run is worth sending, but less than a short stretch of play', () => {
     // What the party itself earns in one fight there (gold and parts), averaged.
     const ownFight = (floor: number, level: number) => {
       let total = 0;
@@ -142,11 +142,15 @@ describe('Raven Runs balance', { timeout: 120_000 }, () => {
       return total / seeds.length;
     };
     for (const [floor, level] of [[2, 8], [7, 20], [9, 26]]) {
+      const one = ownFight(floor, level);
+      // Without a gatherer, a night's scouting on a floor the team handles brings home what about four fights would.
+      const plain = outcomes(trained(TEAM, level, floor), floor, 'overnight').reduce((s, r) => s + value(r), 0) / seeds.length;
+      expect(plain).toBeGreaterThan(one * 3.5);
       const team = trained(TEAM, level, floor);
       team[0].skills = { ...team[0].skills, forage: 5, mine: 5, fell: 5, fish: 5 };
       const avg = outcomes(team, floor, 'overnight').reduce((s, r) => s + value(r), 0) / seeds.length;
       // About 15–20 minutes of play is a dozen fights; a run must never beat that.
-      expect(avg).toBeLessThan(ownFight(floor, level) * 12);
+      expect(avg).toBeLessThan(one * 12);
       expect(avg).toBeGreaterThan(0);
     }
   });
