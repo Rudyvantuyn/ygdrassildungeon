@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "screenshots": "node scripts/screenshots.cjs",
-    "build:itch": "ITCH=1 vite build && rm -f dist-itch/inbox.html && cd dist-itch && rm -f ../ygdrassil-itch.zip && zip -qr ../ygdrassil-itch.zip .",
+    "build:itch": "ITCH=1 vite build && mv dist-itch/play.html dist-itch/index.html && cd dist-itch && rm -f ../ygdrassil-itch.zip && zip -qr ../ygdrassil-itch.zip .",
     "build:server": "esbuild server/expedition.ts --bundle --format=esm --platform=neutral --target=es2022 --minify --legal-comments=none --outfile=server/build/expedition.js"
   },
   "devDependencies": {
@@ -20,6 +20,7 @@
     "vitest": "3.2.7"
   },
   "dependencies": {
+    "@fontsource/alegreya": "^5.3.0",
     "@fontsource/pixelify-sans": "^5.3.0",
     "@supabase/supabase-js": "^2.58.0",
     "@vercel/analytics": "^1.5.0"

@@ -68,6 +68,16 @@ type ViewFx = {
 /** How long the view glides after a step or turn. */
 const GLIDE_MS = 190;
 
+/** On the title screen: the way to the website (lore, devlog, the newest version). */
+function siteLink(): HTMLElement {
+  const itch = __BUILD__.endsWith('-itch');
+  const a = el('a', { className: 'title-site', text: itch ? 'Lore, devlog and the newest version: ygdrassilgame.com' : 'ygdrassilgame.com: the world, classes and devlog' });
+  a.href = itch ? 'https://www.ygdrassilgame.com/?from=itch' : './';
+  a.target = itch ? '_blank' : '_self';
+  a.rel = 'noopener';
+  return a;
+}
+
 export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   game!: Game;
   private keyHint!: HTMLElement;
@@ -548,6 +558,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       el('div', { className: 'panel dialog' }, [menu.el]),
       ...(notice ? [el('div', { className: 'title-notice panel', text: notice })] : []),
       el('div', { className: 'title-foot', text: 'Arrow keys / WASD to move · Enter to confirm · Esc to go back' }),
+      siteLink(),
     ]);
     this.openOverlay(screen, menu, 'title');
   }

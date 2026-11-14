@@ -103,7 +103,13 @@ Add new names there and keep the glossary in sync.
 - Game logic lives in `src/core` and must stay free of DOM code so it can be tested.
 - After UI changes, run the game (`npm run dev`) and check it with `node scripts/screenshots.cjs` (needs Playwright).
 - Balance changes: run the balance tests and look at the numbers on purpose; don't just loosen the bounds.
-- The live site (Vercel project `ygdrassil-dungeon`) deploys production from `main`.
+- The live site is **www.ygdrassilgame.com** (Vercel project `ygdrassil-dungeon`, production from `main`; the apex redirects
+  to www). The website is the front door: `index/world/classes/bestiary/devlog.html` rendered by `src/site/main.ts` from the
+  game's own data plus `src/site/lore.ts` (spoiler-free lore, in line with `docs/verhaal.md`) and `src/site/devlog.ts`
+  (devlog posts; itch gets a short version linking here). The game is at `/play` (`play.html`). Deeper chapters stay
+  sealed on the site (`OPEN_CHAPTERS`). Visits to the old `ygdrassil-dungeon.vercel.app` move to the new address and carry
+  the local save along (`src/site/transfer.ts`). itch.io stays the shop window: its build links to the site with
+  `?from=itch`; the site always has the newest version.
 - Online features use the Supabase project `ygdrassil` (`src/net/online.ts`). The `expedition` Edge Function runs
   `server/expedition.ts`, which uses the same rules as the client (`src/core/expedition.ts`). `npm run build` also
   bundles it into `server/build/expedition.js`; commit that file whenever it changes. Deploy the function after pushing,

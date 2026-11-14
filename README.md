@@ -4,7 +4,7 @@ Een first-person dungeon crawler met de gameplay van klassieke grid-crawlers (zo
 maar met een eigen wereld, eigen namen en eigen ontwerp. Gebouwd als webgame in TypeScript.
 De gangen worden in code getekend; monsters, personen, plekken, voorwerpen en tekentjes zijn geschilderde AI-art (herkomst in `art/SOURCES.md`).
 
-Online spelen: **https://ygdrassil-dungeon.vercel.app**
+Website en online spelen: **https://www.ygdrassilgame.com** (de game zelf op `/play`)
 
 ## Spelen
 
@@ -278,6 +278,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 
 ```
 src/
+  site/         De website (voorpagina, wereld, klassen, bestiarium, devlog) en het meeverhuizen van saves
   core/         Spellogica zonder scherm (volledig getest)
     data/       Klassen, skills, items, vijanden en verdiepingen: hier pas je de balans en kaarten aan
     combat.ts   Gevechtssysteem

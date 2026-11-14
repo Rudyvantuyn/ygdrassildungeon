@@ -2857,3 +2857,24 @@ body.phone .look-picker {
   gap: 10px;
   margin: 2px 0 4px;
 }
+
+/* The pixel font joins "fi" and "fl" into odd glyphs ("Wayfinders" read as "WayAnders"). */
+body, button, input, textarea {
+  font-variant-ligatures: none;
+}
+
+/* The way to the website, under the title menu */
+.title-site {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  color: var(--gold);
+  font-size: 15px;
+  text-decoration: underline;
+  text-shadow: 0 2px 0 #000;
+}
+body.phone .title-site {
+  bottom: 8px;
+  right: 10px;
+  font-size: 12px;
+}

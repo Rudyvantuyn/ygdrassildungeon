@@ -14,8 +14,11 @@ export default defineConfig({
   build: {
     outDir: itch ? 'dist-itch' : 'dist',
     rollupOptions: {
-      // The game, and the owner's feedback inbox.
-      input: itch ? { main: resolve(__dirname, 'index.html') } : { main: resolve(__dirname, 'index.html'), inbox: resolve(__dirname, 'inbox.html') },
+      // itch.io gets the game only (renamed to index.html after the build). Our own site: the website pages, the game
+      // at /play, and the owner's feedback inbox.
+      input: itch
+        ? { play: resolve(__dirname, 'play.html') }
+        : Object.fromEntries(['index', 'play', 'world', 'classes', 'bestiary', 'devlog', 'inbox'].map((p) => [p, resolve(__dirname, `${p}.html`)])),
     },
   },
 });
