@@ -604,8 +604,16 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   save(): void {
     // Never let the title screen's scenery overwrite a real save.
     if (this.trial || this.game === this.titleGame) return;
-    writeSave((this.home ?? this.game).serialize());
+    const data = (this.home ?? this.game).serialize();
+    writeSave(data);
+    // Signed in: keep the game with the account too (at most every two minutes), for other devices and the website.
+    if (online.signedIn && !this.coop && Date.now() - this.lastCloudSave > 120_000) {
+      this.lastCloudSave = Date.now();
+      void online.uploadSave(data).catch(() => undefined);
+    }
   }
+
+  private lastCloudSave = 0;
 
   loadSaveData(data: string): boolean {
     try {

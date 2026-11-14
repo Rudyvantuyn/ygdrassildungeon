@@ -18,7 +18,7 @@ export default defineConfig({
       // at /play, and the owner's feedback inbox.
       input: itch
         ? { play: resolve(__dirname, 'play.html') }
-        : Object.fromEntries(['index', 'play', 'world', 'classes', 'bestiary', 'devlog', 'inbox'].map((p) => [p, resolve(__dirname, `${p}.html`)])),
+        : Object.fromEntries(['index', 'play', 'world', 'classes', 'bestiary', 'devlog', 'wayfinder', 'inbox'].map((p) => [p, resolve(__dirname, `${p}.html`)])),
     },
   },
 });

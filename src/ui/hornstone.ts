@@ -352,7 +352,12 @@ export class Hornstone {
     const back = () => this.leave();
     const menu = new ListMenu(
       [
-        { label: 'Sign in', description: 'With the e-mail and password of your account.', onSelect: () => this.signIn() },
+        {
+          label: 'Sign in with Google',
+          description: __BUILD__.endsWith('-itch') ? 'Opens ygdrassilgame.com, where Google sign-in works (it cannot open inside itch.io).' : 'One click, no password. Your progress is kept with your Google account.',
+          onSelect: () => void online.signInWithGoogle().catch((e) => this.message('Sign in', errorText(e), true, () => this.account())),
+        },
+        { label: 'Sign in with e-mail', description: 'With the e-mail and password of your account.', onSelect: () => this.signIn() },
         { label: 'Create an account', description: 'Free. Lets you play with others and keep your save in the cloud.', onSelect: () => this.signUp() },
         { label: 'Play as a guest', description: 'Try it without an account. You can add an e-mail later.', onSelect: () => this.guest() },
         { label: 'Back', onSelect: back },
@@ -419,6 +424,15 @@ export class Hornstone {
               void online.setName(name).then(() => this.accountMenu()).catch((e) => fail(errorText(e)));
             }, () => this.accountMenu()),
         },
+        ...(online.isGuest && !__BUILD__.endsWith('-itch')
+          ? [
+              {
+                label: 'Keep it with Google',
+                description: 'Link this guest account to Google: your progress stays, and you can sign in anywhere, also on ygdrassilgame.com.',
+                onSelect: () => void online.signInWithGoogle().catch((e) => this.message('Google', errorText(e), true, () => this.accountMenu())),
+              },
+            ]
+          : []),
         {
           label: 'Upload save to the cloud',
           description: 'Store this game online, to continue on another device.',

@@ -7,7 +7,8 @@ import '@fontsource/pixelify-sans/latin-400.css';
 import '@fontsource/pixelify-sans/latin-600.css';
 import '@fontsource/pixelify-sans/latin-700.css';
 import './ui/styles.css';
-import { leaveOldAddress, takeCarriedSave } from './site/transfer';
+import { leaveOldAddress, takeCarriedSave, takeCloudSave } from './site/transfer';
+import { online } from './net/online';
 
 /** Starts the game (after a save carried over from the old address, if any, has been taken in). */
 function start(): void {
@@ -72,5 +73,12 @@ void (async () => {
   if (__BUILD__.endsWith('-itch')) return start();
   if (await leaveOldAddress()) return;
   await takeCarriedSave();
+  await takeCloudSave();
   start();
+  // Back from Google: take in the sign-in now.
+  if (online.returningFromSignIn) {
+    void online.connected().then((ok) => {
+      if (ok) (window as unknown as { ygg: App }).ygg.toast(`Signed in as ${online.playerName}.`);
+    });
+  }
 })();

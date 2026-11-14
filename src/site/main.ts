@@ -18,6 +18,11 @@ import { LOOKS, drawPortrait } from '../render/portraits';
 import { POSTS, type Post } from './devlog';
 import { CHAPTERS, PEOPLE, WORLD } from './lore';
 import { leaveOldAddress } from './transfer';
+import { online } from '../net/online';
+import { DEED_BY_ID, type EarnedDeed } from '../core/deeds';
+import { FLOORS } from '../core/data/floors';
+import type { GameState } from '../core/game';
+import { drawMedal } from '../render/medals';
 
 type Child = Node | string | null | undefined | false;
 function h(tag: string, attrs: Record<string, string> = {}, ...children: Child[]): HTMLElement {
@@ -31,8 +36,37 @@ function h(tag: string, attrs: Record<string, string> = {}, ...children: Child[]
 }
 
 const page = document.body.dataset.page ?? 'index';
-/** Chapters whose pages are open to everyone; deeper ones stay sealed (they will open with your progress). */
+/** Chapters whose pages are open to everyone; deeper ones open for a signed-in player who has reached them. */
 const OPEN_CHAPTERS = 1;
+
+/** What the site knows about the visitor once signed in. */
+interface Me {
+  name: string;
+  deeds: Record<string, EarnedDeed>;
+  save: GameState | null;
+  savedAt: string | null;
+  /** Chapters this player has reached (deeds and cloud save). */
+  chapters: number;
+}
+let me: Me | null = null;
+
+async function loadMe(): Promise<Me | null> {
+  if (!online.mayBeSignedIn && !online.returningFromSignIn) return null;
+  if (!(await online.connected())) return null;
+  const [deeds, cloud] = await Promise.all([online.loadDeeds().catch(() => null), online.downloadSave().catch(() => null)]);
+  let save: GameState | null = null;
+  try {
+    save = cloud ? (JSON.parse(cloud.data) as GameState) : null;
+  } catch {
+    save = null;
+  }
+  const d = deeds ?? {};
+  const fromDeeds = d.marrow ? 3 : d.drowned ? 2 : 1;
+  const fromSave = save ? Math.floor((save.deepest ?? 0) / 5) + 1 : 1;
+  return { name: online.playerName, deeds: d, save, savedAt: cloud?.savedAt ?? null, chapters: Math.max(OPEN_CHAPTERS, fromDeeds, fromSave) };
+}
+
+const openChapters = () => me?.chapters ?? OPEN_CHAPTERS;
 
 const NAV: [string, string][] = [
   ['world', 'The world'],
@@ -46,7 +80,13 @@ function header(): HTMLElement {
     'header',
     { class: 'site-head' },
     h('a', { class: 'brand', href: './' }, 'YGDRASSIL'),
-    h('nav', {}, ...NAV.map(([p, label]) => h('a', { href: `${p}.html`, class: p === page ? 'on' : '' }, label)), h('a', { class: 'btn play', href: 'play.html' }, 'Play')),
+    h(
+      'nav',
+      {},
+      ...NAV.map(([p, label]) => h('a', { href: `${p}.html`, class: p === page ? 'on' : '' }, label)),
+      h('a', { href: 'wayfinder.html', class: `account ${page === 'wayfinder' ? 'on' : ''}` }, me ? me.name : 'Sign in'),
+      h('a', { class: 'btn play', href: 'play.html' }, 'Play'),
+    ),
   );
 }
 
@@ -172,12 +212,14 @@ function bestiary(): HTMLElement[] {
   const chapterOf = (floor: number) => Math.floor((floor - 1) / 5);
   const blocks = GAME_CHAPTERS.map((ch, ci) => {
     const beasts = all.filter((b) => chapterOf(Math.min(...b.floors)) === ci);
-    const open = ci < OPEN_CHAPTERS;
+    const open = ci < openChapters();
     return h(
       'section',
       { class: 'block' },
       h('h2', {}, `Chapter ${ch.numeral}: ${ch.name}`),
-      open ? h('p', {}, 'What Wayfinders have met so far. Their weaknesses you will have to find yourself.') : h('p', { class: 'muted' }, 'These pages are still sealed. Reach this chapter in the game to learn what lives there.'),
+      open
+        ? h('p', {}, 'What Wayfinders have met so far. Their weaknesses you will have to find yourself.')
+        : h('p', { class: 'muted' }, me ? 'These pages are still sealed. Reach this chapter in the game to open them.' : 'These pages are still sealed. ', me ? null : h('a', { href: 'wayfinder.html' }, 'Sign in'), me ? null : ' and reach this chapter in the game to open them.'),
       h(
         'div',
         { class: `beasts ${open ? '' : 'sealed'}` },
@@ -200,10 +242,78 @@ function devlog(): HTMLElement[] {
   return [h('section', { class: 'page-head' }, h('h1', {}, 'Devlog'), h('p', { class: 'tagline' }, 'News from the making of Ygdrassil')), h('section', { class: 'block' }, ...POSTS.map((p) => postCard(p, true)))];
 }
 
-const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog };
+// ── My Wayfinder ─────────────────────────────────────────────────────────────
+
+function medalCard(id: string, e: EarnedDeed): HTMLElement | null {
+  const def = DEED_BY_ID[id];
+  if (!def) return null;
+  const c = h('canvas', { class: 'medal' }) as HTMLCanvasElement;
+  c.width = 48;
+  c.height = 64;
+  drawMedal(c, def.kind, def.tier, def.icon);
+  const when = new Date(e.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return h('div', { class: 'medal-card', title: def.text }, c, h('b', {}, def.name), h('span', { class: 'muted' }, when));
+}
+
+function signInBox(): HTMLElement {
+  const error = h('p', { class: 'form-error' });
+  const google = h('button', { class: 'btn big' }, 'Sign in with Google');
+  google.addEventListener('click', () => void online.signInWithGoogle(location.href.split('#')[0]).catch((e: Error) => (error.textContent = e.message)));
+  const email = h('input', { type: 'email', placeholder: 'E-mail', autocomplete: 'username' }) as HTMLInputElement;
+  const pass = h('input', { type: 'password', placeholder: 'Password', autocomplete: 'current-password' }) as HTMLInputElement;
+  const go = h('button', { class: 'btn ghost' }, 'Sign in with e-mail');
+  go.addEventListener('click', () => {
+    error.textContent = '';
+    void online.init().then(() => online.signIn(email.value, pass.value)).then(() => location.reload()).catch((e: Error) => (error.textContent = e.message));
+  });
+  return h(
+    'section',
+    { class: 'block signin' },
+    h('h2', {}, 'Sign in'),
+    h('p', {}, 'Sign in with the account you play with: your medals, your party and the pages of the Rootdeep you have reached open up here. No account yet? Sign in with Google: one click, no password.'),
+    google,
+    h('details', {}, h('summary', {}, 'I made an account with e-mail'), h('div', { class: 'email-form' }, email, pass, go)),
+    error,
+    h('p', { class: 'small' }, 'Played as a guest so far? In the game, go to the Hornstone, choose Account and then "Keep it with Google": your progress stays, and you can sign in here.'),
+  );
+}
+
+function wayfinder(): HTMLElement[] {
+  const head = h('section', { class: 'page-head' }, h('h1', {}, 'My Wayfinder'), h('p', { class: 'tagline' }, me ? `Sworn in as ${me.name}` : 'Your medals and your party'));
+  if (!me) return [head, signInBox()];
+  const out: HTMLElement[] = [head];
+  const s = me.save;
+  if (s) {
+    const floor = FLOORS[s.deepest ?? 0]?.name ?? '';
+    const hours = Math.floor((s.playSeconds ?? 0) / 3600);
+    out.push(
+      section(
+        'Your party',
+        h('div', { class: 'party' }, ...[...s.party, ...s.reserve].map((m) => h('div', { class: 'member' }, portrait(m.classId, m.name, CLASSES[m.classId].color, 96, m.look, 'look'), h('b', {}, m.name), h('span', { class: 'muted' }, `Lv ${m.level} ${CLASSES[m.classId].name}`)))),
+        h('p', {}, `Deepest: ${floor} · ${s.battles} battles · ${hours} h played${me.savedAt ? ` · saved to the cloud ${new Date(me.savedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}` : ''}`),
+        h('p', {}, h('a', { class: 'btn', href: 'play.html#cloud' }, 'Play with this save'), ' ', h('span', { class: 'small' }, 'Loads the save kept with your account into this browser.')),
+      ),
+    );
+  } else {
+    out.push(section('Your party', h('p', {}, 'No save in the cloud yet. In the game: the Hornstone, Account, "Upload save to the cloud". Then your party shows here, and you can carry on in any browser.'), h('p', {}, h('a', { class: 'btn', href: 'play.html' }, 'Play'))));
+  }
+  const medals = Object.entries(me.deeds)
+    .sort((a, b) => b[1].at - a[1].at)
+    .map(([id, e]) => medalCard(id, e))
+    .filter((x): x is HTMLElement => !!x);
+  out.push(section('Book of Deeds', medals.length ? h('div', { class: 'medal-case' }, ...medals) : h('p', {}, 'No medals yet. Nobody will tell you what counts as a deed.')));
+  out.push(section('The Rootdeep', h('p', {}, `You have reached ${me.chapters === 1 ? 'the first chapter' : `${me.chapters} chapters`}: their pages in the `, h('a', { href: 'bestiary.html' }, 'bestiary'), ' are open to you.')));
+  const signOut = h('button', { class: 'btn ghost' }, 'Sign out');
+  signOut.addEventListener('click', () => void online.signOut().then(() => location.reload()));
+  out.push(h('section', { class: 'block' }, signOut));
+  return out;
+}
+
+const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog, wayfinder };
 
 void (async () => {
   if (await leaveOldAddress()) return;
+  me = await loadMe().catch(() => null);
   const root = document.getElementById('site')!;
   root.append(header(), h('main', {}, ...(PAGES[page] ?? home)()), footer());
   if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();

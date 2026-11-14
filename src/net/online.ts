@@ -90,8 +90,37 @@ class Online {
   }
 
   get playerName(): string {
-    const meta = this.session?.user.user_metadata as { name?: string } | undefined;
-    return meta?.name || this.email?.split('@')[0] || 'Adventurer';
+    const meta = this.session?.user.user_metadata as { name?: string; full_name?: string; given_name?: string } | undefined;
+    // Our own player name first; for a Google account, the first name it came with.
+    const google = (meta?.given_name || meta?.full_name?.split(' ')[0] || '').slice(0, 16);
+    return meta?.name || google || this.email?.split('@')[0] || 'Adventurer';
+  }
+
+  /** Signed in with Google (or a guest who linked Google). */
+  get hasGoogle(): boolean {
+    return !!this.session?.user.identities?.some((i) => i.provider === 'google');
+  }
+
+  /**
+   * Sign in with Google. A guest links Google to the account they already have, so nothing is lost. The page goes to
+   * Google and comes back to `returnTo`. Inside the itch.io frame Google cannot open, so the website opens instead.
+   */
+  async signInWithGoogle(returnTo = location.href.split('#')[0]): Promise<void> {
+    if (__BUILD__.endsWith('-itch')) {
+      window.open('https://www.ygdrassilgame.com/wayfinder?from=itch', '_blank', 'noopener');
+      return;
+    }
+    await this.init();
+    const options = { redirectTo: returnTo };
+    const { error } = this.session?.user.is_anonymous
+      ? await this.db.auth.linkIdentity({ provider: 'google', options })
+      : await this.db.auth.signInWithOAuth({ provider: 'google', options });
+    if (error) throw new OnlineError(friendly(error.message));
+  }
+
+  /** Coming back from Google: the address holds the sign-in, so connect now to take it in. */
+  get returningFromSignIn(): boolean {
+    return /[?&#](code|access_token|error_description)=/.test(location.href);
   }
 
   async signIn(email: string, password: string): Promise<void> {

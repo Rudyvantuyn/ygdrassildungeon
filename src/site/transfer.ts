@@ -51,6 +51,26 @@ export async function leaveOldAddress(): Promise<boolean> {
   return true;
 }
 
+/**
+ * From the website ("Play with your cloud save"): /play#cloud loads the save kept with the account into this
+ * browser before the game starts (asking first if it would replace another one).
+ */
+export async function takeCloudSave(): Promise<void> {
+  if (location.hash !== '#cloud') return;
+  history.replaceState(null, '', location.pathname + location.search);
+  const { online } = await import('../net/online');
+  try {
+    if (!(await online.connected())) return;
+    const save = await online.downloadSave();
+    if (!save) return;
+    const existing = read('ygdrassil-save-v1');
+    if (existing && existing !== save.data && !confirm('Play with the save kept with your account? This replaces the save in this browser.')) return;
+    localStorage.setItem('ygdrassil-save-v1', save.data);
+  } catch {
+    // Offline or no save: start as usual.
+  }
+}
+
 /** In the game on the new address: take in a save carried over from the old address. */
 export async function takeCarriedSave(): Promise<void> {
   const m = location.hash.match(/^#carry=([A-Za-z0-9_-]+)$/);

@@ -108,7 +108,10 @@ Add new names there and keep the glossary in sync.
   game's own data plus `src/site/lore.ts` (spoiler-free lore, in line with `docs/verhaal.md`) and `src/site/devlog.ts`
   (devlog posts; itch gets a short version linking here). The game is at `/play` (`play.html`). Deeper chapters stay
   sealed on the site (`OPEN_CHAPTERS`). Visits to the old `ygdrassil-dungeon.vercel.app` move to the new address and carry
-  the local save along (`src/site/transfer.ts`). itch.io stays the shop window: its build links to the site with
+  the local save along (`src/site/transfer.ts`). Players sign in with Google (one click; a guest links Google and keeps
+  everything) or e-mail; inside the itch.io frame Google cannot open, so there the button opens the site. Signed in,
+  the game keeps the save with the account (at most every two minutes) and deeds in the `deeds` table; the site's
+  "My Wayfinder" page shows party, medals and progress, and deeper bestiary chapters open for those who reached them. itch.io stays the shop window: its build links to the site with
   `?from=itch`; the site always has the newest version.
 - Online features use the Supabase project `ygdrassil` (`src/net/online.ts`). The `expedition` Edge Function runs
   `server/expedition.ts`, which uses the same rules as the client (`src/core/expedition.ts`). `npm run build` also

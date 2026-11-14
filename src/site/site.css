@@ -152,3 +152,21 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
 @media (max-width: 760px) {
   .site-head { position: static; }
 }
+
+/* Signing in and My Wayfinder */
+nav a.account { border-bottom: 2px dotted var(--rim); }
+.signin { max-width: 640px; margin: 0 auto; text-align: center; }
+.signin details { margin: 18px 0 6px; }
+.signin summary { cursor: pointer; color: var(--muted); }
+.email-form { display: flex; flex-direction: column; gap: 8px; max-width: 320px; margin: 10px auto; }
+.email-form input { font: 17px var(--read); padding: 8px 10px; background: #0a1014; color: var(--text); border: 2px solid var(--rim); }
+button.btn { border: 0; cursor: pointer; font-size: 16px; }
+.form-error { color: #e8806a; min-height: 1em; }
+.party { display: flex; flex-wrap: wrap; gap: 12px; }
+.party .member { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 110px; text-align: center; font-size: 15px; }
+.party .member b { font-family: var(--pixel); }
+.party .look { width: 96px; height: 96px; }
+.medal-case { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.medal-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 10px 6px; background: var(--panel); box-shadow: inset 0 0 0 2px var(--rim); font-size: 14px; }
+.medal-card canvas { width: 72px; height: 96px; }
+.medal-card b { font-family: var(--pixel); font-size: 15px; color: var(--gold); }
