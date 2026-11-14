@@ -4,7 +4,8 @@
  */
 import { eraseCell, setTerrain } from '../core/chart';
 import type { Game } from '../core/game';
-import { mapLayout } from '../render/minimap';
+import { MAP_ZOOMS, mapLayout } from '../render/minimap';
+import { prefs } from './prefs';
 import { el } from './dom';
 
 type Pen = 'wall' | 'floor' | 'erase';
@@ -70,7 +71,7 @@ export class SideMapPen {
     const rect = this.canvas.getBoundingClientRect();
     const px = ((e.clientX - rect.left) * this.size) / rect.width;
     const py = ((e.clientY - rect.top) * this.size) / rect.height;
-    const { cell, ox, oy } = mapLayout(this.size, game.map);
+    const { cell, ox, oy } = mapLayout(this.size, game.map, MAP_ZOOMS[prefs.mapZoom] ?? 1, game.state);
     const x = Math.floor((px - ox) / cell);
     const y = Math.floor((py - oy) / cell);
     if (x < 0 || y < 0 || x >= game.map.width || y >= game.map.height) return;

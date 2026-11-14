@@ -9,10 +9,16 @@ export interface Prefs {
   strafeKeys: boolean;
   /** Softer dungeon walls, floor and ceiling (less contrast and grain), for players who find them busy. */
   calmTextures: boolean;
+  /** How the view moves on a step or turn: a short glide (smooth) or a quick fade. */
+  moveMotion: 'smooth' | 'fade';
+  /** Zoom step of the small map (0 shows the whole floor), see MAP_ZOOMS. */
+  mapZoom: number;
+  /** Zoom step of the full map. */
+  bigMapZoom: number;
 }
 
 const KEY = 'ygdrassil-prefs';
-const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false, calmTextures: false };
+const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false, calmTextures: false, moveMotion: 'smooth', mapZoom: 0, bigMapZoom: 0 };
 
 export const BATTLE_SPEED_NAMES: Record<BattleSpeed, string> = { 0: 'Slow', 1: 'Normal', 2: 'Fast', 3: 'Fastest' };
 export const TEXT_SPEED_NAMES: Record<TextSpeed, string> = { slow: 'Slow', normal: 'Normal', fast: 'Fast', instant: 'Instant' };

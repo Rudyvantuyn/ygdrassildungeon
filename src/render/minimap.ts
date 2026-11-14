@@ -10,10 +10,22 @@ export interface MapLayout {
   oy: number;
 }
 
-/** Cell size and offset that fit the floor into a square of `size` pixels. */
-export function mapLayout(size: number, map: FloorMap): MapLayout {
-  const cell = Math.floor(size / Math.max(map.width, map.height));
-  return { cell, ox: Math.floor((size - cell * map.width) / 2), oy: Math.floor((size - cell * map.height) / 2) };
+/** How much each map zoom step enlarges the squares. */
+export const MAP_ZOOMS = [1, 1.75, 2.5] as const;
+
+/**
+ * Cell size and offset for a square of `size` pixels. At zoom 1 the whole floor fits; zoomed in, the view centres on
+ * `focus` (the party or the cursor) but never scrolls past the floor's edge.
+ */
+export function mapLayout(size: number, map: FloorMap, zoom = 1, focus?: { x: number; y: number }): MapLayout {
+  const cell = Math.floor((size * zoom) / Math.max(map.width, map.height));
+  const axis = (cells: number, at: number | undefined) => {
+    const span = cell * cells;
+    if (span <= size || at === undefined) return Math.floor((size - span) / 2);
+    const centred = Math.round(size / 2 - (at + 0.5) * cell);
+    return Math.min(0, Math.max(size - span, centred));
+  };
+  return { cell, ox: axis(map.width, focus?.x), oy: axis(map.height, focus?.y) };
 }
 
 const FLOOR = '#d8c9a4';
@@ -30,9 +42,10 @@ export function drawMinimap(
   game: Game,
   time: number,
   cursor?: { x: number; y: number },
+  zoom = 1,
 ): void {
   const { map, chart } = game;
-  const { cell, ox, oy } = mapLayout(size, map);
+  const { cell, ox, oy } = mapLayout(size, map, zoom, cursor ?? game.state);
   const auto = game.state.chartMode === 'auto';
 
   ctx.clearRect(0, 0, size, size);

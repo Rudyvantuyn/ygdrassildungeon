@@ -13,7 +13,7 @@ import { randomSeed } from '../core/rng';
 import type { ItemId, Loot, Member } from '../core/types';
 import { CLASSES } from '../core/data/classes';
 import { CorridorRenderer } from '../render/corridor';
-import { drawMinimap } from '../render/minimap';
+import { MAP_ZOOMS, drawMinimap } from '../render/minimap';
 import { drawTownScene, preloadTownScenes } from '../render/town';
 import { preload, sprite } from '../render/sprites';
 import { audio } from '../audio/audio';
@@ -55,7 +55,15 @@ const MOVE_COOLDOWN = 150;
 type Mode = 'title' | 'town' | 'explore' | 'combat' | 'overlay' | 'editor' | 'drafting' | 'story' | 'busy';
 type SidePanel = 'explore' | 'combat' | 'town';
 type MenuTab = 'party' | 'bag' | 'journal' | 'options';
-type ViewFx = { kind: 'step' | 'turn' | 'bump' | 'encounter' | 'shake'; start: number };
+type ViewFx = {
+  kind: 'step' | 'turn' | 'bump' | 'encounter' | 'shake';
+  start: number;
+  /** Step or turn direction for the glide: forward/backward (+1/−1), right/left (+1/−1). */
+  forward?: number;
+  right?: number;
+};
+/** How long the view glides after a step or turn. */
+const GLIDE_MS = 190;
 
 export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   game!: Game;
@@ -111,7 +119,11 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private trial: ChapterDesign | null = null;
   private story: { lines: StoryLine[]; index: number; shown: number; then: () => void; box: HTMLElement } | null = null;
   private fx: ViewFx | null = null;
+  /** The view just before a step or turn, for the glide into the new view. */
+  private readonly before = document.createElement('canvas');
+  private readonly current = document.createElement('canvas');
   private lastMove = 0;
+  private stepDir = { forward: 1, right: 0 };
   private toastTimer = 0;
   private now = 0;
 
@@ -145,7 +157,17 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       canDraw: () => this.mode === 'explore' && this.game?.state.location === 'dungeon' && this.game.state.chartMode !== 'auto',
       changed: () => {},
     });
-    const mapPanel = el('div', { id: 'map-panel', className: 'panel' }, [minimapCanvas, this.mapPen.el, this.keyHint]);
+    const mapZoom = el('div', { id: 'map-zoom' });
+    for (const [label, step, title] of [['−', -1, 'Show more of the floor'], ['+', 1, 'Zoom in around the party']] as const) {
+      const b = el('button', { text: label });
+      b.title = title;
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setPref('mapZoom', Math.min(MAP_ZOOMS.length - 1, Math.max(0, prefs.mapZoom + step)));
+      });
+      mapZoom.append(b);
+    }
+    const mapPanel = el('div', { id: 'map-panel', className: 'panel' }, [minimapCanvas, mapZoom, this.mapPen.el, this.keyHint]);
     const statusRow = el('div', { id: 'status-row', className: 'panel' }, [
       el('div', { id: 'danger' }, [this.dangerOrb, el('span', { text: 'Danger' })]),
       this.goldEl,
@@ -264,7 +286,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     ctx.restore();
     this.drawFx(time);
     if (this.mode === 'editor') this.mapEditor?.draw(time);
-    if (this.game && this.mode !== 'combat' && this.game.state.location === 'dungeon') drawMinimap(this.minimap, MAP_SIZE, this.game, time);
+    if (this.game && this.mode !== 'combat' && this.game.state.location === 'dungeon') drawMinimap(this.minimap, MAP_SIZE, this.game, time, undefined, MAP_ZOOMS[prefs.mapZoom] ?? 1);
     this.mapPen.update();
   }
 
@@ -273,7 +295,11 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     if (!fx) return;
     const ctx = this.view;
     const t = time - fx.start;
-    if (fx.kind === 'step' || fx.kind === 'turn') {
+    if ((fx.kind === 'step' || fx.kind === 'turn') && prefs.moveMotion === 'smooth') {
+      const k = t / GLIDE_MS;
+      if (k >= 1) return void (this.fx = null);
+      this.drawGlide(fx, k);
+    } else if (fx.kind === 'step' || fx.kind === 'turn') {
       const k = t / MOVE_COOLDOWN;
       if (k >= 1) return void (this.fx = null);
       ctx.fillStyle = `rgba(0,0,0,${(fx.kind === 'turn' ? 0.5 : 0.35) * (1 - k)})`;
@@ -294,6 +320,55 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     } else if (t > 260) {
       this.fx = null;
     }
+  }
+
+  /** Keeps a copy of the view as it is now, to glide from after the coming step or turn. */
+  private keepView(): void {
+    const src = this.view.canvas;
+    if (this.before.width !== src.width || this.before.height !== src.height) {
+      this.before.width = this.current.width = src.width;
+      this.before.height = this.current.height = src.height;
+    }
+    this.before.getContext('2d')!.drawImage(src, 0, 0);
+  }
+
+  /**
+   * The glide after a step or turn (k from 0 to 1): turning pans the old view out and the new one in, a step
+   * forward grows the old view as you walk into it, a step back shrinks the new one into place, a side-step slides.
+   */
+  private drawGlide(fx: ViewFx, k: number): void {
+    const ctx = this.view;
+    const { width: w, height: h } = ctx.canvas;
+    const ease = 1 - (1 - k) * (1 - k) * (1 - k);
+    const cur = this.current.getContext('2d')!;
+    cur.drawImage(ctx.canvas, 0, 0);
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const right = fx.right ?? 0;
+    const forward = fx.forward ?? 0;
+    if (fx.kind === 'turn' || (right && !forward)) {
+      // Turning moves the whole view; a side-step only part of the way, fading across.
+      const span = fx.kind === 'turn' ? w : w * 0.3;
+      const dir = right > 0 ? -1 : 1;
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalAlpha = fx.kind === 'turn' ? 1 : ease;
+      ctx.drawImage(this.current, -dir * span * (1 - ease), 0);
+      ctx.globalAlpha = fx.kind === 'turn' ? 1 : 1 - ease;
+      ctx.drawImage(this.before, dir * span * ease, 0);
+    } else {
+      const zoomed = (img: HTMLCanvasElement, scale: number, alpha: number) => {
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(img, (w - w * scale) / 2, (h - h * scale) / 2, w * scale, h * scale);
+      };
+      if (forward > 0) {
+        zoomed(this.before, 1 + 0.35 * ease, 1 - ease);
+      } else {
+        ctx.drawImage(this.before, 0, 0);
+        zoomed(this.current, 1.35 - 0.35 * ease, ease);
+      }
+    }
+    ctx.restore();
   }
 
   shakeView(): void {
@@ -1114,12 +1189,15 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
   private turn(delta: -1 | 1): void {
     audio.play('turn');
+    this.keepView();
     this.game.turn(delta);
-    this.fx = { kind: 'turn', start: this.now };
+    this.fx = { kind: 'turn', start: this.now, right: delta };
     this.updateHud();
   }
 
   private step(forward: number, right: number): void {
+    this.keepView();
+    this.stepDir = { forward, right };
     const events = this.game.step(forward, right);
     for (const ev of events) this.handleStep(ev);
     this.updateHud();
@@ -1140,7 +1218,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         return;
       case 'moved':
         audio.play('step');
-        this.fx = { kind: 'step', start: this.now };
+        this.fx = { kind: 'step', start: this.now, ...this.stepDir };
         return;
       case 'chest':
         audio.play('chest');
@@ -1693,6 +1771,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.save();
     });
     const keys = choices<'turn' | 'step'>([['turn', 'Turn'], ['step', 'Side-step']], () => (prefs.strafeKeys ? 'step' : 'turn'), (v) => setPref('strafeKeys', v === 'step'));
+    const motion = choices<'smooth' | 'fade'>([['smooth', 'Glide'], ['fade', 'Quick']], () => prefs.moveMotion, (v) => setPref('moveMotion', v));
     const look = choices<'detailed' | 'calm'>([['detailed', 'Detailed'], ['calm', 'Calm']], () => (prefs.calmTextures ? 'calm' : 'detailed'), (v) => setPref('calmTextures', v === 'calm'));
     const chart = choices<ChartMode>(
       [['assisted', 'Assisted'], ['manual', 'Manual'], ['auto', 'Auto']],
@@ -1708,6 +1787,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       { label: 'Battle speed', description: 'How fast the rounds of a fight play out. Enter during a round speeds it up even more.', control: battle.control, onAdjust: battle.onAdjust, onSelect: battle.cycle },
       { label: 'Text speed', description: 'How fast story lines appear.', control: text.control, onAdjust: text.onAdjust, onSelect: text.cycle },
       { label: 'Dungeon look', description: 'Detailed: walls and floors as painted. Calm: softer, with less contrast and grain, if the dungeon feels busy or makes you dizzy.', control: look.control, onAdjust: look.onAdjust, onSelect: look.cycle },
+      { label: 'Walking', description: 'Glide: the view pans when you turn and moves when you step, so you keep your bearings. Quick: a short fade, for fast walkers.', control: motion.control, onAdjust: motion.onAdjust, onSelect: motion.cycle },
       { label: 'A / D keys', description: 'Turn: A and D turn, Q and E side-step. Side-step: the other way round. The arrow keys always turn.', control: keys.control, onAdjust: keys.onAdjust, onSelect: keys.cycle },
       ...(solo
         ? [{ label: 'Map drawing', description: 'Assisted: your steps fill in, you draw walls and marks. Manual: you draw everything. Auto: the map draws itself.', control: chart.control, onAdjust: chart.onAdjust, onSelect: chart.cycle }]

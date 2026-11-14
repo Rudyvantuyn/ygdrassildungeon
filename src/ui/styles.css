@@ -266,6 +266,10 @@ button:active {
   transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
 }
 
+.member.back {
+  /* Back row sits a little lower, so the two rows read at a glance. */
+  top: 9px;
+}
 .member.active {
   transform: translateY(-8px);
   box-shadow:
@@ -736,8 +740,8 @@ table.stats th.gear {
 }
 
 .map-canvas {
-  width: 480px;
-  height: 480px;
+  width: min(640px, calc(100vh - 150px), calc(100vw - 320px));
+  height: min(640px, calc(100vh - 150px), calc(100vw - 320px));
   border: 1px solid var(--border);
   border-radius: 4px;
   cursor: crosshair;
@@ -2760,4 +2764,44 @@ body { word-spacing: 0.18em; }
 /* Phones: the small map is too small to draw on; the Map button opens the full map. */
 body.phone #map-pen {
   display: none;
+}
+
+/* Zoom buttons on the small map */
+#map-zoom {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 3px;
+  z-index: 2;
+}
+#map-zoom button,
+.map-zoom-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+.map-zoom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.map-zoom-label {
+  min-width: 84px;
+  text-align: center;
+  font-size: 13px;
+}
+body.phone #map-zoom {
+  top: 6px;
+  right: 6px;
+}
+body.phone #map-zoom button {
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+}
+body.phone .member.back {
+  top: 5px;
 }

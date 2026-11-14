@@ -1,6 +1,7 @@
 import { CHART_MODES, MARKS, NOTE_MAX_LENGTH, eraseCell, setMark, setNote, setTerrain, type ChartMode, type MarkId } from '../core/chart';
 import type { Game } from '../core/game';
-import { MARK_ICONS, drawMinimap, mapLayout } from '../render/minimap';
+import { MAP_ZOOMS, MARK_ICONS, drawMinimap, mapLayout } from '../render/minimap';
+import { prefs, setPref } from './prefs';
 import { iconPath } from '../render/icons';
 import { el } from './dom';
 
@@ -19,7 +20,7 @@ const MODE_LABELS: Record<ChartMode, string> = {
   auto: 'Auto — the map draws itself',
 };
 
-const SIZE = 480;
+const SIZE = 640;
 
 /** Full-size map where the player draws walls, floor, marks and notes. */
 export class MapEditor {
@@ -30,6 +31,7 @@ export class MapEditor {
   private readonly modeButton: HTMLButtonElement;
   private readonly noteInput: HTMLInputElement;
   private readonly cellInfo: HTMLElement;
+  private zoomLabel!: HTMLElement;
   private cursor: { x: number; y: number };
   private tool: Tool = 'wall';
   private painting = false;
@@ -94,19 +96,29 @@ export class MapEditor {
       }
     });
 
+    const zoomOut = el('button', { className: 'map-zoom-btn', text: '−' });
+    zoomOut.title = 'Zoom out (−)';
+    zoomOut.addEventListener('click', () => this.changeZoom(-1));
+    const zoomIn = el('button', { className: 'map-zoom-btn', text: '+' });
+    zoomIn.title = 'Zoom in (+)';
+    zoomIn.addEventListener('click', () => this.changeZoom(1));
+    this.zoomLabel = el('span', { className: 'map-zoom-label' });
+
     const close = el('button', { className: 'map-close', text: 'Close (Esc)' });
     close.addEventListener('click', () => this.onClose());
 
     const side = el('div', { className: 'map-side' }, [
       el('div', { className: 'map-label', text: 'Tools' }),
       tools,
+      el('div', { className: 'map-label', text: 'Zoom' }),
+      el('div', { className: 'map-zoom' }, [zoomOut, this.zoomLabel, zoomIn]),
       el('div', { className: 'map-label', text: 'Map mode' }),
       this.modeButton,
       this.cellInfo,
       this.noteInput,
       el('div', {
         className: 'cmd-hint',
-        text: 'Click or drag to draw · Click a mark again to remove it · Arrows move the cursor · Space draws · 1–9 and 0 pick a tool · N writes a note',
+        text: 'Click or drag to draw · Click a mark again to remove it · Arrows move the cursor · Space draws · 1–9 and 0 pick a tool · N writes a note · + and − zoom',
       }),
       close,
     ]);
@@ -119,7 +131,7 @@ export class MapEditor {
   }
 
   draw(time: number): void {
-    drawMinimap(this.ctx, SIZE, this.game, time, this.cursor);
+    drawMinimap(this.ctx, SIZE, this.game, time, this.cursor, this.zoom());
   }
 
   handleKey(key: string): boolean {
@@ -150,6 +162,13 @@ export class MapEditor {
       case 'n':
         this.editNote();
         return true;
+      case '+':
+      case '=':
+        this.changeZoom(1);
+        return true;
+      case '-':
+        this.changeZoom(-1);
+        return true;
       case 'Escape':
       case 'm':
         this.onClose();
@@ -162,6 +181,15 @@ export class MapEditor {
       return true;
     }
     return false;
+  }
+
+  private zoom(): number {
+    return MAP_ZOOMS[prefs.bigMapZoom] ?? 1;
+  }
+
+  private changeZoom(step: number): void {
+    setPref('bigMapZoom', Math.min(MAP_ZOOMS.length - 1, Math.max(0, prefs.bigMapZoom + step)));
+    this.refresh();
   }
 
   private index(): number {
@@ -206,7 +234,7 @@ export class MapEditor {
     const rect = this.canvas.getBoundingClientRect();
     const px = ((e.clientX - rect.left) * SIZE) / rect.width;
     const py = ((e.clientY - rect.top) * SIZE) / rect.height;
-    const { cell, ox, oy } = mapLayout(SIZE, this.game.map);
+    const { cell, ox, oy } = mapLayout(SIZE, this.game.map, this.zoom(), this.cursor);
     const x = Math.floor((px - ox) / cell);
     const y = Math.floor((py - oy) / cell);
     if (x < 0 || y < 0 || x >= this.game.map.width || y >= this.game.map.height) return;
@@ -224,6 +252,7 @@ export class MapEditor {
 
   private refresh(): void {
     this.modeButton.textContent = MODE_LABELS[this.game.state.chartMode];
+    this.zoomLabel.textContent = prefs.bigMapZoom === 0 ? 'Whole floor' : `×${MAP_ZOOMS[prefs.bigMapZoom]}`;
     const note = this.game.chart.notes[this.index()];
     this.cellInfo.textContent = note ? `“${note}”` : 'No note on this cell.';
     if (document.activeElement !== this.noteInput) this.noteInput.value = note ?? '';

@@ -64,6 +64,7 @@ export class PartyView {
       card.ailment.style.background = ailment ? AILMENT_BADGE[ailment].color : '';
       card.ailment.classList.toggle('hidden', !ailment);
       card.root.classList.toggle('active', display.active === i);
+      card.root.classList.toggle('back', m.row === 'back');
       const mods = display.mods?.[i];
       card.row.textContent = mods || (display.owners?.[i] ?? m.row);
       card.row.classList.toggle('owner', !!display.owners && !mods);
