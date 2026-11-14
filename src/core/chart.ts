@@ -12,7 +12,8 @@ export const CHART_MODES: ChartMode[] = ['assisted', 'manual', 'auto'];
 
 export type Terrain = 'none' | 'floor' | 'wall';
 
-export type MarkId = 'down' | 'up' | 'chest' | 'spring' | 'danger' | 'note' | 'gather';
+/** `gather` is the old single gathering mark (kept for maps drawn before the four kinds got their own). */
+export type MarkId = 'down' | 'up' | 'chest' | 'spring' | 'danger' | 'note' | 'forage' | 'mine' | 'fell' | 'fish' | 'gather';
 
 export const MARKS: Record<MarkId, { glyph: string; color: string; label: string }> = {
   down: { glyph: '▼', color: '#d08a1a', label: 'Stairs down' },
@@ -21,6 +22,10 @@ export const MARKS: Record<MarkId, { glyph: string; color: string; label: string
   spring: { glyph: '●', color: '#1d8ec2', label: 'Spring' },
   danger: { glyph: '✖', color: '#d0302a', label: 'Danger' },
   note: { glyph: '✎', color: '#6a4a9a', label: 'Note' },
+  forage: { glyph: '✿', color: '#7cc85a', label: 'Forage' },
+  mine: { glyph: '◆', color: '#c8a46a', label: 'Mine' },
+  fell: { glyph: '♠', color: '#b07a4a', label: 'Fell' },
+  fish: { glyph: '≈', color: '#5ab0e0', label: 'Fish' },
   gather: { glyph: '✿', color: '#5a9a3a', label: 'Gathering' },
 };
 

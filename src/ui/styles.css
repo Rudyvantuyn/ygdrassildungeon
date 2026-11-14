@@ -740,8 +740,9 @@ table.stats th.gear {
 }
 
 .map-canvas {
-  width: min(640px, calc(100vh - 150px), calc(100vw - 320px));
-  height: min(640px, calc(100vh - 150px), calc(100vw - 320px));
+  /* The game is drawn on a fixed 1280×720 stage that is scaled to the window, so sizes here are stage pixels. */
+  width: 530px;
+  height: 530px;
   border: 1px solid var(--border);
   border-radius: 4px;
   cursor: crosshair;
@@ -764,7 +765,7 @@ table.stats th.gear {
 
 .map-tools {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 5px;
 }
 
@@ -773,7 +774,7 @@ table.stats th.gear {
   flex-direction: column;
   align-items: center;
   gap: 1px;
-  padding: 5px 4px;
+  padding: 3px 4px;
   position: relative;
   font-size: 12px;
 }
@@ -2914,3 +2915,9 @@ body.phone .title-site {
 body.phone .deed-body { grid-template-columns: 1fr 180px; }
 body.phone .deed-hooks { grid-template-columns: repeat(6, 1fr); max-height: 220px; }
 body.phone .deed-banner { top: 6px; max-width: 460px; }
+
+/* The full map's dialog has a fixed height: the canvas fits it, and the tools scroll if they must. */
+.map-body { min-height: 0; flex: 1 1 auto; }
+.map-side { overflow-y: auto; min-height: 0; max-height: 530px; }
+.map-side .cmd-hint { font-size: 12px; line-height: 1.35; }
+.map-cell-info:empty { display: none; }

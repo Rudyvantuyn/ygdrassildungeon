@@ -155,7 +155,7 @@ export function drawMinimap(
 }
 
 /** The icon for each mark the player can place. */
-export const MARK_ICONS: Record<MarkId, IconId> = { down: 'down', up: 'up', chest: 'chest', spring: 'spring', danger: 'danger', note: 'note', gather: 'forage' };
+export const MARK_ICONS: Record<MarkId, IconId> = { down: 'down', up: 'up', chest: 'chest', spring: 'spring', danger: 'danger', note: 'note', forage: 'forage', mine: 'mine', fell: 'fell', fish: 'fish', gather: 'forage' };
 
 /** A map symbol: the painted icon when it has loaded, else `text` in `color`. */
 function glyph(ctx: CanvasRenderingContext2D, x: number, y: number, cell: number, color: string, text: string, id?: IconId, dim = false): void {

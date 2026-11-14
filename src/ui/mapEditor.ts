@@ -11,7 +11,8 @@ const TOOLS: { id: Tool; label: string; glyph: string; color: string }[] = [
   { id: 'floor', label: 'Floor', glyph: '■', color: '#d8c9a4' },
   { id: 'wall', label: 'Wall', glyph: '■', color: '#8a6a44' },
   { id: 'erase', label: 'Erase', glyph: '⌫', color: '#e8e2d0' },
-  ...(Object.keys(MARKS) as MarkId[]).map((id) => ({ id, label: MARKS[id].label, glyph: MARKS[id].glyph, color: MARKS[id].color })),
+  // The old single gathering mark still shows on maps, but is no longer a tool.
+  ...(Object.keys(MARKS) as MarkId[]).filter((id) => id !== 'gather').map((id) => ({ id, label: MARKS[id].label, glyph: MARKS[id].glyph, color: MARKS[id].color })),
 ];
 
 const MODE_LABELS: Record<ChartMode, string> = {
@@ -61,7 +62,7 @@ export class MapEditor {
     const tools = el('div', { className: 'map-tools' });
     TOOLS.forEach((t, i) => {
       const b = el('button', { className: 'map-tool' });
-      b.innerHTML = `<span class="glyph"></span><span class="name"></span><span class="key">${(i + 1) % 10}</span>`;
+      b.innerHTML = `<span class="glyph"></span><span class="name"></span><span class="key">${i < 10 ? (i + 1) % 10 : ''}</span>`;
       const glyph = b.querySelector('.glyph') as HTMLElement;
       if (t.id in MARK_ICONS) {
         // Marks show the same painted icon as on the map.
@@ -120,7 +121,7 @@ export class MapEditor {
       this.noteInput,
       el('div', {
         className: 'cmd-hint',
-        text: 'Click or drag to draw · Click a mark again to remove it · Arrows move the cursor · Space draws · 1–9 and 0 pick a tool · N writes a note · + and − zoom',
+        text: 'Click or drag to draw; click a mark again to remove it. Keys: arrows, Space, 1–0, N note, +/− zoom',
       }),
       close,
     ]);
@@ -256,7 +257,7 @@ export class MapEditor {
     this.modeButton.textContent = MODE_LABELS[this.game.state.chartMode];
     this.zoomLabel.textContent = prefs.bigMapZoom === 0 ? 'Whole floor' : `×${MAP_ZOOMS[prefs.bigMapZoom]}`;
     const note = this.game.chart.notes[this.index()];
-    this.cellInfo.textContent = note ? `“${note}”` : 'No note on this cell.';
+    this.cellInfo.textContent = note ? `“${note}”` : '';
     if (document.activeElement !== this.noteInput) this.noteInput.value = note ?? '';
   }
 }
