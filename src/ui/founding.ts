@@ -10,6 +10,7 @@ import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import { npcSays } from './npc';
 import { lookPicker } from './lookPicker';
+import { SECRET_CLASSES } from '../core/deeds';
 
 export interface FoundingHost {
   openOverlay(content: HTMLElement, menu: ListMenu): void;
@@ -124,7 +125,8 @@ export class Founding {
 
   private chooseClass(): void {
     const front = this.members.filter((m) => m.row === 'front').length;
-    const items: MenuItem[] = (Object.keys(CLASSES) as ClassId[]).map((id) => {
+    // The founding party chooses from the eight classes everyone starts with (secret ones come later).
+    const items: MenuItem[] = (Object.keys(CLASSES) as ClassId[]).filter((id) => !SECRET_CLASSES[id]).map((id) => {
       const c = CLASSES[id];
       return {
         label: c.name,

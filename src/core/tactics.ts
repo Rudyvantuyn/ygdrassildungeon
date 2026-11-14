@@ -84,6 +84,26 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
         if (canUse(i, 'packHunt')) return { kind: 'skill', skill: 'packHunt', target: weakest };
         if (canUse(i, 'fangStrike')) return { kind: 'skill', skill: 'fangStrike', target: weakest };
         break;
+      case 'ravenspeaker': {
+        const foe = combat.enemies[weakest];
+        if (hurt.length >= 2 && canUse(i, 'muninnsReturn')) return { kind: 'skill', skill: 'muninnsReturn', target: -1 };
+        if (living.length >= 2 && canUse(i, 'ravenstorm')) return { kind: 'skill', skill: 'ravenstorm', target: -1 };
+        if (living.length >= 2 && canUse(i, 'murderOfRavens')) return { kind: 'skill', skill: 'murderOfRavens', target: -1 };
+        if (living.length >= 2 && canUse(i, 'stormWing')) return { kind: 'skill', skill: 'stormWing', target: -1 };
+        if ((combat.boss || combat.prowler) && !foe.mods?.res && canUse(i, 'illOmen')) return { kind: 'skill', skill: 'illOmen', target: -1 };
+        if (canUse(i, 'ravenStrike')) return { kind: 'skill', skill: 'ravenStrike', target: weakest };
+        break;
+      }
+      case 'hornbearer': {
+        const partyHas = (stat: 'atk' | 'def') => party.some((_, j) => isAlive(party[j]) && combat.status[j].mods?.[stat]);
+        if (hurt.length >= 2 && canUse(i, 'secondWind')) return { kind: 'skill', skill: 'secondWind', target: -1 };
+        if (combat.boss && !partyHas('atk') && canUse(i, 'callOfGjallar')) return { kind: 'skill', skill: 'callOfGjallar', target: -1 };
+        if (!partyHas('atk') && canUse(i, 'rallyCall')) return { kind: 'skill', skill: 'rallyCall', target: -1 };
+        if ((combat.boss || combat.prowler) && !combat.enemies[weakest].mods?.atk && canUse(i, 'warHorn')) return { kind: 'skill', skill: 'warHorn', target: -1 };
+        if (living.length >= 2 && canUse(i, 'hornBlast')) return { kind: 'skill', skill: 'hornBlast', target: -1 };
+        if (canUse(i, 'echoingBlow')) return { kind: 'skill', skill: 'echoingBlow', target: weakest };
+        break;
+      }
       case 'bastion':
         if (combat.boss && canUse(i, 'ironFormation') && combat.status[i].guard === 0) return { kind: 'skill', skill: 'ironFormation', target: -1 };
         if (living.length >= 2 && canUse(i, 'rampartCrash')) return { kind: 'skill', skill: 'rampartCrash', target: -1 };

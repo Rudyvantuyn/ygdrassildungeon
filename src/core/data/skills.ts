@@ -456,4 +456,69 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     id: 'moonfangFrenzy', name: 'Moonfang Frenzy', sp: 15, target: 'allEnemies', kind: 'phys', power: 70, hits: 2,
     description: 'Wolf and hunter tear through the enemy line twice.',
   }),
+  // ── Ravenspeaker (a secret class) ──────────────────────────────────────────
+  ravenStrike: skill({
+    id: 'ravenStrike', name: 'Raven Strike', sp: 3, target: 'enemy', kind: 'magic', power: 135,
+    description: 'Your raven dives at one enemy, beak first.',
+  }),
+  eyePeck: skill({
+    id: 'eyePeck', name: 'Eye Peck', sp: 5, target: 'enemy', kind: 'magic', power: 95,
+    inflict: { ailment: 'paralysis', chance: 0.4 },
+    description: 'Your raven goes for the eyes. The enemy may reel and lose its turn (paralysis).',
+  }),
+  stormWing: skill({
+    id: 'stormWing', name: 'Storm Wing', sp: 7, target: 'allEnemies', kind: 'magic', element: 'storm', power: 72,
+    description: 'Wings beat up a storm. Storm damage to every enemy.',
+  }),
+  illOmen: skill({
+    id: 'illOmen', name: 'Ill Omen', sp: 7, target: 'allEnemies', kind: 'debuff', power: 0, turns: 3,
+    mods: [{ stat: 'res', amount: -18 }, { stat: 'def', amount: -10 }],
+    description: 'The raven circles and cries their doom. Lowers resistance and defence of every enemy.',
+  }),
+  huginnsWatch: skill({
+    id: 'huginnsWatch', name: "Huginn's Watch", sp: 6, target: 'allAllies', kind: 'buff', power: 0, turns: 3,
+    mods: [{ stat: 'def', amount: 10 }, { stat: 'res', amount: 20 }],
+    description: 'Thought keeps watch from above and calls out every blow. Raises defence and resistance of the party.',
+  }),
+  muninnsReturn: skill({
+    id: 'muninnsReturn', name: "Muninn's Return", sp: 8, target: 'allAllies', kind: 'heal', power: 36, field: true,
+    description: 'Memory flies back with what the body has forgotten. Heals the whole party a little.',
+  }),
+  murderOfRavens: skill({
+    id: 'murderOfRavens', name: 'Murder of Ravens', sp: 10, target: 'allEnemies', kind: 'magic', power: 56, hits: 2,
+    description: 'A whole flock descends. Every enemy is struck twice.',
+  }),
+  ravenstorm: skill({
+    id: 'ravenstorm', name: 'Ravenstorm', sp: 16, target: 'allEnemies', kind: 'magic', element: 'storm', power: 125,
+    description: 'The sky goes black with wings and lightning. Heavy storm damage to every enemy.',
+  }),
+  // ── Hornbearer (a secret class) ────────────────────────────────────────────
+  hornBlast: skill({
+    id: 'hornBlast', name: 'Horn Blast', sp: 6, target: 'allEnemies', kind: 'phys', power: 70,
+    description: 'One deafening blast that shakes every enemy.',
+  }),
+  rallyCall: skill({
+    id: 'rallyCall', name: 'Rally Call', sp: 6, target: 'allAllies', kind: 'buff', power: 0, turns: 3,
+    mods: [{ stat: 'atk', amount: 16 }, { stat: 'def', amount: 8 }],
+    description: 'The call every Wayfinder knows. Raises attack and defence of the party.',
+  }),
+  echoingBlow: skill({
+    id: 'echoingBlow', name: 'Echoing Blow', sp: 6, target: 'enemy', kind: 'phys', power: 165,
+    inflict: { ailment: 'paralysis', chance: 0.25 },
+    description: 'A strike that rings like a struck horn. May leave the enemy stunned (paralysis).',
+  }),
+  warHorn: skill({
+    id: 'warHorn', name: 'War Horn', sp: 7, target: 'allEnemies', kind: 'debuff', power: 0, turns: 3,
+    mods: [{ stat: 'atk', amount: -14 }],
+    description: 'A low, long note that takes the heart out of the enemy. Lowers enemy attack.',
+  }),
+  secondWind: skill({
+    id: 'secondWind', name: 'Second Wind', sp: 9, target: 'allAllies', kind: 'heal', power: 38, field: true,
+    description: 'Breathe in with the horn. Heals the whole party a little.',
+  }),
+  callOfGjallar: skill({
+    id: 'callOfGjallar', name: 'Call of Gjallar', sp: 18, target: 'allAllies', kind: 'buff', power: 0, turns: 4,
+    mods: [{ stat: 'atk', amount: 24 }, { stat: 'def', amount: 24 }, { stat: 'mag', amount: 12 }],
+    description: 'A call like the horn at the end of the world. Raises attack, defence and magic of the party.',
+  }),
 };

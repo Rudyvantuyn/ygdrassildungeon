@@ -35,6 +35,7 @@ import { bindNameField, suggestName } from './founding';
 import { RavensView, ravenBadge, ravenNow } from './ravensView';
 import { lookPicker } from './lookPicker';
 import { healWound, healerCost, isWounded, unavailable } from '../core/ravens';
+import { classUnlocked } from '../core/deeds';
 
 export interface TownHost {
   game: Game;
@@ -388,12 +389,17 @@ export class TownView {
   }
 
   private chooseClass(): void {
-    const items: MenuItem[] = (Object.keys(CLASSES) as ClassId[]).map((id) => ({
-      label: CLASSES[id].name,
-      detail: CLASSES[id].row === 'front' ? 'front row' : 'back row',
-      description: CLASSES[id].description,
-      onSelect: () => this.chooseLook(id),
-    }));
+    // Secret classes show as ??? until their stranger has come to the Oath Hall.
+    const items: MenuItem[] = (Object.keys(CLASSES) as ClassId[]).map((id) =>
+      classUnlocked(this.game, id)
+        ? {
+            label: CLASSES[id].name,
+            detail: CLASSES[id].row === 'front' ? 'front row' : 'back row',
+            description: CLASSES[id].description,
+            onSelect: () => this.chooseLook(id),
+          }
+        : { label: '???', detail: 'not yet found', description: 'Nobody in Lindholm has sworn this oath yet. Perhaps one day someone will come to the Oath Hall to teach it.', disabled: true, onSelect: () => {} },
+    );
     const menu = new ListMenu(items, { onCancel: () => this.hall(0) });
     this.dialog('Choose a class', [], menu, true);
   }

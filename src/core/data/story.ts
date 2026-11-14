@@ -454,6 +454,31 @@ export const STORY: StoryScene[] = [
     ],
   },
 
+  // ── Strangers at the Oath Hall: the secret classes (a proposal; Thijs may change them) ──
+  {
+    id: 'ravenStranger',
+    title: 'The raven on the roof',
+    when: 'town',
+    ready: (g) => !!g.state.deeds?.ravenCall,
+    lines: [
+      { speaker: NARRATOR, text: 'A raven has followed your scouts home. It sits on the roof of the Oath Hall and will not leave.' },
+      { speaker: BRYNJA, text: 'Twenty-five times you sent them down, and twenty-five times the ravens came back with word. Now one has brought someone with it.' },
+      { speaker: NARRATOR, text: 'A woman in a cloak of black feathers steps out of the rain. The raven settles on her shoulder and looks at you with one eye, then the other.' },
+      { speaker: BRYNJA, text: 'She calls herself a Ravenspeaker. The birds told her you are worth swearing for. From now on the Oath Hall takes her kind.' },
+    ],
+  },
+  {
+    id: 'hornStranger',
+    title: 'The horn from another hall',
+    when: 'town',
+    ready: (g) => !!g.state.deeds?.hornCall,
+    lines: [
+      { speaker: NARRATOR, text: 'After your fifth expedition a stranger follows the Wayfinders home: broad, travel-worn, a great horn slung across the back.' },
+      { speaker: BRYNJA, text: 'Five times you sounded the Hornstone, and five times this one answered from a far hall. Now they would rather stand beside you.' },
+      { speaker: BRYNJA, text: 'A Hornbearer. One blast and the deep shakes; one call and tired Wayfinders stand up again. The Oath Hall takes their kind now.' },
+    ],
+  },
+
   // ── Chapter III: the Marrowdeep ────────────────────────────────────────────
   // A proposal written while Thijs is busy (see docs/verhaal.md): he may change any of it.
   {

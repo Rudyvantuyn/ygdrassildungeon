@@ -19,7 +19,7 @@ import { POSTS, type Post } from './devlog';
 import { CHAPTERS, PEOPLE, WORLD } from './lore';
 import { leaveOldAddress } from './transfer';
 import { online } from '../net/online';
-import { DEED_BY_ID, type EarnedDeed } from '../core/deeds';
+import { DEED_BY_ID, SECRET_CLASSES, type EarnedDeed } from '../core/deeds';
 import { FLOORS } from '../core/data/floors';
 import type { GameState } from '../core/game';
 import { drawMedal } from '../render/medals';
@@ -137,7 +137,7 @@ function postCard(post: Post, full: boolean): HTMLElement {
 // ── Pages ────────────────────────────────────────────────────────────────────
 
 function home(): HTMLElement[] {
-  const classes = Object.keys(CLASSES) as ClassId[];
+  const classes = (Object.keys(CLASSES) as ClassId[]).filter((id) => !SECRET_CLASSES[id]);
   const party = h('div', { class: 'looks-strip' }, ...classes.map((id, i) => portrait(id, '', CLASSES[id].color, 96, (i * 3) % LOOKS, 'look')));
   const stone = h('ul', { class: 'stone-names' }, h('li', { class: 'muted' }, 'Reading the stone…'));
   void fetchHonors().then((honors) => {
@@ -189,7 +189,7 @@ function world(): HTMLElement[] {
 }
 
 function classes(): HTMLElement[] {
-  const cards = (Object.keys(CLASSES) as ClassId[]).map((id) => {
+  const card = (id: ClassId) => {
     const c = CLASSES[id];
     return h(
       'div',
@@ -197,8 +197,12 @@ function classes(): HTMLElement[] {
       h('div', { class: 'class-top' }, portrait(id, '', c.color, 128, 0, 'look big'), h('div', {}, h('h3', { style: `color:${c.color}` }, c.name), h('p', { class: 'muted' }, c.row === 'front' ? 'Starts in the front row' : 'Starts in the back row'), h('p', {}, c.description))),
       h('div', { class: 'looks-row' }, ...Array.from({ length: LOOKS }, (_, i) => portrait(id, '', c.color, 64, i, 'look small'))),
     );
-  });
-  const secret = Array.from({ length: 4 }, () => h('div', { class: 'class-card sealed' }, h('div', { class: 'class-top' }, h('div', { class: 'seal big' }, '?'), h('div', {}, h('h3', {}, '???'), h('p', { class: 'muted' }, 'Not yet found'), h('p', {}, 'Some say a stranger comes to the Oath Hall when a Wayfinder has done something no one else has. Nobody knows what.')))));
+  };
+  const ids = Object.keys(CLASSES) as ClassId[];
+  const cards = ids.filter((id) => !SECRET_CLASSES[id]).map(card);
+  const sealed = () => h('div', { class: 'class-card sealed' }, h('div', { class: 'class-top' }, h('div', { class: 'seal big' }, '?'), h('div', {}, h('h3', {}, '???'), h('p', { class: 'muted' }, 'Not yet found'), h('p', {}, 'Some say a stranger comes to the Oath Hall when a Wayfinder has done something no one else has. Nobody knows what.'))));
+  // Secret classes show only to a signed-in player who found them; the last two cards wait for classes to come.
+  const secret = [...ids.filter((id) => SECRET_CLASSES[id]).map((id) => (me?.deeds[SECRET_CLASSES[id]!] ? card(id) : sealed())), sealed(), sealed()];
   return [
     h('section', { class: 'page-head' }, h('h1', {}, 'Classes'), h('p', { class: 'tagline' }, 'Swear them in at the Oath Hall')),
     section('Eight to begin with', h('p', {}, 'Every adventurer swears the Pact as one of these classes, and picks one of eight looks: four men and four women. Every level brings a skill point to spend in the class\'s skill tree; every skill has ten ranks. Most parties want two in front, a healer, and someone to cast or sing.'), h('div', { class: 'class-grid' }, ...cards)),

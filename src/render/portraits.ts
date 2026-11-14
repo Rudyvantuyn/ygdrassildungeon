@@ -6,7 +6,7 @@ import { onSpriteLoad, sprite } from './sprites';
 export type NpcId = 'gerd' | 'hilde' | 'brynja' | 'sigrid' | 'ketil' | 'hjalmar' | 'ylva' | 'aske' | 'torvald' | 'hrodna' | 'eira';
 export type PortraitKind = ClassId | NpcId;
 
-const CLASSES: readonly string[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin'];
+const CLASSES: readonly string[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin', 'ravenspeaker', 'hornbearer'];
 const isClass = (kind: PortraitKind): kind is ClassId => CLASSES.includes(kind);
 
 const HAIR = ['#2a1a12', '#5a3a1e', '#8a5a2a', '#c89a4a', '#e8d090', '#a0a0a8', '#6a2a1a', '#1a1a22'];
@@ -127,6 +127,8 @@ function drawBust(ctx: CanvasRenderingContext2D, size: number, kind: BustKind, n
     berserker: '#5a3a24',
     seeress: '#2a3a4a',
     wolfkin: '#5a5a4a',
+    ravenspeaker: '#2a2e3a',
+    hornbearer: '#6a4a2a',
     sigrid: '#6a3a2a',
   };
   ctx.fillStyle = outfit[kind];

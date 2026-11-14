@@ -159,7 +159,7 @@ export const DEEDS: DeedDef[] = [
 
   // The Oath Hall
   { id: 'fullHall', name: 'Full Hall', text: 'Filled the Oath Hall with twelve adventurers.', kind: 'hall', tier: 'silver', icon: 'castle', earned: (g) => roster(g).length >= 12 },
-  { id: 'everyBanner', name: 'Every Banner', text: 'Swore in one of every class.', kind: 'hall', tier: 'silver', icon: 'flying-flag', earned: (g) => (Object.keys(CLASSES) as ClassId[]).every((c) => roster(g).some((m) => m.classId === c)) },
+  { id: 'everyBanner', name: 'Every Banner', text: 'Swore in one of every class.', kind: 'hall', tier: 'silver', icon: 'flying-flag', earned: (g) => (Object.keys(CLASSES) as ClassId[]).filter((c) => !SECRET_CLASSES[c]).every((c) => roster(g).some((m) => m.classId === c)) },
   { id: 'oldGuard', name: 'Old Guard', text: 'Brought an adventurer to level fifty.', kind: 'hall', tier: 'gold', icon: 'crown', earned: (g) => roster(g).some((m) => m.level >= 50) },
 
   // Raven Runs
@@ -175,9 +175,22 @@ export const DEEDS: DeedDef[] = [
   // The story
   { id: 'firstChoice', name: 'A Road Chosen', text: 'Made your first choice for Midgard.', kind: 'story', tier: 'bronze', icon: 'crossroad', earned: (g) => Object.keys(g.state.choices ?? {}).length >= 1 },
 
+  // Secret: each brings a stranger to the Oath Hall, and a new class with them.
+  { id: 'ravenCall', name: 'Voice of the Ravens', text: 'Sent out twenty-five Raven Runs. One of the ravens came back with someone: the Ravenspeakers now swear the oath.', kind: 'secret', tier: 'rune', icon: 'raven', earned: (g) => n(g, 'runs') >= 25 },
+  { id: 'hornCall', name: 'Horn of Many Halls', text: 'Came home from five expeditions. Someone from another hall followed you back: the Hornbearers now swear the oath.', kind: 'secret', tier: 'rune', icon: 'hunting-horn', earned: (g) => (g.state.claimed?.length ?? 0) >= 5 },
+
   // Odd ones
   { id: 'stubborn', name: 'Stubborn', text: 'Walked into the same wall twenty times in a row.', kind: 'odd', tier: 'bronze', icon: 'brick-wall', earned: (g) => n(g, 'bumps') >= 20 },
 ];
+
+/** Secret classes and the deed that brings each to the Oath Hall. */
+export const SECRET_CLASSES: Partial<Record<ClassId, string>> = { ravenspeaker: 'ravenCall', hornbearer: 'hornCall' };
+
+/** Whether this save may swear in adventurers of a class (secret ones only once their deed is done). */
+export function classUnlocked(g: Pick<Game, 'state'> | null, classId: ClassId): boolean {
+  const deed = SECRET_CLASSES[classId];
+  return !deed || !!g?.state.deeds?.[deed];
+}
 
 export const DEED_BY_ID: Record<string, DeedDef> = Object.fromEntries(DEEDS.map((d) => [d.id, d]));
 

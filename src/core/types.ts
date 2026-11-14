@@ -22,7 +22,7 @@ export interface Stats {
   spd: number;
 }
 
-export type ClassId = 'bastion' | 'strider' | 'mender' | 'runecaller' | 'skald' | 'berserker' | 'seeress' | 'wolfkin';
+export type ClassId = 'bastion' | 'strider' | 'mender' | 'runecaller' | 'skald' | 'berserker' | 'seeress' | 'wolfkin' | 'ravenspeaker' | 'hornbearer';
 
 /** Stats that skills can raise or lower for a few turns in a fight. */
 export type ModStat = 'atk' | 'def' | 'mag' | 'res';
@@ -85,7 +85,21 @@ export type SkillId =
   | 'wolfGuard'
   | 'packHowl'
   | 'hamstring'
-  | 'moonfangFrenzy';
+  | 'moonfangFrenzy'
+  | 'ravenStrike'
+  | 'eyePeck'
+  | 'stormWing'
+  | 'illOmen'
+  | 'huginnsWatch'
+  | 'muninnsReturn'
+  | 'murderOfRavens'
+  | 'ravenstorm'
+  | 'hornBlast'
+  | 'rallyCall'
+  | 'echoingBlow'
+  | 'warHorn'
+  | 'secondWind'
+  | 'callOfGjallar';
 
 export interface Member {
   name: string;

@@ -86,6 +86,16 @@ Thijs had geen tijd; dit is een voorstel in zijn lijn. Alles mag hij veranderen.
   de Oath Hall (midgard).
 - Open voor Thijs: wie de raven stuurt (Odin?), wat er onder de botten ligt, en wanneer Eira ontmaskerd wordt.
 
+### Geheime klassen (voorstel, november 2026)
+
+Twee klassen die je niet kunt kiezen tot je een verborgen deed haalt. Dan meldt zich een vreemdeling bij Brynja
+(scènes `ravenStranger` en `hornStranger` in `story.ts`). *Voorstel, Thijs mag het aanpassen.*
+
+- **Ravenspeaker**: na 25 Raven Runs volgt een raaf je verkenners naar huis, met een vrouw in een mantel van zwarte
+  veren. Ze spreekt met de raven. (Open voor Thijs: horen de raven bij Odin? Na Hrungnir vliegt er ook een raaf weg.)
+- **Hornbearer**: na 5 expedities volgt iemand uit een andere hal je naar huis, met een grote hoorn. (De hoorn kan
+  later verbonden worden met Gjallarhorn, de hoorn van Heimdall.)
+
 ### Keuzes (de drie wegen)
 
 Op drie momenten kiest de speler. Dat wordt opgeslagen (`state.choices`) en telt op richting **asgard**, **realms**

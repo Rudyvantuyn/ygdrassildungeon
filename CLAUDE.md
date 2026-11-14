@@ -40,6 +40,11 @@ Add new names there and keep the glossary in sync.
 - **Character growth is dynamic**: skill points per level, spent in a skill tree per class; skills have ranks 1–10.
   There are also gathering skills (e.g. foraging, mining) used at gathering spots in the dungeon. More classes are
   welcome; invent them freely (own names).
+- **Secret classes**: some classes are not on offer until a hidden deed is done (`SECRET_CLASSES` in
+  `src/core/deeds.ts`); then a stranger comes to the Oath Hall (a story scene) and the class can be sworn in. Until then
+  the Oath Hall and the website show them only as ???. The founding party always picks from the eight open classes.
+  So far: Ravenspeaker (25 Raven Runs) and Hornbearer (5 expeditions). Each needs a full tree, 8 looks, gear access,
+  tactics in `tactics.ts`, and the balance check in `secretClasses.test.ts`.
 - **A new game starts by founding the party**: the player swears in their own adventurers (up to four, free) with
   Brynja's guidance. After that every new adventurer costs rising gold **and an Oath Token** (found on bosses,
   prowlers and in a few chests), so the roster cannot grow endlessly.

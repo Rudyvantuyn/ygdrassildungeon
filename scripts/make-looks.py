@@ -4,7 +4,7 @@ Builds the hero looks (public/art/heroes/<class>-<n>.webp) from Dungeon Crawl St
     python3 scripts/make-looks.py "<path to 'Dungeon Crawl Stone Soup Full'>" [preview.png]
 
 scripts/hero-looks.json lists, per class, 8 looks (4 men, then 4 women): which part goes on which layer, and how
-dark the skin is (0-3). Each 32x32 doll is scaled up 8x with hard pixel edges, like the monsters.
+dark the skin is (0-3), and optionally a small companion from the monster tiles ("companion": [tile, x, y, size]). Each 32x32 doll is scaled up 8x with hard pixel edges, like the monsters.
 """
 import json
 import sys
@@ -49,6 +49,11 @@ def doll(player: Path, look: dict) -> Image.Image:
         if layer == "base":
             im = darken_skin(im, look.get("skin", 0))
         out.alpha_composite(im)
+    # A companion creature from the monster tiles, small, on the shoulder (the Ravenspeaker's raven).
+    if "companion" in look:
+        name, x, y, size = look["companion"]
+        pet = Image.open(player.parent / "monster" / f"{name}.png").convert("RGBA").resize((size, size), Image.NEAREST)
+        out.alpha_composite(pet, (x, y))
     return out
 
 

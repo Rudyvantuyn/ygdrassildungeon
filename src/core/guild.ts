@@ -2,6 +2,7 @@ import { CLASSES } from './data/classes';
 import type { Game } from './game';
 import { createMember } from './party';
 import { unavailable } from './ravens';
+import { classUnlocked } from './deeds';
 import type { ClassId } from './types';
 
 /** The Oath Hall: register adventurers and choose who goes into the Rootdeep. */
@@ -37,7 +38,7 @@ export function registerMember(game: Game, rawName: string, classId: ClassId, lo
   const name = cleanName(rawName);
   if (!name) return 'Give your adventurer a name.';
   if (nameLength(name) > NAME_MAX_LENGTH) return `Names can be at most ${NAME_MAX_LENGTH} letters.`;
-  if (!CLASSES[classId]) return 'Unknown class.';
+  if (!CLASSES[classId] || !classUnlocked(game, classId)) return 'Unknown class.';
   const all = [...game.state.party, ...game.state.reserve];
   if (all.some((m) => m.name.toLowerCase() === name.toLowerCase())) return `There is already someone called ${name}.`;
   if (all.length >= MAX_ROSTER) return `The Oath Hall can hold at most ${MAX_ROSTER} adventurers.`;

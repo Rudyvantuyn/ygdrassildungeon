@@ -13,12 +13,12 @@ export interface EquipDef {
   bonus: Partial<Stats>;
 }
 
-const ALL: ClassId[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin'];
-const CASTERS: ClassId[] = ['mender', 'runecaller', 'skald', 'seeress'];
+const ALL: ClassId[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin', 'ravenspeaker', 'hornbearer'];
+const CASTERS: ClassId[] = ['mender', 'runecaller', 'skald', 'seeress', 'ravenspeaker'];
 /** Blades, axes and spears for the front-line fighters. */
-const BLADES: ClassId[] = ['bastion', 'berserker', 'wolfkin'];
+const BLADES: ClassId[] = ['bastion', 'berserker', 'wolfkin', 'hornbearer'];
 /** Mail and hide armour. */
-const MAIL: ClassId[] = ['bastion', 'strider', 'berserker', 'wolfkin'];
+const MAIL: ClassId[] = ['bastion', 'strider', 'berserker', 'wolfkin', 'hornbearer'];
 
 const list: EquipDef[] = [
   // Tier 0 — available from the start
