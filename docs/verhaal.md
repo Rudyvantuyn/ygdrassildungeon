@@ -88,13 +88,17 @@ Thijs had geen tijd; dit is een voorstel in zijn lijn. Alles mag hij veranderen.
 
 ### Geheime klassen (voorstel, november 2026)
 
-Twee klassen die je niet kunt kiezen tot je een verborgen deed haalt. Dan meldt zich een vreemdeling bij Brynja
-(scènes `ravenStranger` en `hornStranger` in `story.ts`). *Voorstel, Thijs mag het aanpassen.*
+Drie klassen die je niet kunt kiezen tot je een verborgen deed haalt. Dan meldt zich een vreemdeling bij Brynja
+(scènes `ravenStranger`, `hornStranger` en `wildStranger` in `story.ts`). *Voorstel, Thijs mag het aanpassen.*
 
 - **Ravenspeaker**: na 25 Raven Runs volgt een raaf je verkenners naar huis, met een vrouw in een mantel van zwarte
   veren. Ze spreekt met de raven. (Open voor Thijs: horen de raven bij Odin? Na Hrungnir vliegt er ook een raaf weg.)
 - **Hornbearer**: na 5 expedities volgt iemand uit een andere hal je naar huis, met een grote hoorn. (De hoorn kan
   later verbonden worden met Gjallarhorn, de hoorn van Heimdall.)
+- **Fylgja**: als elk wezen van de Greenwood Roots (ook prowlers en de Blighted Elder) één keer verslagen is, gaat er
+  's nachts een groot dier voor de Oath Hall zitten. Brynja herkent het: een fylgja, de geest die in dierengedaante met
+  een leven meeloopt. Ze kiezen zelf wie ze volgen; deze koos de hal. Speelbaar als beer of kat (Freyja's katten).
+  (Open voor Thijs: wiens fylgja is het, en waarom koos het juist nu?)
 
 ### Keuzes (de drie wegen)
 

@@ -4,7 +4,7 @@
  */
 import { CLASSES } from '../core/data/classes';
 import type { ClassId } from '../core/types';
-import { LOOKS, drawPortrait } from '../render/portraits';
+import { LOOKS, drawPortrait, lookGroups, lookName } from '../render/portraits';
 import { el } from './dom';
 import type { MenuItem } from './menu';
 
@@ -36,10 +36,10 @@ export function lookPicker(classId: ClassId, start: number, choose: (look: numbe
     look = ((i % LOOKS) + LOOKS) % LOOKS;
     drawPortrait(big.getContext('2d')!, 192, classId, '', accent, look);
     thumbs.forEach((t, j) => t.classList.toggle('on', j === look));
-    label.textContent = `${look < LOOKS / 2 ? 'Man' : 'Woman'} ${(look % (LOOKS / 2)) + 1} of ${LOOKS / 2}`;
+    label.textContent = lookName(classId, look);
   };
   set(look);
-  const gallery = el('div', { className: 'look-picker' }, [big, el('div', { className: 'look-side' }, [el('div', { className: 'look-caption', text: 'Men' }), rows[0], el('div', { className: 'look-caption', text: 'Women' }), rows[1]])]);
+  const gallery = el('div', { className: 'look-picker' }, [big, el('div', { className: 'look-side' }, [el('div', { className: 'look-caption', text: lookGroups(classId)[0] }), rows[0], el('div', { className: 'look-caption', text: lookGroups(classId)[1] }), rows[1]])]);
   return {
     body: [gallery],
     items: [

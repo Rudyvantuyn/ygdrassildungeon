@@ -7,6 +7,7 @@ import { makeInventory } from './data/items';
 import { pendingScene } from './data/story';
 import { SECRET_CLASSES, checkDeeds, classUnlocked } from './deeds';
 import { Game } from './game';
+import { bestiaryOrder } from './bestiary';
 import { registerMember } from './guild';
 import { createMember, fullRestore, xpForLevel } from './party';
 import { Rng } from './rng';
@@ -59,6 +60,10 @@ describe('secret classes', () => {
     g.state.claimed = ['a', 'b', 'c', 'd', 'e'];
     expect(checkDeeds(g, 2).map((d) => d.id)).toContain('hornCall');
     expect(registerMember(g, 'Hallgrim', 'hornbearer', 0)).toBeNull();
+    expect(classUnlocked(g, 'fylgja')).toBe(false);
+    for (const b of bestiaryOrder()) if (Math.min(...b.floors) <= 5) (g.state.bestiary ??= {})[b.def.id] = { seen: 1, defeated: 1, tried: [] };
+    expect(checkDeeds(g, 3).map((d) => d.id)).toContain('wildCall');
+    expect(registerMember(g, 'Bjarnfrid', 'fylgja', 2)).toBeNull();
   });
 
   it('every secret class has a full tree, gear and eight looks', () => {
@@ -75,6 +80,7 @@ describe('secret classes balance', { timeout: 120_000 }, () => {
   const base: ClassId[] = ['bastion', 'strider', 'mender', 'runecaller'];
   const raven: ClassId[] = ['bastion', 'strider', 'mender', 'ravenspeaker'];
   const horn: ClassId[] = ['bastion', 'hornbearer', 'mender', 'runecaller'];
+  const wild: ClassId[] = ['fylgja', 'strider', 'mender', 'runecaller'];
   const fights: [string, number, number, string[], boolean][] = [
     ['the Rootgnawer', 10, 4, FLOORS[4].boss!, true],
     ['the Drowned Jarl', 15, 7, FLOORS[7].boss!, true],
@@ -85,6 +91,7 @@ describe('secret classes balance', { timeout: 120_000 }, () => {
       const usual = winRate(base, level, tier, enemies, boss);
       expect(Math.abs(winRate(raven, level, tier, enemies, boss) - usual)).toBeLessThanOrEqual(0.25);
       expect(Math.abs(winRate(horn, level, tier, enemies, boss) - usual)).toBeLessThanOrEqual(0.25);
+      expect(Math.abs(winRate(wild, level, tier, enemies, boss) - usual)).toBeLessThanOrEqual(0.25);
     });
   }
 });

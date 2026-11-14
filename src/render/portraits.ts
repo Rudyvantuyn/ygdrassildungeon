@@ -6,7 +6,7 @@ import { onSpriteLoad, sprite } from './sprites';
 export type NpcId = 'gerd' | 'hilde' | 'brynja' | 'sigrid' | 'ketil' | 'hjalmar' | 'ylva' | 'aske' | 'torvald' | 'hrodna' | 'eira';
 export type PortraitKind = ClassId | NpcId;
 
-const CLASSES: readonly string[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin', 'ravenspeaker', 'hornbearer'];
+const CLASSES: readonly string[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin', 'ravenspeaker', 'hornbearer', 'fylgja'];
 const isClass = (kind: PortraitKind): kind is ClassId => CLASSES.includes(kind);
 
 const HAIR = ['#2a1a12', '#5a3a1e', '#8a5a2a', '#c89a4a', '#e8d090', '#a0a0a8', '#6a2a1a', '#1a1a22'];
@@ -25,6 +25,17 @@ export const LOOKS = 8;
 /** An adventurer's look; one without a chosen look gets one from their name. */
 export function lookOf(name: string, look?: number): number {
   return look !== undefined && Number.isInteger(look) && look >= 0 && look < LOOKS ? look : hash(name) % LOOKS;
+}
+
+/** How the two rows of looks are called: men and women, or for an animal class the kinds of animal. */
+export function lookGroups(classId: ClassId): [string, string] {
+  return classId === 'fylgja' ? ['Bears', 'Cats'] : ['Men', 'Women'];
+}
+
+/** The name of one look, as the picker shows it ("Woman 2 of 4", "Grizzly"). */
+export function lookName(classId: ClassId, look: number): string {
+  if (classId === 'fylgja') return ['Grizzly', 'Black bear', 'White bear', 'Red bear', 'White cat', 'Black cat', 'Golden cat', 'Grey cat'][look] ?? 'Fylgja';
+  return `${look < LOOKS / 2 ? 'Man' : 'Woman'} ${(look % (LOOKS / 2)) + 1} of ${LOOKS / 2}`;
 }
 
 export function lookPath(classId: ClassId, look: number): string {
@@ -129,6 +140,7 @@ function drawBust(ctx: CanvasRenderingContext2D, size: number, kind: BustKind, n
     wolfkin: '#5a5a4a',
     ravenspeaker: '#2a2e3a',
     hornbearer: '#6a4a2a',
+    fylgja: '#4a5a3a',
     sigrid: '#6a3a2a',
   };
   ctx.fillStyle = outfit[kind];

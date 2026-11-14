@@ -4,7 +4,7 @@ Builds the hero looks (public/art/heroes/<class>-<n>.webp) from Dungeon Crawl St
     python3 scripts/make-looks.py "<path to 'Dungeon Crawl Stone Soup Full'>" [preview.png]
 
 scripts/hero-looks.json lists, per class, 8 looks (4 men, then 4 women): which part goes on which layer, and how
-dark the skin is (0-3), and optionally a small companion from the monster tiles ("companion": [tile, x, y, size]). Each 32x32 doll is scaled up 8x with hard pixel edges, like the monsters.
+dark the skin is (0-3), or for an animal class one whole creature ("animal": monster tile path), and optionally a small companion from the monster tiles ("companion": [tile, x, y, size]). Each 32x32 doll is scaled up 8x with hard pixel edges, like the monsters.
 """
 import json
 import sys
@@ -41,6 +41,9 @@ def darken_skin(img: Image.Image, tone: int) -> Image.Image:
 
 
 def doll(player: Path, look: dict) -> Image.Image:
+    # An animal class (the Fylgja): one whole creature from the monster tiles instead of a doll.
+    if "animal" in look:
+        return Image.open(player.parent / "monster" / f"{look['animal']}.png").convert("RGBA")
     out = Image.new("RGBA", (32, 32))
     for layer in ORDER:
         if layer not in look:

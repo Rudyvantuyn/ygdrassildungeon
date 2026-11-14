@@ -104,6 +104,15 @@ export function chooseCommands(combat: Combat): (Command | null)[] {
         if (canUse(i, 'echoingBlow')) return { kind: 'skill', skill: 'echoingBlow', target: weakest };
         break;
       }
+      case 'fylgja': {
+        if (m.hp < memberStats(m).hp * 0.4 && canUse(i, 'lickWounds')) return { kind: 'skill', skill: 'lickWounds', target: i };
+        if ((combat.boss || combat.prowler) && !combat.enemies[weakest].mods?.atk && canUse(i, 'feralRoar')) return { kind: 'skill', skill: 'feralRoar', target: -1 };
+        if (living.length >= 2 && canUse(i, 'spiritUnbound')) return { kind: 'skill', skill: 'spiritUnbound', target: -1 };
+        if (living.length >= 3 && canUse(i, 'wildRush')) return { kind: 'skill', skill: 'wildRush', target: -1 };
+        if (canUse(i, 'rendingClaws')) return { kind: 'skill', skill: 'rendingClaws', target: weakest };
+        if (canUse(i, 'maul')) return { kind: 'skill', skill: 'maul', target: weakest };
+        break;
+      }
       case 'bastion':
         if (combat.boss && canUse(i, 'ironFormation') && combat.status[i].guard === 0) return { kind: 'skill', skill: 'ironFormation', target: -1 };
         if (living.length >= 2 && canUse(i, 'rampartCrash')) return { kind: 'skill', skill: 'rampartCrash', target: -1 };

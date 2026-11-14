@@ -126,6 +126,15 @@ function seenAllOfChapter(g: Game, ch: number): boolean {
     .every((b) => (g.state.bestiary?.[b.def.id]?.seen ?? 0) > 0);
 }
 
+/** Every creature of a chapter (its monsters, prowlers and guardian) defeated at least once. */
+function beatenAllOfChapter(g: Game, ch: number): boolean {
+  const first = ch * FLOORS_PER_CHAPTER + 1;
+  const last = first + FLOORS_PER_CHAPTER - 1;
+  return bestiaryOrder()
+    .filter((b) => Math.min(...b.floors) >= first && Math.min(...b.floors) <= last)
+    .every((b) => (g.state.bestiary?.[b.def.id]?.defeated ?? 0) > 0);
+}
+
 export const DEEDS: DeedDef[] = [
   // Exploring and mapping
   { id: 'firstSteps', name: 'First Steps', text: 'Went down the stairs for the first time.', kind: 'explore', tier: 'bronze', icon: 'stairs', earned: (g) => g.state.deepest >= 1 },
@@ -179,12 +188,14 @@ export const DEEDS: DeedDef[] = [
   { id: 'ravenCall', name: 'Voice of the Ravens', text: 'Sent out twenty-five Raven Runs. One of the ravens came back with someone: the Ravenspeakers now swear the oath.', kind: 'secret', tier: 'rune', icon: 'raven', earned: (g) => n(g, 'runs') >= 25 },
   { id: 'hornCall', name: 'Horn of Many Halls', text: 'Came home from five expeditions. Someone from another hall followed you back: the Hornbearers now swear the oath.', kind: 'secret', tier: 'rune', icon: 'hunting-horn', earned: (g) => (g.state.claimed?.length ?? 0) >= 5 },
 
+  { id: 'wildCall', name: 'Kin of the Wild', text: 'Defeated every creature of the Greenwood Roots, prowlers and guardian too. Something wild followed you home: the Fylgjur now swear the oath.', kind: 'secret', tier: 'rune', icon: 'paw', earned: (g) => beatenAllOfChapter(g, 0) },
+
   // Odd ones
   { id: 'stubborn', name: 'Stubborn', text: 'Walked into the same wall twenty times in a row.', kind: 'odd', tier: 'bronze', icon: 'brick-wall', earned: (g) => n(g, 'bumps') >= 20 },
 ];
 
 /** Secret classes and the deed that brings each to the Oath Hall. */
-export const SECRET_CLASSES: Partial<Record<ClassId, string>> = { ravenspeaker: 'ravenCall', hornbearer: 'hornCall' };
+export const SECRET_CLASSES: Partial<Record<ClassId, string>> = { ravenspeaker: 'ravenCall', hornbearer: 'hornCall', fylgja: 'wildCall' };
 
 /** Whether this save may swear in adventurers of a class (secret ones only once their deed is done). */
 export function classUnlocked(g: Pick<Game, 'state'> | null, classId: ClassId): boolean {

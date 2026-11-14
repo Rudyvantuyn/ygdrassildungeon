@@ -479,6 +479,19 @@ export const STORY: StoryScene[] = [
     ],
   },
 
+  {
+    id: 'wildStranger',
+    title: 'The bear at the door',
+    when: 'town',
+    ready: (g) => !!g.state.deeds?.wildCall,
+    lines: [
+      { speaker: NARRATOR, text: 'Every beast of the Greenwood Roots has fallen to you once. That night something large sits down outside the Oath Hall and waits.' },
+      { speaker: BRYNJA, text: 'Do not reach for your weapons. That is no beast of the roots. It is a fylgja: the spirit that walks beside a life, in an animal\'s shape.' },
+      { speaker: NARRATOR, text: 'It looks at each of you in turn, as if it has known you a long time. Then it lies down by the hearth.' },
+      { speaker: BRYNJA, text: 'They choose whom they follow. It chose this hall. The Oath Hall takes the Fylgjur now: bears and cats, all of them oath-bound.' },
+    ],
+  },
+
   // ── Chapter III: the Marrowdeep ────────────────────────────────────────────
   // A proposal written while Thijs is busy (see docs/verhaal.md): he may change any of it.
   {

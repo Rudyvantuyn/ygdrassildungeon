@@ -19,12 +19,12 @@ export interface EquipDef {
   wyrd?: 'lastStand' | 'mending' | 'steadfast';
 }
 
-const ALL: ClassId[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin', 'ravenspeaker', 'hornbearer'];
+const ALL: ClassId[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin', 'ravenspeaker', 'hornbearer', 'fylgja'];
 const CASTERS: ClassId[] = ['mender', 'runecaller', 'skald', 'seeress', 'ravenspeaker'];
 /** Blades, axes and spears for the front-line fighters. */
-const BLADES: ClassId[] = ['bastion', 'berserker', 'wolfkin', 'hornbearer'];
+const BLADES: ClassId[] = ['bastion', 'berserker', 'wolfkin', 'hornbearer', 'fylgja'];
 /** Mail and hide armour. */
-const MAIL: ClassId[] = ['bastion', 'strider', 'berserker', 'wolfkin', 'hornbearer'];
+const MAIL: ClassId[] = ['bastion', 'strider', 'berserker', 'wolfkin', 'hornbearer', 'fylgja'];
 
 const list: EquipDef[] = [
   // Wyrd gear: woven from Wyrd Threads at Hilde's (see WYRD_COSTS in src/core/wyrd.ts), for every class.

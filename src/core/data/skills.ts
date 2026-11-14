@@ -521,4 +521,45 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     mods: [{ stat: 'atk', amount: 24 }, { stat: 'def', amount: 24 }, { stat: 'mag', amount: 12 }],
     description: 'A call like the horn at the end of the world. Raises attack, defence and magic of the party.',
   }),
+  // ── Fylgja (a secret class) ────────────────────────────────────────────────
+  maul: skill({
+    id: 'maul', name: 'Maul', sp: 4, target: 'enemy', kind: 'phys', power: 155,
+    description: 'All of its weight behind one blow of the paw.',
+  }),
+  warding: skill({
+    id: 'warding', name: 'Warding', sp: 3, target: 'self', kind: 'challenge', power: 0, turns: 2,
+    description: 'It plants itself before the party, hackles up. Enemies strike the Fylgja first.',
+  }),
+  thickHide: skill({
+    id: 'thickHide', name: 'Thick Hide', sp: 0, target: 'self', kind: 'passive', power: 0,
+    passive: { stat: 'hp', perRank: 4 },
+    description: 'Fur and fat against the cold of the roots. Raises max HP.',
+  }),
+  lickWounds: skill({
+    id: 'lickWounds', name: 'Lick Wounds', sp: 5, target: 'self', kind: 'heal', power: 75, field: true,
+    description: 'It tends its own hurts, as animals do. Heals the Fylgja.',
+  }),
+  rendingClaws: skill({
+    id: 'rendingClaws', name: 'Rending Claws', sp: 6, target: 'enemy', kind: 'phys', power: 78, hits: 2,
+    inflict: { ailment: 'poison', chance: 0.3 },
+    description: 'Two swipes that leave deep, dirty wounds. May poison.',
+  }),
+  feralRoar: skill({
+    id: 'feralRoar', name: 'Feral Roar', sp: 7, target: 'allEnemies', kind: 'debuff', power: 0, turns: 3,
+    mods: [{ stat: 'atk', amount: -12 }, { stat: 'mag', amount: -12 }],
+    description: 'A roar from deep in the chest. Lowers attack and magic of every enemy.',
+  }),
+  spiritWard: skill({
+    id: 'spiritWard', name: 'Spirit Ward', sp: 6, target: 'ally', kind: 'buff', power: 0, turns: 3,
+    mods: [{ stat: 'def', amount: 35 }, { stat: 'res', amount: 20 }],
+    description: 'The Fylgja follows one ally like a shadow and guards them. Raises their defence and resistance.',
+  }),
+  wildRush: skill({
+    id: 'wildRush', name: 'Wild Rush', sp: 9, target: 'allEnemies', kind: 'phys', power: 80,
+    description: 'It charges straight through the enemy line. Hits every enemy.',
+  }),
+  spiritUnbound: skill({
+    id: 'spiritUnbound', name: 'Spirit Unbound', sp: 16, target: 'allEnemies', kind: 'phys', power: 135,
+    description: 'For a moment it shows its true shape, far larger than any beast. Heavy damage to every enemy.',
+  }),
 };

@@ -43,11 +43,13 @@ Built by `scripts/make-looks.py` from the player doll parts of the Dungeon Crawl
 (https://opengameart.org/content/dungeon-crawl-32x32-tiles), CC0: body, armour, hair, beard, headgear, cloak and what
 they hold, layered per look as listed in `scripts/hero-looks.json` (looks 0–3 men, 4–7 women; some get a darker skin
 tone by recolouring the body layer). Each 32×32 figure is scaled up 8× with hard pixel edges.
+The Fylgja is an animal: its looks are whole creatures from the same set (grizzly, black, polar and brown bear from
+`monster/animals/`, four cats from `player/felids/`), also CC0.
 
 ## Medal signs (`public/art/medals/icons.json`)
 
 Icons from game-icons.net (CC BY 3.0), stored as SVG paths and drawn into the medals of the Book of Deeds
-(`src/render/medals.ts`; the medals themselves are drawn in code). by Delapouite: stairs, tree-roots, brick-wall, kraken-tentacle, heart-beats, coins, shaking-hands, crossroad; by Lorc: wave-crest, ribcage, treasure-map, crossed-swords, sword-clash, dead-wood, wolf-head, magnifying-glass, book-cover, knapsack, laurels, run, broken-shield, sprout, anvil, castle, flying-flag, crown, raven, feather, hunting-horn, rune-stone, tied-scroll; by Skoll: open-chest, fangs. Credited on `public/credits.html`.
+(`src/render/medals.ts`; the medals themselves are drawn in code). by Delapouite: stairs, tree-roots, brick-wall, kraken-tentacle, heart-beats, coins, shaking-hands, crossroad; by Lorc: wave-crest, ribcage, treasure-map, crossed-swords, sword-clash, dead-wood, wolf-head, magnifying-glass, book-cover, knapsack, laurels, run, broken-shield, sprout, anvil, castle, flying-flag, crown, raven, feather, hunting-horn, paw, rune-stone, tied-scroll; by Skoll: open-chest, fangs. Credited on `public/credits.html`.
 
 ## Places (`public/art/places`) and dungeon textures (`public/art/dungeon`)
 

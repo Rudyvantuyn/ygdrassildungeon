@@ -1,5 +1,5 @@
 {
-  "_about": "Hero looks (4 men, then 4 women, per class) built from Dungeon Crawl Stone Soup player doll parts (CC0) by scripts/make-looks.py. Paths are under player/<layer>/ in the 'Dungeon Crawl Stone Soup Full' download; skin 0-3 darkens the skin.",
+  "_about": "Hero looks (4 men, then 4 women, per class) built from Dungeon Crawl Stone Soup player doll parts (CC0) by scripts/make-looks.py. Paths are under player/<layer>/ in the 'Dungeon Crawl Stone Soup Full' download; skin 0-3 darkens the skin. The Fylgja is an animal: each look is one whole creature from monster/ (\"animal\"), four bears then four cats.",
   "bastion": [
     {
       "base": "human_male",
@@ -843,6 +843,32 @@
       "hand_left": "dagger_new",
       "cloak": "red",
       "skin": 3
+    }
+  ],
+  "fylgja": [
+    {
+      "animal": "animals/grizzly_bear"
+    },
+    {
+      "animal": "animals/black_bear_new"
+    },
+    {
+      "animal": "animals/polar_bear"
+    },
+    {
+      "animal": "animals/bear"
+    },
+    {
+      "animal": "../player/felids/cat_6"
+    },
+    {
+      "animal": "../player/felids/cat_7"
+    },
+    {
+      "animal": "../player/felids/cat_9"
+    },
+    {
+      "animal": "../player/felids/cat_8"
     }
   ]
 }
