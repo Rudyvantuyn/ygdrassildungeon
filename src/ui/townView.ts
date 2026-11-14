@@ -32,6 +32,8 @@ import { ListMenu, type MenuItem } from './menu';
 import { npcFromName, npcSays } from './npc';
 import { fetchHonors } from '../net/reports';
 import { bindNameField, suggestName } from './founding';
+import { RavensView, ravenBadge, ravenNow } from './ravensView';
+import { healWound, healerCost, isWounded, unavailable } from '../core/ravens';
 
 export interface TownHost {
   game: Game;
@@ -89,7 +91,7 @@ export class TownView {
       { spot: 'rootdeep', name: 'The Rootdeep', detail: '', description: 'Descend from the start of a chapter you have opened.', onSelect: () => this.rootdeep() },
       { spot: 'inn', name: 'The Sleeping Stag', detail: `Rest · ${innCost(this.game)} G`, description: 'Rest to restore HP and SP, wake the fallen, and save.', onSelect: () => this.host.tips(['inn'], () => this.inn()) },
       { spot: 'shop', name: "Hilde's Supplies", detail: 'Shop', description: 'Buy items and gear, sell materials. Better gear appears as you go deeper.', onSelect: () => this.host.tips(['shop'], () => this.shop()) },
-      { spot: 'hall', name: 'The Oath Hall', detail: 'Party · Skills', description: 'Swear in adventurers, choose who walks in the party, spend skill points.', onSelect: () => this.host.tips((s.oaths ?? 0) >= FOUNDING_OATHS ? ['oath', 'skillPoints'] : ['skillPoints'], () => this.hall()) },
+      { spot: 'hall', name: 'The Oath Hall', detail: ravenBadge(this.game) ? `Ravens: ${ravenBadge(this.game)}` : 'Party · Skills', description: 'Swear in adventurers, choose who walks in the party, spend skill points.', onSelect: () => this.host.tips((s.oaths ?? 0) >= FOUNDING_OATHS ? ['oath', 'skillPoints'] : ['skillPoints'], () => this.hall()) },
       { spot: 'board', name: 'The Notice Board', detail: this.boardBadge() || 'Requests', description: 'Requests from the people of Lindholm. Finished work pays well.', onSelect: () => this.host.tips(['quests'], () => this.board()) },
       { spot: 'horn', name: 'The Hornstone', detail: 'Play together', description: 'Sound the horn to descend together with players from other halls.', onSelect: () => this.host.tips(['hornstone'], () => this.host.openHornstone()) },
     ];
@@ -178,11 +180,29 @@ export class TownView {
             this.host.toast('The party rests well. Game saved.');
           },
         },
+        ...this.woundedHere().map((m) => ({
+          label: `Healer for ${m.name} (${healerCost(this.game)} G)`,
+          description: `${m.name} came back wounded from a Raven Run. The healer patches them up at once.`,
+          disabled: this.game.state.gold < healerCost(this.game),
+          onSelect: () => {
+            if (!healWound(this.game, m.oath!, ravenNow(this.game))) return;
+            audio.play('heal');
+            this.host.save();
+            this.host.updateHud();
+            this.host.toast(`${m.name} is back on their feet.`);
+            this.inn();
+          },
+        })),
         { label: 'Leave', onSelect: back },
       ],
       { onCancel: back },
     );
     this.dialog('The Sleeping Stag', [npcSays('gerd', `"Welcome, explorers! A warm bed and a hot meal for ${cost} gold."`)], menu);
+  }
+
+  private woundedHere(): Member[] {
+    const now = ravenNow(this.game);
+    return [...this.game.state.party, ...this.game.state.reserve].filter((m) => isWounded(m, now));
   }
 
   // ── Notice board ───────────────────────────────────────────────────────────
@@ -302,11 +322,31 @@ export class TownView {
         },
         { label: 'Unlearn skills', description: 'Take back all skill points of one adventurer, for a fee.', onSelect: () => this.unlearn() },
         { label: 'Dismiss', description: 'Release an adventurer from the reserve for good.', disabled: s.reserve.length === 0, onSelect: () => this.dismiss() },
+        {
+          label: 'Raven Runs',
+          detail: ravenBadge(this.game) || undefined,
+          description: 'Send adventurers from the reserve scouting for a few hours. They bring back materials, or come back wounded.',
+          onSelect: () => this.host.tips(['ravens'], () => this.ravens()),
+        },
         { label: 'Leave', onSelect: back },
       ],
       { onCancel: back, startIndex: start },
     );
     this.dialog('The Oath Hall', [npcSays('brynja', '"Swear on the bone of Ymir, and the realms will remember your name."')], menu, true);
+  }
+
+  private ravens(): void {
+    const view = new RavensView(
+      {
+        game: this.game,
+        dialog: (title, body, menu, withDesc) => this.dialog(title, body, menu, withDesc),
+        save: () => this.host.save(),
+        updateHud: () => this.host.updateHud(),
+        toast: (text) => this.host.toast(text),
+      },
+      () => this.hall(5),
+    );
+    view.open();
   }
 
   private skills(): void {
@@ -389,6 +429,7 @@ export class TownView {
 
   private formParty(start = 0): void {
     const s = this.game.state;
+    const now = ravenNow(this.game);
     const items: MenuItem[] = [
       ...s.party.map((m, i) => ({
         label: `${i + 1}. ${m.name}`,
@@ -398,9 +439,11 @@ export class TownView {
       })),
       ...s.reserve.map((m, i) => ({
         label: `   ${m.name}`,
-        detail: `${CLASSES[m.classId].name} Lv ${m.level} · reserve`,
-        description: s.party.length >= MAX_PARTY ? `The party is full (${MAX_PARTY}). Send someone to the reserve first.` : 'Waiting in the hall. Select to join the party.',
-        disabled: s.party.length >= MAX_PARTY,
+        detail: `${CLASSES[m.classId].name} Lv ${m.level} · ${m.ravenRun !== undefined ? 'on a run' : isWounded(m, now) ? 'wounded' : 'reserve'}`,
+        description:
+          unavailable(m, now) ??
+          (s.party.length >= MAX_PARTY ? `The party is full (${MAX_PARTY}). Send someone to the reserve first.` : 'Waiting in the hall. Select to join the party.'),
+        disabled: s.party.length >= MAX_PARTY || !!unavailable(m, now),
         onSelect: () => {
           moveToParty(this.game, i);
           this.host.updateHud();
@@ -438,6 +481,8 @@ export class TownView {
     const items: MenuItem[] = s.reserve.map((m, i) => ({
       label: m.name,
       detail: `${CLASSES[m.classId].name} Lv ${m.level}`,
+      description: m.ravenRun !== undefined ? 'Out on a Raven Run: wait until they are back.' : undefined,
+      disabled: m.ravenRun !== undefined,
       onSelect: () => {
         const menu = new ListMenu(
           [

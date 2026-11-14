@@ -13,6 +13,7 @@ import { FLOORS_PER_CHAPTER, startFloors } from './data/chapters';
 import { STORY } from './data/story';
 import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
 import { Rng } from './rng';
+import type { RavenRun } from './ravens';
 import type { Dir, ItemId, Loot, Member } from './types';
 
 /** Bump when the save format changes incompatibly; older saves are then discarded. */
@@ -87,6 +88,11 @@ export interface GameState {
   fighting?: number | null;
   /** Expeditions whose share has already been brought home. */
   claimed?: string[];
+  /** Raven Runs out (or back and not yet collected). */
+  ravenRuns?: RavenRun[];
+  nextRunId?: number;
+  /** The latest real time (ms) the game has seen, for Raven Runs and wounds. */
+  clock?: number;
 }
 
 export type StepEvent =
@@ -121,6 +127,24 @@ export interface GatherResult {
   finds: string[];
   /** Monsters drawn by the noise, or null. */
   ambush: string[] | null;
+}
+
+/**
+ * What one gathering at a spot finds: better ranks (`power`, 1–10) find more, and rarer things; deeper floors
+ * in a chapter hold rarer things too. Used in the dungeon and by Raven Runs.
+ */
+export function gatherFinds(depth: number, kind: GatherKind, power: number, rng: Rng): string[] {
+  const table = GATHER_TABLES[Math.min(GATHER_TABLES.length - 1, Math.floor(depth / FLOORS_PER_CHAPTER))][kind];
+  const inChapter = depth % FLOORS_PER_CHAPTER;
+  const count = 1 + (power >= 4 ? 1 : 0) + (power >= 8 ? 1 : 0);
+  const finds: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const roll = rng.next();
+    const rare = 0.03 + 0.015 * power + 0.015 * inChapter;
+    const uncommon = rare + 0.22 + 0.02 * power + 0.03 * inChapter;
+    finds.push(roll < rare ? table[2] : roll < uncommon ? table[1] : table[0]);
+  }
+  return finds;
 }
 
 export class SaveVersionError extends Error {
@@ -516,19 +540,8 @@ export class Game {
     if (!spot || spot.left <= 0 || spot.rank <= 0) return null;
     const index = this.state.y * this.map.width + this.state.x;
     this.progress.gathered = { ...this.progress.gathered, [index]: GATHER_USES - spot.left + 1 };
-    const table = GATHER_TABLES[Math.min(GATHER_TABLES.length - 1, Math.floor(this.depth / FLOORS_PER_CHAPTER))][spot.kind];
-    const inChapter = this.depth % FLOORS_PER_CHAPTER;
-    const power = this.gatherPower(spot.kind);
-    const count = 1 + (power >= 4 ? 1 : 0) + (power >= 8 ? 1 : 0);
-    const finds: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const roll = this.rng.next();
-      const rare = 0.03 + 0.015 * power + 0.015 * inChapter;
-      const uncommon = rare + 0.22 + 0.02 * power + 0.03 * inChapter;
-      const id = roll < rare ? table[2] : roll < uncommon ? table[1] : table[0];
-      finds.push(id);
-      this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
-    }
+    const finds = gatherFinds(this.depth, spot.kind, this.gatherPower(spot.kind), this.rng);
+    for (const id of finds) this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
     const ambush = this.rng.chance(GATHER_AMBUSH) ? this.rng.weighted(this.floorDef.encounters).enemies : null;
     return { kind: spot.kind, finds, ambush };
   }

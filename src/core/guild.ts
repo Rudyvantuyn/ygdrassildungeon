@@ -1,6 +1,7 @@
 import { CLASSES } from './data/classes';
 import type { Game } from './game';
 import { createMember } from './party';
+import { unavailable } from './ravens';
 import type { ClassId } from './types';
 
 /** The Oath Hall: register adventurers and choose who goes into the Rootdeep. */
@@ -60,7 +61,8 @@ export function moveToReserve(game: Game, partyIndex: number): boolean {
 }
 
 export function moveToParty(game: Game, reserveIndex: number): boolean {
-  if (game.state.party.length >= MAX_PARTY || !game.state.reserve[reserveIndex]) return false;
+  const m = game.state.reserve[reserveIndex];
+  if (game.state.party.length >= MAX_PARTY || !m || unavailable(m, game.state.clock ?? 0)) return false;
   game.state.party.push(...game.state.reserve.splice(reserveIndex, 1));
   return true;
 }
@@ -83,7 +85,8 @@ export function toggleRow(game: Game, partyIndex: number): boolean {
 
 /** Dismiss a reserve member for good (their equipment goes with them). */
 export function dismissMember(game: Game, reserveIndex: number): boolean {
-  if (!game.state.reserve[reserveIndex]) return false;
+  const m = game.state.reserve[reserveIndex];
+  if (!m || m.ravenRun !== undefined) return false;
   game.state.reserve.splice(reserveIndex, 1);
   return true;
 }

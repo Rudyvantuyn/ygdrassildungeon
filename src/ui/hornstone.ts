@@ -11,6 +11,8 @@ import { isAlive } from '../core/party';
 import type { Member } from '../core/types';
 import { MATERIALS } from '../core/data/materials';
 import { online, OnlineError, type ExpeditionRow } from '../net/online';
+import { unavailable } from '../core/ravens';
+import { ravenNow } from './ravensView';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import { npcSays } from './npc';
@@ -135,8 +137,8 @@ export class Hornstone {
     const items: MenuItem[] = this.roster().map((m) => ({
       label: m.name,
       detail: `Lv ${m.level} ${CLASSES[m.classId].name}`,
-      description: isAlive(m) ? 'Everyone sets out rested.' : 'Fallen. Rest at the Inn first.',
-      disabled: !isAlive(m),
+      description: unavailable(m, ravenNow(this.game)) ?? (isAlive(m) ? 'Everyone sets out rested.' : 'Fallen. Rest at the Inn first.'),
+      disabled: !isAlive(m) || !!unavailable(m, ravenNow(this.game)),
       onSelect: () => pick(m),
     }));
     items.push({ label: 'Back', onSelect: back });

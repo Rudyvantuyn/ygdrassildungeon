@@ -14,6 +14,8 @@ import type { ItemId, Loot, Member } from '../core/types';
 import { CLASSES } from '../core/data/classes';
 import { CorridorRenderer } from '../render/corridor';
 import { MAP_ZOOMS, drawMinimap } from '../render/minimap';
+import { ravenBadge } from './ravensView';
+import { syncClock } from '../net/clock';
 import { drawTownScene, preloadTownScenes } from '../render/town';
 import { preload, sprite } from '../render/sprites';
 import { audio } from '../audio/audio';
@@ -128,6 +130,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private now = 0;
 
   constructor(root: HTMLElement) {
+    void syncClock();
     this.stage = el('div', { id: 'stage' });
     root.appendChild(this.stage);
 
@@ -595,6 +598,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.message.classList.add('hidden');
     this.town.show();
     this.updateHud();
+    if (this.game !== this.titleGame && !this.coop && ravenBadge(this.game).endsWith('back')) this.toast('The ravens are back: news waits at the Oath Hall.');
     const tips = () => this.townTips();
     // Scenes waiting in town play one after the other.
     const story = (): void => {

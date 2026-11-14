@@ -101,6 +101,10 @@ export interface Member {
   oath?: number;
   /** Ranks bought with skill points (1–10). Saves from before skill points get a recommended build. */
   skills?: Partial<Record<SkillId, number>>;
+  /** Out on a Raven Run (its id): not in the party, not on expeditions, until the run is collected. */
+  ravenRun?: number;
+  /** Hurt on a Raven Run: rests until this time (ms), unless the Inn's healer sees to it. */
+  woundedUntil?: number;
 }
 
 export type Loot = { gold: number } | { item: ItemId; qty: number };

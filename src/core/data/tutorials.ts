@@ -184,6 +184,16 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'ravens',
+    title: 'Raven Runs',
+    speaker: 'brynja',
+    pages: [
+      'Adventurers waiting in the hall need not sit idle. Send one to three of them scouting on a floor your party has reached; Huginn and Muninn follow them down.',
+      'A run takes real hours: 3, 8 or 14. Come back later to hear what they found. Scouts bring materials home, never gold, and they learn nothing: training happens at your side.',
+      'Every fight on the way is a chance to fall. Send them too deep and they come back wounded, empty-handed, and need twelve hours of rest, or the healer at the Sleeping Stag.',
+    ],
+  },
+  {
     id: 'choice',
     title: 'Choices',
     speaker: 'sigrid',
