@@ -170,3 +170,6 @@ button.btn { border: 0; cursor: pointer; font-size: 16px; }
 .medal-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 10px 6px; background: var(--panel); box-shadow: inset 0 0 0 2px var(--rim); font-size: 14px; }
 .medal-card canvas { width: 72px; height: 96px; }
 .medal-card b { font-family: var(--pixel); font-size: 15px; color: var(--gold); }
+
+.name-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.name-row input { font: 17px var(--read); padding: 8px 10px; background: #0a1014; color: var(--text); border: 2px solid var(--rim); width: 220px; }

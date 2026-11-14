@@ -90,10 +90,12 @@ class Online {
   }
 
   get playerName(): string {
-    const meta = this.session?.user.user_metadata as { name?: string; full_name?: string; given_name?: string } | undefined;
-    // Our own player name first; for a Google account, the first name it came with.
-    const google = (meta?.given_name || meta?.full_name?.split(' ')[0] || '').slice(0, 16);
-    return meta?.name || google || this.email?.split('@')[0] || 'Adventurer';
+    const meta = this.session?.user.user_metadata as { player?: string; name?: string; full_name?: string; given_name?: string } | undefined;
+    // The player name chosen in the game first. A Google account brings the person's full name: other players only
+    // ever see the first name, until a player name is chosen.
+    if (meta?.player) return meta.player;
+    if (this.hasGoogle) return (meta?.given_name || (meta?.full_name ?? meta?.name ?? '').split(' ')[0] || 'Wayfinder').slice(0, 16);
+    return meta?.name || this.email?.split('@')[0] || 'Adventurer';
   }
 
   /** Signed in with Google (or a guest who linked Google). */
@@ -144,7 +146,7 @@ class Online {
   }
 
   async setName(name: string): Promise<void> {
-    const { error } = await this.db.auth.updateUser({ data: { name: name.trim() } });
+    const { error } = await this.db.auth.updateUser({ data: { name: name.trim(), player: name.trim() } });
     if (error) throw new OnlineError(friendly(error.message));
     const { data } = await this.db.auth.getSession();
     this.session = data.session;

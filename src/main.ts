@@ -9,6 +9,7 @@ import '@fontsource/pixelify-sans/latin-700.css';
 import './ui/styles.css';
 import { leaveOldAddress, takeCarriedSave, takeCloudSave } from './site/transfer';
 import { online } from './net/online';
+import { readSave } from './ui/storage';
 
 /** Starts the game (after a save carried over from the old address, if any, has been taken in). */
 function start(): void {
@@ -75,10 +76,15 @@ void (async () => {
   await takeCarriedSave();
   await takeCloudSave();
   start();
-  // Back from Google: take in the sign-in now.
-  if (online.returningFromSignIn) {
-    void online.connected().then((ok) => {
-      if (ok) (window as unknown as { ygg: App }).ygg.toast(`Signed in as ${online.playerName}.`);
+  // Signed in (or back from Google): connect, so the save is kept with the account. If the account has no save yet,
+  // this one goes up right away.
+  if (online.returningFromSignIn || online.mayBeSignedIn) {
+    const back = online.returningFromSignIn;
+    void online.connected().then(async (ok) => {
+      if (!ok) return;
+      if (back) (window as unknown as { ygg: App }).ygg.toast(`Signed in as ${online.playerName}.`);
+      const local = readSave();
+      if (local && !(await online.downloadSave().catch(() => 'error'))) await online.uploadSave(local).catch(() => undefined);
     });
   }
 })();

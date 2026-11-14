@@ -303,6 +303,15 @@ function wayfinder(): HTMLElement[] {
     .filter((x): x is HTMLElement => !!x);
   out.push(section('Book of Deeds', medals.length ? h('div', { class: 'medal-case' }, ...medals) : h('p', {}, 'No medals yet. Nobody will tell you what counts as a deed.')));
   out.push(section('The Rootdeep', h('p', {}, `You have reached ${me.chapters === 1 ? 'the first chapter' : `${me.chapters} chapters`}: their pages in the `, h('a', { href: 'bestiary.html' }, 'bestiary'), ' are open to you.')));
+  const nameInput = h('input', { type: 'text', maxlength: '16', value: me.name, 'aria-label': 'Player name' }) as HTMLInputElement;
+  const nameSave = h('button', { class: 'btn ghost' }, 'Save');
+  const nameNote = h('span', { class: 'small' });
+  nameSave.addEventListener('click', () => {
+    const v = nameInput.value.trim();
+    if (!v) return void (nameNote.textContent = 'Choose a name.');
+    void online.setName(v).then(() => location.reload()).catch((e: Error) => (nameNote.textContent = e.message));
+  });
+  out.push(section('Player name', h('p', {}, 'This is the name other Wayfinders see: on your runestones, at the Hornstone and on expeditions.'), h('div', { class: 'name-row' }, nameInput, nameSave, nameNote)));
   const signOut = h('button', { class: 'btn ghost' }, 'Sign out');
   signOut.addEventListener('click', () => void online.signOut().then(() => location.reload()));
   out.push(h('section', { class: 'block' }, signOut));
