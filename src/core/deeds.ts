@@ -52,7 +52,14 @@ export type DeedCounter =
   | 'byAHair'
   | 'guardianNoItems'
   | 'guardianNoFall'
-  | 'heedsReceived';
+  | 'heedsReceived'
+  | 'threadsEarned'
+  | 'winsFloor'
+  | 'downDescent'
+  | 'pacifist'
+  | 'longWayHome'
+  | 'nightOwl'
+  | 'bareHands';
 
 export function count(g: Game, key: DeedCounter, by = 1): void {
   const c = (g.state.counters ??= {});
@@ -118,6 +125,18 @@ function weaknessesFound(g: Game): number {
   return found;
 }
 
+/** Every root gate of a chapter opened (false for a chapter without gates). */
+function allGatesOf(g: Game, ch: number): boolean {
+  const floors = chapterFloors(ch).filter((f) => f < FLOORS.length);
+  const any = floors.some((f) => mapOf(f).tiles.some((t) => t === 'gate' || t === 'gateOpen'));
+  return any && gatesOpened(g, floors);
+}
+
+/** Guardians felled by the party's own blows (sagas), over everyone in the hall. */
+function guardiansFelled(g: Game): number {
+  return new Set(roster(g).flatMap((m) => m.saga?.guardians ?? [])).size;
+}
+
 function seenAllOfChapter(g: Game, ch: number): boolean {
   const first = ch * FLOORS_PER_CHAPTER + 1;
   const last = first + FLOORS_PER_CHAPTER - 1;
@@ -155,6 +174,8 @@ export const DEEDS: DeedDef[] = [
   { id: 'prowlerSlain', name: 'Prowler Slayer', text: 'Brought down a prowler.', kind: 'battle', tier: 'silver', icon: 'fangs', earned: (g) => g.state.progress.some((p) => (p.prowlerTokens?.length ?? 0) > 0) },
   { id: 'byAHair', name: 'By a Hair', text: 'Won a fight with one adventurer left standing, barely.', kind: 'battle', tier: 'silver', icon: 'heart-beats', earned: (g) => n(g, 'byAHair') > 0 },
   { id: 'weaknessFound', name: 'Keen Eye', text: 'Found twenty-five weaknesses.', kind: 'battle', tier: 'silver', icon: 'magnifying-glass', earned: (g) => weaknessesFound(g) >= 25 },
+  { id: 'boneWarden', name: 'Warden of the Bone', text: 'Brought down the guardian of the Marrowdeep.', kind: 'battle', tier: 'gold', icon: 'ribcage', earned: (g) => bossBeaten(g, 14) },
+  { id: 'drownedBook', name: 'Drowned Lore', text: 'Met every creature of the Drowned Roots.', kind: 'battle', tier: 'silver', icon: 'book-cover', earned: (g) => seenAllOfChapter(g, 1) },
   { id: 'greenwoodBook', name: 'Greenwood Lore', text: 'Met every creature of the Greenwood Roots.', kind: 'battle', tier: 'silver', icon: 'book-cover', earned: (g) => seenAllOfChapter(g, 0) },
   { id: 'lightPack', name: 'Light Pack', text: 'Brought down a guardian without using a single item on that descent.', kind: 'battle', tier: 'gold', icon: 'knapsack', earned: (g) => n(g, 'guardianNoItems') > 0 },
   { id: 'deathless', name: 'Deathless', text: 'Brought down a guardian on a descent where nobody fell.', kind: 'battle', tier: 'gold', icon: 'laurels', earned: (g) => n(g, 'guardianNoFall') > 0 },
@@ -181,6 +202,17 @@ export const DEEDS: DeedDef[] = [
   { id: 'kindStranger', name: 'Kind Stranger', text: 'Heeded ten runestones of other Wayfinders.', kind: 'together', tier: 'silver', icon: 'shaking-hands', earned: (g) => n(g, 'heedsGiven') >= 10 },
   { id: 'heeded', name: 'Heeded', text: 'Your runestones were heeded ten times.', kind: 'together', tier: 'silver', icon: 'tied-scroll', earned: (g) => n(g, 'heedsReceived') >= 10 },
 
+  // The Wyrdweave
+  { id: 'threadBearer', name: 'Thread-Bearer', text: 'Brought a Wyrd Thread home from the Well of Urd.', kind: 'explore', tier: 'bronze', icon: 'feather', earned: (g) => n(g, 'threadsEarned') >= 1 },
+  { id: 'allThree', name: 'All Three Floors', text: 'Went through all three floors of the Wyrdweave in one day.', kind: 'explore', tier: 'silver', icon: 'stairs', earned: (g) => (g.state.wyrd?.best ?? 0) >= 3 },
+  { id: 'wovenFate', name: 'Woven Fate', text: 'Had Hilde weave a piece of Wyrd gear.', kind: 'craft', tier: 'silver', icon: 'anvil', earned: (g) => (g.state.wyrd?.woven?.length ?? 0) >= 1 },
+  { id: 'sevenDays', name: 'Seven Days Spun', text: 'Walked the Wyrdweave seven days in a row.', kind: 'explore', tier: 'gold', icon: 'crown', earned: (g) => (g.state.wyrd?.streak ?? 0) >= 7 },
+
+  // Sagas
+  { id: 'sungOf', name: 'Sung Of', text: 'One of yours earned a byname. The skalds are singing.', kind: 'hall', tier: 'bronze', icon: 'tied-scroll', earned: (g) => roster(g).some((m) => (m.bynames?.length ?? 0) > 0) },
+  { id: 'hallOfNames', name: 'A Hall of Names', text: 'Everyone in a full party bore a byname.', kind: 'hall', tier: 'silver', icon: 'laurels', earned: (g) => g.state.party.length >= 4 && g.state.party.every((m) => !!m.byname) },
+  { id: 'guardiansBane', name: "Guardians' Bane", text: 'Struck the last blow on three different guardians.', kind: 'battle', tier: 'gold', icon: 'crossed-swords', earned: (g) => guardiansFelled(g) >= 3 },
+
   // The story
   { id: 'firstChoice', name: 'A Road Chosen', text: 'Made your first choice for Midgard.', kind: 'story', tier: 'bronze', icon: 'crossroad', earned: (g) => Object.keys(g.state.choices ?? {}).length >= 1 },
 
@@ -191,6 +223,11 @@ export const DEEDS: DeedDef[] = [
   { id: 'wildCall', name: 'Kin of the Wild', text: 'Defeated every creature of the Greenwood Roots, prowlers and guardian too. Something wild followed you home: the Fylgjur now swear the oath.', kind: 'secret', tier: 'rune', icon: 'paw', earned: (g) => beatenAllOfChapter(g, 0) },
 
   // Odd ones
+  { id: 'gateOpener', name: 'Gate-Opener', text: 'Opened every root gate of the Marrowdeep.', kind: 'explore', tier: 'silver', icon: 'tree-roots', earned: (g) => allGatesOf(g, 2) },
+  { id: 'nightOwl', name: 'Night Owl', text: 'Won a fight between three and four in the morning. Go to bed.', kind: 'odd', tier: 'bronze', icon: 'raven', earned: (g) => n(g, 'nightOwl') >= 1 },
+  { id: 'pacifist', name: "Pacifist's Walk", text: 'Reached the stairs down without winning a single fight on that floor.', kind: 'odd', tier: 'silver', icon: 'run', earned: (g) => n(g, 'pacifist') >= 1 },
+  { id: 'bareHands', name: 'Bare Hands', text: 'Beat a guardian or a prowler with someone unarmed in the party.', kind: 'odd', tier: 'bronze', icon: 'broken-shield', earned: (g) => n(g, 'bareHands') >= 1 },
+  { id: 'longWayHome', name: 'The Long Way Home', text: 'Walked all the way back up to Lindholm after going down three stairs.', kind: 'odd', tier: 'silver', icon: 'stairs', earned: (g) => n(g, 'longWayHome') >= 1 },
   { id: 'stubborn', name: 'Stubborn', text: 'Walked into the same wall twenty times in a row.', kind: 'odd', tier: 'bronze', icon: 'brick-wall', earned: (g) => n(g, 'bumps') >= 20 },
 ];
 

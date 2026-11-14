@@ -109,7 +109,7 @@ export interface GameState {
   /** Where the party last walked into a wall (for a deed). */
   lastBump?: string;
   /** The Wyrdweave: the day of the last try, threads held, pieces of Wyrd gear woven, most floors cleared in a day. */
-  wyrd?: { lastDay: number; threads?: number; woven?: string[]; best?: number };
+  wyrd?: { lastDay: number; threads?: number; woven?: string[]; best?: number; streak?: number };
 }
 
 export type StepEvent =
@@ -440,6 +440,9 @@ export class Game {
 
   descend(): void {
     if (this.tileHere() !== 'stairs' || this.isLastFloor) return;
+    // Deeds: down a floor without winning a single fight on it; how many stairs down on this descent.
+    if ((this.state.counters?.winsFloor ?? 0) === 0) count(this, 'pacifist');
+    count(this, 'downDescent');
     this.enterFloor(this.state.floor + 1, true);
   }
 
@@ -447,9 +450,11 @@ export class Game {
   ascend(): void {
     if (this.tileHere() !== 'up') return;
     if (this.state.floor === 0) {
+      if ((this.state.counters?.downDescent ?? 0) >= 3) count(this, 'longWayHome');
       this.returnToTown();
       return;
     }
+    setCount(this, 'winsFloor', 0);
     this.state.floor -= 1;
     this.map = this.loadMap();
     const i = this.map.tiles.indexOf('stairs');
@@ -469,10 +474,12 @@ export class Game {
     if (this.state.location === 'town' || !this.state.descent) {
       setCount(this, 'itemsDescent', 0);
       setCount(this, 'fallenDescent', 0);
+      setCount(this, 'downDescent', 0);
       // A name for this descent; random, but without touching the game's own dice.
       this.state.descent = `d${this.state.steps.toString(36)}-${Math.floor(Math.random() * 0x7fffffff).toString(36)}`.padEnd(10, '0');
     }
     this.state.location = 'dungeon';
+    setCount(this, 'winsFloor', 0);
     this.state.floor = floor;
     this.state.deepest = Math.max(this.state.deepest, floor);
     this.map = this.loadMap();
@@ -561,6 +568,10 @@ export class Game {
     if (combat.outcome === 'victory') {
       const standing = this.state.party.filter(isAlive);
       if (standing.length === 1 && this.state.party.length > 1 && standing[0].hp <= 0.1 * memberStats(standing[0]).hp) count(this, 'byAHair');
+      count(this, 'winsFloor');
+      // Odd ones: a win in the small hours (the player's own clock), and a big fight won with someone unarmed.
+      if (new Date().getHours() === 3) count(this, 'nightOwl');
+      if ((combat.boss || combat.prowler) && this.state.party.some((m) => !m.weapon)) count(this, 'bareHands');
       if (combat.boss && (this.state.counters?.itemsDescent ?? 0) === 0) count(this, 'guardianNoItems');
       if (combat.boss && (this.state.counters?.fallenDescent ?? 0) === 0) count(this, 'guardianNoFall');
     }

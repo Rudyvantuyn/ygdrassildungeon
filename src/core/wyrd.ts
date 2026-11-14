@@ -12,6 +12,7 @@ import { FLOORS_PER_CHAPTER } from './data/chapters';
 import { EQUIPMENT } from './data/equipment';
 import type { Game } from './game';
 import { Rng } from './rng';
+import { count } from './deeds';
 import type { Dir, Member } from './types';
 
 export const DAY_MS = 86_400_000;
@@ -235,7 +236,11 @@ export function wyrdDoneToday(home: Game, now: number): boolean {
 }
 
 export function markWyrdStarted(home: Game, now: number): void {
-  home.state.wyrd = { ...home.state.wyrd, lastDay: wyrdDayNumber(now) };
+  const day = wyrdDayNumber(now);
+  const w = home.state.wyrd;
+  // Days in a row with a try (for a deed).
+  const streak = w && w.lastDay === day - 1 ? (w.streak ?? 1) + 1 : w?.lastDay === day ? w.streak ?? 1 : 1;
+  home.state.wyrd = { ...w, lastDay: day, streak };
 }
 
 export interface WyrdResult {
@@ -278,6 +283,7 @@ export function bringWyrdHome(home: Game, run: Game, cleared: number, fell: bool
   }
   home.state.battles += run.state.battles;
   const threads = threadsFor(cleared, fell);
+  count(home, 'threadsEarned', threads);
   home.state.wyrd = { ...home.state.wyrd, lastDay: home.state.wyrd?.lastDay ?? 0, threads: (home.state.wyrd?.threads ?? 0) + threads, best: Math.max(home.state.wyrd?.best ?? 0, cleared) };
   return { cleared, fell, threads, gold: run.state.gold };
 }
