@@ -61,6 +61,8 @@ export class CorridorRenderer {
   private calm = new Map<HTMLImageElement, HTMLCanvasElement>();
   /** Floor and ceiling look the same from every cell (the party always stands in a cell's middle), so they are drawn once per floor. */
   private planeCache: { key: string; canvas: HTMLCanvasElement } | null = null;
+  /** Runestones and shades other players left on this floor (cell indices), set by the app. */
+  marks: { stones: Set<number>; shades: Set<number> } | null = null;
 
   /** A texture as the player wants to see it: as painted, or calmed (less contrast, colour and grain). */
   private look(img: HTMLImageElement): CanvasImageSource {
@@ -204,6 +206,9 @@ export class CorridorRenderer {
             }
           }
           if (tile === 'boss' && d > 0 && !game.progress.bossDefeated) this.bossSigil(s, d, time);
+          const index = cell.y * game.map.width + cell.x;
+          if (d > 0 && this.marks?.stones.has(index)) this.pixelated(() => this.runestone(s, d, pal, time));
+          if (d > 0 && this.marks?.shades.has(index)) this.shade(s, d, time);
           if (isGatherTile(tile) && d > 0) this.gatherSpot(s, d, tile, time, pal);
           const prowler = d > 0 ? game.prowlerAt(cell.x, cell.y) : -1;
           if (prowler >= 0) {
@@ -697,6 +702,61 @@ export class CorridorRenderer {
       ctx.fillStyle = withAlpha(GATHER_KINDS[kind].color, 1 - f);
       ctx.fillRect(cx - 4, cy - rx * 1.75 - 4, 8, 8);
     }
+  }
+
+  /** A runestone: a small standing slab with runes that glow softly, a little to the side of the square. */
+  private runestone(s: number, d: number, pal: Palette, time: number): void {
+    const ctx = this.ctx;
+    const x = s + 0.22, z = d + 0.62;
+    const f = this.fog(z);
+    this.face(this.disc(x, z + 0.02, 0.16, 0.08), '#0b0907', z, pal);
+    const slab: P3[] = [[x - 0.1, 0.5, z], [x - 0.085, 0.16, z], [x - 0.04, 0.1, z], [x + 0.04, 0.1, z], [x + 0.085, 0.16, z], [x + 0.1, 0.5, z]];
+    // Side, then front.
+    this.poly([[x + 0.1, 0.5, z], [x + 0.085, 0.16, z], [x + 0.085, 0.16, z + 0.06], [x + 0.1, 0.5, z + 0.06]]);
+    this.stoneFill(pal, z, 0.35);
+    this.poly(slab);
+    this.stoneFill(pal, z, 0.05);
+    ctx.fillStyle = `rgba(150,160,150,${0.35 * (1 - f)})`;
+    ctx.fill();
+    ctx.strokeStyle = mix('#0b0907', pal.fog, f);
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Runes: a few cut strokes that pulse.
+    const glow = 0.55 + 0.35 * Math.sin(time / 650 + s);
+    ctx.beginPath();
+    const z0 = z - 0.002;
+    this.line([x - 0.03, 0.2, z0], [x - 0.03, 0.42, z0]);
+    this.line([x - 0.03, 0.26, z0], [x + 0.04, 0.2, z0]);
+    this.line([x - 0.03, 0.32, z0], [x + 0.04, 0.26, z0]);
+    this.line([x + 0.04, 0.34, z0], [x + 0.04, 0.44, z0]);
+    ctx.strokeStyle = `rgba(150,220,255,${glow * (1 - f)})`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  /** A shade: the faint, wavering outline of someone who fell here. Not pixelated, so it reads as not quite there. */
+  private shade(s: number, d: number, time: number): void {
+    const ctx = this.ctx;
+    const z = d + 0.5;
+    const f = this.fog(z);
+    const sway = Math.sin(time / 900 + d) * 0.02;
+    const [hx, hy] = this.project([s + sway, 0.0, z]);
+    const [fx, fy] = this.project([s, 0.5, z]);
+    const [ex] = this.project([s + 0.2, 0.5, z]);
+    const r = ex - fx;
+    const alpha = (0.22 + 0.08 * Math.sin(time / 400 + s)) * (1 - f);
+    const grad = ctx.createLinearGradient(hx, hy, fx, fy);
+    grad.addColorStop(0, `rgba(200,215,230,${alpha})`);
+    grad.addColorStop(1, 'rgba(200,215,230,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(hx, hy + r * 0.35, r * 0.38, r * 0.45, 0, 0, Math.PI * 2);
+    ctx.moveTo(hx - r * 0.55, hy + r * 0.9);
+    ctx.quadraticCurveTo(hx, hy + r * 0.55, hx + r * 0.55, hy + r * 0.9);
+    ctx.lineTo(fx + r * 0.75, fy);
+    ctx.lineTo(fx - r * 0.75, fy);
+    ctx.closePath();
+    ctx.fill();
   }
 
   /** A flat disc on the floor, as a polygon. */

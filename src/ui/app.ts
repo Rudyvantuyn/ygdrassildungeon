@@ -16,6 +16,7 @@ import { CorridorRenderer } from '../render/corridor';
 import { MAP_ZOOMS, drawMinimap } from '../render/minimap';
 import { ravenBadge } from './ravensView';
 import { syncClock } from '../net/clock';
+import { RuneMarks, claimRenown, reportShade } from './runeView';
 import { drawTownScene, preloadTownScenes } from '../render/town';
 import { preload, sprite } from '../render/sprites';
 import { audio } from '../audio/audio';
@@ -119,6 +120,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private designer: Designer | null = null;
   /** The floor being test-played from the drafting table (nothing is saved meanwhile). */
   private trial: ChapterDesign | null = null;
+  private readonly runes: RuneMarks;
   private story: { lines: StoryLine[]; index: number; shown: number; then: () => void; box: HTMLElement } | null = null;
   private fx: ViewFx | null = null;
   /** The view just before a step or turn, for the glide into the new view. */
@@ -218,6 +220,18 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.view = viewCanvas.getContext('2d')!;
     this.minimap = minimapCanvas.getContext('2d')!;
     this.corridor = new CorridorRenderer(this.view, VIEW_W, VIEW_H);
+    const app = this;
+    this.runes = new RuneMarks({
+      get game() {
+        return app.game;
+      },
+      corridor: this.corridor,
+      openOverlay: (content, menu) => this.openOverlay(content, menu),
+      closeOverlay: () => this.closeOverlay(),
+      resume: () => this.resumeExplore(),
+      toast: (text, ms) => this.toast(text, ms),
+      tips: (ids, then) => this.tips(ids, then),
+    });
     // Count time played while the game is in view (not on the title screen); it goes along with feedback.
     window.setInterval(() => {
       if (document.visibilityState !== 'visible' || !this.game || this.game === this.titleGame || this.mode === 'title') return;
@@ -284,12 +298,13 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       const story = this.mode === 'story';
       drawTownScene(ctx, VIEW_W, VIEW_H, time, this.mode === 'title' || story ? null : this.town.focus, this.mode === 'title', !story);
     } else if (this.game) {
+      this.runes.sync(!this.trial && this.game !== this.titleGame);
       this.corridor.draw(this.game, time);
     }
     ctx.restore();
     this.drawFx(time);
     if (this.mode === 'editor') this.mapEditor?.draw(time);
-    if (this.game && this.mode !== 'combat' && this.game.state.location === 'dungeon') drawMinimap(this.minimap, MAP_SIZE, this.game, time, undefined, MAP_ZOOMS[prefs.mapZoom] ?? 1);
+    if (this.game && this.mode !== 'combat' && this.game.state.location === 'dungeon') drawMinimap(this.minimap, MAP_SIZE, this.game, time, undefined, MAP_ZOOMS[prefs.mapZoom] ?? 1, this.runes.readHere());
     this.mapPen.update();
   }
 
@@ -599,6 +614,16 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.town.show();
     this.updateHud();
     if (this.game !== this.titleGame && !this.coop && ravenBadge(this.game).endsWith('back')) this.toast('The ravens are back: news waits at the Oath Hall.');
+    if (this.game !== this.titleGame && !this.coop && !this.trial) {
+      const game = this.game;
+      void claimRenown(game).then((r) => {
+        if (!r || this.game !== game) return;
+        this.save();
+        this.updateHud();
+        const gold = r.gold ? ` +${r.gold} G` : '';
+        this.toast(`Your runestones were heeded ${r.heeds} time${r.heeds === 1 ? '' : 's'}.${gold}`, 4000);
+      });
+    }
     const tips = () => this.townTips();
     // Scenes waiting in town play one after the other.
     const story = (): void => {
@@ -1173,6 +1198,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.dangerOrb.style.color = color;
     this.goldEl.textContent = `${g.state.gold} G`;
     this.party.render(g.state.party, { owners: this.coop?.owners });
+    if (this.coop && g.state.location === 'dungeon') this.runes.stepped(false);
     this.keyHint.textContent = prefs.strafeKeys
       ? 'W S: walk · A D: side-step · Q E: turn · Space: act · M: map · Esc: menu'
       : 'W S: walk · A D: turn · Q E: side-step · Space: act · M: map · Esc: menu';
@@ -1205,6 +1231,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const events = this.game.step(forward, right);
     for (const ev of events) this.handleStep(ev);
     this.updateHud();
+    if (this.mode === 'explore' && !this.trial) this.runes.stepped(true);
   }
 
   private handleStep(ev: StepEvent): void {
@@ -1380,6 +1407,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       audio.music(null);
       audio.play('defeat');
       if (this.coop) return this.coop.combatOver();
+      if (!this.trial) reportShade(this.game, combat.enemies[0].def.id);
       return this.showGameOver();
     }
     if (combat.outcome === 'fled') {
@@ -1548,6 +1576,16 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       ],
       journal: [
         ...(inTown ? [] : [{ label: 'Map', description: 'Your map of this floor: draw walls, marks and notes.', onSelect: () => { this.closeOverlay(); this.showMapOverlay(); } }]),
+        ...(inTown || coop || this.trial
+          ? []
+          : [
+              {
+                label: 'Carve a runestone',
+                detail: s.carvedOn && s.carvedOn === s.descent ? 'carved' : undefined,
+                description: this.runes.carveProblem() ?? 'Leave a short message on this square for other players. One stone per descent.',
+                onSelect: () => void this.runes.carve(back),
+              },
+            ]),
         ...(coop
           ? []
           : [
@@ -1849,11 +1887,15 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
   private showMapOverlay(): void {
     if (!this.game.state.tips?.includes('map') && !this.game.state.tipsOff && !this.trial && !this.coop) return this.tips(['map'], () => this.showMapOverlay());
-    this.mapEditor = new MapEditor(this.game, () => {
-      this.mapEditor = null;
-      this.closeOverlay();
-      this.enterExplore();
-    });
+    this.mapEditor = new MapEditor(
+      this.game,
+      () => {
+        this.mapEditor = null;
+        this.closeOverlay();
+        this.enterExplore();
+      },
+      () => this.runes.readHere(),
+    );
     this.overlay.innerHTML = '';
     this.overlay.appendChild(this.mapEditor.el);
     this.overlay.classList.remove('hidden');

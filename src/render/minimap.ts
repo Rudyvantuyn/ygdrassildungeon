@@ -43,6 +43,8 @@ export function drawMinimap(
   time: number,
   cursor?: { x: number; y: number },
   zoom = 1,
+  /** Runestones the player has read on this floor. */
+  stones: { x: number; y: number }[] = [],
 ): void {
   const { map, chart } = game;
   const { cell, ox, oy } = mapLayout(size, map, zoom, cursor ?? game.state);
@@ -109,6 +111,16 @@ export function drawMinimap(
       const mark = chart.marks[index];
       if (mark) glyph(ctx, px + mid, py + mid, cell, MARKS[mark].color, MARKS[mark].glyph, MARK_ICONS[mark]);
     }
+  }
+
+  // Runestones already read
+  for (const st of stones) {
+    const px = ox + st.x * cell + cell / 2, py = oy + st.y * cell + cell / 2;
+    ctx.fillStyle = '#9fdcff';
+    ctx.font = `bold ${Math.max(9, Math.floor(cell * 0.75))}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('ᚱ', px, py + 1);
   }
 
   // Prowlers the party has seen

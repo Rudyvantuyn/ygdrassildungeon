@@ -21,7 +21,7 @@
   <body>
     <main>
       <h1>Privacy and terms</h1>
-      <p class="muted">Ygdrassil · last updated 30 October 2026 · <a href="./">back to the game</a></p>
+      <p class="muted">Ygdrassil · last updated 14 November 2026 · <a href="./">back to the game</a></p>
 
       <h2>In short</h2>
       <p>
@@ -59,6 +59,16 @@
           <td>Expeditions: your player name, the adventurer you bring, and what happens on the expedition; for a private expedition, a scrambled (hashed) copy of its password</td>
           <td>To run a shared expedition fairly (the server keeps the rules).</td>
           <td>Supabase (EU). Other players in the expedition see your player name and adventurer.</td>
+        </tr>
+        <tr>
+          <td>Runestones you carve: your player name, the floor and square, and the message (built from fixed words only), with how often other players heeded it or marked it false and who did (so everyone judges a stone once)</td>
+          <td>So other players find your stone in their own game, and you hear when it helped someone.</td>
+          <td>Supabase (EU). Every signed-in player can read the stone and your player name. A stone is deleted when it crumbles (your 21st stone, enough "false" marks) and at the latest 90 days after it was carved or last heeded.</td>
+        </tr>
+        <tr>
+          <td>Shades: the floor, square and monster where a whole party fell, linked to your account only to limit how often one can be left</td>
+          <td>So other players see where parties fell.</td>
+          <td>Supabase (EU). Other players see the shade, never who left it. Deleted after 30 days.</td>
         </tr>
         <tr>
           <td>Feedback and crash reports: your message, where you were in the game (floor, levels, settings, number of battles, time played), screen size, browser type, game version, your account id if you are signed in, and a name or contact only if you fill one in</td>

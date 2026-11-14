@@ -93,6 +93,12 @@ export interface GameState {
   nextRunId?: number;
   /** The latest real time (ms) the game has seen, for Raven Runs and wounds. */
   clock?: number;
+  /** This descent (from leaving town until coming back): one runestone may be carved per descent. */
+  descent?: string;
+  /** The descent a runestone was last carved on. */
+  carvedOn?: string;
+  /** Runestones already read (ids, newest last): they show on the map. */
+  runesRead?: number[];
 }
 
 export type StepEvent =
@@ -423,6 +429,10 @@ export class Game {
     if (floor < 0 || floor >= this.floors.length) return;
     if (!unlock && this.floors === FLOORS && !startFloors(this.state.deepest).includes(floor)) return;
     if (!unlock && floor > this.state.deepest) return;
+    if (this.state.location === 'town' || !this.state.descent) {
+      // A name for this descent; random, but without touching the game's own dice.
+      this.state.descent = `d${this.state.steps.toString(36)}-${Math.floor(Math.random() * 0x7fffffff).toString(36)}`.padEnd(10, '0');
+    }
     this.state.location = 'dungeon';
     this.state.floor = floor;
     this.state.deepest = Math.max(this.state.deepest, floor);
@@ -438,6 +448,7 @@ export class Game {
   /** Back to town. Springs refill and prowlers return while the party is away. */
   returnToTown(): void {
     this.state.location = 'town';
+    delete this.state.descent;
     this.state.progress.forEach((p, i) => {
       p.springUsed = false;
       p.gathered = {};

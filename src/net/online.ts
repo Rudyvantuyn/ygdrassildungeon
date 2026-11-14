@@ -5,6 +5,7 @@
 import type { RealtimeChannel, Session, SupabaseClient } from '@supabase/supabase-js';
 import type { Action, ExpeditionState } from '../core/expedition';
 import type { Member } from '../core/types';
+import type { CarveRequest, FloorMarks } from '../core/runestones';
 
 /** Public project settings (safe to ship: access is enforced by the database's row rules). */
 export const SUPABASE_URL = 'https://prcwekmvndxddqbgdnbf.supabase.co';
@@ -166,6 +167,64 @@ class Online {
       throw error;
     }
     return json as ExpeditionRow;
+  }
+
+  // ── Runestones ─────────────────────────────────────────────────────────────
+
+  /** Connects only when a session may exist; true when signed in (a guest counts). */
+  async connected(): Promise<boolean> {
+    if (!this.mayBeSignedIn && !this.client) return false;
+    try {
+      await this.init();
+    } catch {
+      return false;
+    }
+    return this.signedIn;
+  }
+
+  async floorMarks(floor: number): Promise<FloorMarks | null> {
+    if (!(await this.connected())) return null;
+    const { data, error } = await this.db.rpc('floor_marks', { p_floor: floor });
+    return error ? null : (data as FloorMarks);
+  }
+
+  /** Returns an error message, or null when the vote counted. */
+  async voteStone(id: number, vote: 'heed' | 'false'): Promise<string | null> {
+    if (!(await this.connected())) return 'Please sign in first.';
+    const { data, error } = await this.db.rpc('vote_runestone', { p_stone: id, p_vote: vote });
+    if (error) return 'The Hornstone did not answer.';
+    return (data as { error?: string }).error ?? null;
+  }
+
+  async reportShade(floor: number, x: number, y: number, enemy: string): Promise<void> {
+    if (!(await this.connected())) return;
+    await this.db.rpc('report_shade', { p_floor: floor, p_x: x, p_y: y, p_enemy: enemy });
+  }
+
+  /** Heeds received since the last time, and the gold they bring. */
+  async claimRenown(): Promise<{ heeds: number; gold: number; total: number } | null> {
+    if (!(await this.connected())) return null;
+    const { data, error } = await this.db.rpc('claim_renown');
+    return error ? null : (data as { heeds: number; gold: number; total: number });
+  }
+
+  /** Returns an error message, or null when the stone stands. */
+  async carveStone(stone: Omit<CarveRequest, 'advice'> & { advice: string | null }): Promise<string | null> {
+    if (!(await this.connected())) return 'Please sign in first.';
+    const { data } = await this.db.auth.getSession();
+    this.session = data.session;
+    if (!this.session) return 'Please sign in again.';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/expedition`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: `Bearer ${this.session.access_token}` },
+        body: JSON.stringify({ op: 'carve', player: this.playerName, ...stone }),
+      });
+      const json = (await res.json().catch(() => ({}))) as { error?: string };
+      return res.ok ? null : (json.error ?? 'Something went wrong.');
+    } catch {
+      return 'Could not reach the Hornstone. Check your connection.';
+    }
   }
 
   /** `password`: makes the expedition private. */

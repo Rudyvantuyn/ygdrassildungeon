@@ -4,11 +4,15 @@
  * only this function writes the `expeditions` table (with the service role), so
  * nobody can change an expedition except by playing by the rules.
  *
+ * It also carves runestones (src/core/runestones.ts): the stone is checked against the floor maps here, the
+ * limits are kept by the database function `carve_runestone` (server/sql/runestones.sql).
+ *
  * Build with `npm run build:server`, which bundles it into one file for deploying.
  */
 import { applyAction, cleanPlayerName, createExpedition, players, validMember, type Action, type ExpeditionState } from '../src/core/expedition';
 import { startFloorFor } from '../src/core/data/chapters';
 import { FLOORS } from '../src/core/data/floors';
+import { carveProblem, type CarveRequest } from '../src/core/runestones';
 
 declare const Deno: {
   env: { get(key: string): string | undefined };
@@ -216,6 +220,36 @@ async function act(user: string, filter: string, action: Action, password?: unkn
   throw new Error('The expedition is busy, please try again.');
 }
 
+/** Carves a runestone after checking it against the game's own floor maps; the database enforces the limits. */
+async function carve(user: string, body: Record<string, unknown>): Promise<Response> {
+  const request: CarveRequest = {
+    floor: Number(body.floor),
+    x: Number(body.x),
+    y: Number(body.y),
+    what: String(body.what ?? ''),
+    dir: String(body.dir ?? ''),
+    advice: body.advice ? String(body.advice) : null,
+    descent: String(body.descent ?? ''),
+  };
+  const problem = carveProblem(request);
+  if (problem) return reply({ error: problem }, 409);
+  const result = (await rest('rpc/carve_runestone', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_user: user,
+      p_author: cleanPlayerName(body.player),
+      p_floor: request.floor,
+      p_x: request.x,
+      p_y: request.y,
+      p_what: request.what,
+      p_dir: request.dir,
+      p_advice: request.advice ?? '',
+      p_descent: request.descent,
+    }),
+  })) as { id?: number; error?: string };
+  return result.error ? reply({ error: result.error }, 409) : reply({ id: result.id });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   if (req.method !== 'POST') return reply({ error: 'Use POST.' }, 405);
@@ -223,6 +257,7 @@ Deno.serve(async (req) => {
   if (!user) return reply({ error: 'Please sign in first.' }, 401);
   try {
     const body = (await req.json()) as Record<string, unknown>;
+    if (body.op === 'carve') return await carve(user, body);
     let row: Row;
     switch (body.op) {
       case 'create':

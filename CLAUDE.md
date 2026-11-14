@@ -66,6 +66,13 @@ Add new names there and keep the glossary in sync.
   contests are "events" and only come once the game is finished.
 - The game is meant to be released **commercially**: keep everything we ship (art, music, names, code) cleared for
   commercial use, and keep the server authoritative so players cannot cheat.
+- **Earning money (decided November 2026):** stay true to the game. Steam at version 1.0 (pay once; the browser version
+  can stay the free demo), plus an optional **Supporter Pack** and later **cosmetic packs** (things to look at, e.g.
+  runestone styles, portrait sets, an expedition banner), each with a plain euro price. **Never** a premium currency,
+  pay-to-win (no gold, XP, Oath Tokens or shorter timers for money), ads or subscriptions. Events are free for everyone,
+  with at most an optional cosmetic keepsake. Build features so cosmetics can be added later without changing the rules.
+  Before any income: Vercel's free Hobby plan is non-commercial, so move to Pro (and Supabase Pro around launch).
+  Start a Steam page with wishlists well before launch; visibility is the biggest risk, not cost.
 - Art direction (changed after playtest feedback, November 2026): **no AI-generated images**. Players of the genre
   reject them. The AI art is being replaced, one category at a time, by:
   - real photos (our own, or CC0 / public domain / CC BY, never share-alike or non-commercial) run through

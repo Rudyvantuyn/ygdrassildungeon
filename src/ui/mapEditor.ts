@@ -39,6 +39,8 @@ export class MapEditor {
   constructor(
     private readonly game: Game,
     private readonly onClose: () => void,
+    /** Runestones read on this floor, shown on the map. */
+    private readonly stones: () => { x: number; y: number }[] = () => [],
   ) {
     this.cursor = { x: game.state.x, y: game.state.y };
 
@@ -131,7 +133,7 @@ export class MapEditor {
   }
 
   draw(time: number): void {
-    drawMinimap(this.ctx, SIZE, this.game, time, this.cursor, this.zoom());
+    drawMinimap(this.ctx, SIZE, this.game, time, this.cursor, this.zoom(), this.stones());
   }
 
   handleKey(key: string): boolean {

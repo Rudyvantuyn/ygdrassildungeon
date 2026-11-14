@@ -194,6 +194,17 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'runestones',
+    title: 'Runestones',
+    speaker: 'ketil',
+    pages: [
+      'Wayfinders from other halls walk the same roots. Some carve a runestone to warn or guide whoever comes next: step on one to read it.',
+      'Heed a stone that helped you; the carver hears of it in town. Mark a lying stone False: enough of those and it crumbles.',
+      'You may carve one stone yourself on every descent (Journal, Carve a runestone). Only fixed words: say what is there, where, and what to do.',
+      'Where a whole party fell, a shade lingers. Learn from it.',
+    ],
+  },
+  {
     id: 'choice',
     title: 'Choices',
     speaker: 'sigrid',
