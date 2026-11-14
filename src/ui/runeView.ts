@@ -136,7 +136,7 @@ export class RuneMarks {
       { label: 'False', description: 'It is wrong. Stones marked false often enough crumble.', onSelect: vote('false') },
       { label: 'Walk on', description: 'Judge it later: you will find it on your map.', onSelect: done },
     ];
-    const menu = new ListMenu(items, { onCancel: done });
+    const menu = new ListMenu(items, { onCancel: done, backRow: false });
     const desc = el('div', { className: 'menu-desc' });
     menu.describeInto(desc);
     this.host.openOverlay(
@@ -220,7 +220,7 @@ export class RuneMarks {
   }
 
   private dialog(title: string, body: HTMLElement[], items: MenuItem[], cancel: () => void): void {
-    const menu = new ListMenu(items, { onCancel: cancel });
+    const menu = new ListMenu(items, { onCancel: cancel, backRow: false });
     const desc = el('div', { className: 'menu-desc' });
     menu.describeInto(desc);
     this.host.openOverlay(el('div', { className: 'panel dialog runestone' }, [el('h2', { text: title }), ...body, menu.el, desc]), menu);
