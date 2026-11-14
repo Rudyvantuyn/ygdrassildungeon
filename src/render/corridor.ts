@@ -38,6 +38,36 @@ interface TextureSet {
   size: number;
 }
 
+export type DecorKind = 'roots' | 'mushrooms' | 'lantern' | 'icicles' | 'embers' | 'kelp' | 'shells' | 'coral' | 'bones' | 'ribs' | 'crystals';
+
+/** Decor per set of textures, with weights (lanterns are rare). */
+const DECOR: Record<string, [DecorKind, number][]> = {
+  forest: [['roots', 4], ['mushrooms', 3], ['lantern', 1]],
+  frostwood: [['icicles', 4], ['roots', 2], ['lantern', 1]],
+  emberroot: [['embers', 4], ['roots', 2], ['lantern', 1]],
+  tidewater: [['kelp', 4], ['shells', 3], ['lantern', 1]],
+  coral: [['coral', 4], ['shells', 3], ['kelp', 2]],
+  abyss: [['crystals', 3], ['kelp', 3], ['shells', 1]],
+  marrow: [['bones', 3], ['ribs', 3], ['crystals', 2], ['lantern', 1]],
+};
+
+function pickDecor(set: [DecorKind, number][], roll: number): DecorKind {
+  const total = set.reduce((sum, [, w]) => sum + w, 0);
+  let r = roll % total;
+  for (const [kind, w] of set) {
+    if (r < w) return kind;
+    r -= w;
+  }
+  return set[0][0];
+}
+
+/** A fixed number per floor and square. */
+function cellHash(floor: number, x: number, y: number): number {
+  let h = Math.imul(x + 1, 73856093) ^ Math.imul(y + 1, 19349663) ^ Math.imul(floor + 7, 83492791);
+  h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d);
+  return (h ^ (h >>> 13)) >>> 0;
+}
+
 export class CorridorRenderer {
   private sx = 0;
   private sy = 0;
@@ -57,26 +87,33 @@ export class CorridorRenderer {
 
   private patterns = new Map<CanvasImageSource, CanvasPattern>();
   private mips = new Map<CanvasImageSource, HTMLCanvasElement[]>();
-  /** Softened copies of the textures, for the calm dungeon look. */
-  private calm = new Map<HTMLImageElement, HTMLCanvasElement>();
+  /** Graded and/or softened copies of the textures, by source, grade and calm setting. */
+  private looks = new Map<string, HTMLCanvasElement>();
   /** Floor and ceiling look the same from every cell (the party always stands in a cell's middle), so they are drawn once per floor. */
   private planeCache: { key: string; canvas: HTMLCanvasElement } | null = null;
   /** Runestones and shades other players left on this floor (cell indices), set by the app. */
   marks: { stones: Set<number>; shades: Set<number> } | null = null;
+  /** Shows one kind of decor wherever decor can stand (for checking how it looks), or null for the real choice. */
+  previewDecor: DecorKind | null = null;
 
-  /** A texture as the player wants to see it: as painted, or calmed (less contrast, colour and grain). */
-  private look(img: HTMLImageElement): CanvasImageSource {
-    if (!prefs.calmTextures) return img;
-    let c = this.calm.get(img);
+  /**
+   * A texture as this floor shows it (its colour grade) and as the player wants to see it: as painted, or calmed
+   * (less contrast, colour and grain).
+   */
+  private look(img: HTMLImageElement, grade = ''): CanvasImageSource {
+    const calm = prefs.calmTextures;
+    if (!calm && !grade) return img;
+    const key = `${img.src}|${grade}|${calm}`;
+    let c = this.looks.get(key);
     if (!c) {
       c = document.createElement('canvas');
       c.width = img.naturalWidth;
       c.height = img.naturalHeight;
       const g = c.getContext('2d')!;
-      g.filter = 'blur(2px) contrast(62%) saturate(70%) brightness(92%)';
-      // Draw it three times over itself, offset by the tile size, so the blur wraps round and the tile stays seamless.
+      g.filter = [grade, calm ? 'blur(2px) contrast(62%) saturate(70%) brightness(92%)' : ''].filter(Boolean).join(' ');
+      // Draw it three times over itself, offset by the tile size, so a blur wraps round and the tile stays seamless.
       for (const dx of [-c.width, 0, c.width]) for (const dy of [-c.height, 0, c.height]) g.drawImage(img, dx, dy);
-      this.calm.set(img, c);
+      this.looks.set(key, c);
     }
     return c;
   }
@@ -88,7 +125,7 @@ export class CorridorRenderer {
     const floorImg = sprite(`dungeon/${pal.textures}-floor.webp`);
     const ceilingImg = sprite(`dungeon/${pal.textures}-ceiling.webp`);
     if (!wallImg || !floorImg || !ceilingImg) return null;
-    const wall = this.look(wallImg);
+    const wall = this.look(wallImg, pal.grade);
     const pattern = (img: CanvasImageSource) => {
       let p = this.patterns.get(img);
       if (!p) {
@@ -112,7 +149,7 @@ export class CorridorRenderer {
       }
       this.mips.set(wall, wallMips);
     }
-    return { wall: wallMips, floor: pattern(this.look(floorImg)), ceiling: pattern(this.look(ceilingImg)), size: floorImg.naturalWidth };
+    return { wall: wallMips, floor: pattern(this.look(floorImg, pal.grade)), ceiling: pattern(this.look(ceilingImg, pal.grade)), size: floorImg.naturalWidth };
   }
 
   /** The smallest wall mip that is still at least `px` pixels big. */
@@ -130,7 +167,7 @@ export class CorridorRenderer {
     const tex = this.textureSet(pal);
 
     if (tex) {
-      const key = `${pal.textures}|${pal.fog}|${prefs.calmTextures}`;
+      const key = `${pal.textures}|${pal.grade ?? ''}|${pal.fog}|${prefs.calmTextures}`;
       if (this.planeCache?.key !== key) {
         const canvas = this.planeCache?.canvas ?? document.createElement('canvas');
         canvas.width = w;
@@ -207,6 +244,7 @@ export class CorridorRenderer {
           }
           if (tile === 'boss' && d > 0 && !game.progress.bossDefeated) this.bossSigil(s, d, time);
           const index = cell.y * game.map.width + cell.x;
+          if (tile === 'floor') this.decorAt(game, cell.x, cell.y, s, d, dir, pal, time);
           if (d > 0 && this.marks?.stones.has(index)) this.pixelated(() => this.runestone(s, d, pal, time));
           if (d > 0 && this.marks?.shades.has(index)) this.shade(s, d, time);
           if (isGatherTile(tile) && d > 0) this.gatherSpot(s, d, tile, time, pal);
@@ -704,6 +742,207 @@ export class CorridorRenderer {
     }
   }
 
+  /**
+   * Wall decor that gives each chapter (and corridor) its own character: roots, icicles and embers in the forest,
+   * kelp and shells by the sea, bones and crystals in the Marrowdeep, and now and then a lantern. Chosen from the
+   * floor and square, so a corridor always looks the same when you come back (it is a landmark for mapping).
+   */
+  private decorAt(game: Game, x: number, y: number, s: number, d: number, viewDir: number, pal: Palette, time: number): void {
+    const set = DECOR[pal.textures ?? ''];
+    if (!set) return;
+    const h = cellHash(game.state.floor, x, y);
+    if (h % 100 >= 34 && !this.previewDecor) return;
+    // A wall next to this square to lean against (not the one behind the viewer's back in their own square).
+    const sides: number[] = [];
+    for (let abs = 0; abs < 4; abs++) {
+      const nx = x + [0, 1, 0, -1][abs], ny = y + [-1, 0, 1, 0][abs];
+      if (tileAt(game.map, nx, ny) !== 'wall') continue;
+      const rel = (abs - viewDir + 4) % 4;
+      if (rel === 2) continue;
+      sides.push(abs);
+    }
+    if (!sides.length) return;
+    const abs = sides[Math.floor(h / 100) % sides.length];
+    const side = (abs - viewDir + 4) % 4;
+    const kind = this.previewDecor ?? pickDecor(set, Math.floor(h / 1000));
+    const at = (u: number, v: number, inset = 0.02): P3 => {
+      // u runs along the wall (-0.5..0.5), v is the height (-0.5 top .. 0.5 floor), inset away from the wall.
+      if (side === 0) return [s + u, v, d + 1 - inset];
+      if (side === 1) return [s + 0.5 - inset, v, d + 0.5 + u];
+      return [s - 0.5 + inset, v, d + 0.5 - u];
+    };
+    const z = side === 0 ? d + 0.98 : d + 0.5;
+    const seed = (h >> 4) % 997;
+    this.pixelated(() => this.decor(kind, at, z, pal, time, seed));
+  }
+
+  private decor(kind: DecorKind, at: (u: number, v: number, inset?: number) => P3, z: number, pal: Palette, time: number, seed: number): void {
+    const ctx = this.ctx;
+    const f = this.fog(z);
+    const off = ((seed % 7) - 3) * 0.05;
+    switch (kind) {
+      case 'roots': {
+        // Roots that broke through the wall high up and hang down it.
+        for (let i = 0; i < 4; i++) {
+          const u0 = off - 0.3 + i * 0.19, tip = 0.02 + ((seed + i * 3) % 5) * 0.08, bend = (i % 2 ? 1 : -1) * 0.07;
+          const left: P3[] = [], right: P3[] = [];
+          for (let k = 0; k <= 6; k++) {
+            const t = k / 6, v = -0.5 + (tip + 0.5) * t, u = u0 + Math.sin(t * Math.PI) * bend, w = 0.075 * (1 - t * 0.92);
+            left.push(at(u - w, v, 0.03 + Math.sin(t * Math.PI) * 0.03));
+            right.push(at(u + w, v, 0.03 + Math.sin(t * Math.PI) * 0.03));
+          }
+          const root = [...left, ...right.reverse()];
+          this.tinted(root, i % 2 ? '#8a6a40' : '#a07c4c', z, pal, 0.55);
+          this.poly(root);
+          ctx.strokeStyle = mix('#1e140b', pal.fog, f);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        break;
+      }
+      case 'mushrooms': {
+        // A cluster of glowcaps at the foot of the wall.
+        const glow = 0.7 + 0.3 * Math.sin(time / 600 + seed);
+        const [gx, gy] = this.project(at(off, 0.42, 0.12));
+        const [gx2] = this.project(at(off + 0.2, 0.42, 0.12));
+        const gr = Math.abs(gx2 - gx);
+        const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr * 1.6);
+        g.addColorStop(0, `rgba(170,230,140,${0.28 * glow * (1 - f)})`);
+        g.addColorStop(1, 'rgba(170,230,140,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(gx - gr * 1.6, gy - gr * 1.6, gr * 3.2, gr * 3.2);
+        for (let i = 0; i < 4; i++) {
+          const u = off - 0.2 + i * 0.12, hgt = 0.1 + ((seed + i) % 3) * 0.06, r = 0.06 + (i % 2) * 0.035, w = 0.08 + (i % 2) * 0.08;
+          this.face([at(u - 0.018, 0.5, w), at(u + 0.018, 0.5, w), at(u + 0.014, 0.5 - hgt, w), at(u - 0.014, 0.5 - hgt, w)], '#e4dcc0', z, pal);
+          const cap: P3[] = [];
+          for (let k = 0; k <= 10; k++) {
+            const a = (k / 10) * Math.PI;
+            cap.push(at(u + Math.cos(a) * r, 0.5 - hgt - Math.sin(a) * r * 0.7, w));
+          }
+          this.face(cap, mix(i % 2 ? '#c8e07a' : '#9fd46a', '#f4ffd0', glow - 0.7), z, pal);
+          this.poly(cap);
+          ctx.strokeStyle = mix('#24321a', pal.fog, f);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        break;
+      }
+      case 'lantern': {
+        const glow = 0.75 + 0.25 * Math.sin(time / 230 + seed);
+        this.face([at(off - 0.015, -0.24, 0.01), at(off + 0.015, -0.24, 0.01), at(off + 0.015, -0.12, 0.08), at(off - 0.015, -0.12, 0.08)], '#2a2622', z, pal);
+        const [lx, ly] = this.project(at(off, -0.02, 0.1));
+        const [ex] = this.project(at(off + 0.1, -0.02, 0.1));
+        const r = Math.abs(ex - lx);
+        const g = ctx.createRadialGradient(lx, ly, 0, lx, ly, r * 3.2);
+        g.addColorStop(0, `rgba(255,190,110,${0.38 * glow * (1 - f)})`);
+        g.addColorStop(1, 'rgba(255,190,110,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(lx - r * 3.2, ly - r * 3.2, r * 6.4, r * 6.4);
+        this.face([at(off - 0.05, -0.1, 0.1), at(off + 0.05, -0.1, 0.1), at(off + 0.06, 0.06, 0.1), at(off - 0.06, 0.06, 0.1)], '#3a3026', z, pal);
+        this.face([at(off - 0.035, -0.07, 0.11), at(off + 0.035, -0.07, 0.11), at(off + 0.04, 0.04, 0.11), at(off - 0.04, 0.04, 0.11)], mix('#ffd28a', '#ff9a40', 1 - glow), z, pal);
+        break;
+      }
+      case 'icicles': {
+        for (let i = 0; i < 6; i++) {
+          const u = off - 0.35 + i * 0.13, len = 0.1 + ((seed + i * 5) % 4) * 0.06;
+          this.face([at(u - 0.035, -0.5, 0.04), at(u + 0.035, -0.5, 0.04), at(u, -0.5 + len, 0.05)], i % 2 ? '#bfe2f2' : '#8fc4dc', z, pal);
+        }
+        break;
+      }
+      case 'embers': {
+        const pulse = 0.6 + 0.4 * Math.sin(time / 380 + seed);
+        ctx.beginPath();
+        const pts: [number, number][] = [[-0.3, 0.45], [-0.18, 0.3], [-0.08, 0.33], [0.02, 0.18], [0.14, 0.22], [0.22, 0.05]];
+        for (let i = 0; i + 1 < pts.length; i++) this.line(at(off + pts[i][0], pts[i][1], 0.005), at(off + pts[i + 1][0], pts[i + 1][1], 0.005));
+        this.line(at(off - 0.08, 0.33, 0.005), at(off - 0.12, 0.12, 0.005));
+        ctx.strokeStyle = `rgba(255,${Math.round(110 + 60 * pulse)},40,${(0.55 + 0.4 * pulse) * (1 - f)})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        break;
+      }
+      case 'kelp': {
+        for (let i = 0; i < 4; i++) {
+          const u = off - 0.24 + i * 0.15, hgt = 0.45 + ((seed + i) % 3) * 0.12;
+          const sway = Math.sin(time / 700 + i + seed) * 0.04;
+          const strand: P3[] = [];
+          for (let k = 0; k <= 6; k++) strand.push(at(u - 0.025 + Math.sin(k * 1.1 + i) * 0.03 + sway * (k / 6), 0.5 - (hgt * k) / 6, 0.08));
+          for (let k = 6; k >= 0; k--) strand.push(at(u + 0.025 + Math.sin(k * 1.1 + i) * 0.03 + sway * (k / 6), 0.5 - (hgt * k) / 6, 0.08));
+          this.face(strand, i % 2 ? '#2f5a32' : '#46743a', z, pal);
+        }
+        break;
+      }
+      case 'shells': {
+        for (let i = 0; i < 4; i++) {
+          const u = off - 0.2 + i * 0.12 + ((seed + i) % 3) * 0.02, r = 0.035 + (i % 2) * 0.015, w = 0.08 + (i % 3) * 0.05;
+          const fan: P3[] = [at(u, 0.5, w)];
+          for (let k = 0; k <= 6; k++) {
+            const a = Math.PI * (k / 6);
+            fan.push(at(u + Math.cos(a) * r, 0.5 - Math.sin(a) * r * 0.8, w));
+          }
+          this.face(fan, i % 2 ? '#e8d6c0' : '#d9a98a', z, pal);
+        }
+        break;
+      }
+      case 'coral': {
+        const branch = (u: number, v: number, len: number, a: number, depth: number, color: string) => {
+          const u2 = u + Math.sin(a) * len, v2 = v - Math.cos(a) * len;
+          this.face([at(u - 0.012, v, 0.06), at(u + 0.012, v, 0.06), at(u2 + 0.01, v2, 0.06), at(u2 - 0.01, v2, 0.06)], color, z, pal);
+          if (depth > 0) {
+            branch(u2, v2, len * 0.72, a - 0.5, depth - 1, color);
+            branch(u2, v2, len * 0.72, a + 0.45, depth - 1, color);
+          }
+        };
+        branch(off - 0.1, 0.5, 0.16, -0.15, 3, '#d8604a');
+        branch(off + 0.15, 0.5, 0.12, 0.2, 2, '#e89a5a');
+        break;
+      }
+      case 'bones': {
+        // Old bones heaped at the foot of the wall, with a skull on top.
+        const lineCol = mix('#2a2418', pal.fog, f);
+        const outline = (pts: P3[], color: string) => {
+          this.tinted(pts, color, z, pal, 0.65);
+          this.poly(pts);
+          ctx.strokeStyle = lineCol;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        };
+        for (let i = 0; i < 5; i++) {
+          const u = off - 0.28 + i * 0.13, w = 0.06 + ((seed + i) % 3) * 0.07, len = 0.22, tilt = (((seed + i) % 5) - 2) * 0.025, t = 0.035;
+          outline([at(u - len / 2, 0.5 - t + tilt, w), at(u + len / 2, 0.5 - t - tilt, w), at(u + len / 2, 0.5 - tilt, w), at(u - len / 2, 0.5 + tilt, w)], i % 2 ? '#e6dcc0' : '#d4c8a6');
+          outline([at(u + len / 2 - 0.02, 0.5 - t * 1.6 - tilt, w), at(u + len / 2 + 0.03, 0.5 - t * 1.6 - tilt, w), at(u + len / 2 + 0.03, 0.5 - tilt, w), at(u + len / 2 - 0.02, 0.5 - tilt, w)], '#e6dcc0');
+        }
+        const cx = off + 0.12;
+        const skull: P3[] = [];
+        for (let k = 0; k <= 12; k++) {
+          const a = Math.PI * (k / 12);
+          skull.push(at(cx + Math.cos(a) * 0.12, 0.43 - Math.sin(a) * 0.13, 0.16));
+        }
+        outline([...skull.slice(0, 13), at(cx + 0.08, 0.5, 0.16), at(cx - 0.08, 0.5, 0.16)], '#ece4ca');
+        this.face([at(cx - 0.07, 0.42, 0.165), at(cx - 0.02, 0.42, 0.165), at(cx - 0.02, 0.37, 0.165), at(cx - 0.07, 0.37, 0.165)], '#1a1610', z, pal);
+        this.face([at(cx + 0.02, 0.42, 0.165), at(cx + 0.07, 0.42, 0.165), at(cx + 0.07, 0.37, 0.165), at(cx + 0.02, 0.37, 0.165)], '#1a1610', z, pal);
+        break;
+      }
+      case 'ribs': {
+        for (let i = 0; i < 4; i++) {
+          const v = -0.3 + i * 0.16;
+          const arc: P3[] = [];
+          for (let k = 0; k <= 6; k++) arc.push(at(off - 0.32 + k * 0.1, v - Math.sin((k / 6) * Math.PI) * 0.06, 0.02 + Math.sin((k / 6) * Math.PI) * 0.06));
+          for (let k = 6; k >= 0; k--) arc.push(at(off - 0.32 + k * 0.1, v + 0.035 - Math.sin((k / 6) * Math.PI) * 0.06, 0.02 + Math.sin((k / 6) * Math.PI) * 0.06));
+          this.tinted(arc, '#e0d8bc', z, pal, 0.6);
+        }
+        break;
+      }
+      case 'crystals': {
+        const shine = 0.65 + 0.35 * Math.sin(time / 500 + seed);
+        for (let i = 0; i < 4; i++) {
+          const u = off - 0.15 + i * 0.1, hgt = 0.14 + ((seed + i * 2) % 4) * 0.06, lean = (i - 1.5) * 0.03, w = 0.05 + (i % 2) * 0.04;
+          this.face([at(u - 0.035, 0.5, w), at(u + 0.035, 0.5, w), at(u + lean + 0.01, 0.5 - hgt, w)], mix('#9fe4ff', '#e8fbff', i % 2 ? shine : 1 - shine), z, pal);
+        }
+        break;
+      }
+    }
+  }
+
   /** A runestone: a small standing slab with runes that glow softly, a little to the side of the square. */
   private runestone(s: number, d: number, pal: Palette, time: number): void {
     const ctx = this.ctx;
@@ -1019,6 +1258,14 @@ export class CorridorRenderer {
     real.imageSmoothingEnabled = false;
     real.drawImage(low, 0, 0, lw, lh, 0, 0, lw * P, lh * P);
     real.imageSmoothingEnabled = true;
+  }
+
+  /** A polygon filled with the floor's own stone, tinted: decor that keeps the grain of the painted walls. */
+  private tinted(points: P3[], color: string, z: number, pal: Palette, alpha: number): void {
+    this.poly(points);
+    this.stoneFill(pal, z, 0.1);
+    this.ctx.fillStyle = withAlpha(mix(color, pal.fog, this.fog(z)), alpha);
+    this.ctx.fill();
   }
 
   private face(points: P3[], color: string, z: number, pal: Palette): void {

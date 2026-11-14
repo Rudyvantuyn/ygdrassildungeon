@@ -9,6 +9,8 @@ export interface Palette {
   fog: string;
   /** Painted textures for walls, floor and ceiling (art/dungeon/<textures>-wall.webp etc.). */
   textures?: string;
+  /** A colour grade (CSS filter) over the textures, so floors that share textures each look like their own place. */
+  grade?: string;
 }
 
 /**
@@ -690,3 +692,23 @@ export const FLOORS: FloorDef[] = [
     palette: MARROW,
   },
 ];
+
+/**
+ * Floors of a chapter often share one set of textures; a colour grade gives each its own mood
+ * (players found neighbouring floors too alike).
+ */
+const GRADES: Record<string, string> = {
+  'Rootway II': 'hue-rotate(-14deg) saturate(118%) brightness(92%)',
+  'Heartwood III': 'sepia(28%) saturate(125%) brightness(106%)',
+  'Saltmarsh VI': 'sepia(18%) saturate(85%) brightness(104%)',
+  'Kelpwood VII': 'hue-rotate(28deg) saturate(120%) brightness(94%)',
+  "Ran's Reach IX": 'hue-rotate(-12deg) saturate(110%) brightness(82%)',
+  "The Giant's Stair XII": 'sepia(22%) brightness(98%) contrast(108%)',
+  'Ribvault XIII': 'saturate(55%) brightness(112%) contrast(104%)',
+  'Echo Hollows XIV': 'hue-rotate(160deg) saturate(80%) brightness(80%)',
+  "Hrungnir's Rest XV": 'sepia(35%) hue-rotate(-25deg) saturate(150%) brightness(90%)',
+};
+for (const floor of FLOORS) {
+  const grade = GRADES[floor.name];
+  if (grade) floor.palette = { ...floor.palette, grade };
+}
