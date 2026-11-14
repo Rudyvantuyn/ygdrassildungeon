@@ -6,6 +6,7 @@ import type { RealtimeChannel, Session, SupabaseClient } from '@supabase/supabas
 import type { Action, ExpeditionState } from '../core/expedition';
 import type { Member } from '../core/types';
 import type { CarveRequest, FloorMarks } from '../core/runestones';
+import type { EarnedDeed } from '../core/deeds';
 
 /** Public project settings (safe to ship: access is enforced by the database's row rules). */
 export const SUPABASE_URL = 'https://prcwekmvndxddqbgdnbf.supabase.co';
@@ -225,6 +226,22 @@ class Online {
     } catch {
       return 'Could not reach the Hornstone. Check your connection.';
     }
+  }
+
+  // ── Book of Deeds ──────────────────────────────────────────────────────────
+
+  /** Deeds kept with the account, by id; null when not signed in or unreachable. */
+  async loadDeeds(): Promise<Record<string, EarnedDeed> | null> {
+    if (!(await this.connected()) || !this.userId) return null;
+    const { data, error } = await this.db.from('deeds').select('deed_id, earned_at, hero').eq('user_id', this.userId);
+    if (error) return null;
+    return Object.fromEntries((data ?? []).map((r) => [r.deed_id as string, { at: Date.parse(r.earned_at as string), by: (r.hero as string | null) ?? undefined }]));
+  }
+
+  async saveDeeds(deeds: Record<string, EarnedDeed>): Promise<void> {
+    if (!(await this.connected()) || !this.userId) return;
+    const rows = Object.entries(deeds).map(([id, e]) => ({ user_id: this.userId, deed_id: id, earned_at: new Date(e.at).toISOString(), hero: e.by ?? null }));
+    if (rows.length) await this.db.from('deeds').upsert(rows, { onConflict: 'user_id,deed_id', ignoreDuplicates: true });
   }
 
   /** `password`: makes the expedition private. */

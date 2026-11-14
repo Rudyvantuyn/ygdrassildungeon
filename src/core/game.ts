@@ -4,7 +4,7 @@ import { FLOORS, type FloorDef } from './data/floors';
 import { makeInventory } from './data/items';
 import type { QuestState } from './quests';
 import { DX, DY, isGatherTile, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
-import { createStartingParty, fullRestore, isAlive, xpForLevel } from './party';
+import { createStartingParty, fullRestore, isAlive, memberStats, xpForLevel } from './party';
 import { EQUIPMENT_LIST } from './data/equipment';
 import type { Bestiary } from './bestiary';
 import { autoSpend, clampRanks, fullScaleRank, rankOf } from './skilltree';
@@ -14,6 +14,7 @@ import { STORY } from './data/story';
 import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
 import { Rng } from './rng';
 import type { RavenRun } from './ravens';
+import { count, setCount, type DeedCounter, type EarnedDeed } from './deeds';
 import type { Dir, ItemId, Loot, Member } from './types';
 
 /** Bump when the save format changes incompatibly; older saves are then discarded. */
@@ -99,6 +100,12 @@ export interface GameState {
   carvedOn?: string;
   /** Runestones already read (ids, newest last): they show on the map. */
   runesRead?: number[];
+  /** Deeds earned (Book of Deeds), by id. */
+  deeds?: Record<string, EarnedDeed>;
+  /** Counters for deeds. */
+  counters?: Partial<Record<DeedCounter, number>>;
+  /** Where the party last walked into a wall (for a deed). */
+  lastBump?: string;
 }
 
 export type StepEvent =
@@ -336,6 +343,10 @@ export class Game {
     const next = relCell(x, y, dir, forward, right);
     if (!this.canEnter(next.x, next.y)) {
       if (tileAt(this.map, next.x, next.y) === 'chest') return [{ type: 'chestAhead', opened: this.isChestOpened(next.x, next.y) }];
+      const spot = `${this.state.floor}:${next.x}:${next.y}`;
+      if (this.state.lastBump === spot) count(this, 'bumps');
+      else setCount(this, 'bumps', 1);
+      this.state.lastBump = spot;
       return [{ type: 'bump' }];
     }
 
@@ -430,6 +441,8 @@ export class Game {
     if (!unlock && this.floors === FLOORS && !startFloors(this.state.deepest).includes(floor)) return;
     if (!unlock && floor > this.state.deepest) return;
     if (this.state.location === 'town' || !this.state.descent) {
+      setCount(this, 'itemsDescent', 0);
+      setCount(this, 'fallenDescent', 0);
       // A name for this descent; random, but without touching the game's own dice.
       this.state.descent = `d${this.state.steps.toString(36)}-${Math.floor(Math.random() * 0x7fffffff).toString(36)}`.padEnd(10, '0');
     }
@@ -504,6 +517,16 @@ export class Game {
       if (combat.outcome === 'fled') prowler.stun = 3;
       this.state.fighting = null;
     }
+    // For deeds: items used and adventurers fallen on this descent, flights, narrow escapes.
+    count(this, 'itemsDescent', combat.itemsUsed);
+    if (combat.outcome === 'fled') count(this, 'flees');
+    if (this.state.party.some((m) => m.hp <= 0) || combat.fellDuring) count(this, 'fallenDescent');
+    if (combat.outcome === 'victory') {
+      const standing = this.state.party.filter(isAlive);
+      if (standing.length === 1 && this.state.party.length > 1 && standing[0].hp <= 0.1 * memberStats(standing[0]).hp) count(this, 'byAHair');
+      if (combat.boss && (this.state.counters?.itemsDescent ?? 0) === 0) count(this, 'guardianNoItems');
+      if (combat.boss && (this.state.counters?.fallenDescent ?? 0) === 0) count(this, 'guardianNoFall');
+    }
     if (combat.outcome === 'victory' && combat.rewards) {
       this.state.gold += combat.rewards.gold;
       for (const id of combat.rewards.materials) this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
@@ -551,6 +574,7 @@ export class Game {
     if (!spot || spot.left <= 0 || spot.rank <= 0) return null;
     const index = this.state.y * this.map.width + this.state.x;
     this.progress.gathered = { ...this.progress.gathered, [index]: GATHER_USES - spot.left + 1 };
+    count(this, 'gathers');
     const finds = gatherFinds(this.depth, spot.kind, this.gatherPower(spot.kind), this.rng);
     for (const id of finds) this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
     const ambush = this.rng.chance(GATHER_AMBUSH) ? this.rng.weighted(this.floorDef.encounters).enemies : null;

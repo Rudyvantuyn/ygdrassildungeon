@@ -4,6 +4,7 @@ import type { SkillDef } from '../core/data/skills';
 import type { Game } from '../core/game';
 import { isAlive, knownSkills, memberStats } from '../core/party';
 import { noteEvents, noteSeen } from '../core/bestiary';
+import { count } from '../core/deeds';
 import { elementIcon } from './elements';
 import { rankOf, skillFor } from '../core/skilltree';
 import { chooseCommands } from '../core/tactics';
@@ -655,6 +656,8 @@ export class CombatView {
       events = this.combat.resolveRound(this.commands);
     }
     noteEvents((this.host.game.state.bestiary ??= {}), this.combat.enemies.map((e) => e.def.id), events);
+    const shrugged = events.filter((ev) => ev.type === 'damage' && ev.side === 'enemy' && ev.resist).length;
+    if (shrugged) count(this.host.game, 'resisted', shrugged);
     for (const ev of events) await this.play(ev);
 
     this.playing = false;

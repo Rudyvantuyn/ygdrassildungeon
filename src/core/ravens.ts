@@ -15,6 +15,7 @@ import { fullRestore, healAmount, healMember, isAlive, memberStats, revive } fro
 import { Rng } from './rng';
 import { fullScaleRank, rankOf, skillFor } from './skilltree';
 import { innCost } from './town';
+import { count } from './deeds';
 import { chooseCommands } from './tactics';
 import type { ItemId, Member } from './types';
 
@@ -170,6 +171,8 @@ export function collectRun(game: Game, id: number, now: number): RunReport | nul
   if (i < 0) return null;
   const [run] = list.splice(i, 1);
   const { materials, items, wounded } = run.report;
+  count(game, 'runs');
+  if (!wounded.length) count(game, 'safeRuns');
   for (const [mid, n] of Object.entries(materials)) game.state.materials[mid] = (game.state.materials[mid] ?? 0) + n;
   for (const [item, n] of Object.entries(items) as [ItemId, number][]) game.state.inventory[item] = (game.state.inventory[item] ?? 0) + n;
   for (const oath of run.members) {

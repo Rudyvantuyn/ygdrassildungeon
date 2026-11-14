@@ -205,6 +205,15 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'deeds',
+    title: 'The Book of Deeds',
+    speaker: 'brynja',
+    pages: [
+      'That was a deed worth a medal. Lindholm keeps a book of them: you will find yours in the Journal.',
+      'Nobody will tell you what counts as a deed. Some are earned by courage, some by patience, and some by doing something nobody else would think of.',
+    ],
+  },
+  {
     id: 'choice',
     title: 'Choices',
     speaker: 'sigrid',

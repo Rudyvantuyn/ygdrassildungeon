@@ -4,6 +4,7 @@
  */
 import { ENEMIES } from '../core/data/enemies';
 import type { Game } from '../core/game';
+import { count, setCount } from '../core/deeds';
 import {
   RUNE_ADVICE,
   RUNE_WHAT,
@@ -127,6 +128,7 @@ export class RuneMarks {
       const error = await online.voteStone(stone.id, v);
       if (error) return this.host.toast(error);
       stone.voted = v;
+      if (v === 'heed') count(g, 'heedsGiven');
       if (v === 'heed') stone.heeds += 1;
       else stone.falses += 1;
       this.host.toast(v === 'heed' ? `You heed ${stone.author}'s stone. They will hear of it.` : 'You mark the stone as false.');
@@ -213,6 +215,7 @@ export class RuneMarks {
     const error = await online.carveStone({ floor: g.state.floor, x: g.state.x, y: g.state.y, ...stone, descent });
     if (error) return this.dialog('Runestones', [el('p', { text: error })], [{ label: 'Back', onSelect: back }], back);
     g.state.carvedOn = descent;
+    count(g, 'stonesCarved');
     this.host.closeOverlay();
     this.host.resume();
     this.host.toast('You carve the stone. Those who come after you will find it here.', 3200);
@@ -242,6 +245,7 @@ export function reportShade(game: Game, enemy: string): void {
 export async function claimRenown(game: Game): Promise<{ heeds: number; gold: number } | null> {
   if (!online.mayBeSignedIn) return null;
   const r = await online.claimRenown().catch(() => null);
+  if (r) setCount(game, 'heedsReceived', r.total);
   if (!r || r.heeds <= 0) return null;
   game.state.gold += r.gold;
   return r;

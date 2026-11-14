@@ -134,6 +134,9 @@ export class Combat {
   private fleeTried = 0;
   outcome: Outcome | null = null;
   rewards: Rewards | null = null;
+  /** Items used in this fight, and whether anyone fell at some point (for deeds). */
+  itemsUsed = 0;
+  fellDuring = false;
 
   constructor(
     readonly party: Member[],
@@ -386,6 +389,7 @@ export class Combat {
           return;
         }
         this.inventory[cmd.item] -= 1;
+        this.itemsUsed += 1;
         if (item.effect === 'warp') {
           events.push({ type: 'info', text: 'It has no effect here.' });
         } else if (item.effect === 'revive') {
@@ -521,6 +525,7 @@ export class Combat {
     m.hp = Math.max(0, m.hp - damage);
     events.push({ type: 'damage', side: 'party', target: memberIndex, amount: damage, hp: m.hp, crit, weak: false, resist: false, element: action.element });
     if (m.hp === 0) {
+      this.fellDuring = true;
       this.status[memberIndex].ailment = null;
       events.push({ type: 'down', side: 'party', target: memberIndex, text: `${m.name} falls!` });
       return;
@@ -597,6 +602,7 @@ export class Combat {
           m.hp = Math.max(0, m.hp - damage);
           events.push({ type: 'damage', side, target: index, amount: damage, hp: m.hp, crit: false, weak: false, resist: false, element: 'phys' });
           if (m.hp === 0) {
+            this.fellDuring = true;
             target.ailment = null;
             events.push({ type: 'down', side, target: index, text: `${m.name} succumbs to the poison!` });
             return;

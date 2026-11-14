@@ -17,6 +17,8 @@ import { MAP_ZOOMS, drawMinimap } from '../render/minimap';
 import { ravenBadge } from './ravensView';
 import { syncClock } from '../net/clock';
 import { RuneMarks, claimRenown, reportShade } from './runeView';
+import { checkDeeds, count, mergeDeeds } from '../core/deeds';
+import { DeedBanner, bookOfDeeds } from './deedsView';
 import { drawTownScene, preloadTownScenes } from '../render/town';
 import { preload, sprite } from '../render/sprites';
 import { audio } from '../audio/audio';
@@ -131,6 +133,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   /** The floor being test-played from the drafting table (nothing is saved meanwhile). */
   private trial: ChapterDesign | null = null;
   private readonly runes: RuneMarks;
+  private deedBanner!: DeedBanner;
   private story: { lines: StoryLine[]; index: number; shown: number; then: () => void; box: HTMLElement } | null = null;
   private fx: ViewFx | null = null;
   /** The view just before a step or turn, for the glide into the new view. */
@@ -145,6 +148,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     void syncClock();
     this.stage = el('div', { id: 'stage' });
     root.appendChild(this.stage);
+    this.deedBanner = new DeedBanner(this.stage, () => audio.play('levelUp'));
 
     const viewCanvas = el('canvas', { id: 'view' });
     viewCanvas.width = VIEW_W;
@@ -594,6 +598,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.closeOverlay();
     this.resume();
     this.toast('Game loaded.');
+    void this.syncDeeds();
   }
 
   save(): void {
@@ -1210,10 +1215,33 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.goldEl.textContent = `${g.state.gold} G`;
     this.party.render(g.state.party, { owners: this.coop?.owners });
     if (this.coop && g.state.location === 'dungeon') this.runes.stepped(false);
+    this.checkDeeds();
     this.keyHint.textContent = prefs.strafeKeys
       ? 'W S: walk · A D: side-step · Q E: turn · Space: act · M: map · Esc: menu'
       : 'W S: walk · A D: turn · Q E: side-step · Space: act · M: map · Esc: menu';
     this.updateActPrompt();
+  }
+
+  /** Deeds earned just now: a medal slides in, and they are kept with the account when signed in. */
+  private checkDeeds(): void {
+    if (!this.game || this.game === this.titleGame || this.trial || this.coop || !this.deedBanner) return;
+    const fresh = checkDeeds(this.game, Date.now());
+    if (!fresh.length) return;
+    this.deedBanner.add(fresh);
+    this.noticeTip('deeds');
+    this.save();
+    void this.syncDeeds();
+  }
+
+  /** Deeds kept with the account come into this save, and this save's deeds go to the account. */
+  private async syncDeeds(): Promise<void> {
+    const game = this.game;
+    if (!game || game === this.titleGame || this.trial || !online.mayBeSignedIn) return;
+    const remote = await online.loadDeeds().catch(() => null);
+    if (!remote || this.game !== game) return;
+    mergeDeeds(game, remote);
+    const missing = Object.entries(game.state.deeds ?? {}).filter(([id]) => !remote[id]);
+    if (missing.length) await online.saveDeeds(Object.fromEntries(missing)).catch(() => undefined);
   }
 
   /** The action button in the view: only there when there is something to do where the party stands. */
@@ -1603,6 +1631,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
               { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(back) },
               { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(back) },
               { label: 'Bestiary', description: 'Every monster you have met: where it lives, what it leaves behind, and the weaknesses you have found.', onSelect: () => this.tips(['bestiary'], () => this.showBestiary(back)) },
+              { label: 'Book of Deeds', detail: Object.keys(s.deeds ?? {}).length ? String(Object.keys(s.deeds ?? {}).length) : undefined, description: 'The medals you have earned. Nobody will tell you what counts as a deed.', onSelect: () => bookOfDeeds(this.game, (c, m) => this.openOverlay(c, m), back) },
             ]),
       ],
       options: [
@@ -1729,6 +1758,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           const amount =
             def.effect === 'revive' ? revive(party[t], def.amount) : def.effect === 'hp' ? healMember(party[t], def.amount) : restoreSp(party[t], def.amount);
           inv[id] -= 1;
+          count(this.game, 'itemsDescent');
           const a = this.party.anchor(t);
           floater(this.floaters, a.x, a.y, `+${amount}${def.effect === 'sp' ? ' SP' : ''}`, 'heal');
           this.updateHud();
