@@ -21,7 +21,7 @@
   <body>
     <main>
       <h1>Privacy and terms</h1>
-      <p class="muted">Ygdrassil · last updated 14 November 2026 · <a href="./">back to the game</a></p>
+      <p class="muted">Ygdrassil · last updated 14 November 2026 · <a href="./">back to Ygdrassil</a></p>
 
       <h2>In short</h2>
       <p>
@@ -46,7 +46,7 @@
           <td>Only in your browser's storage, until you delete it. We never see it.</td>
         </tr>
         <tr>
-          <td>Account: e-mail address, password (stored scrambled, never readable), player name</td>
+          <td>Account: e-mail address, password (stored scrambled, never readable), player name. Signing in with Google gives us your e-mail address and your name from Google (we show only your first name). A guest account holds no e-mail at all, only a random id, until you link it</td>
           <td>To sign in, play together and keep a cloud save. Only if you create an account.</td>
           <td>Supabase (Frankfurt, EU), until you ask us to delete your account.</td>
         </tr>
@@ -58,10 +58,10 @@
         <tr>
           <td>Expeditions: your player name, the adventurer you bring, and what happens on the expedition; for a private expedition, a scrambled (hashed) copy of its password</td>
           <td>To run a shared expedition fairly (the server keeps the rules).</td>
-          <td>Supabase (EU). Other players in the expedition see your player name and adventurer.</td>
+          <td>Supabase (EU). Other players in the expedition see your player name and adventurer; while a gathering is open to all, anyone looking for one sees its host's player name. Deleted 90 days after the expedition's last move.</td>
         </tr>
         <tr>
-          <td>Runestones you carve: your player name, the floor and square, and the message (built from fixed words only), with how often other players heeded it or marked it false and who did (so everyone judges a stone once)</td>
+          <td>Runestones you carve: your player name, the floor and square, and the message (built from fixed words only), with how often other players heeded it or marked it false and who did (so everyone judges a stone once); and how much Heed gold you received today (a daily cap)</td>
           <td>So other players find your stone in their own game, and you hear when it helped someone.</td>
           <td>Supabase (EU). Every signed-in player can read the stone and your player name. A stone is deleted when it crumbles (your 21st stone, enough "false" marks) and at the latest 90 days after it was carved or last heeded.</td>
         </tr>
@@ -76,7 +76,7 @@
           <td>Supabase (EU). Other players see the shade, never who left it. Deleted after 30 days.</td>
         </tr>
         <tr>
-          <td>Feedback and crash reports: your message, where you were in the game (floor, levels, settings, number of battles, time played), screen size, browser type, game version, your account id if you are signed in, and a name or contact only if you fill one in</td>
+          <td>Feedback and crash reports: your message, where you were in the game (screen, floor and square, your party's classes and levels, number of battles, time played, whether on an expedition), screen size, game version, and a name or contact only if you fill one in. Crash reports also hold the error details and your browser type. No account id is sent</td>
           <td>To find and fix problems and to improve the game. Crash reports are sent automatically when the game breaks.</td>
           <td>Supabase (EU). Only the maker can read them; they are deleted once handled, and at the latest after 12 months.</td>
         </tr>
@@ -99,7 +99,8 @@
       <p>
         The legal basis is the agreement to provide the game to you (accounts, cloud saves, expeditions) and our
         legitimate interest in a working, secure game (feedback, crash reports, logs). Fonts and art are served with
-        the game itself; no third-party font or analytics service sees your visit.
+        the game itself, so no third-party font service sees your visit; the only visitor counting is the cookieless
+        Vercel Web Analytics described above.
       </p>
 
       <h2>Your rights</h2>

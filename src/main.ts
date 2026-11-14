@@ -1,3 +1,4 @@
+import './render/roundRect';
 import { inject } from '@vercel/analytics';
 import { audio } from './audio/audio';
 import { watchErrors } from './net/reports';

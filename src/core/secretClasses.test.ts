@@ -4,7 +4,8 @@ import { CLASSES } from './data/classes';
 import { EQUIPMENT_LIST } from './data/equipment';
 import { FLOORS } from './data/floors';
 import { makeInventory } from './data/items';
-import { pendingScene } from './data/story';
+import { STORY, pendingScene } from './data/story';
+import { existsSync } from 'node:fs';
 import { SECRET_CLASSES, checkDeeds, classUnlocked } from './deeds';
 import { Game } from './game';
 import { bestiaryOrder } from './bestiary';
@@ -56,14 +57,27 @@ describe('secret classes', () => {
     expect(classUnlocked(g, 'hornbearer')).toBe(false);
     expect(registerMember(g, 'Svala', 'ravenspeaker', 5)).toBeNull();
     g.state.location = 'town';
-    expect(pendingScene(g, 'town')?.id === 'ravenStranger' || g.state.story.length === 0).toBe(true);
-    g.state.claimed = ['a', 'b', 'c', 'd', 'e'];
+    // Every other scene already seen: the stranger is the one waiting in town.
+    const strangers = ['ravenStranger', 'hornStranger', 'wildStranger'];
+    g.state.story = STORY.map((sc) => sc.id).filter((id) => !strangers.includes(id));
+    expect(pendingScene(g, 'town')?.id).toBe('ravenStranger');
+    g.state.story.push('ravenStranger');
+    (g.state.counters ??= {}).expeditionsHome = 5;
     expect(checkDeeds(g, 2).map((d) => d.id)).toContain('hornCall');
     expect(registerMember(g, 'Hallgrim', 'hornbearer', 0)).toBeNull();
+    expect(pendingScene(g, 'town')?.id).toBe('hornStranger');
+    g.state.story.push('hornStranger');
     expect(classUnlocked(g, 'fylgja')).toBe(false);
     for (const b of bestiaryOrder()) if (Math.min(...b.floors) <= 5) (g.state.bestiary ??= {})[b.def.id] = { seen: 1, defeated: 1, tried: [] };
     expect(checkDeeds(g, 3).map((d) => d.id)).toContain('wildCall');
     expect(registerMember(g, 'Bjarnfrid', 'fylgja', 2)).toBeNull();
+    expect(pendingScene(g, 'town')?.id).toBe('wildStranger');
+  });
+
+  it('an older save that only kept its collected shares still counts them for the Hornbearer', () => {
+    const g = Game.newGame(4);
+    g.state.claimed = ['a', 'b', 'c', 'd', 'e'];
+    expect(checkDeeds(g, 1).map((d) => d.id)).toContain('hornCall');
   });
 
   it('every secret class has a full tree, gear and eight looks', () => {
@@ -71,6 +85,7 @@ describe('secret classes', () => {
       expect(CLASSES[id].skills.length).toBeGreaterThanOrEqual(10);
       expect(EQUIPMENT_LIST.some((e) => e.slot === 'weapon' && e.tier === 0 && e.classes.includes(id))).toBe(true);
       expect(EQUIPMENT_LIST.some((e) => e.slot === 'armor' && e.tier === 0 && e.classes.includes(id))).toBe(true);
+      for (let look = 0; look < 8; look++) expect(existsSync(`public/art/heroes/${id}-${look}.webp`), `${id}-${look}`).toBe(true);
     }
   });
 });

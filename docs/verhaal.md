@@ -93,9 +93,9 @@ Drie klassen die je niet kunt kiezen tot je een verborgen deed haalt. Dan meldt 
 
 - **Ravenspeaker**: na 25 Raven Runs volgt een raaf je verkenners naar huis, met een vrouw in een mantel van zwarte
   veren. Ze spreekt met de raven. (Open voor Thijs: horen de raven bij Odin? Na Hrungnir vliegt er ook een raaf weg.)
-- **Hornbearer**: na 5 expedities volgt iemand uit een andere hal je naar huis, met een grote hoorn. (De hoorn kan
+- **Hornbearer**: na 5 expedities met spelers uit andere hallen volgt iemand uit zo'n hal je naar huis, met een grote hoorn. (De hoorn kan
   later verbonden worden met Gjallarhorn, de hoorn van Heimdall.)
-- **Fylgja**: als elk wezen van de Greenwood Roots (ook prowlers en de Blighted Elder) één keer verslagen is, gaat er
+- **Fylgja**: als elk wezen van de Greenwood Roots (ook de prowlers en beide eindbazen, de Blighted Elder en de Rootgnawer) één keer verslagen is, gaat er
   's nachts een groot dier voor de Oath Hall zitten. Brynja herkent het: een fylgja, de geest die in dierengedaante met
   een leven meeloopt. Ze kiezen zelf wie ze volgen; deze koos de hal. Speelbaar als beer of kat (Freyja's katten).
   (Open voor Thijs: wiens fylgja is het, en waarom koos het juist nu?)
@@ -108,6 +108,19 @@ Een eerste briefje van een Wayfinder; de gouden rune onder het rot; botsplinters
 van Hallvards vloot ("Tell them we kept the Pact"); een logboekpagina ("a woman with a lantern was waiting there");
 een drinkhoorn van een gemengde bemanning van mensen, reuzen en een dwerg; de hoorn in Asgard na de Hafgufa; een
 wegsteen van de reuzen met weggekraste namen; Askes "nails in a grave"; Hrungnirs hart dat nog één keer klopt.
+
+### Rond het verhaal: Wyrdweave, raven, runestenen en sagas (voorstel, november 2026)
+
+Spelsystemen met een eigen stukje mythe. *Voorstel, Thijs mag het aanpassen.*
+
+- **De Wyrdweave**: bij de bron van Urd weven de Nornen elke dag drie verdiepingen, voor iedereen dezelfde, elk met
+  een eigen regel. Wat je ervan meeneemt zijn Wyrd Threads, waar Hilde kleding van weeft.
+- **Raven Runs**: in de tip volgen Huginn en Muninn de verkenners naar beneden. Dat raakt de open vraag hierboven
+  (horen de raven bij Odin?). Thijs beslist; tot dan zeggen de teksten niet wie ze stuurt.
+- **Runestenen en schimmen**: Wayfinders uit andere hallen kerven runestenen met vaste woorden; waar een hele groep
+  viel blijft een schim achter.
+- **Sagas**: skalds bezingen wat avonturiers doen, en geven ze een bijnaam ("Wolf-Feeder", "Bane of the Blighted
+  Elder"). Alleen eer, geen voordeel.
 
 ### Keuzes (de drie wegen)
 

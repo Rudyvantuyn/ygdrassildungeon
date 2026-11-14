@@ -44,6 +44,8 @@ export interface EnemyUnit extends Afflictable {
   name: string;
   hp: number;
   maxHp: number;
+  /** The party member whose poison is working on this enemy, so a poison kill counts in their saga. */
+  poisonedBy?: number;
 }
 
 export interface PartyStatus extends Afflictable {
@@ -87,7 +89,7 @@ export type CombatEvent =
 
 /** Everything about a fight that changes while it runs, in plain JSON (for saving or sending). */
 export interface CombatSnapshot {
-  enemies: { id: string; name: string; hp: number; ailment: Ailment | null; ailmentTurns: number; mods?: Mods }[];
+  enemies: { id: string; name: string; hp: number; ailment: Ailment | null; ailmentTurns: number; mods?: Mods; poisonedBy?: number }[];
   status: PartyStatus[];
   round: number;
   outcome: Outcome | null;
@@ -96,6 +98,13 @@ export interface CombatSnapshot {
   prowler: boolean;
   oathToken?: boolean;
   fleeTried?: number;
+  /** The fight's memory beyond the round: expeditions rebuild the fight from a snapshot every round. */
+  itemsUsed?: number;
+  fellDuring?: boolean;
+  fell?: number[];
+  stoodLast?: number[];
+  deeds?: Combat['deeds'];
+  rewardScale?: number;
 }
 
 export interface CombatOptions {
@@ -140,13 +149,13 @@ export class Combat {
   /** Items used in this fight, and whether anyone fell at some point (for deeds). */
   itemsUsed = 0;
   fellDuring = false;
-  private readonly rewardScale: number;
+  private rewardScale: number;
   /** What each party member did in this fight, for their saga (src/core/sagas.ts). */
-  readonly deeds: { kills: number; crits: number; weakHits: number; healed: number; revives: number; taken: number; guardians: string[]; prowlers: number }[];
+  deeds: { kills: number; crits: number; weakHits: number; healed: number; revives: number; taken: number; guardians: string[]; prowlers: number }[];
   /** Party members who fell at some point in this fight. */
-  readonly fell = new Set<number>();
+  fell = new Set<number>();
   /** Party members whose Norn-Spun Mantle already saved them this fight. */
-  private readonly stoodLast = new Set<number>();
+  private stoodLast = new Set<number>();
 
   constructor(
     readonly party: Member[],
@@ -175,7 +184,7 @@ export class Combat {
 
   snapshot(): CombatSnapshot {
     return {
-      enemies: this.enemies.map((e) => ({ id: e.def.id, name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns, mods: clone(e.mods) })),
+      enemies: this.enemies.map((e) => ({ id: e.def.id, name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns, mods: clone(e.mods), poisonedBy: e.poisonedBy })),
       status: this.status.map((s) => ({ ...s, mods: clone(s.mods) })),
       round: this.round,
       outcome: this.outcome,
@@ -184,6 +193,12 @@ export class Combat {
       prowler: this.prowler,
       oathToken: this.oathToken,
       fleeTried: this.fleeTried,
+      itemsUsed: this.itemsUsed,
+      fellDuring: this.fellDuring,
+      fell: [...this.fell],
+      stoodLast: [...this.stoodLast],
+      deeds: clone(this.deeds),
+      rewardScale: this.rewardScale,
     };
   }
 
@@ -196,7 +211,7 @@ export class Combat {
 
   /** Overwrites this fight's changing state in place with a snapshot of the same fight. */
   apply(snap: CombatSnapshot): void {
-    snap.enemies.forEach((e, i) => Object.assign(this.enemies[i], { name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns, mods: clone(e.mods) }));
+    snap.enemies.forEach((e, i) => Object.assign(this.enemies[i], { name: e.name, hp: e.hp, ailment: e.ailment, ailmentTurns: e.ailmentTurns, mods: clone(e.mods), poisonedBy: e.poisonedBy }));
     snap.status.forEach((s, i) => {
       if (this.status[i]) Object.assign(this.status[i], { ...s, mods: clone(s.mods) });
     });
@@ -204,6 +219,12 @@ export class Combat {
     this.outcome = snap.outcome;
     this.rewards = snap.rewards;
     this.fleeTried = snap.fleeTried ?? 0;
+    if (snap.itemsUsed !== undefined) this.itemsUsed = snap.itemsUsed;
+    if (snap.fellDuring !== undefined) this.fellDuring = snap.fellDuring;
+    if (snap.fell) this.fell = new Set(snap.fell);
+    if (snap.stoodLast) this.stoodLast = new Set(snap.stoodLast);
+    if (snap.deeds?.length === this.deeds.length) this.deeds = clone(snap.deeds);
+    if (snap.rewardScale !== undefined) this.rewardScale = snap.rewardScale;
   }
 
   get canFlee(): boolean {
@@ -328,20 +349,20 @@ export class Combat {
             for (let h = 0; h < skill.hits && this.enemies[t].hp > 0; h++) {
               this.hitEnemy(i, t, skill.power, skill.kind, skill.element, events);
             }
-            if (skill.inflict && this.enemies[t].hp > 0) this.tryInflict('enemy', t, skill.inflict, events);
+            if (skill.inflict && this.enemies[t].hp > 0) this.tryInflict('enemy', t, skill.inflict, events, i);
           }
         } else if (skill.kind === 'ailment') {
           const first = this.retargetEnemy(cmd.target);
           const targets = skill.target === 'allEnemies' ? this.livingEnemies() : first >= 0 ? [first] : [];
           for (const t of targets) {
-            if (skill.inflict && !this.tryInflict('enemy', t, skill.inflict, events)) events.push({ type: 'miss', side: 'enemy', target: t });
+            if (skill.inflict && !this.tryInflict('enemy', t, skill.inflict, events, i)) events.push({ type: 'miss', side: 'enemy', target: t });
           }
         } else if (skill.kind === 'cure') {
           const t = this.retargetAlly(cmd.target);
           if (t < 0 || !this.status[t].ailment) events.push({ type: 'info', text: 'But nothing happened.' });
           else this.clearAilment('party', t, events);
         } else if (skill.kind === 'heal') {
-          const targets = skill.target === 'allAllies' ? this.livingParty() : [this.retargetAlly(cmd.target)];
+          const targets = skill.target === 'allAllies' ? this.livingParty() : skill.target === 'self' ? [i] : [this.retargetAlly(cmd.target)];
           // A magic buff on the healer (a Skald's song, say) strengthens heals just like it strengthens spells.
           const amount = Math.round(healAmount(m, skill.power) * Math.max(0.2, 1 + (this.status[i].mods?.mag?.amount ?? 0) / 100));
           for (const t of targets) {
@@ -405,7 +426,7 @@ export class Combat {
         }
         this.inventory[cmd.item] -= 1;
         this.itemsUsed += 1;
-        if (item.effect === 'warp') {
+        if (item.effect === 'home') {
           events.push({ type: 'info', text: 'It has no effect here.' });
         } else if (item.effect === 'revive') {
           const hp = revive(target, item.amount);
@@ -484,9 +505,7 @@ export class Combat {
     if (crit) did.crits += 1;
     if (weak) did.weakHits += 1;
     if (enemy.hp === 0) {
-      did.kills += 1;
-      if (enemyIndex === 0 && this.boss) did.guardians.push(enemy.def.id);
-      if (enemyIndex === 0 && this.prowler) did.prowlers += 1;
+      this.creditKill(memberIndex, enemyIndex);
       events.push({ type: 'down', side: 'enemy', target: enemyIndex, text: `${enemy.name} is defeated!` });
     } else if (enemy.ailment === 'sleep') {
       this.clearAilment('enemy', enemyIndex, events, `${enemy.name} wakes up!`);
@@ -597,8 +616,17 @@ export class Combat {
     return side === 'party' ? this.party[index].name : this.enemies[index].name;
   }
 
+  /** A felled enemy goes into the saga of the party member who felled it. */
+  private creditKill(memberIndex: number, enemyIndex: number): void {
+    const did = this.deeds[memberIndex];
+    if (!did) return;
+    did.kills += 1;
+    if (enemyIndex === 0 && this.boss) did.guardians.push(this.enemies[enemyIndex].def.id);
+    if (enemyIndex === 0 && this.prowler) did.prowlers += 1;
+  }
+
   /** Rolls an ailment on a target. Bosses can't be put to sleep and resist the rest. Returns true if it took. */
-  private tryInflict(side: Side, index: number, inflict: Inflict, events: CombatEvent[]): boolean {
+  private tryInflict(side: Side, index: number, inflict: Inflict, events: CombatEvent[], by?: number): boolean {
     const target = this.afflicted(side, index);
     if (target.ailment) return false;
     let chance = inflict.chance;
@@ -614,6 +642,7 @@ export class Combat {
     if (!this.rng.chance(chance)) return false;
     target.ailment = inflict.ailment;
     target.ailmentTurns = AILMENT_TURNS[inflict.ailment];
+    if (side === 'enemy') this.enemies[index].poisonedBy = inflict.ailment === 'poison' ? by : undefined;
     const who = this.nameOf(side, index);
     const text = { poison: `${who} is poisoned!`, sleep: `${who} falls asleep!`, paralysis: `${who} is paralysed!` }[inflict.ailment];
     events.push({ type: 'ailment', side, target: index, ailment: inflict.ailment, text });
@@ -667,6 +696,7 @@ export class Combat {
           e.hp = Math.max(0, e.hp - damage);
           events.push({ type: 'damage', side, target: index, amount: damage, hp: e.hp, crit: false, weak: false, resist: false, element: 'phys' });
           if (e.hp === 0) {
+            if (e.poisonedBy !== undefined) this.creditKill(e.poisonedBy, index);
             events.push({ type: 'down', side, target: index, text: `${e.name} succumbs to the poison!` });
             return;
           }

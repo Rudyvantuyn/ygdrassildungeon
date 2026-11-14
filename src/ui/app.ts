@@ -718,7 +718,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.closeOverlay();
       this.mode = 'town';
     };
-    const queue = ['town'];
+    // Tips noticed out of a fight (a deed earned in town, say) are shown here too, rather than on the next descent.
+    const queue = ['town', ...this.tipQueue.splice(0)];
     if (s.party.some((m) => unspentPoints(m) > 0)) queue.push('skillPoints');
     if ((s.inventory.oathToken ?? 0) > 0) queue.push('oath');
     this.tips(queue, back);
@@ -1917,6 +1918,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
               this.packSkills();
             };
             if (skill.target === 'allAllies') cast(party.flatMap((p, i) => (isAlive(p) ? [i] : [])));
+            else if (skill.target === 'self') cast([party.indexOf(m)]);
             else this.pickAlly(`${skill.name} on whom?`, (t) => cast([t]), () => this.packSkills(), skill.kind === 'revive', skill.kind === 'revive' ? undefined : 'hp');
           },
         });
@@ -1931,7 +1933,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const party = this.game.state.party;
     const inv = this.game.state.inventory;
     // Ailments only exist in a fight, so cures are left out here; feathers and tokens have their own uses.
-    const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => !['warp', 'token', 'cure'].includes(ITEMS[id].effect));
+    const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => !['home', 'token', 'cure'].includes(ITEMS[id].effect));
     const items: MenuItem[] = usable.map((id) => ({
       label: ITEMS[id].name,
       detail: `×${inv[id] ?? 0}`,

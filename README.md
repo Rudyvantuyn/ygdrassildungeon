@@ -2,7 +2,7 @@
 
 Een first-person dungeon crawler met de gameplay van klassieke grid-crawlers (zoals Etrian Odyssey),
 maar met een eigen wereld, eigen namen en eigen ontwerp. Gebouwd als webgame in TypeScript.
-De gangen worden in code getekend; monsters, personen, plekken, voorwerpen en tekentjes zijn geschilderde AI-art (herkomst in `art/SOURCES.md`).
+De gangen worden in code opgebouwd uit gefilterde foto-texturen; monsters en avonturiers zijn CC0-pixelart (Dungeon Crawl Stone Soup), plekken zijn gefilterde foto's en de icoontjes komen van game-icons.net. Alleen de portretten van de inwoners van Lindholm zijn nog AI-art (besluit van de eigenaar). Herkomst van alles staat in `art/SOURCES.md`.
 
 Website en online spelen: **https://www.ygdrassilgame.com** (de game zelf op `/play`)
 
@@ -180,6 +180,9 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ### Geschilderde wereld (mijlpaal 6)
 
+_Sindsdien vervangen: de AI-art hieronder is in november 2026 vervangen door foto's, CC0-pixelart en game-icons (zie de
+kunstrichting in `CLAUDE.md`). Deze paragraaf beschrijft hoe het toen was._
+
 - **Lindholm** is geschilderd: het stadsbeeld toont de plek die je in het menu kiest (herberg, Oath Hall, winkel,
   prikbord, Rootdeep, Hornstone), met een zachte overgang. Het titelscherm heeft eigen art.
 - **De Rootdeep** is geschilderd: muren, vloeren en plafonds hebben geschilderde texturen per thema (bos, winterbos,
@@ -280,14 +283,14 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Mythologie | Ymir, Midgard, Asgard, Niflheim, Muspelheim, Jotunheim, Ginnungagap, Heimdall (Noorse mythe, vrij te gebruiken) |
 | Verhaal | **Pact of the Gap** (het pact met de andere werelden), **Wayfinders** (de gezworen avonturiers), **Frost Court** (de werelden die het pact tekenden), ward (een slot van de goden op de weg naar Asgard), Chronicle (verhaal teruglezen), Hallvard (jarl van het eerste pact) |
 | Tekenscherm | The Drafting Table; thema's Greenwood, Frostwood, Emberroot, Tidewater, Coral, Abyss |
-| Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimewood IV, Wyrmroot V, Saltmarsh VI, Kelpwood VII, Coral Vault VIII, Ran's Reach IX, Aegir's Hall X |
+| Verdiepingen | Mossy Hollow I, Rootway II, Heartwood III, Rimewood IV, Wyrmroot V, Saltmarsh VI, Kelpwood VII, Coral Vault VIII, Ran's Reach IX, Aegir's Hall X, Marrow Gate XI, The Giant's Stair XII, Ribvault XIII, Echo Hollows XIV, Hrungnir's Rest XV |
 | Stad | The Sleeping Stag (herberg), Hilde's Supplies (winkel), Oath Hall (avonturiers aanmelden en party samenstellen) |
 | Personages | (standaardgroep in tests: Bram, Sela, Wren, Orrin) Sigrid (hoedster van Lindholm), Gerd (herbergierster van The Sleeping Stag), Brynja (meesteres van de Oath Hall), Ketil (hoornwachter van de Hornstone), Hjalmar (molenaar), Hilde (winkel), Ylva (herderin), broeder Aske (genezer), Torvald (houtsnijder), Hrodna (gezant van de Frost Court), Eira the Wanderer, Kolbein (steenhouwer uit Jotunheim, hoofdstuk III) |
 | Party | Bram, Sela, Wren, Orrin |
 | Klassen | Bastion (schild), Strider (boog), Mender (genezer), Runecaller (elementmagie), Skald (liederen die de groep versterken), Berserker (bijl, veel schade, weinig verdediging), Seeress (vervloekingen), Wolfkin (jager met wolf); geheim: **Ravenspeaker** (raven en storm, na 25 Raven Runs), **Hornbearer** (hoorn, versterkt de groep, na 5 expedities), **Fylgja** (meervoud Fylgjur; een geestdier, beer of kat, dat beschermt en verscheurt; na de deed Kin of the Wild: elk wezen van hoofdstuk I verslagen) |
 | Statistieken | HP, **SP** (Spirit), ATK, DEF, MAG, RES, SPD |
 | Elementen | fysiek, vuur (fire), vorst (frost), storm; elk met een eigen icoon (zwaard, vlam, sneeuwvlok, bliksem) |
-| Skills | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Ember Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead, War Song, Shieldhymn, Mocking Verse, Runic Chant, Thunder Verse, Restful Tune, Heroes' Saga, Cleave, Blood Price, Frenzy, Skull Splitter, Reaving Spin, Curse of Frailty, Curse of Weakness, Hollow Bolt, Witherblight, Stilling Gaze, Fate Unravelled, Fang Strike, Rime Fang, Pack Hunt, Wolf Guard, Howl of the Pack, Hamstring, Moonfang Frenzy, Raven Strike, Eye Peck, Storm Wing, Ill Omen, Huginn's Watch, Muninn's Return, Murder of Ravens, Ravenstorm, Horn Blast, Rally Call, Echoing Blow, War Horn, Second Wind, Call of Gjallar, Maul, Warding, Lick Wounds, Rending Claws, Feral Roar, Spirit Ward, Wild Rush, Spirit Unbound; passief: Thick Hide, Stout Heart, Iron Skin, Keen Eye, Fleet Foot, Gentle Hands, Rune Lore, Deep Well; verzamelen: Forage, Mine, Fell, Fish |
+| Skills (spelers; vijandaanvallen hebben eigen namen in `enemies.ts`) | Challenge, Bulwark Bash, Iron Formation, Twin Fang, Venom Arrow, Ember Arrow, Scatter Volley, Mend, Cleanse, Verdant Chorus, Rekindle, Ember/Frost/Storm Rune, Wildfire, Slumber Rune, Rampart Crash, Gale Piercer, Wellspring, Thunderhead, War Song, Shieldhymn, Mocking Verse, Runic Chant, Thunder Verse, Restful Tune, Heroes' Saga, Cleave, Blood Price, Frenzy, Skull Splitter, Reaving Spin, Curse of Frailty, Curse of Weakness, Hollow Bolt, Witherblight, Stilling Gaze, Fate Unravelled, Fang Strike, Rime Fang, Pack Hunt, Wolf Guard, Howl of the Pack, Hamstring, Moonfang Frenzy, Raven Strike, Eye Peck, Storm Wing, Ill Omen, Huginn's Watch, Muninn's Return, Murder of Ravens, Ravenstorm, Horn Blast, Rally Call, Echoing Blow, War Horn, Second Wind, Call of Gjallar, Maul, Warding, Lick Wounds, Rending Claws, Feral Roar, Spirit Ward, Wild Rush, Spirit Unbound; passief: Thick Hide, Stout Heart, Iron Skin, Keen Eye, Fleet Foot, Gentle Hands, Rune Lore, Deep Well; verzamelen: Forage, Mine, Fell, Fish |
 | Statuseffecten | Poison, Sleep, Paralysis |
 | Items | Oath Token (nodig voor nieuwe avonturiers), Sap Tonic (HP), Tide Draught (veel HP), Spirit Dew (SP), Clearwater (statuseffecten), Kindling Moss (opwekken), Homing Feather (terug naar de stad) |
 | Uitrusting | Copper Edge, Ashwood Bow, Oaken Rod, Hide Jerkin, Ironbark Blade, Yew Longbow, Cinder Rod, Ringmail, Mosswove Robe, Oath Edge, Galestring Bow, Starfall Rod, Bulwark Plate, Spiritweave Robe, Runehewn Axe, Hrimstring Bow, Frostbirch Rod, Scalehide Mail, Rimeweave Robe, Wyrmtooth Blade, Embersong Bow, Ashroot Rod, Emberscale Plate, Starveil Robe, Saltsteel Blade, Gullwind Bow, Driftwood Rod, Sharkhide Mail, Kelpweave Robe, Tidebreaker Axe, Stormgull Bow, Coralheart Rod, Anchor Plate, Deepscale Mail, Seafoam Robe, Fathom Edge, Wavecaller Bow, Abyss Rod, Leviathan Mail, Tidesong Robe, Bonebreaker Axe, Marrow Bow, Runebone Rod, Cairnplate Mail, Chalkweave Robe, Giantsteel Blade, Stormhorn Bow, Quartzheart Rod, Crag Plate, Cragleather Coat, Echoweave Robe, Jotun Cleaver, Skyrender Bow, Starmarrow Rod, Mountainheart Mail, Runeveil Robe |

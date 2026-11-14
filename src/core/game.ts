@@ -1,7 +1,7 @@
 import { emptyChart, setTerrain, type Chart, type ChartMode } from './chart';
 import { Combat, type CombatSnapshot } from './combat';
 import { FLOORS, type FloorDef } from './data/floors';
-import { makeInventory } from './data/items';
+import { ITEMS, makeInventory } from './data/items';
 import type { QuestState } from './quests';
 import { DX, DY, isGatherTile, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
 import { createStartingParty, fullRestore, isAlive, memberStats, xpForLevel } from './party';
@@ -105,6 +105,8 @@ export interface GameState {
   runesRead?: number[];
   /** Fragments of the Rootdeep's past found (ids, src/core/data/fragments.ts). */
   fragments?: string[];
+  /** Guardians beaten before sagas were kept: they count for Guardians' Bane, since nobody can strike them again. */
+  guardiansBefore?: string[];
   /** Deeds earned (Book of Deeds), by id. */
   deeds?: Record<string, EarnedDeed>;
   /** Counters for deeds. */
@@ -212,8 +214,41 @@ export class Game {
     });
     // New chapters add floors; saves from before them get fresh progress for those.
     for (let i = state.progress.length; i < this.floors.length; i++) state.progress.push(newProgress(this.floors[i]));
+    if (this.floors === FLOORS) this.catchUpOldSave();
     // "Cleared" means the last floor's boss has fallen (it meant floor 5 before chapter II).
     state.cleared = state.progress[this.floors.length - 1].bossDefeated;
+  }
+
+  /**
+   * Guardians cannot be fought again and chests stay open, so what a save did before the bestiary, fragments and
+   * sagas existed is filled in here: guardians beaten count as met and defeated, and their fragments (and those in
+   * the first chests already opened) are found.
+   */
+  private catchUpOldSave(): void {
+    const state = this.state;
+    const fresh = !state.fragments;
+    const beaten: string[] = [];
+    state.progress.forEach((p, i) => {
+      const boss = this.floors[i]?.boss;
+      if (p.bossDefeated && boss?.length) {
+        beaten.push(boss[0]);
+        for (const id of boss) {
+          const e = ((state.bestiary ??= {})[id] ??= { seen: 0, defeated: 0, tried: [] });
+          e.seen = Math.max(e.seen, 1);
+          e.defeated = Math.max(e.defeated, 1);
+        }
+      }
+      if (fresh) {
+        const found = (state.fragments ??= []);
+        const add = (f: FragmentDef | undefined) => f && !found.includes(f.id) && found.push(f.id);
+        if (p.bossDefeated) add(fragmentAt(i, 'guardian'));
+        if (p.openedChests.includes(0)) add(fragmentAt(i, 'chest'));
+      }
+    });
+    if (state.guardiansBefore === undefined) {
+      const sagasKept = [...state.party, ...state.reserve].some((m) => m.saga);
+      state.guardiansBefore = sagasKept ? [] : beaten;
+    }
   }
 
   /** A new game; `party` is the group the player made (the default party is for tests and the computer player). */
@@ -257,7 +292,7 @@ export class Game {
    * What happens here goes back home with bringWyrdHome (src/core/wyrd.ts).
    */
   static wyrdRun(home: Game, day: number, seed: number): Game {
-    const game = Game.fresh(seed, wyrdFloors(day, wyrdChapter(home)));
+    const game = Game.fresh(seed, wyrdFloors(day, wyrdChapter(home), home.state.deepest >= FLOORS_PER_CHAPTER - 1));
     const s = game.state;
     s.party = JSON.parse(JSON.stringify(home.state.party)) as Member[];
     s.inventory = { ...home.state.inventory };
@@ -709,6 +744,12 @@ export class Game {
   takeLink(): boolean {
     const to = this.linkTarget(this.state.x, this.state.y);
     if (!to) return false;
+    // Numbered stairs count like the plain ones for the deeds: down without a win, and a fresh floor's tally.
+    if (to.floor > this.state.floor) {
+      if ((this.state.counters?.winsFloor ?? 0) === 0) count(this, 'pacifist');
+      count(this, 'downDescent');
+    }
+    setCount(this, 'winsFloor', 0);
     this.state.floor = to.floor;
     this.state.deepest = Math.max(this.state.deepest, to.floor);
     this.map = this.loadMap();
@@ -730,7 +771,9 @@ export class Game {
     const index = this.map.chests.findIndex((c) => c.x === x && c.y === y);
     if (index < 0 || this.progress.openedChests.includes(index)) return { type: 'emptyChest' };
     this.progress.openedChests.push(index);
-    const loot = this.floorDef.chests[index] ?? { gold: 10 };
+    let loot = this.floorDef.chests[index] ?? { gold: 10 };
+    // Oath Tokens are not won on expeditions (every expedition starts afresh, so they could be farmed).
+    if (this.state.expedition && 'item' in loot && ITEMS[loot.item]?.effect === 'token') loot = { gold: 40 };
     if ('gold' in loot) this.state.gold += loot.gold;
     else this.state.inventory[loot.item] = (this.state.inventory[loot.item] ?? 0) + loot.qty;
     const fragment = index === 0 ? this.findFragment('chest') : undefined;

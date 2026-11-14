@@ -474,7 +474,7 @@ export const STORY: StoryScene[] = [
     ready: (g) => !!g.state.deeds?.hornCall,
     lines: [
       { speaker: NARRATOR, text: 'After your fifth expedition a stranger follows the Wayfinders home: broad, travel-worn, a great horn slung across the back.' },
-      { speaker: BRYNJA, text: 'Five times you sounded the Hornstone, and five times this one answered from a far hall. Now they would rather stand beside you.' },
+      { speaker: BRYNJA, text: 'Five times you went down beside Wayfinders from other halls, and five times this one was among them. Now they would rather stand beside you.' },
       { speaker: BRYNJA, text: 'A Hornbearer. One blast and the deep shakes; one call and tired Wayfinders stand up again. The Oath Hall takes their kind now.' },
     ],
   },

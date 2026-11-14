@@ -14,7 +14,7 @@ export const POSTS: Post[] = [
     title: 'Threads, beasts and bynames',
     body: `A big one. Everything below is now in the game, here and on itch.io.
 
-**The Wyrdweave.** Once the Blighted Elder has fallen, the Norns weave three floors at the Well of Urd every day: the same floors for every Wayfinder, each with a rule of its own. No map that draws itself, light that reaches two squares, no healing outside of fights, a prowler that never stops hunting. After each floor you choose: take your Wyrd Threads home, or go deeper and risk losing half. One try a day. Hilde weaves the threads into gear with a gift of its own, but slowly: it is meant to take weeks, not days.
+**The Wyrdweave.** Once the Blighted Elder has fallen, the Norns weave three floors at the Well of Urd every day: the same floors for every Wayfinder, each with a rule of its own. No map that draws itself, light that reaches two squares, no healing outside of fights, something that never stops hunting. After each floor you choose: take your Wyrd Threads home, or go deeper and risk losing half. One try a day. Hilde weaves the threads into gear with a gift of its own, but slowly: it is meant to take weeks, not days.
 
 **Sagas.** Every fight is now told. Finishing blows, wounds healed, friends brought back, blows taken, narrow escapes: do enough of something and the skalds give your adventurer a byname. Bram Wolf-Feeder. Wren the Kind. Whoever strikes the last blow on a guardian becomes its Bane. Choose which byname they bear in the Party menu or at the Oath Hall. It changes nothing in a fight; it is just yours.
 

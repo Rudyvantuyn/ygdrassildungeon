@@ -2,6 +2,7 @@
  * The website around the game (www.ygdrassilgame.com): the front page, the world, classes, bestiary and devlog.
  * Built from the game's own data, so names and pictures always match the game. The game itself lives at /play.
  */
+import '../render/roundRect';
 import { fullName } from '../core/sagas';
 import { FRAGMENTS } from '../core/data/fragments';
 import { inject } from '@vercel/analytics';

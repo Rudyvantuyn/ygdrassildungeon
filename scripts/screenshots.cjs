@@ -1,13 +1,13 @@
 /**
  * Smoke test + screenshots. Starts nothing itself: run `npm run dev` first, then
- *   node scripts/screenshots.cjs [url]
+ *   node scripts/screenshots.cjs [url]   (default: the game at /play.html)
  * Requires Playwright (`npm i -D playwright && npx playwright install chromium`).
  * Writes PNGs to screenshots/ and fails on page errors.
  */
 const { chromium } = require('playwright');
 const fs = require('fs');
 
-const url = process.argv[2] || 'http://localhost:5173/';
+const url = process.argv[2] || 'http://localhost:5173/play.html';
 const out = 'screenshots';
 
 (async () => {
@@ -41,6 +41,7 @@ const out = 'screenshots';
     await press('Enter'); // Swear in an adventurer
     await press('ArrowDown', down);
     await press('Enter'); // the class
+    await press('Enter'); // Choose this look (the menu starts on it)
     await page.keyboard.type(name);
     await press('Enter'); // swear the oath
   }

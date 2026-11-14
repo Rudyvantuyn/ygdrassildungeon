@@ -40,6 +40,8 @@ export interface EarnedDeed {
 /** Counters some deeds need; everything else is read from the save. */
 export type DeedCounter =
   | 'flees'
+  /** Expeditions come home from (or fallen on) together with at least one other player. */
+  | 'expeditionsHome'
   | 'bumps'
   | 'gathers'
   | 'runs'
@@ -60,6 +62,11 @@ export type DeedCounter =
   | 'longWayHome'
   | 'nightOwl'
   | 'bareHands';
+
+/** Expeditions shared with another player (older saves only kept the list of shares collected). */
+function expeditionsHome(g: Game): number {
+  return g.state.counters?.expeditionsHome ?? g.state.claimed?.length ?? 0;
+}
 
 export function count(g: Game, key: DeedCounter, by = 1): void {
   const c = (g.state.counters ??= {});
@@ -126,15 +133,10 @@ function weaknessesFound(g: Game): number {
 }
 
 /** Every root gate of a chapter opened (false for a chapter without gates). */
-function allGatesOf(g: Game, ch: number): boolean {
-  const floors = chapterFloors(ch).filter((f) => f < FLOORS.length);
-  const any = floors.some((f) => mapOf(f).tiles.some((t) => t === 'gate' || t === 'gateOpen'));
-  return any && gatesOpened(g, floors);
-}
 
 /** Guardians felled by the party's own blows (sagas), over everyone in the hall. */
 function guardiansFelled(g: Game): number {
-  return new Set(roster(g).flatMap((m) => m.saga?.guardians ?? [])).size;
+  return new Set([...roster(g).flatMap((m) => m.saga?.guardians ?? []), ...(g.state.guardiansBefore ?? [])]).size;
 }
 
 function seenAllOfChapter(g: Game, ch: number): boolean {
@@ -197,7 +199,7 @@ export const DEEDS: DeedDef[] = [
   { id: 'safeReturns', name: 'Safe Returns', text: 'Ten Raven Runs came home without a scratch.', kind: 'ravens', tier: 'silver', icon: 'feather', earned: (g) => n(g, 'safeRuns') >= 10 },
 
   // Together
-  { id: 'answeredHorn', name: 'Answered the Horn', text: 'Came home from an expedition with other Wayfinders.', kind: 'together', tier: 'bronze', icon: 'hunting-horn', earned: (g) => (g.state.claimed?.length ?? 0) >= 1 },
+  { id: 'answeredHorn', name: 'Answered the Horn', text: 'Came home from an expedition with other Wayfinders.', kind: 'together', tier: 'bronze', icon: 'hunting-horn', earned: (g) => expeditionsHome(g) >= 1 },
   { id: 'carver', name: 'Stone Carver', text: 'Carved a runestone for others to find.', kind: 'together', tier: 'bronze', icon: 'rune-stone', earned: (g) => n(g, 'stonesCarved') >= 1 },
   { id: 'kindStranger', name: 'Kind Stranger', text: 'Heeded ten runestones of other Wayfinders.', kind: 'together', tier: 'silver', icon: 'shaking-hands', earned: (g) => n(g, 'heedsGiven') >= 10 },
   { id: 'heeded', name: 'Heeded', text: 'Your runestones were heeded ten times.', kind: 'together', tier: 'silver', icon: 'tied-scroll', earned: (g) => n(g, 'heedsReceived') >= 10 },
@@ -218,12 +220,12 @@ export const DEEDS: DeedDef[] = [
 
   // Secret: each brings a stranger to the Oath Hall, and a new class with them.
   { id: 'ravenCall', name: 'Voice of the Ravens', text: 'Sent out twenty-five Raven Runs. One of the ravens came back with someone: the Ravenspeakers now swear the oath.', kind: 'secret', tier: 'rune', icon: 'raven', earned: (g) => n(g, 'runs') >= 25 },
-  { id: 'hornCall', name: 'Horn of Many Halls', text: 'Came home from five expeditions. Someone from another hall followed you back: the Hornbearers now swear the oath.', kind: 'secret', tier: 'rune', icon: 'hunting-horn', earned: (g) => (g.state.claimed?.length ?? 0) >= 5 },
+  { id: 'hornCall', name: 'Horn of Many Halls', text: 'Went down on five expeditions with Wayfinders from other halls. Someone from another hall followed you back: the Hornbearers now swear the oath.', kind: 'secret', tier: 'rune', icon: 'hunting-horn', earned: (g) => expeditionsHome(g) >= 5 },
 
   { id: 'wildCall', name: 'Kin of the Wild', text: 'Defeated every creature of the Greenwood Roots, prowlers and guardian too. Something wild followed you home: the Fylgjur now swear the oath.', kind: 'secret', tier: 'rune', icon: 'paw', earned: (g) => beatenAllOfChapter(g, 0) },
 
   // Odd ones
-  { id: 'gateOpener', name: 'Gate-Opener', text: 'Opened every root gate of the Marrowdeep.', kind: 'explore', tier: 'silver', icon: 'tree-roots', earned: (g) => allGatesOf(g, 2) },
+  { id: 'gateOpener', name: 'Gate-Opener', text: 'Opened a root gate from its far side. The roots will let you through from now on.', kind: 'explore', tier: 'bronze', icon: 'tree-roots', earned: (g) => g.state.progress.some((p) => (p.gatesOpen?.length ?? 0) > 0) },
   { id: 'nightOwl', name: 'Night Owl', text: 'Won a fight between three and four in the morning. Go to bed.', kind: 'odd', tier: 'bronze', icon: 'raven', earned: (g) => n(g, 'nightOwl') >= 1 },
   { id: 'pacifist', name: "Pacifist's Walk", text: 'Reached the stairs down without winning a single fight on that floor.', kind: 'odd', tier: 'silver', icon: 'run', earned: (g) => n(g, 'pacifist') >= 1 },
   { id: 'bareHands', name: 'Bare Hands', text: 'Beat a guardian or a prowler with someone unarmed in the party.', kind: 'odd', tier: 'bronze', icon: 'broken-shield', earned: (g) => n(g, 'bareHands') >= 1 },

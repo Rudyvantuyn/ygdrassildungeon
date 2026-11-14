@@ -122,6 +122,9 @@ const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
 /** Checks that an adventurer sent by a client is one the game could have produced. */
 /** The best gear tier an honest adventurer can carry at `level` (generous: tier t is sold from floor t). */
+/** The lowest level an adventurer in Wyrd gear can join an expedition with (a cheat check, see validMember). */
+export const WYRD_GEAR_MIN_LEVEL = 10;
+
 export function maxGearTier(level: number): number {
   return Math.floor(level / 2) + 1;
 }
@@ -147,6 +150,8 @@ export function validMember(raw: unknown): Member | null {
     // Gear far beyond what an adventurer of this level could have bought is not accepted (a cheap cheat check;
     // saves are kept on the player's device, so this cannot be exact).
     if (!def.wyrd && def.tier > maxGearTier(level)) return false;
+    // Wyrd gear takes weeks of daily runs to weave; nobody who has done that is still a beginner.
+    if (def.wyrd && level < WYRD_GEAR_MIN_LEVEL) return false;
     return id;
   };
   const weapon = gear(m.weapon, 'weapon');
@@ -163,6 +168,16 @@ export function validMember(raw: unknown): Member | null {
   if (armor) member.armor = armor;
   fullRestore([member]);
   return member;
+}
+
+/**
+ * Whether an ended expedition counts as one gone through together (for deeds): it set out, was not called off,
+ * and had at least two different players in it.
+ */
+export function wentTogether(state: ExpeditionState, user: string): boolean {
+  if (!state.result || state.result.reason === 'disbanded') return false;
+  if (!state.result.shares.some((s) => s.user === user)) return false;
+  return new Set(state.seats.map((s) => s.user)).size >= 2;
 }
 
 export function cleanPlayerName(raw: unknown): string {
@@ -406,7 +421,7 @@ function checkCommand(state: ExpeditionState, seat: number, cmd: Command): strin
       return index(cmd.target) ? null : 'Pick a target.';
     }
     case 'item':
-      if (!ITEMS[cmd.item] || ITEMS[cmd.item].effect === 'warp') return 'That item cannot be used here.';
+      if (!ITEMS[cmd.item] || ITEMS[cmd.item].effect === 'home') return 'That item cannot be used here.';
       return index(cmd.target) ? null : 'Pick a target.';
     default:
       return 'Unknown command.';

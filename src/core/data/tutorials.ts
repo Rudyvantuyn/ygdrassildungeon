@@ -20,7 +20,7 @@ export const TIPS: TipDef[] = [
       'This is Lindholm. Everything you need before a descent is here.',
       'Rest at the Sleeping Stag to heal. Hilde\'s shop sells supplies and gear. The notice board has paid requests.',
       'The Oath Hall is where Wayfinders swear the Pact and parties are formed. The Rootdeep entrance is past the well.',
-      'Explorers who rush in die. Explorers who come back, a little stronger each time, reach the bottom.',
+      'Wayfinders who rush in die. Wayfinders who come back, a little stronger each time, reach the bottom.',
     ],
   },
   {
@@ -142,7 +142,7 @@ export const TIPS: TipDef[] = [
     pages: [
       'That shape in the dark is a prowler: a beast that gorged on Ymir\'s flesh and grew far stronger than anything around it.',
       'Do not fight one until you are much stronger. There is always a way around; some hunt you if you come close. On the map they show as an orange eye.',
-      'Running from a prowler works only about one time in three, however many of you try.',
+      'Running from a prowler works only three times in ten, however many of you try.',
       'The first time you bring one down, it leaves an Oath Token. It is back once you have been to town; its token is not.',
     ],
   },
@@ -179,7 +179,7 @@ export const TIPS: TipDef[] = [
     speaker: 'brynja',
     pages: [
       'Your first party swore for free. Every oath after that costs gold, more each time, and an Oath Token.',
-      'Oath Tokens are shards of Ymir\'s bone; the realms honour no oath without one. Guardians, prowlers (once each) and a few chests hold them.',
+      'Oath Tokens are shards of Ymir\'s bone; the realms honour no oath without one. Guardians, prowlers (once each), a few chests and the hardest requests on the Notice Board hold them.',
       'Adventurers in the hall can swap into the party whenever you are in town.',
     ],
   },
@@ -199,7 +199,7 @@ export const TIPS: TipDef[] = [
     speaker: 'ketil',
     pages: [
       'Wayfinders from other halls walk the same roots. Some carve a runestone to warn or guide whoever comes next: step on one to read it.',
-      'Heed a stone that helped you; the carver hears of it in town. Mark a lying stone False: enough of those and it crumbles.',
+      'Heed a stone that helped you; the carver hears of it in town, with a little gold from grateful Wayfinders. Mark a lying stone False: enough of those and it crumbles.',
       'You may carve one stone yourself on every descent (Journal, Carve a runestone). Only fixed words: say what is there, where, and what to do.',
       'Where a whole party fell, a shade lingers. Learn from it.',
     ],

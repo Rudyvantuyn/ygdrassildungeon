@@ -67,6 +67,11 @@ Chests, springs, stairs, gathering spots and root gates are not images: the rend
 the floor's own wall texture and the shared palette, and draws them at a third of the resolution so they get the same
 chunky pixels as the walls (`src/render/corridor.ts`). Nothing to credit.
 
+## Website pictures (`public/art/site`)
+
+- `ch1.webp`, `ch2.webp`, `ch3.webp`, `shot-*.webp`: screenshots of the game itself (its corridors, a fight, the map,
+  the town), so they are made only of the assets listed on this page. Retake them when the art changes.
+
 ## Map icons (`public/art/icons`)
 
 Icons from game-icons.net (CC BY 3.0): horned-skull, locked-chest, hazard-sign, axe-in-stump, sprout, mining,

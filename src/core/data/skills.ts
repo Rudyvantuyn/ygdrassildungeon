@@ -10,7 +10,7 @@ export interface SkillDef {
   target: SkillTarget;
   kind: 'phys' | 'magic' | 'heal' | 'revive' | 'cure' | 'ailment' | 'challenge' | 'guard' | 'passive' | 'gather' | 'buff' | 'debuff';
   element: Element;
-  /** Percent of a normal attack (damage) or of the heal formula. */
+  /** Percent of a normal attack (damage) or of the usual heal amount. */
   power: number;
   hits: number;
   /** Usable outside combat from the menu (Party, Use a skill). */

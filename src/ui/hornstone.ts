@@ -5,7 +5,8 @@
 import { CLASSES } from '../core/data/classes';
 import { chapterOf, startFloors } from '../core/data/chapters';
 import { FLOORS } from '../core/data/floors';
-import { claimShare, MAX_SEATS, PING_MS, type ExpeditionState, type Share } from '../core/expedition';
+import { claimShare, MAX_SEATS, PING_MS, wentTogether, type ExpeditionState, type Share } from '../core/expedition';
+import { count, setCount } from '../core/deeds';
 import type { Game } from '../core/game';
 import { isAlive } from '../core/party';
 import type { Member } from '../core/types';
@@ -334,9 +335,12 @@ export class Hornstone {
 
   private collect(rows: ExpeditionRow[]): void {
     const lines: HTMLElement[] = [];
+    // Saves from before the counter existed start from the shares they collected.
+    if (this.game.state.counters?.expeditionsHome === undefined) setCount(this.game, 'expeditionsHome', this.game.state.claimed?.length ?? 0);
     for (const row of rows) {
       const share = row.state.result?.shares.find((s) => s.user === online.userId);
       this.game.state.claimed = [...(this.game.state.claimed ?? []), row.id];
+      if (online.userId && wentTogether(row.state, online.userId)) count(this.game, 'expeditionsHome');
       if (!share) continue;
       lines.push(...shareLines(this.game, share, row.state));
     }

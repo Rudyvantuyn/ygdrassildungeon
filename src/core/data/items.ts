@@ -5,9 +5,9 @@ export interface ItemDef {
   name: string;
   /**
    * hp/sp restore an ally; cure removes ailments; revive (amount = % of max HP) wakes a fallen ally;
-   * warp returns the party to town (outside combat only); token is a keepsake with a use in town.
+   * home returns the party to town (outside combat only); token is a keepsake with a use in town.
    */
-  effect: 'hp' | 'sp' | 'cure' | 'revive' | 'warp' | 'token';
+  effect: 'hp' | 'sp' | 'cure' | 'revive' | 'home' | 'token';
   amount: number;
   price: number;
   description: string;
@@ -31,7 +31,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   homingFeather: {
     id: 'homingFeather',
     name: 'Homing Feather',
-    effect: 'warp',
+    effect: 'home',
     amount: 0,
     price: 120,
     description: 'Toss it into the air and the wind carries you home to Lindholm. Use it from the menu (Bag).',
@@ -54,5 +54,5 @@ export function makeInventory(items: Partial<Record<ItemId, number>> = {}): Reco
 }
 
 export function usableInCombat(id: ItemId): boolean {
-  return ITEMS[id].effect !== 'warp' && ITEMS[id].effect !== 'token';
+  return ITEMS[id].effect !== 'home' && ITEMS[id].effect !== 'token';
 }

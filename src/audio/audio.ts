@@ -215,13 +215,19 @@ export class AudioEngine {
     this.musicBus = ctx.createGain();
     this.sfxBus = ctx.createGain();
     this.reverb = ctx.createConvolver();
-    this.reverb.buffer = this.impulse(2.4);
-    const wet = ctx.createGain();
-    wet.gain.value = 0.35;
-    this.reverb.connect(wet);
-    wet.connect(this.master);
     this.musicBus.connect(this.master);
-    this.musicBus.connect(this.reverb);
+    try {
+      // Some browsers switch the output device's sample rate under us (e.g. a Bluetooth headset), and then refuse a
+      // reverb built at the old rate. The music plays on without reverb rather than crashing.
+      this.reverb.buffer = this.impulse(2.4);
+      const wet = ctx.createGain();
+      wet.gain.value = 0.35;
+      this.reverb.connect(wet);
+      wet.connect(this.master);
+      this.musicBus.connect(this.reverb);
+    } catch {
+      /* no reverb */
+    }
     this.sfxBus.connect(this.master);
     this.noise = this.whiteNoise();
     this.applyVolumes();

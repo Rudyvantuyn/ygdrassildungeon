@@ -60,7 +60,7 @@ export const WYRD_RULES: WyrdRule[] = [
   { id: 'dim', name: 'Dim Roots', text: 'The light reaches only four squares ahead.', tier: 2 },
   { id: 'thinAir', name: 'Thin Air', text: 'Monsters come more often, and the floor is wide.', tier: 2 },
   { id: 'deepHunger', name: 'Deep Hunger', text: 'Monsters from the next chapter roam here.', tier: 3 },
-  { id: 'theHunt', name: 'The Hunt', text: 'A prowler stalks this floor, and it never stops hunting.', tier: 3 },
+  { id: 'theHunt', name: 'The Hunt', text: 'Something stalks this floor, and it never stops hunting.', tier: 3 },
   { id: 'fadingLight', name: 'Fading Light', text: 'You see only two squares ahead.', tier: 3 },
 ];
 export const WYRD_RULE_BY_ID = Object.fromEntries(WYRD_RULES.map((r) => [r.id, r])) as Record<WyrdRuleId, WyrdRule>;
@@ -181,15 +181,24 @@ export function wyrdChapter(game: Game): number {
   return Math.min(Math.floor(game.state.deepest / FLOORS_PER_CHAPTER), Math.floor((FLOORS.length - 1) / FLOORS_PER_CHAPTER));
 }
 
-function prowlerFor(chapter: number): ProwlerDef['enemies'] {
+function prowlerFor(chapter: number, metProwlers: boolean): ProwlerDef['enemies'] {
+  // Prowlers belong to floor 5 and deeper. A party that has not been that far is hunted by the strongest pack of
+  // the floors it knows instead: dangerous, not hopeless.
+  if (!metProwlers) {
+    const packs = FLOORS[FLOORS_PER_CHAPTER - 2].encounters;
+    return [...packs].sort((a, b) => b.enemies.length - a.enemies.length)[0]?.enemies ?? ['grimtusk'];
+  }
   const first = chapter * FLOORS_PER_CHAPTER;
   for (let f = first; f < FLOORS.length; f++) if (FLOORS[f].prowlers.length) return FLOORS[f].prowlers[0].enemies;
   for (let f = first; f >= 0; f--) if (FLOORS[f].prowlers.length) return FLOORS[f].prowlers[0].enemies;
   return ['grimtusk'];
 }
 
-/** The three floors of `day` for a player in `chapter`. */
-export function wyrdFloors(day: number, chapter: number): FloorDef[] {
+/**
+ * The three floors of `day` for a player in `chapter`. `metProwlers`: the player has reached the first floor with
+ * prowlers (floor 5), so The Hunt may send a real one.
+ */
+export function wyrdFloors(day: number, chapter: number, metProwlers = true): FloorDef[] {
   const w = wyrdDay(day);
   return w.rules.map((rule, k) => {
     const rows = wyrdLayout(day, k);
@@ -202,7 +211,7 @@ export function wyrdFloors(day: number, chapter: number): FloorDef[] {
     const routeRng = new Rng(hash(day * 13 + k));
     const prowlers: ProwlerDef[] =
       rule.id === 'theHunt' && open.length > 4
-        ? [{ enemies: prowlerFor(chapter), route: [routeRng.pick(open), routeRng.pick(open), routeRng.pick(open)], hunt: 6 }]
+        ? [{ enemies: prowlerFor(chapter, metProwlers), route: [routeRng.pick(open), routeRng.pick(open), routeRng.pick(open)], hunt: 6 }]
         : [];
     const startDir: Dir = rows[1][2] !== '#' ? 1 : 2;
     return {
@@ -282,6 +291,11 @@ export function bringWyrdHome(home: Game, run: Game, cleared: number, fell: bool
     for (const el of e.tried) if (!mine.tried.includes(el)) mine.tried.push(el);
   }
   home.state.battles += run.state.battles;
+  // What counts toward deeds over a whole career comes home too (the run's own descent tallies stay behind).
+  for (const key of ['flees', 'byAHair', 'nightOwl', 'bareHands', 'resisted', 'bumps', 'gathers'] as const) {
+    const n = run.state.counters?.[key] ?? 0;
+    if (n) count(home, key, n);
+  }
   const threads = threadsFor(cleared, fell);
   count(home, 'threadsEarned', threads);
   home.state.wyrd = { ...home.state.wyrd, lastDay: home.state.wyrd?.lastDay ?? 0, threads: (home.state.wyrd?.threads ?? 0) + threads, best: Math.max(home.state.wyrd?.best ?? 0, cleared) };

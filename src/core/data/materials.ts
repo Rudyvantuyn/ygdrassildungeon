@@ -47,7 +47,7 @@ const list: MaterialDef[] = [
   { id: 'skerryjawFin', name: 'Skerryjaw Fin', price: 1100, description: 'The fin of a Skerryjaw. Sailors would pay a fortune for it.' },
   { id: 'brineCrown', name: 'Brine Crown', price: 1200, description: 'A rusted crown of a drowned chieftain, grown over with salt.' },
   { id: 'coilScale', name: 'Coil Scale', price: 1300, description: 'A scale of the Tidecoil, shifting like deep water.' },
-  { id: 'jarlsCrown', name: 'Jarl’s Crown', price: 2000, description: 'The crown of the Drowned Jarl, heavy with sea gold.' },
+  { id: 'jarlsCrown', name: "Jarl's Crown", price: 2000, description: 'The crown of the Drowned Jarl, heavy with sea gold.' },
   // Gathered (forage, mine, fell, fish): chapter I
   { id: 'wildSorrel', name: 'Wild Sorrel', price: 10, description: 'Sour green leaves. The inn puts them in soup.' },
   { id: 'bitterroot', name: 'Bitterroot', price: 28, description: 'A knotted root that healers grind into tonics.' },
