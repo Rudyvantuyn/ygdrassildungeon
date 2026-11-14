@@ -619,6 +619,27 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   /** What the Save row says just after saving. */
   private savedNote: { at: number; text: string; long: string } | null = null;
 
+  /**
+   * Leave the game for the website. In town the game is saved first; in the Rootdeep, what happened since the last
+   * stair or spring is lost (as with Quit to title). From itch.io the website opens in a new tab instead.
+   */
+  private homepageItem(inTown: boolean, back: () => void): MenuItem {
+    const itch = __BUILD__.endsWith('-itch');
+    const go = () => {
+      if (itch) {
+        window.open('https://www.ygdrassilgame.com/?from=itch', '_blank', 'noopener');
+        return back();
+      }
+      if (inTown) this.save();
+      location.href = './';
+    };
+    return {
+      label: 'Quit to homepage',
+      description: itch ? 'Opens ygdrassilgame.com in a new tab: the world, classes, devlog and your Wayfinder page.' : inTown ? 'Saves, then goes to the website: the world, classes, devlog and your Wayfinder page.' : 'Go to the website. In the Rootdeep, anything since your last save is lost.',
+      onSelect: () => (itch || inTown ? go() : this.confirm('Quit to homepage', 'Go to the website? Anything since your last save is lost.', go, back)),
+    };
+  }
+
   /** The Save row in the menu: saves (also to the account when signed in) and says so right there in the menu. */
   private async manualSave(): Promise<void> {
     this.save();
@@ -1685,6 +1706,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'Privacy & Terms', description: 'What the game stores about you (opens a new page).', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
         { label: 'Credits', description: 'The photographers, artists and icon makers whose work is in the game (opens a new page).', onSelect: () => window.open('credits.html', '_blank', 'noopener') },
         quit(),
+        ...(coop || this.trial ? [] : [this.homepageItem(inTown, back)]),
       ],
     };
     const order: MenuTab[] = ['party', 'bag', 'journal', 'options'];
