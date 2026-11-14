@@ -285,12 +285,13 @@ function wayfinder(): HTMLElement[] {
   const s = me.save;
   if (s) {
     const floor = FLOORS[s.deepest ?? 0]?.name ?? '';
-    const hours = Math.floor((s.playSeconds ?? 0) / 3600);
+    const secs = s.playSeconds ?? 0;
+    const played = secs >= 3600 ? `${Math.floor(secs / 3600)} h ${Math.floor((secs % 3600) / 60)} min` : `${Math.max(1, Math.floor(secs / 60))} min`;
     out.push(
       section(
         'Your party',
         h('div', { class: 'party' }, ...[...s.party, ...s.reserve].map((m) => h('div', { class: 'member' }, portrait(m.classId, m.name, CLASSES[m.classId].color, 96, m.look, 'look'), h('b', {}, m.name), h('span', { class: 'muted' }, `Lv ${m.level} ${CLASSES[m.classId].name}`)))),
-        h('p', {}, `Deepest: ${floor} · ${s.battles} battles · ${hours} h played${me.savedAt ? ` · saved to the cloud ${new Date(me.savedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}` : ''}`),
+        h('p', {}, `Deepest: ${floor} · ${s.battles} battles · ${played} played${me.savedAt ? ` · saved to the cloud ${new Date(me.savedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}` : ''}`),
         h('p', {}, h('a', { class: 'btn', href: 'play.html#cloud' }, 'Play with this save'), ' ', h('span', { class: 'small' }, 'Loads the save kept with your account into this browser.')),
       ),
     );
