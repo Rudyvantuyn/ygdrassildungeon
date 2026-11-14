@@ -308,7 +308,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 
 ```
 src/
-  site/         De website (voorpagina, wereld, klassen, bestiarium, devlog) en het meeverhuizen van saves
+  site/         De website (voorpagina, wereld, klassen, bestiarium, devlog, changelog) en het meeverhuizen van saves
   core/         Spellogica zonder scherm (volledig getest)
     data/       Klassen, skills, items, vijanden en verdiepingen: hier pas je de balans en kaarten aan
     combat.ts   Gevechtssysteem

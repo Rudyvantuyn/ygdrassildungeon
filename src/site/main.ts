@@ -17,6 +17,7 @@ import { CLASSES } from '../core/data/classes';
 import type { ClassId } from '../core/types';
 import { fetchHonors } from '../net/reports';
 import { LOOKS, drawPortrait } from '../render/portraits';
+import { CHANGES } from './changelog';
 import { POSTS, type Post } from './devlog';
 import { CHAPTERS, PEOPLE, WORLD } from './lore';
 import { leaveOldAddress } from './transfer';
@@ -84,7 +85,7 @@ function header(): HTMLElement {
     h(
       'nav',
       {},
-      ...NAV.map(([p, label]) => h('a', { href: `${p}.html`, class: p === page ? 'on' : '' }, label)),
+      ...NAV.map(([p, label]) => h('a', { href: `${p}.html`, class: p === page || (p === 'devlog' && page === 'changelog') ? 'on' : '' }, label)),
       h('a', { href: 'wayfinder.html', class: `account ${page === 'wayfinder' ? 'on' : ''}` }, me ? me.name : 'Sign in'),
       h('a', { class: 'btn play', href: 'play.html' }, 'Play'),
     ),
@@ -95,7 +96,7 @@ function footer(): HTMLElement {
   return h(
     'footer',
     { class: 'site-foot' },
-    h('p', {}, 'Ygdrassil is made by one person and a friend who writes the story, with art from photographers and pixel artists who share their work. ', h('a', { href: 'credits.html' }, 'Credits'), ' · ', h('a', { href: 'privacy.html' }, 'Privacy & terms'), ' · ', h('a', { href: 'https://rudy-van-tuijn.itch.io/ygdrassil' }, 'itch.io')),
+    h('p', {}, 'Ygdrassil is made by one person and a friend who writes the story, with art from photographers and pixel artists who share their work. ', h('a', { href: 'changelog.html' }, 'Changelog'), ' · ', h('a', { href: 'credits.html' }, 'Credits'), ' · ', h('a', { href: 'privacy.html' }, 'Privacy & terms'), ' · ', h('a', { href: 'https://rudy-van-tuijn.itch.io/ygdrassil' }, 'itch.io')),
     h('p', { class: 'small' }, 'Found a bug or have an idea? Use the Feedback button in the game (Menu, Options).'),
   );
 }
@@ -307,7 +308,23 @@ function bestiary(): HTMLElement[] {
 }
 
 function devlog(): HTMLElement[] {
-  return [h('section', { class: 'page-head' }, h('h1', {}, 'Devlog'), h('p', { class: 'tagline' }, 'News from the making of Ygdrassil')), h('section', { class: 'block' }, ...POSTS.map((p) => postCard(p, true)))];
+  return [
+    h('section', { class: 'page-head' }, h('h1', {}, 'Devlog'), h('p', { class: 'tagline' }, 'News from the making of Ygdrassil')),
+    h('section', { class: 'block' }, h('p', { class: 'muted' }, 'Looking for every change, big and small? See the ', h('a', { href: 'changelog.html' }, 'changelog'), '.'), ...POSTS.map((p) => postCard(p, true))),
+  ];
+}
+
+function changelog(): HTMLElement[] {
+  const day = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return [
+    h('section', { class: 'page-head' }, h('h1', {}, 'Changelog'), h('p', { class: 'tagline' }, 'Every change, big and small')),
+    h(
+      'section',
+      { class: 'block' },
+      h('p', { class: 'muted' }, 'The plain list, newest first. The story behind the bigger updates is in the ', h('a', { href: 'devlog.html' }, 'devlog'), '.'),
+      ...CHANGES.map((c) => h('article', { class: 'post changes' }, h('time', {}, day(c.date)), prose(c.changes.map((l) => `- ${l.replace(/^(\w+):/, '**$1:**')}`).join('\n')))),
+    ),
+  ];
 }
 
 // ── My Wayfinder ─────────────────────────────────────────────────────────────
@@ -388,7 +405,7 @@ function wayfinder(): HTMLElement[] {
   return out;
 }
 
-const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog, wayfinder };
+const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog, changelog, wayfinder };
 
 void (async () => {
   if (await leaveOldAddress()) return;

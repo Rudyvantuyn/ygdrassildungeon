@@ -122,7 +122,8 @@ Add new names there and keep the glossary in sync.
 - The live site is **www.ygdrassilgame.com** (Vercel project `ygdrassil-dungeon`, production from `main`; the apex redirects
   to www). The website is the front door: `index/world/classes/bestiary/devlog.html` rendered by `src/site/main.ts` from the
   game's own data plus `src/site/lore.ts` (spoiler-free lore, in line with `docs/verhaal.md`) and `src/site/devlog.ts`
-  (devlog posts; itch gets a short version linking here). The game is at `/play` (`play.html`). The site's bestiary shows only the Bogling and Briar Gnawer to
+  (devlog posts; itch gets a short version linking here). `src/site/changelog.ts` is the plain list of every player-visible change
+  (`changelog.html`): add a line with each such change, without spoilers. The game is at `/play` (`play.html`). The site's bestiary shows only the Bogling and Briar Gnawer to
   everyone (`ALWAYS_KNOWN`); a signed-in player sees every creature their cloud save has met. Visits to the old `ygdrassil-dungeon.vercel.app` move to the new address and carry
   the local save along (`src/site/transfer.ts`). Players sign in with Google (one click; a guest links Google and keeps
   everything) or e-mail; inside the itch.io frame Google cannot open, so there the button opens the site. Signed in,
