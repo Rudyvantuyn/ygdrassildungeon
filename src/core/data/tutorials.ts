@@ -220,7 +220,7 @@ export const TIPS: TipDef[] = [
     pages: [
       'The skalds of Lindholm are already singing about one of yours. Do enough of something, and the songs give a person a byname.',
       'Every fight is told: blows struck, wounds healed, falls, narrow escapes. Read each adventurer\'s saga in the Party menu or at the Oath Hall, and choose which byname they bear.',
-      'A byname is honour, nothing more. It changes nothing in a fight, but the others on an expedition will see it.',
+      'A byname is honour, nothing more. It changes nothing in a fight, but it is yours to show, on your page at the Wayfinders\' site too.',
     ],
   },
   {

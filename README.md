@@ -37,7 +37,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
   vrienden, incasseerde klappen, vallen, nipte overwinningen, prowlers, eindbazen en Raven Runs.
 - Genoeg van iets levert een **byname** op ("Bram Wolf-Feeder", "Wren the Kind", "Sela, Bane of the Blighted Elder").
   De eerste draagt een avonturier meteen; daarna kies je zelf (Party-menu of de Oath Hall, *Sagas*).
-- Een bijnaam verandert niets in een gevecht; anderen op een expeditie zien hem wel, en hij staat op My Wayfinder.
+- Een bijnaam verandert niets in een gevecht; hij staat ook op My Wayfinder (en gaat mee op expedities).
 
 ### De Wyrdweave (dagelijks)
 
