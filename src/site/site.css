@@ -134,7 +134,8 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
 .beast b { font-family: var(--pixel); }
 .beast span { font-size: 14px; }
 .beast.boss { box-shadow: inset 0 0 0 2px var(--gold-dark), 0 0 0 2px #000; }
-.beasts.sealed img { filter: brightness(0) drop-shadow(0 0 2px #2e4656); opacity: 0.6; }
+.beast.unknown img { filter: brightness(0) drop-shadow(0 0 2px #2e4656); opacity: 0.6; }
+.beast.unknown { box-shadow: inset 0 0 0 2px var(--rim), 0 0 0 2px #000; }
 
 .site-foot { margin-top: 60px; padding: 26px max(16px, calc(50% - 560px)); border-top: 2px solid var(--rim); background: #080d10; font-size: 16px; }
 

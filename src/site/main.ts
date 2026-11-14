@@ -36,7 +36,7 @@ function h(tag: string, attrs: Record<string, string> = {}, ...children: Child[]
 }
 
 const page = document.body.dataset.page ?? 'index';
-/** Chapters whose pages are open to everyone; deeper ones open for a signed-in player who has reached them. */
+/** The chapters every visitor counts as having reached. */
 const OPEN_CHAPTERS = 1;
 
 /** What the site knows about the visitor once signed in. */
@@ -66,7 +66,6 @@ async function loadMe(): Promise<Me | null> {
   return { name: online.playerName, deeds: d, save, savedAt: cloud?.savedAt ?? null, chapters: Math.max(OPEN_CHAPTERS, fromDeeds, fromSave) };
 }
 
-const openChapters = () => me?.chapters ?? OPEN_CHAPTERS;
 
 const NAV: [string, string][] = [
   ['world', 'The world'],
@@ -207,35 +206,47 @@ function classes(): HTMLElement[] {
   ];
 }
 
+/** Monsters everyone can see on the site; the rest show once a signed-in player has met them in the game. */
+const ALWAYS_KNOWN = new Set(['bogling', 'briarGnawer']);
+
 function bestiary(): HTMLElement[] {
   const all = bestiaryOrder();
   const chapterOf = (floor: number) => Math.floor((floor - 1) / 5);
+  const met = (id: string) => ALWAYS_KNOWN.has(id) || (me?.save?.bestiary?.[id]?.seen ?? 0) > 0;
+  const intro = me
+    ? me.save
+      ? 'Every creature you have met in the game shows here. The rest are still shadows.'
+      : 'Keep your game with your account (in the game: the Hornstone, Account) and every creature you meet shows here.'
+    : null;
   const blocks = GAME_CHAPTERS.map((ch, ci) => {
     const beasts = all.filter((b) => chapterOf(Math.min(...b.floors)) === ci);
-    const open = ci < openChapters();
+    const known = beasts.filter((b) => met(b.def.id)).length;
     return h(
       'section',
       { class: 'block' },
       h('h2', {}, `Chapter ${ch.numeral}: ${ch.name}`),
-      open
-        ? h('p', {}, 'What Wayfinders have met so far. Their weaknesses you will have to find yourself.')
-        : h('p', { class: 'muted' }, me ? 'These pages are still sealed. Reach this chapter in the game to open them.' : 'These pages are still sealed. ', me ? null : h('a', { href: 'wayfinder.html' }, 'Sign in'), me ? null : ' and reach this chapter in the game to open them.'),
+      h('p', { class: 'muted' }, `${known} of ${beasts.length} met`),
       h(
         'div',
-        { class: `beasts ${open ? '' : 'sealed'}` },
-        ...beasts.map((b) =>
-          h(
+        { class: 'beasts' },
+        ...beasts.map((b) => {
+          const open = met(b.def.id);
+          return h(
             'div',
-            { class: `beast ${b.kind}` },
+            { class: `beast ${b.kind} ${open ? '' : 'unknown'}` },
             img(`monsters/${b.def.id}.webp`, open ? b.def.name : 'Unknown'),
             h('b', {}, open ? b.def.name : '???'),
             h('span', { class: 'muted' }, open ? (b.kind === 'boss' ? 'Guardian' : b.kind === 'prowler' ? 'Prowler' : `Floor ${b.floors.join(', ')}`) : ''),
-          ),
-        ),
+          );
+        }),
       ),
     );
   });
-  return [h('section', { class: 'page-head' }, h('h1', {}, 'Bestiary'), h('p', { class: 'tagline' }, 'What dreams inside Ymir')), ...blocks];
+  return [
+    h('section', { class: 'page-head' }, h('h1', {}, 'Bestiary'), h('p', { class: 'tagline' }, 'What dreams inside Ymir')),
+    h('section', { class: 'block' }, intro ? h('p', {}, intro) : h('p', {}, 'Only shadows, for now. ', h('a', { href: 'wayfinder.html' }, 'Sign in'), ' and every creature you meet in the game appears here, page by page. Their weaknesses you will still have to find yourself.')),
+    ...blocks,
+  ];
 }
 
 function devlog(): HTMLElement[] {
@@ -303,7 +314,8 @@ function wayfinder(): HTMLElement[] {
     .map(([id, e]) => medalCard(id, e))
     .filter((x): x is HTMLElement => !!x);
   out.push(section('Book of Deeds', medals.length ? h('div', { class: 'medal-case' }, ...medals) : h('p', {}, 'No medals yet. Nobody will tell you what counts as a deed.')));
-  out.push(section('The Rootdeep', h('p', {}, `You have reached ${me.chapters === 1 ? 'the first chapter' : `${me.chapters} chapters`}: their pages in the `, h('a', { href: 'bestiary.html' }, 'bestiary'), ' are open to you.')));
+  const metCount = Object.values(s?.bestiary ?? {}).filter((e) => e.seen > 0).length;
+  out.push(section('The Rootdeep', h('p', {}, `You have reached ${me.chapters === 1 ? 'the first chapter' : `${me.chapters} chapters`}, and met ${metCount} kinds of creature: they are in your `, h('a', { href: 'bestiary.html' }, 'bestiary'), '.')));
   const nameInput = h('input', { type: 'text', maxlength: '16', value: me.name, 'aria-label': 'Player name' }) as HTMLInputElement;
   const nameSave = h('button', { class: 'btn ghost' }, 'Save');
   const nameNote = h('span', { class: 'small' });
