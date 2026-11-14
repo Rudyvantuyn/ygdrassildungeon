@@ -11,6 +11,29 @@ export interface Post {
 export const POSTS: Post[] = [
   {
     date: '2026-11-14',
+    title: 'Threads, beasts and bynames',
+    body: `A big one. Everything below is now in the game, here and on itch.io.
+
+**The Wyrdweave.** Once the Blighted Elder has fallen, the Norns weave three floors at the Well of Urd every day: the same floors for every Wayfinder, each with a rule of its own. No map that draws itself, light that reaches two squares, no healing outside of fights, a prowler that never stops hunting. After each floor you choose: take your Wyrd Threads home, or go deeper and risk losing half. One try a day. Hilde weaves the threads into gear with a gift of its own, but slowly: it is meant to take weeks, not days.
+
+**Sagas.** Every fight is now told. Finishing blows, wounds healed, friends brought back, blows taken, narrow escapes: do enough of something and the skalds give your adventurer a byname. Bram Wolf-Feeder. Wren the Kind. Whoever strikes the last blow on a guardian becomes its Bane. Choose which byname they bear in the Party menu or at the Oath Hall. It changes nothing in a fight; it is just yours.
+
+**The Book of Deeds** has grown to over fifty medals, all hidden until you earn them. Some are earned by courage, some by patience, and some by doing something nobody else would think of.
+
+**Fragments.** Old notes, carved marks and a page from a certain Jarl's log lie in a few chests and in the hearts of guardians. Read them again in the Journal, and on the World page of this site once you are signed in.
+
+**Secret classes.** Three classes are not on offer at the start. Each comes to the Oath Hall when you have done something particular. Nobody will tell you what. One of them is not quite human.
+
+**Smaller things.**
+- Raven Runs bring home more: scouts keep three of every four parts they win.
+- Sign in with Google in one click, and see your party, medals, sagas and the creatures you met on **My Wayfinder**.
+- The site's world pages, bestiary and fragments open up as you play: chapters you have not reached stay sealed.
+- Save shows a clear confirmation, and the menu has a way back to the homepage.
+
+Thank you for playing, and keep the feedback coming through the Feedback button in the game (Menu, Options).`,
+  },
+  {
+    date: '2026-11-14',
     title: 'Ygdrassil has a home',
     body: `Ygdrassil now lives at **ygdrassilgame.com**. You can play it right here in your browser, always in its newest version, and read about the world it is set in.
 
