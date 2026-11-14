@@ -1,0 +1,83 @@
+{
+  "_about": "Hero looks (4 men, then 4 women, per class) built from Dungeon Crawl Stone Soup player doll parts (CC0) by scripts/make-looks.py. Paths are under player/<layer>/ in the 'Dungeon Crawl Stone Soup Full' download; skin 0-3 darkens the skin.",
+  "bastion": [
+    {"base": "human_male", "body": "plate", "legs": "leg_armor_2", "boots": "middle_gray", "head": "viking_brown_1", "beard": "short_red", "hand_right": "long_sword", "hand_left": "shield_round_3", "skin": 0},
+    {"base": "human_male", "body": "banded", "legs": "leg_armor_1", "boots": "middle_brown", "hair": "short_black", "beard": "long_black", "head": "helm_plume", "hand_right": "broadsword", "hand_left": "shield_kite_2", "skin": 2},
+    {"base": "human_male", "body": "chainmail", "legs": "metal_gray", "boots": "middle_gray", "hair": "long_yellow", "beard": "long_yellow", "hand_right": "hammer_new", "hand_left": "shield_round_5", "cloak": "red", "skin": 1},
+    {"base": "dwarf_male", "body": "half_plate", "legs": "leg_armor_3", "boots": "short_brown", "beard": "long_red", "head": "iron_2", "hand_right": "axe", "hand_left": "shield_middle_round", "skin": 0},
+    {"base": "human_female", "body": "plate_2", "legs": "leg_armor_2", "boots": "middle_gray", "hair": "long_red", "hand_right": "long_sword", "hand_left": "shield_round_3", "skin": 0},
+    {"base": "human_female", "body": "scalemail", "legs": "leg_armor_1", "boots": "middle_brown", "hair": "fem_black", "head": "viking_gold", "hand_right": "spear", "hand_left": "shield_kite_1", "skin": 3},
+    {"base": "human_female", "body": "chainmail_3", "legs": "metal_gray", "boots": "middle_gray", "hair": "pigtails_yellow", "hand_right": "mace_new", "hand_left": "shield_round_6", "cloak": "blue", "skin": 1},
+    {"base": "dwarf_female", "body": "half_plate_2", "legs": "leg_armor_3", "boots": "short_brown", "hair": "knot_red", "head": "iron_1", "hand_right": "hammer_2_new", "hand_left": "shield_middle_brown", "skin": 2}
+  ],
+  "strider": [
+    {"base": "human_male", "body": "leather_armor", "legs": "pants_brown", "boots": "short_brown", "head": "hood_green", "hand_right": "bow", "cloak": "green", "skin": 0},
+    {"base": "human_male", "body": "leather_green", "legs": "trouser_green", "boots": "middle_brown", "hair": "short_red", "beard": "short_red", "hand_right": "bow_2", "skin": 1},
+    {"base": "human_male", "body": "jacket_stud", "legs": "pants_black", "boots": "middle_brown", "hair": "short_black", "hand_right": "bow_3", "cloak": "brown", "skin": 3},
+    {"base": "elf_male", "body": "leather_2", "legs": "pants_darkgreen", "boots": "short_brown_2", "hair": "elf_yellow", "hand_right": "great_bow", "skin": 0},
+    {"base": "human_female", "body": "leather_armor_2", "legs": "pants_brown", "boots": "short_brown", "hair": "ponytail_yellow", "hand_right": "bow", "cloak": "green", "skin": 0},
+    {"base": "human_female", "body": "leather_green", "legs": "trouser_green", "boots": "middle_brown", "head": "hood_ybrown", "hand_right": "bow_2", "skin": 2},
+    {"base": "human_female", "body": "leather_short", "legs": "pants_darkgreen", "boots": "middle_brown", "hair": "pigtail_red", "hand_right": "crossbow", "skin": 1},
+    {"base": "elf_female", "body": "leather_stud", "legs": "pants_black", "boots": "short_brown_2", "hair": "elf_black", "hand_right": "bow_blue", "cloak": "gray", "skin": 3}
+  ],
+  "mender": [
+    {"base": "human_male", "body": "robe_white", "boots": "short_brown", "hair": "short_white", "beard": "long_white", "hand_right": "staff_plain", "skin": 0},
+    {"base": "human_male", "body": "robe_white_green", "boots": "short_brown", "head": "hood_white", "hand_right": "quarterstaff", "skin": 2},
+    {"base": "human_male", "body": "robe_brown", "boots": "short_brown", "hair": "brown_1", "beard": "short_black", "hand_right": "staff_organic", "skin": 1},
+    {"base": "elf_male", "body": "robe_white_blue", "boots": "middle_brown", "hair": "elf_white", "hand_right": "staff_ring_blue", "skin": 0},
+    {"base": "human_female", "body": "robe_white", "boots": "short_brown", "hair": "long_yellow", "hand_right": "staff_plain", "skin": 0},
+    {"base": "human_female", "body": "robe_white_green", "boots": "short_brown", "head": "hood_green", "hand_right": "quarterstaff", "skin": 3},
+    {"base": "human_female", "body": "dress_white", "boots": "short_brown", "hair": "pigtails_brown", "hand_right": "staff_organic", "skin": 1},
+    {"base": "elf_female", "body": "robe_green", "boots": "middle_brown", "hair": "elf_red", "hand_right": "staff_ring_blue", "skin": 0}
+  ],
+  "runecaller": [
+    {"base": "human_male", "body": "robe_blue", "boots": "short_brown", "head": "wizard_blue", "beard": "long_white", "hand_right": "rod_blue_new", "skin": 0},
+    {"base": "human_male", "body": "robe_black_red", "boots": "short_purple", "hair": "short_red", "hand_right": "rod_ruby_new", "cloak": "black", "skin": 1},
+    {"base": "human_male", "body": "robe_purple", "boots": "short_purple", "hair": "long_black", "beard": "short_black", "hand_right": "staff_mage", "skin": 2},
+    {"base": "elf_male", "body": "robe_black_gold", "boots": "short_brown", "hair": "elf_yellow", "hand_right": "rod_moon_new", "skin": 0},
+    {"base": "human_female", "body": "robe_blue_green", "boots": "short_brown", "hair": "long_red", "hand_right": "rod_emerald_new", "skin": 0},
+    {"base": "human_female", "body": "robe_purple", "boots": "short_purple", "head": "wizard_purple", "hair": "fem_black", "hand_right": "staff_mage_2", "skin": 3},
+    {"base": "human_female", "body": "robe_black_hood", "boots": "short_brown", "hand_right": "rod_ruby_new", "cloak": "red", "skin": 1},
+    {"base": "elf_female", "body": "robe_red_gold", "boots": "middle_brown", "hair": "elf_black", "hand_right": "rod_moon_new", "skin": 2}
+  ],
+  "skald": [
+    {"base": "human_male", "body": "vest_red", "legs": "pants_brown", "boots": "middle_brown", "hair": "long_yellow", "beard": "long_yellow", "hand_right": "horn", "hand_left": "short_sword_slant_new", "cloak": "red", "skin": 0},
+    {"base": "human_male", "body": "shirt_white_yellow", "legs": "pants_blue", "boots": "short_brown", "head": "feather_red", "hair": "short_red", "hand_right": "horn", "skin": 1},
+    {"base": "human_male", "body": "jacket_3", "legs": "pants_black", "boots": "middle_brown", "hair": "short_black", "beard": "short_black", "hand_right": "rapier", "hand_left": "lantern", "cloak": "blue", "skin": 3},
+    {"base": "dwarf_male", "body": "leather_red", "legs": "pants_red", "boots": "short_brown", "beard": "long_white", "head": "band_red", "hand_right": "horn", "skin": 0},
+    {"base": "human_female", "body": "dress_green", "boots": "short_brown", "hair": "long_red", "hand_right": "horn", "cloak": "green", "skin": 0},
+    {"base": "human_female", "body": "vest_red_2", "legs": "skirt_red", "boots": "middle_brown", "hair": "pigtails_yellow", "hand_right": "rapier_2", "hand_left": "lantern", "skin": 1},
+    {"base": "human_female", "body": "shirt_white_2", "legs": "skirt_blue", "boots": "short_brown", "head": "feather_blue", "hair": "fem_black", "hand_right": "horn", "skin": 2},
+    {"base": "elf_female", "body": "robe_yellow", "boots": "middle_brown", "hair": "elf_yellow", "hand_right": "horn", "cloak": "yellow", "skin": 3}
+  ],
+  "berserker": [
+    {"base": "human_male", "body": "animal_skin", "legs": "pants_short_brown", "boots": "short_brown", "head": "horned", "beard": "long_red", "hand_right": "great_axe", "skin": 0},
+    {"base": "human_male", "body": "troll_hide", "legs": "loincloth_red", "boots": "short_brown", "hair": "long_black", "beard": "long_black", "hand_right": "battleaxe", "skin": 2},
+    {"base": "human_male", "body": "belt_1", "legs": "pants_short_darkbrown", "boots": "middle_brown", "head": "viking_brown_2", "beard": "short_yellow", "hand_right": "war_axe_new", "hand_left": "dagger_new", "skin": 1},
+    {"base": "dwarf_male", "body": "leather_heavy", "legs": "pants_short_brown", "boots": "short_brown", "beard": "long_yellow", "head": "horns_1", "hand_right": "broad_axe", "skin": 0},
+    {"base": "human_female", "body": "animal_skin", "legs": "pants_short_brown", "boots": "short_brown", "hair": "long_red", "hand_right": "great_axe", "skin": 0},
+    {"base": "human_female", "body": "leather_metal", "legs": "pants_short_gray", "boots": "middle_brown", "head": "viking_gold", "hair": "long_yellow", "hand_right": "battleaxe_2", "skin": 1},
+    {"base": "human_female", "body": "belt_2", "legs": "loincloth_red", "boots": "short_brown", "hair": "knot_red", "hand_right": "axe_double", "skin": 3},
+    {"base": "dwarf_female", "body": "troll_hide", "legs": "pants_short_brown", "boots": "short_brown", "hair": "pigtail_red", "hand_right": "war_axe_new", "hand_left": "dagger_new", "skin": 2}
+  ],
+  "seeress": [
+    {"base": "human_male", "body": "robe_black", "boots": "short_brown", "head": "hood_black_2", "hand_right": "staff_skull", "hand_left": "fire_dark", "skin": 0},
+    {"base": "human_male", "body": "robe_of_night", "boots": "short_purple", "hair": "long_white", "beard": "long_white", "hand_right": "staff_evil", "skin": 1},
+    {"base": "human_male", "body": "robe_gray_2", "boots": "short_brown", "hair": "short_black", "hand_right": "orb", "hand_left": "book_black", "cloak": "black", "skin": 3},
+    {"base": "elf_male", "body": "robe_black_gold", "boots": "short_purple", "hair": "elf_black", "hand_right": "staff_fork", "hand_left": "fire_green", "skin": 0},
+    {"base": "human_female", "body": "robe_black_hood", "boots": "short_brown", "hand_right": "staff_skull", "hand_left": "fire_cyan", "skin": 0},
+    {"base": "human_female", "body": "robe_of_night", "boots": "short_purple", "hair": "long_black", "hand_right": "orb", "hand_left": "book_magenta", "skin": 2},
+    {"base": "human_female", "body": "robe_gray_2", "boots": "short_brown", "head": "hood_gray", "hand_right": "staff_fancy", "cloak": "magenta", "skin": 1},
+    {"base": "elf_female", "body": "robe_purple", "boots": "short_purple", "hair": "elf_white", "hand_right": "staff_evil", "hand_left": "fire_white", "skin": 3}
+  ],
+  "wolfkin": [
+    {"base": "human_male", "body": "animal_skin", "legs": "pants_brown", "boots": "short_brown", "head": "bear", "hand_right": "spear", "skin": 0},
+    {"base": "human_male", "body": "leather_heavy", "legs": "pants_short_darkbrown", "boots": "middle_brown", "hair": "long_black", "beard": "long_black", "hand_right": "trident", "cloak": "ratskin", "skin": 2},
+    {"base": "human_male", "body": "leather_stud", "legs": "pants_brown", "boots": "short_brown", "hair": "short_white", "beard": "short_white", "hand_right": "spear_3", "hand_left": "dagger_new", "skin": 1},
+    {"base": "elf_male", "body": "animal_skin", "legs": "pants_darkgreen", "boots": "short_brown", "head": "bear", "hand_right": "glaive_new", "skin": 3},
+    {"base": "human_female", "body": "animal_skin", "legs": "pants_brown", "boots": "short_brown", "head": "bear", "hand_right": "spear", "skin": 0},
+    {"base": "human_female", "body": "leather_armor_3", "legs": "pants_short_brown", "boots": "middle_brown", "hair": "long_white", "hand_right": "trident_2", "cloak": "ratskin", "skin": 1},
+    {"base": "human_female", "body": "leather_heavy", "legs": "pants_brown", "boots": "short_brown", "hair": "pigtails_brown", "hand_right": "spear_4", "hand_left": "dagger_new", "skin": 2},
+    {"base": "elf_female", "body": "animal_skin", "legs": "pants_darkgreen", "boots": "short_brown", "head": "bear", "hand_right": "spear_2_new", "skin": 3}
+  ]
+}

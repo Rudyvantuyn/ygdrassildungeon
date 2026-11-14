@@ -33,7 +33,7 @@ export function rosterSize(game: Game): number {
 }
 
 /** Returns an error message, or null when the new member was added (to the party if there is room, else the reserve). */
-export function registerMember(game: Game, rawName: string, classId: ClassId): string | null {
+export function registerMember(game: Game, rawName: string, classId: ClassId, look?: number): string | null {
   const name = cleanName(rawName);
   if (!name) return 'Give your adventurer a name.';
   if (nameLength(name) > NAME_MAX_LENGTH) return `Names can be at most ${NAME_MAX_LENGTH} letters.`;
@@ -47,7 +47,7 @@ export function registerMember(game: Game, rawName: string, classId: ClassId): s
   game.state.gold -= cost.gold;
   game.state.inventory.oathToken = (game.state.inventory.oathToken ?? 0) - cost.tokens;
   game.state.oaths = (game.state.oaths ?? rosterSize(game)) + 1;
-  const member = createMember(name, classId);
+  const member = createMember(name, classId, look);
   member.oath = game.state.oaths;
   if (game.state.party.length < MAX_PARTY) game.state.party.push(member);
   else game.state.reserve.push(member);

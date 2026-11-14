@@ -38,7 +38,7 @@ export class PartyView {
   constructor(private readonly container: HTMLElement) {}
 
   render(party: Member[], display: PartyDisplay = {}): void {
-    const lineup = party.map((m) => `${m.name}|${m.classId}|${m.row}`).join(',');
+    const lineup = party.map((m) => `${m.name}|${m.classId}|${m.row}|${m.look}`).join(',');
     if (lineup !== this.lineup) {
       this.lineup = lineup;
       this.build(party);
@@ -101,7 +101,7 @@ export class PartyView {
         <div class="bar hp"><i></i><span><b>HP</b><b class="v"></b></span></div>
         <div class="bar sp"><i></i><span><b>SP</b><b class="v"></b></span></div>`;
       root.querySelector('.member-name')!.textContent = m.name;
-      drawPortrait(root.querySelector<HTMLCanvasElement>('canvas.portrait')!.getContext('2d')!, 132, m.classId, m.name, def.color);
+      drawPortrait(root.querySelector<HTMLCanvasElement>('canvas.portrait')!.getContext('2d')!, 132, m.classId, m.name, def.color, m.look);
       this.container.appendChild(root);
       const hpBar = root.querySelector<HTMLElement>('.bar.hp')!;
       const spBar = root.querySelector<HTMLElement>('.bar.sp')!;

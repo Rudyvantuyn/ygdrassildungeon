@@ -1648,7 +1648,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             const c = el('canvas', { className: 'menu-portrait' });
             c.width = 64;
             c.height = 64;
-            drawPortrait(c.getContext('2d')!, 64, m.classId, m.name, CLASSES[m.classId].color);
+            drawPortrait(c.getContext('2d')!, 64, m.classId, m.name, CLASSES[m.classId].color, m.look);
             const pts = unspentPoints(m);
             return el('div', { className: 'menu-member' }, [
               c,

@@ -3,7 +3,7 @@
 Every image the game ships, and where it came from.
 
 **Status (November 2026):** places and dungeon textures are human-made photos, map icons are CC BY icons, and the
-dungeon props are modelled in code. Monsters are CC0 pixel art (Dungeon Crawl Stone Soup). Hero portraits and NPC portraits are still AI-made and are being replaced. Keep this up to date: the game is meant to be
+dungeon props are modelled in code. Monsters and the adventurers' looks are CC0 pixel art (Dungeon Crawl Stone Soup). The portraits of the people of Lindholm are still AI-made: the owner chose to keep them for now (November 2026). Keep this up to date: the game is meant to be
 released commercially, so each asset needs a known origin and licence.
 
 ## Monsters (`public/art/monsters/<enemy-id>.webp`)
@@ -13,7 +13,7 @@ CC0 (no rights reserved, commercial use allowed, no credit required; credited on
 Each 32×32 tile is cropped and scaled up 12× with hard pixel edges. Which tile is which monster:
 `scripts/monster-tiles.json` (enemy id → path under `monster/` in the "Dungeon Crawl Stone Soup Full" download).
 
-## People and heroes (`public/art/people`, `heroes`), still AI-made, to be replaced
+## People of Lindholm (`public/art/people`), AI-made, kept for now (owner's choice)
 
 - Generated the same way (Canva AI, 2026-10-30), exported from pages 23–47 of the same Canva design, then resized
   to WebP (places 1280×720, portraits 384×384).
@@ -34,25 +34,15 @@ Each 32×32 tile is cropped and scaled up 12× with hard pixel edges. Which tile
 | people/torvald.webp | MAHZdUExJQk |
 | people/hrodna.webp | MAHZfU0QrEo (page 97) |
 | people/eira.webp | MAHZfQNkAB8 (page 98) |
-| heroes/bastion-a.webp | MAHZdRXRNxM |
-| heroes/bastion-b.webp | MAHZdbjQY2o |
-| heroes/strider-a.webp | MAHZdQlTv2U |
-| heroes/strider-b.webp | MAHZdTCyX4w |
-| heroes/mender-a.webp | MAHZdXkodX8 |
-| heroes/mender-b.webp | MAHZdfPUZ-Y |
-| heroes/runecaller-a.webp | MAHZdYDmfUA |
-| heroes/runecaller-b.webp | MAHZdWRakr8 |
-| heroes/skald-a.webp | MAHZfAteqUA |
-| heroes/skald-b.webp | MAHZfPSY9A0 |
-| heroes/berserker-a.webp | MAHZfC3Nw2A |
-| heroes/berserker-b.webp | MAHZfNOjYBg |
-| heroes/seeress-a.webp | MAHZfFz4yT4 |
-| heroes/seeress-b.webp | MAHZfKKCKks |
-| heroes/wolfkin-a.webp | MAHZfDYXyOg |
-| heroes/wolfkin-b.webp | MAHZfAY-HtE |
 
-The Skald, Berserker, Seeress and Wolfkin portraits were added on 2026-10-30 (pages 89–96 of the same design),
-exported at 1024×1024 and scaled to 384 px WebP.
+The AI-made hero portraits (heroes/<class>-a/b.webp) were removed in November 2026 for the looks below.
+
+## Adventurers' looks (`public/art/heroes/<class>-<0..7>.webp`)
+
+Built by `scripts/make-looks.py` from the player doll parts of the Dungeon Crawl Stone Soup tiles
+(https://opengameart.org/content/dungeon-crawl-32x32-tiles), CC0: body, armour, hair, beard, headgear, cloak and what
+they hold, layered per look as listed in `scripts/hero-looks.json` (looks 0–3 men, 4–7 women; some get a darker skin
+tone by recolouring the body layer). Each 32×32 figure is scaled up 8× with hard pixel edges.
 
 ## Places (`public/art/places`) and dungeon textures (`public/art/dungeon`)
 

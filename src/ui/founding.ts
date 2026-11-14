@@ -9,6 +9,7 @@ import type { ClassId, Member } from '../core/types';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import { npcSays } from './npc';
+import { lookPicker } from './lookPicker';
 
 export interface FoundingHost {
   openOverlay(content: HTMLElement, menu: ListMenu): void;
@@ -129,7 +130,7 @@ export class Founding {
         label: c.name,
         detail: c.row === 'front' ? 'starts in front' : 'starts in back',
         description: `${c.description}\n${c.row === 'front' ? 'Starts in the front row, where the blows land.' : 'Starts in the back row: safer, but weapons hit weaker there (bows excepted).'} The row can be changed in the Oath Hall.`,
-        onSelect: () => this.chooseName(id),
+        onSelect: () => this.chooseLook(id),
       };
     });
     const menu = new ListMenu(items, { onCancel: () => this.hall() });
@@ -137,7 +138,14 @@ export class Founding {
     this.dialog('Choose a class', [npcSays('brynja', tip)], menu);
   }
 
-  private chooseName(classId: ClassId): void {
+  private chooseLook(classId: ClassId, start = this.members.length * 3): void {
+    const back = () => this.chooseClass();
+    const pick = lookPicker(classId, start % 8, (look) => this.chooseName(classId, look));
+    const menu = new ListMenu([...pick.items, { label: 'Back', onSelect: back }], { onCancel: back, startIndex: 1 });
+    this.dialog(`A new ${CLASSES[classId].name}`, [el('p', { text: 'How does your adventurer look?' }), ...pick.body], menu, false);
+  }
+
+  private chooseName(classId: ClassId, look: number): void {
     const input = el('input', { className: 'name-input' });
     input.maxLength = NAME_MAX_LENGTH;
     input.placeholder = 'Name';
@@ -147,7 +155,7 @@ export class Founding {
       if (nameLength(name) > NAME_MAX_LENGTH) return void (error.textContent = `Names can be at most ${NAME_MAX_LENGTH} letters.`);
       if (!name) return void (error.textContent = 'Give your adventurer a name.');
       if (this.members.some((m) => m.name.toLowerCase() === name.toLowerCase())) return void (error.textContent = `There is already someone called ${name}.`);
-      this.members.push(createMember(name, classId));
+      this.members.push(createMember(name, classId, look));
       this.hall();
     };
     const suggest = () => {
@@ -158,11 +166,11 @@ export class Founding {
       [
         { label: 'Swear the oath', onSelect: submit },
         { label: 'Suggest a name', onSelect: suggest },
-        { label: 'Back', onSelect: () => this.chooseClass() },
+        { label: 'Back', onSelect: () => this.chooseLook(classId, look) },
       ],
-      { onCancel: () => this.chooseClass() },
+      { onCancel: () => this.chooseLook(classId, look) },
     );
-    bindNameField(input, menu, submit, () => this.chooseClass());
+    bindNameField(input, menu, submit, () => this.chooseLook(classId, look));
     this.dialog(`A new ${CLASSES[classId].name}`, [el('p', { text: 'What is your name, adventurer?' }), input, error], menu, false);
     input.focus();
   }

@@ -19,21 +19,55 @@ function hash(text: string): number {
   return h >>> 0;
 }
 
-/** The painted portrait for a person: each class has two, picked by name; NPCs have their own. */
-function paintedPath(kind: PortraitKind, name: string): string {
-  if (isClass(kind)) return `heroes/${kind}-${hash(name) % 2 ? 'b' : 'a'}.webp`;
+/** Looks per class: 0–3 men, 4–7 women (pixel figures in art/heroes/<class>-<n>.webp). */
+export const LOOKS = 8;
+
+/** An adventurer's look; one without a chosen look gets one from their name. */
+export function lookOf(name: string, look?: number): number {
+  return look !== undefined && Number.isInteger(look) && look >= 0 && look < LOOKS ? look : hash(name) % LOOKS;
+}
+
+export function lookPath(classId: ClassId, look: number): string {
+  return `heroes/${classId}-${look}.webp`;
+}
+
+/** An adventurer's pixel figure on a backdrop in their class colour (square, crisp pixels). */
+function drawHero(ctx: CanvasRenderingContext2D, size: number, classId: ClassId, name: string, accent: string, look?: number): void {
+  const path = lookPath(classId, lookOf(name, look));
+  const img = sprite(path);
+  const s = size;
+  ctx.save();
+  ctx.clearRect(0, 0, s, s);
+  const bg = ctx.createRadialGradient(s * 0.5, s * 0.45, s * 0.05, s * 0.5, s * 0.5, s * 0.75);
+  bg.addColorStop(0, shade(accent, -0.35));
+  bg.addColorStop(1, shade(accent, -0.8));
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, s, s);
+  if (img) {
+    ctx.imageSmoothingEnabled = false;
+    // The whole figure, weapon and all.
+    ctx.drawImage(img, 0, 0, s, s);
+  } else {
+    onSpriteLoad(path, () => drawHero(ctx, size, classId, name, accent, look));
+  }
+  ctx.restore();
+}
+
+/** The painted portrait of one of the people of Lindholm. */
+function paintedPath(kind: NpcId): string {
   return `people/${kind}.webp`;
 }
 
 /**
- * A portrait in a round frame: the painted one once it has loaded (the canvas is
- * redrawn then), and a procedural bust until then.
+ * A portrait: an adventurer's pixel figure (by class and look), or one of the people of Lindholm in a round frame
+ * (painted once it has loaded; the canvas is redrawn then, with a drawn bust until then).
  */
-export function drawPortrait(ctx: CanvasRenderingContext2D, size: number, kind: PortraitKind, name: string, accent: string): void {
-  const path = paintedPath(kind, name);
+export function drawPortrait(ctx: CanvasRenderingContext2D, size: number, kind: PortraitKind, name: string, accent: string, look?: number): void {
+  if (isClass(kind)) return drawHero(ctx, size, kind, name, accent, look);
+  const path = paintedPath(kind);
   const img = sprite(path);
   if (!img) {
-    drawBust(ctx, size, isClass(kind) ? kind : 'sigrid', name, accent);
+    drawBust(ctx, size, 'sigrid', name, accent);
     onSpriteLoad(path, () => drawPortrait(ctx, size, kind, name, accent));
     return;
   }

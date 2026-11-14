@@ -33,6 +33,7 @@ import { npcFromName, npcSays } from './npc';
 import { fetchHonors } from '../net/reports';
 import { bindNameField, suggestName } from './founding';
 import { RavensView, ravenBadge, ravenNow } from './ravensView';
+import { lookPicker } from './lookPicker';
 import { healWound, healerCost, isWounded, unavailable } from '../core/ravens';
 
 export interface TownHost {
@@ -391,19 +392,26 @@ export class TownView {
       label: CLASSES[id].name,
       detail: CLASSES[id].row === 'front' ? 'front row' : 'back row',
       description: CLASSES[id].description,
-      onSelect: () => this.chooseName(id),
+      onSelect: () => this.chooseLook(id),
     }));
     const menu = new ListMenu(items, { onCancel: () => this.hall(0) });
     this.dialog('Choose a class', [], menu, true);
   }
 
-  private chooseName(classId: ClassId): void {
+  private chooseLook(classId: ClassId, start = rosterSize(this.game) * 3): void {
+    const back = () => this.chooseClass();
+    const pick = lookPicker(classId, start % 8, (look) => this.chooseName(classId, look));
+    const menu = new ListMenu([...pick.items, { label: 'Back', onSelect: back }], { onCancel: back, startIndex: 1 });
+    this.dialog(`A new ${CLASSES[classId].name}`, [el('p', { text: 'How does your adventurer look?' }), ...pick.body], menu);
+  }
+
+  private chooseName(classId: ClassId, look: number): void {
     const input = el('input', { className: 'name-input' });
     input.maxLength = NAME_MAX_LENGTH;
     input.placeholder = 'Name';
     const error = el('p', { className: 'form-error' });
     const submit = () => {
-      const problem = registerMember(this.game, input.value, classId);
+      const problem = registerMember(this.game, input.value, classId, look);
       if (problem) {
         error.textContent = problem;
         input.focus();
@@ -418,11 +426,11 @@ export class TownView {
       [
         { label: 'Swear the oath', onSelect: submit },
         { label: 'Suggest a name', onSelect: () => { suggestName(input, taken); error.textContent = ''; } },
-        { label: 'Back', onSelect: () => this.chooseClass() },
+        { label: 'Back', onSelect: () => this.chooseLook(classId, look) },
       ],
-      { onCancel: () => this.chooseClass() },
+      { onCancel: () => this.chooseLook(classId, look) },
     );
-    bindNameField(input, menu, submit, () => this.chooseClass());
+    bindNameField(input, menu, submit, () => this.chooseLook(classId, look));
     this.dialog(`A new ${CLASSES[classId].name}`, [el('p', { text: 'What is your name, adventurer?' }), el('p', { className: 'gold-line', text: `The oath costs ${oathText(this.game)}.` }), input, error], menu);
     input.focus();
   }

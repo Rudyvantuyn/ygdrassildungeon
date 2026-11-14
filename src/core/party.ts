@@ -6,19 +6,20 @@ import type { ClassId, Member, Stats } from './types';
 
 export const MAX_LEVEL = 60;
 
-export function createMember(name: string, classId: ClassId): Member {
+export function createMember(name: string, classId: ClassId, look?: number): Member {
   const def = CLASSES[classId];
   const m: Member = { name, classId, row: def.row, level: 1, xp: 0, hp: def.base.hp, sp: def.base.sp, skills: {} };
+  if (look !== undefined && Number.isInteger(look) && look >= 0 && look < 8) m.look = look;
   autoSpend(m);
   return m;
 }
 
 export function createStartingParty(): Member[] {
   return [
-    createMember('Bram', 'bastion'),
-    createMember('Sela', 'strider'),
-    createMember('Wren', 'mender'),
-    createMember('Orrin', 'runecaller'),
+    createMember('Bram', 'bastion', 0),
+    createMember('Sela', 'strider', 4),
+    createMember('Wren', 'mender', 2),
+    createMember('Orrin', 'runecaller', 1),
   ];
 }
 

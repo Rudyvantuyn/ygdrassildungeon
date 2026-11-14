@@ -254,3 +254,15 @@ describe('sanity', () => {
     expect(memberStats(party[0]).atk).toBeGreaterThan(40);
   });
 });
+
+describe('looks', () => {
+  it('a chosen look is kept, also on expeditions; nonsense looks are dropped', async () => {
+    const { createMember } = await import('./party');
+    const { validMember } = await import('./expedition');
+    const m = createMember('Astrid', 'skald', 6);
+    expect(m.look).toBe(6);
+    expect(createMember('Astrid', 'skald', 9).look).toBeUndefined();
+    expect(validMember(m)?.look).toBe(6);
+    expect(validMember({ ...m, look: 42 })?.look).toBeUndefined();
+  });
+});

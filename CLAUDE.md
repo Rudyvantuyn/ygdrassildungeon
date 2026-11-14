@@ -85,7 +85,10 @@ Add new names there and keep the glossary in sync.
   The owner chose (November 2026): town, dungeon and fights may each have their own look as long as it feels like one
   game, and **pixel art** is the way. Monsters are CC0 pixel art from the Dungeon Crawl Stone Soup tiles
   (`scripts/monster-tiles.json` maps enemy id to tile); add new monsters from that set. `python3 scripts/credits.py`
-  writes the photo table into `public/credits.html`. Still AI-made: the hero and NPC portraits (to replace next).
+  writes the photo table into `public/credits.html`. Adventurers have **looks**: 8 per class (4 men, 4 women), chosen
+  when they swear the oath, built from the same set's player doll parts (`scripts/hero-looks.json`, `scripts/make-looks.py`);
+  a new class gets 8 looks the same way (recolour or draw a 32×32 part if the set lacks one). The portraits of the people
+  of Lindholm (Brynja, Sigrid, …) stay as they are: the owner decided this (November 2026), don't raise it again.
 
 ## Working with the owner
 

@@ -155,6 +155,7 @@ export function validMember(raw: unknown): Member | null {
   if (!validSkills(classId, level, skills)) return null;
   const member: Member = { name, classId, row: m.row === 'back' ? 'back' : 'front', level, xp, hp: 1, sp: 0, skills: { ...skills } };
   if (Number.isInteger(m.oath) && (m.oath as number) > 0) member.oath = m.oath;
+  if (Number.isInteger(m.look) && (m.look as number) >= 0 && (m.look as number) < 8) member.look = m.look;
   if (weapon) member.weapon = weapon;
   if (armor) member.armor = armor;
   fullRestore([member]);
