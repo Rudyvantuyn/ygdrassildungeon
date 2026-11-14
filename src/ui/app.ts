@@ -614,6 +614,30 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   private lastCloudSave = 0;
+  /** The menu row to put the cursor on when the menu is drawn again. */
+  private packFocus: string | null = null;
+  /** What the Save row says just after saving. */
+  private savedNote: { at: number; text: string; long: string } | null = null;
+
+  /** The Save row in the menu: saves (also to the account when signed in) and says so right there in the menu. */
+  private async manualSave(): Promise<void> {
+    this.save();
+    audio.play('menuSelect');
+    const show = (text: string, long: string) => {
+      this.savedNote = { at: Date.now(), text, long };
+      this.packFocus = 'Save';
+      if (this.mode === 'overlay' && this.menuTab === 'options') this.openPack('options');
+    };
+    if (!online.signedIn) return show('✓ Saved', 'Saved on this device.');
+    show('Saving…', 'Saved on this device; now keeping it with your account…');
+    try {
+      await online.uploadSave((this.home ?? this.game).serialize());
+      this.lastCloudSave = Date.now();
+      show('✓ Saved', 'Saved on this device and with your account.');
+    } catch {
+      show('✓ Saved', 'Saved on this device. Your account could not be reached just now; it will be kept there next time.');
+    }
+  }
 
   loadSaveData(data: string): boolean {
     try {
@@ -1648,7 +1672,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           ? []
           : [
               inTown
-                ? { label: 'Save', description: 'Save your progress.', onSelect: () => { this.save(); this.toast('Game saved.'); } }
+                ? {
+                    label: 'Save',
+                    detail: this.savedNote && Date.now() - this.savedNote.at < 8000 ? this.savedNote.text : undefined,
+                    description: this.savedNote && Date.now() - this.savedNote.at < 8000 ? this.savedNote.long : 'Save your progress.',
+                    onSelect: () => void this.manualSave(),
+                  }
                 : { label: 'Save', description: 'In the Rootdeep the game saves at every stair and spring; in town you can save any time.', disabled: true, onSelect: () => {} },
             ]),
         { label: 'Help', description: 'Controls and how to play.', onSelect: () => this.showHelp(back) },
@@ -1660,7 +1689,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     };
     const order: MenuTab[] = ['party', 'bag', 'journal', 'options'];
     const names: Record<MenuTab, string> = { party: 'Party', bag: 'Bag', journal: 'Journal', options: 'Options' };
-    const menu = new ListMenu(tabs[tab], { onCancel: close, backRow: false });
+    const focus = this.packFocus ? tabs[tab].findIndex((it) => it.label === this.packFocus) : -1;
+    this.packFocus = null;
+    const menu = new ListMenu(tabs[tab], { onCancel: close, backRow: false, startIndex: Math.max(0, focus) });
     // ← → (or tapping a tab) switches tabs.
     const handle = menu.handleKey.bind(menu);
     const step = (d: number) => {
