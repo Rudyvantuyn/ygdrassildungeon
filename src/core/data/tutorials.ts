@@ -214,6 +214,16 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'sagas',
+    title: 'Sagas and bynames',
+    speaker: 'brynja',
+    pages: [
+      'The skalds of Lindholm are already singing about one of yours. Do enough of something, and the songs give a person a byname.',
+      'Every fight is told: blows struck, wounds healed, falls, narrow escapes. Read each adventurer\'s saga in the Party menu or at the Oath Hall, and choose which byname they bear.',
+      'A byname is honour, nothing more. It changes nothing in a fight, but the others on an expedition will see it.',
+    ],
+  },
+  {
     id: 'wyrdweave',
     title: 'The Wyrdweave',
     speaker: 'ylva',

@@ -1,3 +1,4 @@
+import { sagas } from './sagaView';
 import { audio } from '../audio/audio';
 import { CLASSES } from '../core/data/classes';
 import { EQUIPMENT, type EquipDef } from '../core/data/equipment';
@@ -326,6 +327,7 @@ export class TownView {
           description: 'Spend skill points. Every level brings one; each skill goes up to rank 10.',
           onSelect: () => this.skills(),
         },
+        { label: 'Sagas', description: 'What each adventurer has done, and the bynames they have earned.', onSelect: () => sagas(this.game, (c, m) => this.host.openOverlay(c, m), () => this.host.save(), () => this.hall(3)) },
         { label: 'Unlearn skills', description: 'Take back all skill points of one adventurer, for a fee.', onSelect: () => this.unlearn() },
         { label: 'Dismiss', description: 'Release an adventurer from the reserve for good.', disabled: s.reserve.length === 0, onSelect: () => this.dismiss() },
         {

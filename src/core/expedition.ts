@@ -7,6 +7,7 @@
  * actions and show the state they get back. Everything here is plain JSON so it can be
  * stored in a database row between actions.
  */
+import { BYNAME_BY_ID } from './sagas';
 import type { CombatEvent, CombatSnapshot, Command } from './combat';
 import { CLASSES } from './data/classes';
 import { EQUIPMENT } from './data/equipment';
@@ -156,6 +157,8 @@ export function validMember(raw: unknown): Member | null {
   const member: Member = { name, classId, row: m.row === 'back' ? 'back' : 'front', level, xp, hp: 1, sp: 0, skills: { ...skills } };
   if (Number.isInteger(m.oath) && (m.oath as number) > 0) member.oath = m.oath;
   if (Number.isInteger(m.look) && (m.look as number) >= 0 && (m.look as number) < 8) member.look = m.look;
+  // The byname they bear is shown to the others; it changes nothing in a fight.
+  if (typeof m.byname === 'string' && m.byname in BYNAME_BY_ID) member.byname = m.byname;
   if (weapon) member.weapon = weapon;
   if (armor) member.armor = armor;
   fullRestore([member]);

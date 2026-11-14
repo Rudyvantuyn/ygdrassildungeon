@@ -16,6 +16,7 @@ import { Rng } from './rng';
 import { fullScaleRank, rankOf, skillFor } from './skilltree';
 import { innCost } from './town';
 import { count } from './deeds';
+import { addToSaga } from './sagas';
 import { chooseCommands } from './tactics';
 import type { ItemId, Member } from './types';
 
@@ -179,6 +180,7 @@ export function collectRun(game: Game, id: number, now: number): RunReport | nul
     const m = memberByOath(game, oath);
     if (!m) continue;
     delete m.ravenRun;
+    addToSaga(m, { runs: 1 });
     if (wounded.includes(oath)) m.woundedUntil = run.returnAt + WOUND_HOURS * HOUR;
   }
   return run.report;

@@ -141,6 +141,10 @@ export class Combat {
   itemsUsed = 0;
   fellDuring = false;
   private readonly rewardScale: number;
+  /** What each party member did in this fight, for their saga (src/core/sagas.ts). */
+  readonly deeds: { kills: number; crits: number; weakHits: number; healed: number; revives: number; taken: number; guardians: string[]; prowlers: number }[];
+  /** Party members who fell at some point in this fight. */
+  readonly fell = new Set<number>();
   /** Party members whose Norn-Spun Mantle already saved them this fight. */
   private readonly stoodLast = new Set<number>();
 
@@ -155,6 +159,7 @@ export class Combat {
     this.prowler = !!opts.prowler;
     this.oathToken = opts.oathToken ?? (this.boss || this.prowler);
     this.rewardScale = opts.rewardScale ?? 1;
+    this.deeds = party.map(() => ({ kills: 0, crits: 0, weakHits: 0, healed: 0, revives: 0, taken: 0, guardians: [], prowlers: 0 }));
     this.enemies = enemyIds.map((id) => {
       const def = ENEMIES[id];
       if (!def) throw new Error(`Unknown enemy "${id}"`);
@@ -342,6 +347,7 @@ export class Combat {
           for (const t of targets) {
             if (t < 0) continue;
             const healed = healMember(this.party[t], amount);
+            this.deeds[i].healed += healed;
             events.push({ type: 'heal', target: t, amount: healed, hp: this.party[t].hp });
           }
         } else if (skill.kind === 'revive') {
@@ -350,6 +356,7 @@ export class Combat {
             events.push({ type: 'info', text: 'But nothing happened.' });
           } else {
             const hp = revive(target, skill.power);
+            this.deeds[i].revives += 1;
             events.push({ type: 'heal', target: cmd.target, amount: hp, hp });
             events.push({ type: 'info', text: `${target.name} is back on their feet!` });
           }
@@ -402,6 +409,7 @@ export class Combat {
           events.push({ type: 'info', text: 'It has no effect here.' });
         } else if (item.effect === 'revive') {
           const hp = revive(target, item.amount);
+          this.deeds[i].revives += 1;
           events.push({ type: 'heal', target: cmd.target, amount: hp, hp });
           events.push({ type: 'info', text: `${target.name} is back on their feet!` });
         } else if (item.effect === 'cure') {
@@ -409,6 +417,7 @@ export class Combat {
           else events.push({ type: 'info', text: 'But nothing happened.' });
         } else if (item.effect === 'hp') {
           const healed = healMember(target, item.amount);
+          this.deeds[i].healed += healed;
           events.push({ type: 'heal', target: cmd.target, amount: healed, hp: target.hp });
         } else {
           restoreSp(target, item.amount);
@@ -471,7 +480,13 @@ export class Combat {
     const { damage, crit, weak, resist } = this.roll(base, power, element, enemy.def.weak, enemy.def.resist, kind === 'phys');
     enemy.hp = Math.max(0, enemy.hp - damage);
     events.push({ type: 'damage', side: 'enemy', target: enemyIndex, amount: damage, hp: enemy.hp, crit, weak, resist, element });
+    const did = this.deeds[memberIndex];
+    if (crit) did.crits += 1;
+    if (weak) did.weakHits += 1;
     if (enemy.hp === 0) {
+      did.kills += 1;
+      if (enemyIndex === 0 && this.boss) did.guardians.push(enemy.def.id);
+      if (enemyIndex === 0 && this.prowler) did.prowlers += 1;
       events.push({ type: 'down', side: 'enemy', target: enemyIndex, text: `${enemy.name} is defeated!` });
     } else if (enemy.ailment === 'sleep') {
       this.clearAilment('enemy', enemyIndex, events, `${enemy.name} wakes up!`);
@@ -530,6 +545,7 @@ export class Combat {
     if (status.guard > 0) base *= 0.7;
 
     const { damage, crit } = this.roll(base, action.power, action.element, [], [], action.kind === 'phys');
+    this.deeds[memberIndex].taken += Math.min(m.hp, damage);
     m.hp = Math.max(0, m.hp - damage);
     if (m.hp === 0 && this.gift(memberIndex) === 'lastStand' && !this.stoodLast.has(memberIndex)) {
       this.stoodLast.add(memberIndex);
@@ -541,6 +557,7 @@ export class Combat {
     events.push({ type: 'damage', side: 'party', target: memberIndex, amount: damage, hp: m.hp, crit, weak: false, resist: false, element: action.element });
     if (m.hp === 0) {
       this.fellDuring = true;
+      this.fell.add(memberIndex);
       this.status[memberIndex].ailment = null;
       events.push({ type: 'down', side: 'party', target: memberIndex, text: `${m.name} falls!` });
       return;
@@ -640,6 +657,7 @@ export class Combat {
           events.push({ type: 'damage', side, target: index, amount: damage, hp: m.hp, crit: false, weak: false, resist: false, element: 'phys' });
           if (m.hp === 0) {
             this.fellDuring = true;
+            this.fell.add(index);
             target.ailment = null;
             events.push({ type: 'down', side, target: index, text: `${m.name} succumbs to the poison!` });
             return;

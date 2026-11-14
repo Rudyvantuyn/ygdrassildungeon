@@ -16,6 +16,7 @@ import { Rng } from './rng';
 import type { RavenRun } from './ravens';
 import { WYRD_REWARD_SCALE, wyrdChapter, wyrdFloorCode, wyrdFloors } from './wyrd';
 import { count, setCount, type DeedCounter, type EarnedDeed } from './deeds';
+import { addToSaga, type Byname } from './sagas';
 import type { Dir, ItemId, Loot, Member } from './types';
 
 /** Bump when the save format changes incompatibly; older saves are then discarded. */
@@ -535,8 +536,9 @@ export class Game {
     return new Combat(this.state.party, this.floorDef.boss ?? [], this.state.inventory, this.rng, { boss: true, oathToken: !this.state.expedition });
   }
 
-  /** Call after a combat is over, with the finished combat. */
-  finishCombat(combat: Combat): void {
+  /** Call after a combat is over, with the finished combat. Returns the bynames earned in it (sagas). */
+  finishCombat(combat: Combat): { member: Member; byname: Byname }[] {
+    const earned = this.addFightToSagas(combat);
     this.state.battles += 1;
     this.state.danger = 0;
     this.rollEncounterAt();
@@ -571,6 +573,19 @@ export class Game {
         if (this.isLastFloor) this.state.cleared = true;
       }
     }
+    return earned;
+  }
+
+  /** Every party member's part in a fight that was won or fled goes into their saga. */
+  private addFightToSagas(combat: Combat): { member: Member; byname: Byname }[] {
+    if (combat.outcome !== 'victory' && combat.outcome !== 'fled') return [];
+    const won = combat.outcome === 'victory';
+    return combat.party.flatMap((m, i) => {
+      const d = combat.deeds[i];
+      const closeCall = won && isAlive(m) && m.hp <= 0.1 * memberStats(m).hp;
+      const fresh = addToSaga(m, { ...d, battles: 1, falls: combat.fell.has(i) ? 1 : 0, closeCalls: closeCall ? 1 : 0 });
+      return fresh.map((byname) => ({ member: m, byname }));
+    });
   }
 
   get partyAlive(): boolean {

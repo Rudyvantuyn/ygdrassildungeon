@@ -2,6 +2,7 @@
  * The website around the game (www.ygdrassilgame.com): the front page, the world, classes, bestiary and devlog.
  * Built from the game's own data, so names and pictures always match the game. The game itself lives at /play.
  */
+import { fullName } from '../core/sagas';
 import { inject } from '@vercel/analytics';
 import '@fontsource/pixelify-sans/latin-400.css';
 import '@fontsource/pixelify-sans/latin-700.css';
@@ -305,7 +306,7 @@ function wayfinder(): HTMLElement[] {
     out.push(
       section(
         'Your party',
-        h('div', { class: 'party' }, ...[...s.party, ...s.reserve].map((m) => h('div', { class: 'member' }, portrait(m.classId, m.name, CLASSES[m.classId].color, 96, m.look, 'look'), h('b', {}, m.name), h('span', { class: 'muted' }, `Lv ${m.level} ${CLASSES[m.classId].name}`)))),
+        h('div', { class: 'party' }, ...[...s.party, ...s.reserve].map((m) => h('div', { class: 'member' }, portrait(m.classId, m.name, CLASSES[m.classId].color, 96, m.look, 'look'), h('b', {}, fullName(m)), h('span', { class: 'muted' }, `Lv ${m.level} ${CLASSES[m.classId].name}`)))),
         h('p', {}, `Deepest: ${floor} · ${s.battles} battles · ${played} played${me.savedAt ? ` · saved to the cloud ${new Date(me.savedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}` : ''}`),
         h('p', {}, h('a', { class: 'btn', href: 'play.html#cloud' }, 'Play with this save'), ' ', h('span', { class: 'small' }, 'Loads the save kept with your account into this browser.')),
       ),

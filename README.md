@@ -31,6 +31,14 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Sagas en bijnamen
+
+- Elk gevecht telt mee in de **saga** van elke avonturier: genadeklappen, voltreffers, zwaktes, genezen HP, opgeholpen
+  vrienden, incasseerde klappen, vallen, nipte overwinningen, prowlers, eindbazen en Raven Runs.
+- Genoeg van iets levert een **byname** op ("Bram Wolf-Feeder", "Wren the Kind", "Sela, Bane of the Blighted Elder").
+  De eerste draagt een avonturier meteen; daarna kies je zelf (Party-menu of de Oath Hall, *Sagas*).
+- Een bijnaam verandert niets in een gevecht; anderen op een expeditie zien hem wel, en hij staat op My Wayfinder.
+
 ### De Wyrdweave (dagelijks)
 
 - Na de Blighted Elder opent bij de Rootdeep **de Wyrdweave**: elke dag (middernacht UTC) weven de Norns drie
@@ -283,6 +291,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Raven Runs | **Raven Runs** (avonturiers uit de reserve gaan een paar echte uren op verkenning; Huginn en Muninn brengen het nieuws), Short / Long / Overnight, scouts, **Wounded** (12 uur rust, of de healer in The Sleeping Stag), routed |
 | Runestones | **Runestones** (korte boodschappen uit vaste woorden die spelers op een vakje kerven; één per afdaling, max. 20 per speler, 12 per verdieping), **Heed** / **False** (oordeel van lezers), **Renown** (Heeds voor de maker, 25 G per Heed, max. 100 G per dag), **shade** (schim waar een team viel) |
 | Book of Deeds | **Book of Deeds** (verborgen prestaties met medailles; je ziet alleen wat je behaald hebt), deeds o.a. First Steps, Cartographer, Wall to Wall, Stubborn, By a Hair, Light Pack, Deathless, Discretion, Wrong Tool, Made to Order, Hilde's Favourite, Every Banner, Old Guard, Word from Below, Stone Carver, Kind Stranger, A Road Chosen |
+| Sagas | **Saga** (wat een avonturier deed: gevechten, genezen HP, vallen, ...), **byname** (bijnaam, kies je zelf): Wolf-Feeder, Raven-Feeder, Keen-Edge, the Wise, the Kind, Life-Giver, Hel-Denier, the Anvil, Shield-Wall, Many-Lives, Hair's-Breadth, the Unbroken, the Seasoned, Prowler-Bane, Raven-Friend, en "Bane of ..." per eindbaas |
 | Wyrdweave | **Wyrdweave** (dagelijkse drie verdiepingen met regels), **Well of Urd**, **Wyrd Threads**, "The ... Thread" (naam van de dag), regels Nameless Dark, Restless, The Long Way, Empty Hands, Bloodless, Echoes, Dim Roots, Thin Air, Deep Hunger, The Hunt, Fading Light; **Wyrd gear**: Norn-Spun Mantle (last stand), Urd's Weave (mending), Skuld's Shroud (steadfast) |
 | Samen spelen | **Hornstone** (ontmoetingssteen), expeditie, Sound the Horn, Answer a Horn, gathering (lobby), share (je deel van de buit) |
 | Menu's | Menu met vier tabs: Party, Bag, Journal, Options (overal hetzelfde); Map (kaarteditor), Notice Board (quests), **Bestiary** (monsters die je tegenkwam, zwaktes ontdek je door ze te proberen), **The Wayfinders' Stone** (erebord voor spelers die meehielpen, naast het Notice Board), Danger-bol |

@@ -130,6 +130,11 @@ export interface Member {
   ravenRun?: number;
   /** Hurt on a Raven Run: rests until this time (ms), unless the Inn's healer sees to it. */
   woundedUntil?: number;
+  /** What they have done (src/core/sagas.ts). */
+  saga?: import('./sagas').SagaTally;
+  /** Bynames earned (ids), and the one they bear. */
+  bynames?: string[];
+  byname?: string;
 }
 
 export type Loot = { gold: number } | { item: ItemId; qty: number };

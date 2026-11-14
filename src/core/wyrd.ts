@@ -262,7 +262,7 @@ export function bringWyrdHome(home: Game, run: Game, cleared: number, fell: bool
   home.state.party = home.state.party.map((m) => {
     const back = byOath.get(m.oath);
     if (!back) return m;
-    const kept: Member = { ...m, level: back.level, xp: back.xp, skills: back.skills, hp: fell ? 0 : back.hp, sp: back.sp };
+    const kept: Member = { ...m, level: back.level, xp: back.xp, skills: back.skills, hp: fell ? 0 : back.hp, sp: back.sp, saga: back.saga, bynames: back.bynames, byname: back.byname };
     return kept;
   });
   home.state.inventory = { ...run.state.inventory };

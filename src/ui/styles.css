@@ -2921,3 +2921,16 @@ body.phone .deed-banner { top: 6px; max-width: 460px; }
 .map-side { overflow-y: auto; min-height: 0; max-height: 530px; }
 .map-side .cmd-hint { font-size: 12px; line-height: 1.35; }
 .map-cell-info:empty { display: none; }
+
+/* Sagas: the tally in two columns, so the page fits. */
+.rewards.saga-facts {
+  grid-template-columns: auto auto auto auto;
+  gap: 4px 18px;
+  font-size: 15px;
+  margin: 8px 0;
+}
+@media (max-width: 700px) {
+  .rewards.saga-facts {
+    grid-template-columns: auto auto;
+  }
+}

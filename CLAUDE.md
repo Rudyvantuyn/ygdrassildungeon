@@ -67,6 +67,8 @@ Add new names there and keep the glossary in sync.
   ends: every chapter resolves something and opens a deeper secret. Choices lean toward one of three roads (Asgard,
   the realms, Midgard's own third way); later chapters must react to them. Keep the canon in `docs/verhaal.md` in sync.
 
+- **Sagas** (`src/core/sagas.ts`): every fight adds to each adventurer's tally and earns bynames ("Bram Wolf-Feeder").
+  Bynames are honour only: never tie stats or rewards to them. New bynames are welcome (own names, Norse flavour).
 - **The Wyrdweave** (`src/core/wyrd.ts`): a daily run of three floors, the same for everyone (seeded by the UTC day),
   each with a rule, opening after the Blighted Elder. One try a day, own party, half XP and gold. Rewards stay scarce:
   at most 4 Wyrd Threads a day (half after a fall), gear costs 30/50/80 threads, threads cannot be sold. Don't make

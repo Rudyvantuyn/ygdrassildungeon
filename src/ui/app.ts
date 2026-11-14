@@ -1,3 +1,5 @@
+import { fullName } from '../core/sagas';
+import { sagas } from './sagaView';
 import type { ChartMode } from '../core/chart';
 import type { Combat } from '../core/combat';
 import { ENEMIES } from '../core/data/enemies';
@@ -1590,7 +1592,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
   private endCombat(combat: Combat): void {
     // On an expedition the server has already settled the fight.
-    if (!this.coop) this.game.finishCombat(combat);
+    const bynames = this.coop ? [] : this.game.finishCombat(combat);
     this.combatView = null;
     this.showSide('explore');
     this.updateHud();
@@ -1626,8 +1628,14 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const levelUps = r.levelUps.map((l) =>
       el('div', { className: 'levelup', text: `${this.game.state.party[l.member].name} reached level ${l.level}! A new skill point to spend.` }),
     );
+    // A byname earned in this fight: the first one is borne at once, the others wait in the saga.
+    for (const { member, byname } of bynames) {
+      const borne = member.byname === byname.id;
+      levelUps.push(el('div', { className: 'levelup saga', text: borne ? `The skalds have a name for ${member.name}: ${fullName(member)}!` : `${member.name} earned another byname: ${fullName({ name: member.name, byname: byname.id })}. Choose it in the saga.` }));
+    }
     this.noticeTip('victory');
     if (r.levelUps.length) this.noticeTip('skillPoints');
+    if (bynames.length) this.noticeTip('sagas');
     const done = () => {
       this.closeOverlay();
       if (this.coop) return this.coop.combatOver();
@@ -1764,6 +1772,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           : [
               { label: 'Skill tree', detail: points ? 'points to spend' : undefined, description: 'Spend skill points. Every level brings one; each skill goes up to rank 10.', onSelect: () => this.packSkillTree() },
               { label: 'Use a skill', description: 'Use a healing skill outside of a fight.', onSelect: () => this.packSkills() },
+              { label: 'Sagas', description: 'What each adventurer has done, and the bynames they have earned.', onSelect: () => sagas(this.game, (c, m) => this.openOverlay(c, m), () => this.save(), back) },
             ]),
       ],
       bag: [
@@ -1859,7 +1868,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             return el('div', { className: 'menu-member' }, [
               c,
               el('div', {}, [
-                el('b', { text: m.name }),
+                el('b', { text: fullName(m) }),
                 el('span', { text: `Lv ${m.level} ${CLASSES[m.classId].name} · HP ${m.hp} · SP ${m.sp}` }),
               ]),
               el('span', { className: 'menu-points', text: pts ? `${pts} skill point${pts > 1 ? 's' : ''}` : '' }),
