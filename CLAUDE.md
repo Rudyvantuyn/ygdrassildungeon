@@ -67,6 +67,9 @@ Add new names there and keep the glossary in sync.
   ends: every chapter resolves something and opens a deeper secret. Choices lean toward one of three roads (Asgard,
   the realms, Midgard's own third way); later chapters must react to them. Keep the canon in `docs/verhaal.md` in sync.
 
+- **Lore unlocks with progress**: the site shows chapter pages only once reached, Hrodna and Eira only after their scene,
+  and **Fragments** (`src/core/data/fragments.ts`, found in chests and with guardians) only once found. Fragments are
+  hints, never reveals; keep them in line with `docs/verhaal.md`.
 - **Sagas** (`src/core/sagas.ts`): every fight adds to each adventurer's tally and earns bynames ("Bram Wolf-Feeder").
   Bynames are honour only: never tie stats or rewards to them. New bynames are welcome (own names, Norse flavour).
 - **The Wyrdweave** (`src/core/wyrd.ts`): a daily run of three floors, the same for everyone (seeded by the UTC day),

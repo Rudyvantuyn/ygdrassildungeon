@@ -3,6 +3,7 @@
  * Built from the game's own data, so names and pictures always match the game. The game itself lives at /play.
  */
 import { fullName } from '../core/sagas';
+import { FRAGMENTS } from '../core/data/fragments';
 import { inject } from '@vercel/analytics';
 import '@fontsource/pixelify-sans/latin-400.css';
 import '@fontsource/pixelify-sans/latin-700.css';
@@ -165,7 +166,7 @@ function home(): HTMLElement[] {
     section(
       'The story so far',
       h('p', {}, 'The gods slew the giant Ymir and built the world from his body, then sealed the road to Asgard. The other realms took their anger out on Midgard. Now Lindholm has made a pact: open a way to Asgard, and the realms will leave Midgard in peace.'),
-      h('div', { class: 'chapter-strip' }, ...CHAPTERS.map((c) => h('a', { class: 'chapter-mini', href: 'world.html#chapters' }, img(c.image, c.name), h('span', {}, `${c.numeral}. ${c.name}`)))),
+      h('div', { class: 'chapter-strip' }, ...CHAPTERS.map((c, i) => (reached(i) ? h('a', { class: 'chapter-mini', href: 'world.html#chapters' }, img(c.image, c.name), h('span', {}, `${c.numeral}. ${c.name}`)) : h('a', { class: 'chapter-mini sealed', href: 'world.html#chapters' }, h('div', { class: 'seal' }, '?'), h('span', {}, `${c.numeral}. Sealed`))))),
       h('p', {}, h('a', { href: 'world.html' }, 'Read about the world →')),
     ),
     section('Latest news', ...POSTS.slice(0, 2).map((p) => postCard(p, false))),
@@ -177,16 +178,67 @@ function world(): HTMLElement[] {
   return [
     h('section', { class: 'page-head' }, h('h1', {}, 'The world'), h('p', { class: 'tagline' }, 'A giant\'s grave, a sealed gate, and a pact')),
     ...WORLD.map((s, i) => h('section', { class: `block lore ${i % 2 ? 'flip' : ''}` }, s.image ? img(s.image, s.title) : null, h('div', {}, h('h2', {}, s.title), ...s.text.map((t) => h('p', {}, t))))),
-    h('section', { class: 'block', id: 'people' }, h('h2', {}, 'The people of Lindholm'), h('div', { class: 'people' }, ...PEOPLE.map((p) => h('div', { class: 'person' }, portrait(p.id, p.name, '#8a7444', 160), h('div', {}, h('h3', {}, p.name), h('p', {}, p.text)))))),
+    h(
+      'section',
+      { class: 'block', id: 'people' },
+      h('h2', {}, 'The people of Lindholm'),
+      h(
+        'div',
+        { class: 'people' },
+        ...PEOPLE.map((p) =>
+          metPerson(p.id)
+            ? h('div', { class: 'person' }, portrait(p.id, p.name, '#8a7444', 160), h('div', {}, h('h3', {}, p.name), h('p', {}, p.text)))
+            : h('div', { class: 'person sealed' }, h('div', { class: 'seal big' }, '?'), h('div', {}, h('h3', {}, '???'), h('p', {}, 'Someone not from Lindholm. You will meet them in the Rootdeep.'))),
+        ),
+      ),
+    ),
     h(
       'section',
       { class: 'block', id: 'chapters' },
       h('h2', {}, 'The chapters of the Rootdeep'),
       h('p', {}, 'The Rootdeep is told in chapters of five floors, each with its own world, its own monsters, and a guardian at the bottom. Every chapter answers one question and opens a deeper one.'),
-      ...CHAPTERS.map((c) => h('div', { class: 'chapter' }, img(c.image, c.name), h('div', {}, h('h3', {}, `Chapter ${c.numeral}: ${c.name}`), h('p', { class: 'muted' }, c.floors), h('p', {}, c.text)))),
+      ...CHAPTERS.map((c, i) =>
+        reached(i)
+          ? h('div', { class: 'chapter' }, img(c.image, c.name), h('div', {}, h('h3', {}, `Chapter ${c.numeral}: ${c.name}`), h('p', { class: 'muted' }, c.floors), h('p', {}, c.text)))
+          : h('div', { class: 'chapter sealed' }, h('div', { class: 'seal' }, '?'), h('div', {}, h('h3', {}, `Chapter ${c.numeral}`), h('p', { class: 'muted' }, c.floors), h('p', {}, me ? 'Sealed. Reach it in the game and its page opens here.' : 'Sealed. Sign in, reach it in the game, and its page opens here.'))),
+      ),
       h('div', { class: 'chapter sealed' }, h('div', { class: 'seal' }, '?'), h('div', {}, h('h3', {}, 'Chapter IV and beyond'), h('p', {}, 'Still sealed. The story never ends: every chapter resolves something and opens a deeper secret.'))),
     ),
+    fragmentsBlock(),
   ];
+}
+
+/** Whether the visitor has reached chapter `i` (0-based): the first is open to all. */
+function reached(i: number): boolean {
+  return i < Math.max(OPEN_CHAPTERS, me?.chapters ?? 0);
+}
+
+/** People met in the story: Lindholm's own are known to all, visitors from below once their scene was seen. */
+const MET_IN: Partial<Record<string, string>> = { hrodna: 'pact', eira: 'wanderer' };
+function metPerson(id: string): boolean {
+  const scene = MET_IN[id];
+  return !scene || !!me?.save?.story?.includes(scene);
+}
+
+/** Fragments of the past found in the game (from the cloud save); the rest as ???. */
+function fragmentsBlock(): HTMLElement {
+  const found = new Set(me?.save?.fragments ?? []);
+  const intro = !me
+    ? h('p', {}, 'Old notes and carved marks lie in the Rootdeep, in a few chests and in the hearts of guardians. ', h('a', { href: 'wayfinder.html' }, 'Sign in'), ' and the ones you found can be read here.')
+    : !me.save
+      ? h('p', {}, 'Keep your game with your account (in the game: the Hornstone, Account) and the fragments you find show here.')
+      : h('p', {}, `You have found ${found.size} of ${FRAGMENTS.length}.`);
+  return h(
+    'section',
+    { class: 'block', id: 'fragments' },
+    h('h2', {}, 'Fragments'),
+    intro,
+    h(
+      'div',
+      { class: 'fragments' },
+      ...FRAGMENTS.map((f) => (found.has(f.id) ? h('div', { class: 'fragment' }, h('h3', {}, f.title), h('p', {}, f.text)) : h('div', { class: 'fragment sealed' }, h('h3', {}, '???'), h('p', { class: 'muted' }, 'Not found yet.')))),
+    ),
+  );
 }
 
 function classes(): HTMLElement[] {
@@ -306,7 +358,7 @@ function wayfinder(): HTMLElement[] {
     out.push(
       section(
         'Your party',
-        h('div', { class: 'party' }, ...[...s.party, ...s.reserve].map((m) => h('div', { class: 'member' }, portrait(m.classId, m.name, CLASSES[m.classId].color, 96, m.look, 'look'), h('b', {}, fullName(m)), h('span', { class: 'muted' }, `Lv ${m.level} ${CLASSES[m.classId].name}`)))),
+        h('div', { class: 'party' }, ...[...s.party, ...s.reserve].map((m) => h('div', { class: 'member' }, portrait(m.classId, m.name, CLASSES[m.classId].color, 96, m.look, 'look'), h('b', {}, fullName(m)), h('span', { class: 'muted' }, `Lv ${m.level} ${CLASSES[m.classId].name}`), m.saga?.battles ? h('span', { class: 'small saga-line' }, `${m.saga.battles} fights · ${m.saga.kills} foes struck down${m.saga.healed ? ` · ${m.saga.healed} HP healed` : ''}`) : null))),
         h('p', {}, `Deepest: ${floor} · ${s.battles} battles · ${played} played${me.savedAt ? ` · saved to the cloud ${new Date(me.savedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}` : ''}`),
         h('p', {}, h('a', { class: 'btn', href: 'play.html#cloud' }, 'Play with this save'), ' ', h('span', { class: 'small' }, 'Loads the save kept with your account into this browser.')),
       ),

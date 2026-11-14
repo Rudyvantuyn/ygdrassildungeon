@@ -31,6 +31,13 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### Lore die je vrijspeelt
+
+- **Fragments**: tien korte stukjes verleden (een brief, een logboekpagina, een gekraste wegsteen), in een paar oude
+  kisten en bij de eindbazen. Terug te lezen in de Journal; ingelogd ook op de World-pagina van de site.
+- De site toont hoofdstuk II en III pas als je ze in je save bereikt hebt, en Hrodna en Eira pas na hun scène.
+- Op My Wayfinder staat bij elke avonturier de bijnaam en een korte saga.
+
 ### Sagas en bijnamen
 
 - Elk gevecht telt mee in de **saga** van elke avonturier: genadeklappen, voltreffers, zwaktes, genezen HP, opgeholpen
@@ -291,6 +298,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Raven Runs | **Raven Runs** (avonturiers uit de reserve gaan een paar echte uren op verkenning; Huginn en Muninn brengen het nieuws), Short / Long / Overnight, scouts, **Wounded** (12 uur rust, of de healer in The Sleeping Stag), routed |
 | Runestones | **Runestones** (korte boodschappen uit vaste woorden die spelers op een vakje kerven; één per afdaling, max. 20 per speler, 12 per verdieping), **Heed** / **False** (oordeel van lezers), **Renown** (Heeds voor de maker, 25 G per Heed, max. 100 G per dag), **shade** (schim waar een team viel) |
 | Book of Deeds | **Book of Deeds** (verborgen prestaties met medailles; je ziet alleen wat je behaald hebt), deeds o.a. First Steps, Cartographer, Wall to Wall, Stubborn, By a Hair, Light Pack, Deathless, Discretion, Wrong Tool, Made to Order, Hilde's Favourite, Every Banner, Old Guard, Word from Below, Stone Carver, Kind Stranger, A Road Chosen, Warden of the Bone, Drowned Lore, Thread-Bearer, All Three Floors, Woven Fate, Seven Days Spun, Sung Of, A Hall of Names, Guardians' Bane, Gate-Opener, Night Owl, Pacifist's Walk, Bare Hands, The Long Way Home |
+| Fragments | **Fragments** (tien stukjes verleden: in de eerste kist van verdieping 1, 6, 8 en 11 en bij de eindbazen), o.a. A Wayfinder's first note, Under the rot, Gnawed bone, A bottle in the salt, A page of Hallvard's log, A horn in the coral, The second rune, A scratched waystone, The chisel mark, A stone that beats |
 | Sagas | **Saga** (wat een avonturier deed: gevechten, genezen HP, vallen, ...), **byname** (bijnaam, kies je zelf): Wolf-Feeder, Raven-Feeder, Keen-Edge, the Wise, the Kind, Life-Giver, Hel-Denier, the Anvil, Shield-Wall, Many-Lives, Hair's-Breadth, the Unbroken, the Seasoned, Prowler-Bane, Raven-Friend, en "Bane of ..." per eindbaas |
 | Wyrdweave | **Wyrdweave** (dagelijkse drie verdiepingen met regels), **Well of Urd**, **Wyrd Threads**, "The ... Thread" (naam van de dag), regels Nameless Dark, Restless, The Long Way, Empty Hands, Bloodless, Echoes, Dim Roots, Thin Air, Deep Hunger, The Hunt, Fading Light; **Wyrd gear**: Norn-Spun Mantle (last stand), Urd's Weave (mending), Skuld's Shroud (steadfast) |
 | Samen spelen | **Hornstone** (ontmoetingssteen), expeditie, Sound the Horn, Answer a Horn, gathering (lobby), share (je deel van de buit) |

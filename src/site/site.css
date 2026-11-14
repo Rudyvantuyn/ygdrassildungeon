@@ -174,3 +174,16 @@ button.btn { border: 0; cursor: pointer; font-size: 16px; }
 
 .name-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .name-row input { font: 17px var(--read); padding: 8px 10px; background: #0a1014; color: var(--text); border: 2px solid var(--rim); width: 220px; }
+
+/* Lore that opens with the player's own progress. */
+.chapter-mini.sealed .seal { width: 100%; height: auto; aspect-ratio: 16 / 9; font-size: 40px; }
+.chapter-mini.sealed span { color: var(--muted); }
+.person .seal.big { width: 96px; height: 96px; font-size: 40px; }
+.person.sealed h3 { color: var(--muted); }
+.fragments { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.fragment { background: var(--panel); box-shadow: inset 0 0 0 2px var(--rim); padding: 14px 16px; }
+.fragment h3 { margin: 0 0 6px; }
+.fragment p { margin: 0; font-style: italic; font-size: 17px; }
+.fragment.sealed { opacity: 0.6; }
+.fragment.sealed p { font-style: normal; }
+.member .saga-line { display: block; margin-top: 2px; }

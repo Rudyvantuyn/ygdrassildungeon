@@ -214,6 +214,15 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'fragments',
+    title: 'Fragments',
+    speaker: 'torvald',
+    pages: [
+      'You found something the Rootdeep kept. Old notes, carved marks, things others left behind. Lindholm knows less about the deep than it pretends.',
+      'Fragments lie in a few old chests and in the hearts of guardians. Read them again in the Journal; signed in, they also appear on the World page of the Wayfinders\' site.',
+    ],
+  },
+  {
     id: 'sagas',
     title: 'Sagas and bynames',
     speaker: 'brynja',

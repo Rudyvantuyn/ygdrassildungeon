@@ -17,6 +17,7 @@ import type { RavenRun } from './ravens';
 import { WYRD_REWARD_SCALE, wyrdChapter, wyrdFloorCode, wyrdFloors } from './wyrd';
 import { count, setCount, type DeedCounter, type EarnedDeed } from './deeds';
 import { addToSaga, type Byname } from './sagas';
+import { fragmentAt, type FragmentDef } from './data/fragments';
 import type { Dir, ItemId, Loot, Member } from './types';
 
 /** Bump when the save format changes incompatibly; older saves are then discarded. */
@@ -102,6 +103,8 @@ export interface GameState {
   carvedOn?: string;
   /** Runestones already read (ids, newest last): they show on the map. */
   runesRead?: number[];
+  /** Fragments of the Rootdeep's past found (ids, src/core/data/fragments.ts). */
+  fragments?: string[];
   /** Deeds earned (Book of Deeds), by id. */
   deeds?: Record<string, EarnedDeed>;
   /** Counters for deeds. */
@@ -119,7 +122,7 @@ export type StepEvent =
   /** The action button was used with nothing to act on. */
   | { type: 'nothing' }
   | { type: 'moved' }
-  | { type: 'chest'; loot: Loot }
+  | { type: 'chest'; loot: Loot; fragment?: FragmentDef }
   | { type: 'emptyChest' }
   | { type: 'stairs' }
   | { type: 'upstairs' }
@@ -509,6 +512,8 @@ export class Game {
     return true;
   }
 
+  /** A fragment found with the guardian just beaten (for the UI to show); not saved. */
+  foundFragment: FragmentDef | null = null;
   /** Share of the usual XP and gold (lower in the Wyrdweave). Not saved: a run is never saved. */
   rewardScale = 1;
   /** For a Wyrdweave run: the floor numbers its runestones and shades are kept under. */
@@ -580,6 +585,7 @@ export class Game {
       for (const id of combat.rewards.materials) this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
       for (const e of combat.enemies) this.state.kills[e.def.id] = (this.state.kills[e.def.id] ?? 0) + 1;
       if (combat.boss) {
+        this.foundFragment = this.findFragment('guardian') ?? null;
         this.progress.bossDefeated = true;
         if (this.isLastFloor) this.state.cleared = true;
       }
@@ -727,7 +733,18 @@ export class Game {
     const loot = this.floorDef.chests[index] ?? { gold: 10 };
     if ('gold' in loot) this.state.gold += loot.gold;
     else this.state.inventory[loot.item] = (this.state.inventory[loot.item] ?? 0) + loot.qty;
-    return { type: 'chest', loot };
+    const fragment = index === 0 ? this.findFragment('chest') : undefined;
+    return { type: 'chest', loot, fragment };
+  }
+
+  /** A fragment lying here (first chest, or the guardian), if this is the Rootdeep and it was not found before. */
+  findFragment(kind: 'chest' | 'guardian'): FragmentDef | undefined {
+    if (this.floors !== FLOORS) return undefined;
+    const f = fragmentAt(this.state.floor, kind);
+    const found = (this.state.fragments ??= []);
+    if (!f || found.includes(f.id)) return undefined;
+    found.push(f.id);
+    return f;
   }
 
   private rollEncounterAt(): void {

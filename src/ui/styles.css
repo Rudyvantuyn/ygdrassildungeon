@@ -2934,3 +2934,17 @@ body.phone .deed-banner { top: 6px; max-width: 460px; }
     grid-template-columns: auto auto;
   }
 }
+
+/* A fragment of the Rootdeep's past. */
+.dialog.fragment .fragment-kind {
+  color: var(--gold);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0;
+}
+.fragment-text {
+  font-style: italic;
+  line-height: 1.5;
+}

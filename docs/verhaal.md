@@ -100,6 +100,15 @@ Drie klassen die je niet kunt kiezen tot je een verborgen deed haalt. Dan meldt 
   een leven meeloopt. Ze kiezen zelf wie ze volgen; deze koos de hal. Speelbaar als beer of kat (Freyja's katten).
   (Open voor Thijs: wiens fylgja is het, en waarom koos het juist nu?)
 
+### Fragmenten (voorstel, november 2026)
+
+Tien korte teksten die spelers vinden (`src/core/data/fragments.ts`), in de eerste kist van verdieping 1, 6, 8 en 11 en
+bij de zes eindbazen. Ze geven alleen hints, nooit een onthulling. *Voorstel, Thijs mag ze aanpassen of vervangen.*
+Een eerste briefje van een Wayfinder; de gouden rune onder het rot; botsplinters in de maag van de Rootgnawer; een fles
+van Hallvards vloot ("Tell them we kept the Pact"); een logboekpagina ("a woman with a lantern was waiting there");
+een drinkhoorn van een gemengde bemanning van mensen, reuzen en een dwerg; de hoorn in Asgard na de Hafgufa; een
+wegsteen van de reuzen met weggekraste namen; Askes "nails in a grave"; Hrungnirs hart dat nog één keer klopt.
+
 ### Keuzes (de drie wegen)
 
 Op drie momenten kiest de speler. Dat wordt opgeslagen (`state.choices`) en telt op richting **asgard**, **realms**

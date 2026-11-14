@@ -1,3 +1,4 @@
+import { FRAGMENTS, type FragmentDef } from '../core/data/fragments';
 import { fullName } from '../core/sagas';
 import { sagas } from './sagaView';
 import type { ChartMode } from '../core/chart';
@@ -1443,6 +1444,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       case 'chest':
         audio.play('chest');
         this.toast(`Found ${describeLoot(ev.loot)} in the chest!`);
+        if (ev.fragment) this.showFragment(ev.fragment, () => this.enterExplore());
         return;
       case 'emptyChest':
         this.toast('The chest is empty.');
@@ -1641,9 +1643,15 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       if (this.coop) return this.coop.combatOver();
       if (!combat.boss) return this.enterExplore();
       this.playStory('victory', () => {
-        if (this.game.state.cleared && !this.trial) return this.showCleared();
-        this.enterExplore();
-        this.toast(`${combat.enemies[0].def.name} has fallen. The way down lies open.`);
+        const fragment = this.game.foundFragment;
+        this.game.foundFragment = null;
+        const after = () => {
+          if (this.game.state.cleared && !this.trial) return this.showCleared();
+          this.enterExplore();
+          this.toast(`${combat.enemies[0].def.name} has fallen. The way down lies open.`);
+        };
+        if (fragment) return this.showFragment(fragment, after);
+        after();
       });
     };
     const menu = new ListMenu([{ label: 'Continue', onSelect: done }], { onCancel: done });
@@ -1795,6 +1803,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         ...(coop
           ? []
           : [
+              { label: 'Fragments', detail: `${s.fragments?.length ?? 0}/${FRAGMENTS.length}`, description: 'Pieces of the Rootdeep\'s past you have found.', onSelect: () => this.showFragments(back) },
               { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(back) },
               { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(back) },
               { label: 'Bestiary', description: 'Every monster you have met: where it lives, what it leaves behind, and the weaknesses you have found.', onSelect: () => this.tips(['bestiary'], () => this.showBestiary(back)) },
@@ -2222,6 +2231,43 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   /** News that must not be missed: a dialog while exploring, a long toast in the middle of anything else. */
+  /** A fragment of the Rootdeep's past, just found. Kept in the Journal (and on the website). */
+  private showFragment(f: FragmentDef, then: () => void): void {
+    const ok = () => {
+      this.closeOverlay();
+      then();
+    };
+    const n = this.game.state.fragments?.length ?? 1;
+    const menu = new ListMenu([{ label: 'Keep it', onSelect: ok }], { onCancel: ok });
+    this.openOverlay(
+      el('div', { className: 'panel dialog fragment' }, [
+        el('p', { className: 'fragment-kind', text: `A fragment · ${n} of ${FRAGMENTS.length}` }),
+        el('h2', { text: f.title }),
+        el('p', { className: 'fragment-text', text: f.text }),
+        el('p', { className: 'small', text: 'Kept in the Journal, under Fragments.' }),
+        menu.el,
+      ]),
+      menu,
+    );
+    this.noticeTip('fragments');
+  }
+
+  /** Every fragment found, to read again; the rest as ???. */
+  private showFragments(back: () => void, start = 0): void {
+    const found = new Set(this.game.state.fragments ?? []);
+    const items: MenuItem[] = FRAGMENTS.map((f) => ({
+      label: found.has(f.id) ? f.title : '???',
+      description: found.has(f.id) ? f.text : 'Not found yet. Fragments lie in old chests and in the hearts of guardians.',
+      disabled: !found.has(f.id),
+      onSelect: () => {},
+    }));
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back, startIndex: start });
+    const desc = el('div', { className: 'menu-desc fragment-text' });
+    menu.describeInto(desc);
+    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: `Fragments (${found.size} of ${FRAGMENTS.length})` }), menu.el, desc]), menu);
+  }
+
   notice(title: string, text: string): void {
     if (this.mode !== 'explore') {
       this.toast(text, 6000);
