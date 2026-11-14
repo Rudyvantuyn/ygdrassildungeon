@@ -523,7 +523,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const screen = el('div', { className: 'title-screen' }, [
       el('div', { className: 'playtest-badge' }, [
         el('strong', { text: 'Early playtest' }),
-        el('span', { text: 'Chapters I and II are open. Saves may be reset before release. Found a bug or have an idea? Use Feedback here or in the menu (Options).' }),
+        el('span', { text: 'Chapters I to III are open. Saves may be reset before release. Found a bug or have an idea? Use Feedback here or in the menu (Options).' }),
       ]),
       el('div', { className: 'logo', text: 'YGDRASSIL' }),
       el('div', { className: 'tagline', text: 'The road to Asgard runs through Ymir' }),

@@ -303,24 +303,33 @@ export class CoopSession {
     const floor = this.mirror.state.floor;
     if (ev.type === 'stairs') {
       if (floor >= FLOORS.length - 1) return;
-      this.host.confirm('Stairs down', `Lead everyone down to ${FLOORS[floor + 1].name}?`, () => void this.send({ type: 'descend' }));
+      this.host.confirm('Stairs down', `Lead everyone down to ${FLOORS[floor + 1].name}?`, () => this.act({ type: 'descend' }));
     } else if (ev.type === 'link') {
       const to = FLOORS[ev.floor]?.name ?? 'the next floor';
-      this.host.confirm(ev.down ? 'Stairs down' : 'Stairs up', `Lead everyone ${ev.down ? 'down' : 'up'} to ${to}?`, () => void this.send({ type: 'link' }));
+      this.host.confirm(ev.down ? 'Stairs down' : 'Stairs up', `Lead everyone ${ev.down ? 'down' : 'up'} to ${to}?`, () => this.act({ type: 'link' }));
     } else if (ev.type === 'upstairs') {
       const text = floor === 0 ? 'Lead everyone back to Lindholm? This ends the expedition.' : `Climb up to ${FLOORS[floor - 1].name}?`;
-      this.host.confirm('Stairs up', text, () => void this.send({ type: 'ascend' }));
+      this.host.confirm('Stairs up', text, () => this.act({ type: 'ascend' }));
     } else if (ev.type === 'gatherSpot') {
       const message = gatherPrompt(ev);
       if (!message.ask) return this.host.toast(message.text);
-      this.host.confirm(GATHER_KINDS[ev.kind].verb, message.text, () => void this.send({ type: 'gather' }));
+      this.host.confirm(GATHER_KINDS[ev.kind].verb, message.text, () => this.act({ type: 'gather' }));
     } else if (ev.type === 'spring') {
       if (ev.used) return this.host.toast('The spring has run dry.');
       this.host.confirm('Healing spring', 'Let everyone drink from the spring? It fully restores the party. It only works once.', () => {
         audio.play('spring');
-        void this.send({ type: 'drink' });
+        this.act({ type: 'drink' });
       });
     }
+  }
+
+  /**
+   * After a Yes in one of the leader's dialogs: back to walking first (the dialog left the screen in its own mode,
+   * and only a change of floor would reset it), then tell the server.
+   */
+  private act(action: Action): void {
+    this.host.enterExplore();
+    void this.send(action);
   }
 
   // ── Combat ─────────────────────────────────────────────────────────────────
