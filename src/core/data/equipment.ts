@@ -11,6 +11,12 @@ export interface EquipDef {
   requires?: { material: string; qty: number };
   price: number;
   bonus: Partial<Stats>;
+  /**
+   * Wyrd gear, woven by Hilde from Wyrd Threads (never sold for gold): its gift in a fight. lastStand: once per fight
+   * a killing blow leaves 1 HP. mending: heals a little at the end of every round. steadfast: poison, sleep and
+   * paralysis do not take.
+   */
+  wyrd?: 'lastStand' | 'mending' | 'steadfast';
 }
 
 const ALL: ClassId[] = ['bastion', 'strider', 'mender', 'runecaller', 'skald', 'berserker', 'seeress', 'wolfkin', 'ravenspeaker', 'hornbearer'];
@@ -21,6 +27,10 @@ const BLADES: ClassId[] = ['bastion', 'berserker', 'wolfkin', 'hornbearer'];
 const MAIL: ClassId[] = ['bastion', 'strider', 'berserker', 'wolfkin', 'hornbearer'];
 
 const list: EquipDef[] = [
+  // Wyrd gear: woven from Wyrd Threads at Hilde's (see WYRD_COSTS in src/core/wyrd.ts), for every class.
+  { id: 'nornMantle', name: 'Norn-Spun Mantle', slot: 'armor', classes: ALL, tier: 99, price: 0, bonus: { def: 9, res: 9 }, wyrd: 'lastStand' },
+  { id: 'urdWeave', name: "Urd's Weave", slot: 'armor', classes: ALL, tier: 99, price: 0, bonus: { def: 8, res: 12 }, wyrd: 'mending' },
+  { id: 'skuldShroud', name: "Skuld's Shroud", slot: 'armor', classes: ALL, tier: 99, price: 0, bonus: { def: 11, res: 11, spd: 2 }, wyrd: 'steadfast' },
   // Tier 0 — available from the start
   { id: 'copperEdge', name: 'Copper Edge', slot: 'weapon', classes: BLADES, tier: 0, price: 80, bonus: { atk: 5 } },
   { id: 'ashwoodBow', name: 'Ashwood Bow', slot: 'weapon', classes: ['strider'], tier: 0, price: 80, bonus: { atk: 5 } },

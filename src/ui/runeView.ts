@@ -58,8 +58,8 @@ export class RuneMarks {
       this.host.corridor.marks = null;
       return;
     }
-    if (g.state.floor === this.floor) return;
-    this.floor = g.state.floor;
+    if (g.runeFloor === this.floor) return;
+    this.floor = g.runeFloor;
     this.marks = EMPTY;
     this.host.corridor.marks = null;
     this.lastCell = g.state.y * g.map.width + g.state.x;
@@ -212,7 +212,7 @@ export class RuneMarks {
   private async doCarve(stone: { what: RuneWhat; dir: ReturnType<typeof runeDir>; advice: RuneAdvice | null }, back: () => void): Promise<void> {
     const g = this.game;
     const descent = g.state.descent ?? '';
-    const error = await online.carveStone({ floor: g.state.floor, x: g.state.x, y: g.state.y, ...stone, descent });
+    const error = await online.carveStone({ floor: g.runeFloor, x: g.state.x, y: g.state.y, ...stone, descent });
     if (error) return this.dialog('Runestones', [el('p', { text: error })], [{ label: 'Back', onSelect: back }], back);
     g.state.carvedOn = descent;
     count(g, 'stonesCarved');
@@ -238,7 +238,7 @@ function fellTo(enemy: string): string {
 /** A whole party fell here: leave a shade for others (only when signed in; quietly does nothing otherwise). */
 export function reportShade(game: Game, enemy: string): void {
   if (!online.mayBeSignedIn || !/^[A-Za-z]{1,40}$/.test(enemy)) return;
-  void online.reportShade(game.state.floor, game.state.x, game.state.y, enemy).catch(() => {});
+  void online.reportShade(game.runeFloor, game.state.x, game.state.y, enemy).catch(() => {});
 }
 
 /** In town: heeds received since last time, and their gold. */

@@ -7,6 +7,7 @@
  */
 import { FLOORS } from './data/floors';
 import { isPassable, parseFloor, type FloorMap } from './dungeon';
+import { wyrdLayoutForCode } from './wyrd';
 import type { Dir } from './types';
 
 export const RUNE_WHAT = {
@@ -106,11 +107,19 @@ function mapOf(floor: number): FloorMap {
   return map;
 }
 
+/** The map of a floor number: a floor of the Rootdeep, or one of the Wyrdweave's (as woven on the day it stands for). */
+function mapFor(floor: number, now: number): FloorMap | null {
+  if (!Number.isInteger(floor) || floor < 0) return null;
+  if (floor < FLOORS.length) return mapOf(floor);
+  const rows = wyrdLayoutForCode(floor, now);
+  return rows ? parseFloor({ name: '', rows, startDir: 1, encounterSteps: 1, encounters: [], chests: [], prowlers: [], palette: FLOORS[0].palette }) : null;
+}
+
 /** Whether a stone can stand on this square: an existing floor, a square one can walk on. */
-export function canHoldStone(floor: number, x: number, y: number): boolean {
-  if (!Number.isInteger(floor) || floor < 0 || floor >= FLOORS.length) return false;
+export function canHoldStone(floor: number, x: number, y: number, now = Date.now()): boolean {
   if (!Number.isInteger(x) || !Number.isInteger(y)) return false;
-  const map = mapOf(floor);
+  const map = mapFor(floor, now);
+  if (!map) return false;
   return x >= 0 && y >= 0 && x < map.width && y < map.height && isPassable(map, x, y);
 }
 

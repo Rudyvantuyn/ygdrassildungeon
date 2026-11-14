@@ -214,6 +214,16 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'wyrdweave',
+    title: 'The Wyrdweave',
+    speaker: 'ylva',
+    pages: [
+      'At the Well of Urd the Norns weave three floors a day, the same for every Wayfinder. Each floor has a rule of its own: no map, short light, no healing outside of fights.',
+      'Reach the way down of a floor and you may take your Wyrd Threads home, or go deeper. Fall, and half of them slip away. One try a day, and fights there pay half.',
+      'Threads cannot be sold. Hilde weaves them into gear with a gift, but slowly: the first piece takes thirty threads, and each one after more.',
+    ],
+  },
+  {
     id: 'choice',
     title: 'Choices',
     speaker: 'sigrid',

@@ -14,6 +14,7 @@ import { STORY } from './data/story';
 import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
 import { Rng } from './rng';
 import type { RavenRun } from './ravens';
+import { WYRD_REWARD_SCALE, wyrdChapter, wyrdFloorCode, wyrdFloors } from './wyrd';
 import { count, setCount, type DeedCounter, type EarnedDeed } from './deeds';
 import type { Dir, ItemId, Loot, Member } from './types';
 
@@ -106,6 +107,8 @@ export interface GameState {
   counters?: Partial<Record<DeedCounter, number>>;
   /** Where the party last walked into a wall (for a deed). */
   lastBump?: string;
+  /** The Wyrdweave: the day of the last try, threads held, pieces of Wyrd gear woven, most floors cleared in a day. */
+  wyrd?: { lastDay: number; threads?: number; woven?: string[]; best?: number };
 }
 
 export type StepEvent =
@@ -242,6 +245,28 @@ export class Game {
     s.story = STORY.map((scene) => scene.id);
     s.gold = 0;
     game.enterFloor(0);
+    return game;
+  }
+
+  /**
+   * Today's Wyrdweave for `home`: its three floors, with the home party (a copy), its bag, its map settings and tips.
+   * What happens here goes back home with bringWyrdHome (src/core/wyrd.ts).
+   */
+  static wyrdRun(home: Game, day: number, seed: number): Game {
+    const game = Game.fresh(seed, wyrdFloors(day, wyrdChapter(home)));
+    const s = game.state;
+    s.party = JSON.parse(JSON.stringify(home.state.party)) as Member[];
+    s.inventory = { ...home.state.inventory };
+    s.chartMode = home.state.chartMode;
+    s.tips = [...(home.state.tips ?? [])];
+    s.tipsOff = home.state.tipsOff;
+    s.story = STORY.map((scene) => scene.id);
+    s.gold = 0;
+    // No Oath Tokens here: the Wyrdweave comes back every day.
+    s.expedition = true;
+    game.rewardScale = WYRD_REWARD_SCALE;
+    game.runeFloors = [0, 1, 2].map((k) => wyrdFloorCode(day, k));
+    game.enterFloor(0, true);
     return game;
   }
 
@@ -476,8 +501,18 @@ export class Game {
     return true;
   }
 
+  /** Share of the usual XP and gold (lower in the Wyrdweave). Not saved: a run is never saved. */
+  rewardScale = 1;
+  /** For a Wyrdweave run: the floor numbers its runestones and shades are kept under. */
+  runeFloors: number[] | null = null;
+
+  /** The floor number runestones and shades of this floor are kept under. */
+  get runeFloor(): number {
+    return this.runeFloors?.[this.state.floor] ?? this.state.floor;
+  }
+
   startCombat(enemies: string[]): Combat {
-    return new Combat(this.state.party, enemies, this.state.inventory, this.rng);
+    return new Combat(this.state.party, enemies, this.state.inventory, this.rng, { rewardScale: this.rewardScale });
   }
 
   /** Index of the active prowler standing on (x, y), or -1. */
@@ -493,7 +528,7 @@ export class Game {
   startProwlerCombat(index: number): Combat {
     this.state.fighting = index;
     const paid = this.progress.prowlerTokens?.includes(index) ?? false;
-    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true, oathToken: !paid && !this.state.expedition });
+    return new Combat(this.state.party, this.floorDef.prowlers[index].enemies, this.state.inventory, this.rng, { prowler: true, oathToken: !paid && !this.state.expedition, rewardScale: this.rewardScale });
   }
 
   startBossCombat(): Combat {

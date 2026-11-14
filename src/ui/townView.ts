@@ -36,6 +36,8 @@ import { RavensView, ravenBadge, ravenNow } from './ravensView';
 import { lookPicker } from './lookPicker';
 import { healWound, healerCost, isWounded, unavailable } from '../core/ravens';
 import { classUnlocked } from '../core/deeds';
+import { WYRD_GEAR, nextWeaveCost, wearWyrd, weave, wyrdDay, wyrdDayNumber, wyrdDoneToday, wyrdOpen } from '../core/wyrd';
+import { clockNow } from '../net/clock';
 
 export interface TownHost {
   game: Game;
@@ -54,6 +56,8 @@ export interface TownHost {
   showFeedback(back: () => void): void;
   showHelp(back: () => void): void;
   openHornstone(): void;
+  /** Today's Wyrdweave (the Well of Urd). */
+  startWyrd(): void;
   confirm(title: string, text: string, yes: () => void, back?: () => void): void;
   /** Shows tips not seen yet, then continues. */
   tips(ids: string[], then: () => void): void;
@@ -528,11 +532,71 @@ export class TownView {
         { label: 'Items', onSelect: () => this.shopItems() },
         { label: 'Equipment', onSelect: () => this.shopEquipment() },
         { label: 'Sell materials', detail: `${Object.values(this.game.state.materials).reduce((a, b) => a + b, 0)} carried`, onSelect: () => this.shopSell() },
+        ...(wyrdOpen(this.game) || this.game.state.wyrd?.threads
+          ? [{ label: 'Wyrd gear', detail: `${this.game.state.wyrd?.threads ?? 0} threads`, description: 'Hilde weaves Wyrd Threads into gear with a gift of its own. Put a woven piece on anyone, as often as you like.', onSelect: () => this.wyrdGear() }]
+          : []),
         { label: 'Leave', onSelect: back },
       ],
       { onCancel: back, startIndex: start },
     );
     this.dialog("Hilde's Supplies", [npcSays('hilde', '"Take a look. Everything here was made to survive the Rootdeep."')], menu);
+  }
+
+  // ── Wyrd gear ──────────────────────────────────────────────────────────────
+
+  private wyrdGear(start = 0): void {
+    const back = () => this.shop(3);
+    const w = this.game.state.wyrd;
+    const cost = nextWeaveCost(this.game);
+    const gifts: Record<string, string> = {
+      lastStand: 'Once in every fight, a killing blow leaves the wearer standing with 1 HP.',
+      mending: 'Heals the wearer a little at the end of every round.',
+      steadfast: 'Poison, sleep and paralysis do not take on the wearer.',
+    };
+    const items: MenuItem[] = WYRD_GEAR.map((id, i) => {
+      const e = EQUIPMENT[id];
+      const woven = w?.woven?.includes(id) ?? false;
+      const wearer = [...this.game.state.party, ...this.game.state.reserve].find((m) => m.armor === id);
+      return {
+        label: e.name,
+        detail: woven ? (wearer ? `worn by ${wearer.name}` : 'woven') : cost === null ? '' : `${cost} threads`,
+        description: `${gifts[e.wyrd!]} Armour for every class (${bonusText(e)}).${woven ? ' Select to give it to someone.' : ''}`,
+        disabled: !woven && (cost === null || (w?.threads ?? 0) < cost),
+        onSelect: () => {
+          if (woven) return this.wearWyrdGear(id, i);
+          const problem = weave(this.game, id);
+          if (problem) return this.host.toast(problem);
+          audio.play('coin');
+          this.host.save();
+          this.host.toast(`Hilde weaves the ${e.name}.`);
+          this.wyrdGear(i);
+        },
+      };
+    });
+    items.push({ label: 'Back', onSelect: back });
+    const note = `You hold ${w?.threads ?? 0} Wyrd Thread${(w?.threads ?? 0) === 1 ? '' : 's'}.${cost === null ? '' : ` The next piece takes ${cost}.`}`;
+    this.dialog('Wyrd gear', [npcSays('hilde', '"Thread the Norns spun. I can weave it, but it will not be hurried, and neither will they."'), el('p', { className: 'gold-line', text: note })], new ListMenu(items, { onCancel: back, startIndex: start }), true);
+  }
+
+  private wearWyrdGear(id: string, listIndex: number): void {
+    const back = () => this.wyrdGear(listIndex);
+    const e = EQUIPMENT[id];
+    const items: MenuItem[] = this.game.state.party.map((m, i) => ({
+      label: m.name,
+      detail: m.armor === id ? 'wearing it' : CLASSES[m.classId].name,
+      description: m.armor && m.armor !== id ? `Now wears ${EQUIPMENT[m.armor]?.name ?? 'armour'}; that is traded in for half price.` : `Put the ${e.name} on ${m.name}.`,
+      disabled: m.armor === id,
+      onSelect: () => {
+        wearWyrd(this.game, id, i);
+        this.host.save();
+        this.host.updateHud();
+        this.host.toast(`${m.name} wears the ${e.name}.`);
+        this.wyrdGear(listIndex);
+      },
+    }));
+    items.push({ label: 'Take it off', onSelect: () => { wearWyrd(this.game, id, null); this.host.save(); this.wyrdGear(listIndex); } });
+    items.push({ label: 'Back', onSelect: back });
+    this.dialog(e.name, [el('p', { text: bonusText(e) })], new ListMenu(items, { onCancel: back }), true);
   }
 
   private shopItems(start = 0): void {
@@ -667,6 +731,19 @@ export class TownView {
         this.host.toast(i === FLOORS.length - 1 ? `${f.name}: the deepest floor.` : `${f.name}: find the stairs down.`);
       },
     }));
+    if (wyrdOpen(this.game)) {
+      const today = wyrdDay(wyrdDayNumber(clockNow()));
+      const done = wyrdDoneToday(this.game, clockNow());
+      items.push({
+        label: `The Wyrdweave: ${today.name}`,
+        detail: done ? 'again at midnight' : 'today',
+        description: done
+          ? 'You have been through today\'s Wyrdweave. The Norns weave new floors at midnight (UTC).'
+          : `Three floors at the Well of Urd, the same for every Wayfinder today. I: ${today.rules[0].name}. II: ${today.rules[1].name}. III: ${today.rules[2].name}. One try a day.`,
+        disabled: done,
+        onSelect: () => this.host.tips(['wyrdweave'], () => this.host.startWyrd()),
+      });
+    }
     items.push({ label: 'Not yet', onSelect: back });
     const menu = new ListMenu(items, { onCancel: back, startIndex: starts.length - 1 });
     this.dialog('The Rootdeep', [el('p', { text: 'Every descent starts at the beginning of a chapter. Where will you begin?' })], menu, true);

@@ -19,6 +19,8 @@ import { syncClock } from '../net/clock';
 import { RuneMarks, claimRenown, reportShade } from './runeView';
 import { checkDeeds, count, mergeDeeds } from '../core/deeds';
 import { DeedBanner, bookOfDeeds } from './deedsView';
+import { WYRD_REWARDS, bringWyrdHome, markWyrdStarted, threadsFor, wyrdDay, wyrdDayNumber, wyrdViewDepth, type WyrdResult } from '../core/wyrd';
+import { clockNow } from '../net/clock';
 import { drawTownScene, preloadTownScenes } from '../render/town';
 import { preload, sprite } from '../render/sprites';
 import { audio } from '../audio/audio';
@@ -134,6 +136,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private trial: ChapterDesign | null = null;
   private readonly runes: RuneMarks;
   private deedBanner!: DeedBanner;
+  /** A Wyrdweave run in progress: its day and how many floors are cleared. */
+  private wyrd: { day: number; cleared: number } | null = null;
+  /** The Wyrdweave's Bloodless rule: no healing outside of fights. */
+  private noFieldHealing = false;
   private story: { lines: StoryLine[]; index: number; shown: number; then: () => void; box: HTMLElement } | null = null;
   private fx: ViewFx | null = null;
   /** The view just before a step or turn, for the glide into the new view. */
@@ -1275,9 +1281,98 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.updateActPrompt();
   }
 
+  // ── The Wyrdweave ──────────────────────────────────────────────────────────
+
+  /** Today's Wyrdweave, with the home party in a run of its own. The try is spent as soon as it starts. */
+  startWyrd(): void {
+    if (this.wyrd || this.coop || this.trial) return;
+    const home = this.game;
+    const now = clockNow();
+    markWyrdStarted(home, now);
+    this.save();
+    const day = wyrdDayNumber(now);
+    this.home = home;
+    this.wyrd = { day, cleared: 0 };
+    this.game = Game.wyrdRun(home, day, randomSeed());
+    this.closeOverlay();
+    this.enterExplore();
+    this.applyWyrdFloor();
+  }
+
+  /** The rule of the floor the run is on: map drawing, how far the light reaches, healing. Told on arrival. */
+  private applyWyrdFloor(): void {
+    if (!this.wyrd || !this.home) return;
+    const k = this.game.state.floor;
+    const rule = wyrdDay(this.wyrd.day).rules[k];
+    this.game.state.chartMode = rule.id === 'namelessDark' ? 'manual' : this.home.state.chartMode;
+    this.corridor.viewDepth = wyrdViewDepth(rule) ?? null;
+    this.noFieldHealing = rule.id === 'bloodless';
+    this.updateHud();
+    this.notice(`${this.game.floorDef.name}: ${rule.name}`, `${rule.text} Reach the way down for ${WYRD_REWARDS[k]} Wyrd Thread${WYRD_REWARDS[k] > 1 ? 's' : ''}.`);
+  }
+
+  /** The way down of a Wyrdweave floor: take the threads home, or go deeper. */
+  private wyrdStairs(): void {
+    const run = this.wyrd!;
+    const k = this.game.state.floor;
+    run.cleared = Math.max(run.cleared, k + 1);
+    if (k >= 2) return this.endWyrd(false);
+    const have = threadsFor(run.cleared, false);
+    const next = wyrdDay(run.day).rules[k + 1];
+    const menu = new ListMenu(
+      [
+        { label: `Take ${have} thread${have > 1 ? 's' : ''} home`, description: 'Back to Lindholm with what you have. Today\'s try ends here.', onSelect: () => this.endWyrd(false) },
+        {
+          label: 'Go deeper',
+          description: `Floor ${['I', 'II', 'III'][k + 1]}: ${next.name}. ${next.text} Fall, and lose half your threads.`,
+          onSelect: () => {
+            this.closeOverlay();
+            audio.play('stairs');
+            this.game.descend();
+            this.enterExplore();
+            this.applyWyrdFloor();
+          },
+        },
+      ],
+      { onCancel: () => this.resumeExplore(), backRow: false },
+    );
+    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'The way down' }), el('p', { text: `You have ${have} Wyrd Thread${have > 1 ? 's' : ''} on this run.` }), menu.el]), menu);
+  }
+
+  /** The run is over: home with what was won (half the threads after a fall). */
+  private endWyrd(fell: boolean): void {
+    const run = this.wyrd;
+    const home = this.home;
+    if (!run || !home) return;
+    const result: WyrdResult = bringWyrdHome(home, this.game, run.cleared, fell);
+    this.wyrd = null;
+    this.home = null;
+    this.game = home;
+    this.corridor.viewDepth = null;
+    this.noFieldHealing = false;
+    this.combatView = null;
+    this.game.returnToTown();
+    this.save();
+    this.enterTown();
+    const held = this.game.state.wyrd?.threads ?? 0;
+    const lines = [
+      fell ? 'Your party fell in the Wyrdweave and woke at the Well of Urd, half the threads slipping through their fingers.' : 'The Norns let you go.',
+      `Floors cleared: ${result.cleared} of 3. Wyrd Threads brought home: ${result.threads} (you now hold ${held}).`,
+      result.gold ? `Gold found: ${result.gold} G.` : '',
+      'The Norns weave again at midnight.',
+    ].filter(Boolean);
+    const done = () => {
+      this.closeOverlay();
+      this.mode = 'town';
+      this.town.show();
+    };
+    const menu = new ListMenu([{ label: 'Continue', onSelect: done }], { onCancel: done });
+    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Back from the Wyrdweave' }), ...lines.map((t) => el('p', { text: t })), menu.el]), menu);
+  }
+
   /** Deeds earned just now: a medal slides in, and they are kept with the account when signed in. */
   private checkDeeds(): void {
-    if (!this.game || this.game === this.titleGame || this.trial || this.coop || !this.deedBanner) return;
+    if (!this.game || this.game === this.titleGame || this.trial || this.coop || this.wyrd || !this.deedBanner) return;
     const fresh = checkDeeds(this.game, Date.now());
     if (!fresh.length) return;
     this.deedBanner.add(fresh);
@@ -1373,6 +1468,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         this.tips(['gate'], () => this.resumeExplore());
         return;
       case 'stairs':
+        if (this.wyrd) return this.wyrdStairs();
         if (this.trial && this.game.isLastFloor) return this.confirm('Stairs down', 'Your chapter ends here. Head back to the drafting table?', () => this.endTrial());
         if (this.game.isLastFloor) return;
         this.confirm('Stairs down', `Descend to ${this.game.floors[this.game.state.floor + 1].name}?`, () => {
@@ -1384,6 +1480,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         });
         return;
       case 'upstairs': {
+        if (this.wyrd) {
+          const threads = threadsFor(this.wyrd.cleared, false);
+          return this.confirm('The way out', `Leave the Wyrdweave${threads ? ` with ${threads} Wyrd Thread${threads > 1 ? 's' : ''}` : ''}? Today's try is spent either way.`, () => this.endWyrd(false));
+        }
         if (this.trial && this.game.state.floor === 0) return this.confirm('Stairs up', 'Stop the test and head back to the drafting table?', () => this.endTrial());
         const leaving = this.game.state.floor === 0;
         const text = leaving ? 'Leave the Rootdeep and return to Lindholm?' : `Climb up to ${this.game.floors[this.game.state.floor - 1].name}?`;
@@ -1500,6 +1600,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       audio.play('defeat');
       if (this.coop) return this.coop.combatOver();
       if (!this.trial) reportShade(this.game, combat.enemies[0].def.id);
+      if (this.wyrd) return this.endWyrd(true);
       return this.showGameOver();
     }
     if (combat.outcome === 'fled') {
@@ -1644,6 +1745,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           onSelect: () =>
             this.confirm('Homing Feather', 'Follow the Homing Feather back to Lindholm?', () => {
               audio.play('spring');
+              if (this.wyrd) {
+                this.game.state.inventory.homingFeather -= 1;
+                return this.endWyrd(false);
+              }
               this.game.useFeather();
               this.save();
               this.enterTown();
@@ -1770,6 +1875,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   private packSkills(): void {
+    if (this.noFieldHealing) return this.toast('Bloodless: no healing outside of fights on this floor.');
     const party = this.game.state.party;
     const items: MenuItem[] = [];
     party.forEach((m) => {
@@ -1803,6 +1909,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   private packItems(): void {
+    if (this.noFieldHealing) return this.toast('Bloodless: no healing outside of fights on this floor.');
     const party = this.game.state.party;
     const inv = this.game.state.inventory;
     // Ailments only exist in a fight, so cures are left out here; feathers and tokens have their own uses.

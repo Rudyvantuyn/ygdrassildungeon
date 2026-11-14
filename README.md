@@ -31,6 +31,17 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 
 ## Wat zit erin
 
+### De Wyrdweave (dagelijks)
+
+- Na de Blighted Elder opent bij de Rootdeep **de Wyrdweave**: elke dag (middernacht UTC) weven de Norns drie
+  verdiepingen bij de **Well of Urd**, voor iedereen dezelfde, met je eigen groep. Eén poging per dag.
+- Elke verdieping heeft een regel, steeds zwaarder: o.a. Nameless Dark (kaart alleen met de hand), Bloodless (niet
+  genezen buiten gevechten), Echoes (dubbele groepen), Fading Light (twee vakjes zicht), The Hunt (een prowler).
+- Na verdieping I en II: met je **Wyrd Threads** naar huis, of dieper. Wie valt verliest de helft. Max. 4 per dag;
+  gevechten geven de helft aan XP en goud. Runestones en schimmen van andere spelers staan er ook.
+- Hilde weeft threads tot **Wyrd gear** (30, dan 50, dan 80 threads): Norn-Spun Mantle, Urd's Weave, Skuld's Shroud,
+  elk met een eigen gave. Threads zijn niet te verkopen; geweven stukken wissel je gratis tussen avonturiers.
+
 ### Hoofdstukken tekenen met trappen en shortcuts (mijlpaal 15)
 
 - De **Drafting Table** (`?maker`) tekent nu hele hoofdstukken: tot vijf verdiepingen als tabbladen.
@@ -272,6 +283,7 @@ Gebruik nooit namen of termen uit Etrian Odyssey of andere games (zie `CLAUDE.md
 | Raven Runs | **Raven Runs** (avonturiers uit de reserve gaan een paar echte uren op verkenning; Huginn en Muninn brengen het nieuws), Short / Long / Overnight, scouts, **Wounded** (12 uur rust, of de healer in The Sleeping Stag), routed |
 | Runestones | **Runestones** (korte boodschappen uit vaste woorden die spelers op een vakje kerven; één per afdaling, max. 20 per speler, 12 per verdieping), **Heed** / **False** (oordeel van lezers), **Renown** (Heeds voor de maker, 25 G per Heed, max. 100 G per dag), **shade** (schim waar een team viel) |
 | Book of Deeds | **Book of Deeds** (verborgen prestaties met medailles; je ziet alleen wat je behaald hebt), deeds o.a. First Steps, Cartographer, Wall to Wall, Stubborn, By a Hair, Light Pack, Deathless, Discretion, Wrong Tool, Made to Order, Hilde's Favourite, Every Banner, Old Guard, Word from Below, Stone Carver, Kind Stranger, A Road Chosen |
+| Wyrdweave | **Wyrdweave** (dagelijkse drie verdiepingen met regels), **Well of Urd**, **Wyrd Threads**, "The ... Thread" (naam van de dag), regels Nameless Dark, Restless, The Long Way, Empty Hands, Bloodless, Echoes, Dim Roots, Thin Air, Deep Hunger, The Hunt, Fading Light; **Wyrd gear**: Norn-Spun Mantle (last stand), Urd's Weave (mending), Skuld's Shroud (steadfast) |
 | Samen spelen | **Hornstone** (ontmoetingssteen), expeditie, Sound the Horn, Answer a Horn, gathering (lobby), share (je deel van de buit) |
 | Menu's | Menu met vier tabs: Party, Bag, Journal, Options (overal hetzelfde); Map (kaarteditor), Notice Board (quests), **Bestiary** (monsters die je tegenkwam, zwaktes ontdek je door ze te proberen), **The Wayfinders' Stone** (erebord voor spelers die meehielpen, naast het Notice Board), Danger-bol |
 

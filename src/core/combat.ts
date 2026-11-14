@@ -1,6 +1,7 @@
 import { CLASSES } from './data/classes';
 import { ENEMIES, type EnemyDef, type EnemySkill } from './data/enemies';
 import { ITEMS } from './data/items';
+import { EQUIPMENT, type EquipDef } from './data/equipment';
 import { skillFor } from './skilltree';
 import { grantXp, healAmount, healMember, isAlive, memberStats, restoreSp, revive } from './party';
 import type { Rng } from './rng';
@@ -102,6 +103,8 @@ export interface CombatOptions {
   prowler?: boolean;
   /** Whether winning leaves an Oath Token (a guardian, or a prowler the first time it falls). */
   oathToken?: boolean;
+  /** Share of the usual XP and gold (the Wyrdweave pays less: it is about the threads). */
+  rewardScale?: number;
 }
 
 const WEAK_MULT = 1.5;
@@ -137,6 +140,9 @@ export class Combat {
   /** Items used in this fight, and whether anyone fell at some point (for deeds). */
   itemsUsed = 0;
   fellDuring = false;
+  private readonly rewardScale: number;
+  /** Party members whose Norn-Spun Mantle already saved them this fight. */
+  private readonly stoodLast = new Set<number>();
 
   constructor(
     readonly party: Member[],
@@ -148,6 +154,7 @@ export class Combat {
     this.boss = !!opts.boss;
     this.prowler = !!opts.prowler;
     this.oathToken = opts.oathToken ?? (this.boss || this.prowler);
+    this.rewardScale = opts.rewardScale ?? 1;
     this.enemies = enemyIds.map((id) => {
       const def = ENEMIES[id];
       if (!def) throw new Error(`Unknown enemy "${id}"`);
@@ -245,6 +252,7 @@ export class Combat {
 
     if (!this.outcome) {
       this.tickAilments(events);
+      this.mend(events);
       this.checkEnd(events);
     }
 
@@ -523,6 +531,13 @@ export class Combat {
 
     const { damage, crit } = this.roll(base, action.power, action.element, [], [], action.kind === 'phys');
     m.hp = Math.max(0, m.hp - damage);
+    if (m.hp === 0 && this.gift(memberIndex) === 'lastStand' && !this.stoodLast.has(memberIndex)) {
+      this.stoodLast.add(memberIndex);
+      m.hp = 1;
+      events.push({ type: 'damage', side: 'party', target: memberIndex, amount: damage, hp: m.hp, crit, weak: false, resist: false, element: action.element });
+      events.push({ type: 'info', text: `The Norn-Spun Mantle holds: ${m.name} stands, barely.` });
+      return;
+    }
     events.push({ type: 'damage', side: 'party', target: memberIndex, amount: damage, hp: m.hp, crit, weak: false, resist: false, element: action.element });
     if (m.hp === 0) {
       this.fellDuring = true;
@@ -532,6 +547,27 @@ export class Combat {
     }
     if (status.ailment === 'sleep') this.clearAilment('party', memberIndex, events, `${m.name} wakes up!`);
     if (action.inflict) this.tryInflict('party', memberIndex, action.inflict, events);
+  }
+
+  // ── Wyrd gear ──────────────────────────────────────────────────────────────
+
+  /** The gift of the Wyrd gear a party member wears, if any. */
+  private gift(index: number): EquipDef['wyrd'] {
+    const armor = this.party[index]?.armor;
+    return armor ? EQUIPMENT[armor]?.wyrd : undefined;
+  }
+
+  /** Urd's Weave: a little healing at the end of every round. */
+  private mend(events: CombatEvent[]): void {
+    for (const i of this.livingParty()) {
+      if (this.gift(i) !== 'mending') continue;
+      const m = this.party[i];
+      const max = memberStats(m).hp;
+      if (m.hp >= max) continue;
+      const amount = Math.min(max - m.hp, Math.max(1, Math.round(max * 0.05)));
+      m.hp += amount;
+      events.push({ type: 'heal', target: i, amount, hp: m.hp });
+    }
   }
 
   // ── Ailments ───────────────────────────────────────────────────────────────
@@ -555,6 +591,7 @@ export class Combat {
     } else if (side === 'enemy' && this.prowler) {
       chance *= 0.6;
     } else if (side === 'party') {
+      if (this.gift(index) === 'steadfast') return false;
       chance *= 1 - Math.min(0.5, memberStats(this.party[index]).res / 120);
     }
     if (!this.rng.chance(chance)) return false;
@@ -665,8 +702,8 @@ export class Combat {
   }
 
   private grantRewards(): Rewards {
-    const xp = Math.round(this.enemies.reduce((sum, e) => sum + e.def.xp, 0) * XP_RATE);
-    const gold = Math.round(this.enemies.reduce((sum, e) => sum + e.def.gold, 0) * GOLD_RATE);
+    const xp = Math.round(this.enemies.reduce((sum, e) => sum + e.def.xp, 0) * XP_RATE * this.rewardScale);
+    const gold = Math.round(this.enemies.reduce((sum, e) => sum + e.def.gold, 0) * GOLD_RATE * this.rewardScale);
     const drops: ItemId[] = [];
     for (const e of this.enemies) {
       if (e.def.drop && this.rng.chance(e.def.drop.chance)) drops.push(e.def.drop.item);

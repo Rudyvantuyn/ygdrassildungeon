@@ -95,6 +95,8 @@ export class CorridorRenderer {
   marks: { stones: Set<number>; shades: Set<number> } | null = null;
   /** Shows one kind of decor wherever decor can stand (for checking how it looks), or null for the real choice. */
   previewDecor: DecorKind | null = null;
+  /** How many squares ahead the party sees; null for the usual (fewer under the Wyrdweave's darkness rules). */
+  viewDepth: number | null = null;
 
   /**
    * A texture as this floor shows it (its colour grade) and as the player wants to see it: as painted, or calmed
@@ -190,10 +192,26 @@ export class CorridorRenderer {
     ctx.fillRect(0, this.cy, w, h - this.cy);
     }
 
+    // Under a darkness rule the light ends a few squares ahead: the floor and ceiling beyond go dark (walls nearer
+    // than that are drawn over it below).
+    if (this.viewDepth !== null) {
+      const z = this.viewDepth + 1 + EYE;
+      const top = this.cy - (0.5 * this.sy) / z - 2;
+      const bottom = this.cy + (0.5 * this.sy) / z + 2;
+      const band = ctx.createLinearGradient(0, top - 30, 0, bottom + 30);
+      band.addColorStop(0, withAlpha(pal.fog, 0));
+      band.addColorStop(0.2, withAlpha(pal.fog, 1));
+      band.addColorStop(0.8, withAlpha(pal.fog, 1));
+      band.addColorStop(1, withAlpha(pal.fog, 0));
+      ctx.fillStyle = band;
+      ctx.fillRect(0, top - 30, w, bottom - top + 60);
+    }
+
     // Per screen column, the nearest depth with a wall face across it: walls hidden behind it are skipped.
     const cov = (this.cover ??= new Uint8Array(w));
     cov.fill(255);
-    for (let d = 1; d <= MAX_DEPTH; d++) {
+    const depth = this.viewDepth ?? MAX_DEPTH;
+    for (let d = 1; d <= depth; d++) {
       const lat = Math.ceil(((d + 1 + EYE) * this.w) / (2 * this.sx) + 0.5);
       for (let s = -lat; s <= lat; s++) {
         const c = relCell(px, py, dir, d, s);
@@ -203,7 +221,7 @@ export class CorridorRenderer {
         for (let i = Math.max(0, Math.ceil(x0)); i < Math.min(w, Math.floor(x1)); i++) if (cov[i] > d) cov[i] = d;
       }
     }
-    for (let d = MAX_DEPTH; d >= 0; d--) {
+    for (let d = depth; d >= 0; d--) {
       // Enough side cells to fill the view at this depth.
       const lateral = Math.ceil(((d + 1 + EYE) * this.w) / (2 * this.sx) + 0.5);
       const order: number[] = [];

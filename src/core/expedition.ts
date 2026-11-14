@@ -145,7 +145,7 @@ export function validMember(raw: unknown): Member | null {
     if (!def || def.slot !== slot || !def.classes.includes(classId)) return false;
     // Gear far beyond what an adventurer of this level could have bought is not accepted (a cheap cheat check;
     // saves are kept on the player's device, so this cannot be exact).
-    if (def.tier > maxGearTier(level)) return false;
+    if (!def.wyrd && def.tier > maxGearTier(level)) return false;
     return id;
   };
   const weapon = gear(m.weapon, 'weapon');

@@ -66,6 +66,11 @@ Add new names there and keep the glossary in sync.
   ends: every chapter resolves something and opens a deeper secret. Choices lean toward one of three roads (Asgard,
   the realms, Midgard's own third way); later chapters must react to them. Keep the canon in `docs/verhaal.md` in sync.
 
+- **The Wyrdweave** (`src/core/wyrd.ts`): a daily run of three floors, the same for everyone (seeded by the UTC day),
+  each with a rule, opening after the Blighted Elder. One try a day, own party, half XP and gold. Rewards stay scarce:
+  at most 4 Wyrd Threads a day (half after a fall), gear costs 30/50/80 threads, threads cannot be sold. Don't make
+  the gear cheaper or the threads more plentiful without the owner.
+
 - **Multiplayer** means going into the dungeon together: each player brings one of their own adventurers into a
   party of up to four (an "expedition"). No shared town. Trading may come later (low priority). Leaderboards and
   contests are "events" and only come once the game is finished.
