@@ -20,6 +20,8 @@ export const CHANGES: ChangeDay[] = [
       'New: a deed for the first time the roots carry you home.',
       'Fixed: signing in with Google sometimes only worked the second time.',
       'New: every creature has a few lines of its own in the bestiary, in the game and on the site.',
+      'New: the byname an adventurer bears shows under their name in the party bar, also for the others on an expedition.',
+      'New: seven more bynames for the long road, and five more deeds, among them one per chapter for finding every weakness.',
       'Site: click a creature you have met in the bestiary to read about it, with the weaknesses you found and, once defeated, its numbers.',
       'Changed: monsters, prowlers and guardians are stronger, to match a party of five. Raven Run scouts meet them as before.',
     ],

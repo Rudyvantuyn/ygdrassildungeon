@@ -63,6 +63,13 @@ const RAW: Byname[] = [
   { id: 'theSeasoned', name: 'the Seasoned', text: 'Fought a thousand fights.', earned: (t) => t.battles >= 1000 },
   { id: 'prowlerBane', name: 'Prowler-Bane', text: 'Struck the last blow on three prowlers.', earned: (t) => t.prowlers >= 3 },
   { id: 'ravenFriend', name: 'Raven-Friend', text: 'Went scouting with the ravens twenty times.', earned: (t) => t.runs >= 20 },
+  { id: 'farWanderer', name: 'Far-Wanderer', text: 'Went scouting a hundred times. Knows roots nobody else has walked.', earned: (t) => t.runs >= 100 },
+  { id: 'thunderHand', name: 'Thunder-Hand', text: 'Landed two hundred crushing blows.', earned: (t) => t.crits >= 200 },
+  { id: 'helsBane', name: "Hel's Bane", text: 'Brought sixty fallen friends back. Hel has stopped expecting them.', earned: (t) => t.revives >= 60 },
+  { id: 'graveCheater', name: 'Grave-Cheater', text: 'Won twenty-five fights on their last drops of blood.', earned: (t) => t.closeCalls >= 25 },
+  { id: 'theHunter', name: 'the Hunter', text: 'Struck the last blow on fifteen prowlers.', earned: (t) => t.prowlers >= 15 },
+  { id: 'mountainBack', name: 'Mountain-Back', text: 'Took two hundred thousand HP of blows, and is still standing.', earned: (t) => t.taken >= 200000 },
+  { id: 'rootOld', name: 'the Root-Old', text: 'Fought three thousand fights. Older in battle than some of the roots.', earned: (t) => t.battles >= 3000 },
 ];
 
 /** A byname for every guardian: "Bane of the Blighted Elder", for the one who struck it down. */

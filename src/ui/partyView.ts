@@ -1,5 +1,6 @@
 import { CLASSES } from '../core/data/classes';
 import { MAX_LEVEL, memberStats, xpForLevel } from '../core/party';
+import { BYNAME_BY_ID, fullName } from '../core/sagas';
 import { unspentPoints } from '../core/skilltree';
 import type { Ailment, Member } from '../core/types';
 import { AILMENT_BADGE } from './combatView';
@@ -54,7 +55,7 @@ export class PartyView {
   }
 
   render(party: Member[], display: PartyDisplay = {}): void {
-    const lineup = party.map((m) => `${m.name}|${m.classId}|${m.row}|${m.look}`).join(',');
+    const lineup = party.map((m) => `${m.name}|${m.byname ?? ''}|${m.classId}|${m.row}|${m.look}`).join(',');
     if (lineup !== this.lineup) {
       this.lineup = lineup;
       this.build(party);
@@ -124,7 +125,12 @@ export class PartyView {
         <div class="bar hp"><i></i><span><b>HP</b><b class="v"></b></span></div>
         <div class="bar sp"><i></i><span><b>SP</b><b class="v"></b></span></div>
         <div class="xp-bar"><i></i></div>`;
-      root.querySelector('.member-name')!.textContent = m.name;
+      // The byname they bear, small under the name: on an expedition everyone sees who is the Wolf-Feeder.
+      const nameEl = root.querySelector('.member-name')!;
+      nameEl.textContent = m.name;
+      const byname = m.byname ? BYNAME_BY_ID[m.byname]?.name.replace(/^,\s*/, '') : undefined;
+      if (byname) nameEl.append(Object.assign(document.createElement('small'), { className: 'member-byname', textContent: byname }));
+      root.title = fullName(m);
       drawPortrait(root.querySelector<HTMLCanvasElement>('canvas.portrait')!.getContext('2d')!, 132, m.classId, m.name, def.color, m.look);
       this.container.appendChild(root);
       const hpBar = root.querySelector<HTMLElement>('.bar.hp')!;

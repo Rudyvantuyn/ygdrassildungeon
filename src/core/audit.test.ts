@@ -140,3 +140,15 @@ describe('the bestiary', () => {
     expect(Object.keys(BEAST_LORE).filter((id) => !ids.includes(id))).toEqual([]);
   });
 });
+
+describe('bestiary deeds', () => {
+  it('Every Soft Spot needs every element tried on every creature of the Greenwood Roots', async () => {
+    const { checkDeeds } = await import('./deeds');
+    const g = Game.newGame(9);
+    const chapterOne = bestiaryOrder().filter((b) => Math.min(...b.floors) <= 5);
+    for (const b of chapterOne) (g.state.bestiary ??= {})[b.def.id] = { seen: 1, defeated: 1, tried: ['phys', 'fire', 'frost'] };
+    expect(checkDeeds(g, 1).map((d) => d.id)).not.toContain('greenwoodWeak');
+    for (const b of chapterOne) g.state.bestiary![b.def.id].tried.push('storm');
+    expect(checkDeeds(g, 2).map((d) => d.id)).toContain('greenwoodWeak');
+  });
+});

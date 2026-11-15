@@ -324,6 +324,23 @@ button:active {
   text-shadow: 0 1px 0 #000, 0 0 10px rgba(240, 207, 106, 0.15);
 }
 
+/* The name takes the room left beside the row label, so a long byname is cut short rather than pushing it down. */
+.member-head .member-name {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.member-byname {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .member-class {
   color: var(--muted);
   font-style: italic;
@@ -2075,6 +2092,9 @@ body.phone .member-name {
   font-size: 15px;
 }
 body.phone .member-class {
+  display: none;
+}
+body.phone .member-byname {
   display: none;
 }
 body.phone .member-row {

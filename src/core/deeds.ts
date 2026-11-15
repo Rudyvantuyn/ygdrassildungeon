@@ -12,7 +12,7 @@ import { FLOORS } from './data/floors';
 import { FLOORS_PER_CHAPTER } from './data/chapters';
 import { isPassable, parseFloor, type FloorMap } from './dungeon';
 import type { Game } from './game';
-import { bestiaryOrder } from './bestiary';
+import { ELEMENTS, bestiaryOrder } from './bestiary';
 import type { ClassId } from './types';
 
 export type DeedKind = 'explore' | 'battle' | 'craft' | 'hall' | 'ravens' | 'together' | 'story' | 'odd' | 'secret';
@@ -148,6 +148,14 @@ function seenAllOfChapter(g: Game, ch: number): boolean {
     .every((b) => (g.state.bestiary?.[b.def.id]?.seen ?? 0) > 0);
 }
 
+/** Every element tried on every creature of a chapter: all their weaknesses (and strengths) found. */
+function triedAllOfChapter(g: Game, ch: number): boolean {
+  const first = ch * FLOORS_PER_CHAPTER + 1;
+  const last = first + FLOORS_PER_CHAPTER - 1;
+  const beasts = bestiaryOrder().filter((b) => Math.min(...b.floors) >= first && Math.min(...b.floors) <= last);
+  return beasts.length > 0 && beasts.every((b) => ELEMENTS.every((x) => g.state.bestiary?.[b.def.id]?.tried.includes(x)));
+}
+
 /** Every creature of a chapter (its monsters, prowlers and guardian) defeated at least once. */
 function beatenAllOfChapter(g: Game, ch: number): boolean {
   const first = ch * FLOORS_PER_CHAPTER + 1;
@@ -179,6 +187,10 @@ export const DEEDS: DeedDef[] = [
   { id: 'weaknessFound', name: 'Keen Eye', text: 'Found twenty-five weaknesses.', kind: 'battle', tier: 'silver', icon: 'magnifying-glass', earned: (g) => weaknessesFound(g) >= 25 },
   { id: 'boneWarden', name: 'Warden of the Bone', text: 'Brought down the guardian of the Marrowdeep.', kind: 'battle', tier: 'gold', icon: 'ribcage', earned: (g) => bossBeaten(g, 14) },
   { id: 'drownedBook', name: 'Drowned Lore', text: 'Met every creature of the Drowned Roots.', kind: 'battle', tier: 'silver', icon: 'book-cover', earned: (g) => seenAllOfChapter(g, 1) },
+  { id: 'marrowBook', name: 'Marrow Lore', text: 'Met every creature of the Marrowdeep.', kind: 'battle', tier: 'silver', icon: 'book-cover', earned: (g) => seenAllOfChapter(g, 2) },
+  { id: 'greenwoodWeak', name: 'Every Soft Spot', text: 'Tried every element on every creature of the Greenwood Roots. The bestiary has no question marks left there.', kind: 'battle', tier: 'gold', icon: 'magnifying-glass', earned: (g) => triedAllOfChapter(g, 0) },
+  { id: 'drownedWeak', name: 'Salt in the Wound', text: 'Tried every element on every creature of the Drowned Roots.', kind: 'battle', tier: 'gold', icon: 'magnifying-glass', earned: (g) => triedAllOfChapter(g, 1) },
+  { id: 'marrowWeak', name: 'Cracked to the Marrow', text: 'Tried every element on every creature of the Marrowdeep.', kind: 'battle', tier: 'gold', icon: 'magnifying-glass', earned: (g) => triedAllOfChapter(g, 2) },
   { id: 'greenwoodBook', name: 'Greenwood Lore', text: 'Met every creature of the Greenwood Roots.', kind: 'battle', tier: 'silver', icon: 'book-cover', earned: (g) => seenAllOfChapter(g, 0) },
   { id: 'lightPack', name: 'Light Pack', text: 'Brought down a guardian without using a single item on that descent.', kind: 'battle', tier: 'gold', icon: 'knapsack', earned: (g) => n(g, 'guardianNoItems') > 0 },
   { id: 'deathless', name: 'Deathless', text: 'Brought down a guardian on a descent where nobody fell.', kind: 'battle', tier: 'gold', icon: 'laurels', earned: (g) => n(g, 'guardianNoFall') > 0 },
@@ -213,6 +225,7 @@ export const DEEDS: DeedDef[] = [
 
   // Sagas
   { id: 'sungOf', name: 'Sung Of', text: 'One of yours earned a byname. The skalds are singing.', kind: 'hall', tier: 'bronze', icon: 'tied-scroll', earned: (g) => roster(g).some((m) => (m.bynames?.length ?? 0) > 0) },
+  { id: 'skaldsFavourite', name: "The Skalds' Favourite", text: 'One of yours has earned five bynames. The skalds have run out of rhymes.', kind: 'hall', tier: 'gold', icon: 'tied-scroll', earned: (g) => roster(g).some((m) => (m.bynames?.length ?? 0) >= 5) },
   { id: 'hallOfNames', name: 'A Hall of Names', text: 'Everyone in a party of four or more bore a byname.', kind: 'hall', tier: 'silver', icon: 'laurels', earned: (g) => g.state.party.length >= 4 && g.state.party.every((m) => !!m.byname) },
   { id: 'guardiansBane', name: "Guardians' Bane", text: 'Struck the last blow on three different guardians.', kind: 'battle', tier: 'gold', icon: 'crossed-swords', earned: (g) => guardiansFelled(g) >= 3 },
 
