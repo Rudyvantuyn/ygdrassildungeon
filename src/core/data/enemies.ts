@@ -640,6 +640,191 @@ const list: EnemyDef[] = [
     material: { id: 'heartstoneShard', chance: 1 },
     art: { shape: 'golem', color: '#c0d0d8', accent: '#f0c040', size: 1.7 },
   },
+  // ── Chapter IV: The Dreaming Skull (Ymir's skull and brain, floors 16–20) ──
+  {
+    id: 'mistling',
+    name: 'Mistling',
+    hp: 2000, atk: 140, def: 70, mag: 130, res: 110, spd: 40,
+    xp: 240, gold: 118,
+    weak: ['fire'], resist: ['frost', 'phys'],
+    skills: [
+      { name: 'Smother', chance: 0.3, kind: 'magic', element: 'frost', power: 90, target: 'all', inflict: { ailment: 'sleep', chance: 0.1 } },
+    ],
+    drop: { item: 'spiritDew', chance: 0.1 },
+    material: { id: 'mistGel', chance: 0.45 },
+    art: { shape: 'slime', color: '#a0c0e0', accent: '#ffffff', size: 0.9 },
+  },
+  {
+    id: 'stormcrone',
+    name: 'Stormcrone',
+    hp: 2100, atk: 160, def: 72, mag: 120, res: 80, spd: 64,
+    xp: 250, gold: 122,
+    weak: ['frost'], resist: ['storm'],
+    ranged: true,
+    skills: [
+      { name: 'Shrieking Gale', chance: 0.3, kind: 'magic', element: 'storm', power: 95, target: 'all' },
+    ],
+    material: { id: 'croneFeather', chance: 0.45 },
+    art: { shape: 'bat', color: '#c0a060', accent: '#f0e0a0', size: 1.0 },
+  },
+  {
+    id: 'dreamwing',
+    name: 'Dreamwing',
+    hp: 1900, atk: 120, def: 60, mag: 140, res: 120, spd: 56,
+    xp: 245, gold: 120,
+    weak: ['fire'], resist: ['storm'],
+    ranged: true,
+    skills: [
+      { name: 'Lulling Dust', chance: 0.35, kind: 'magic', element: 'frost', power: 80, target: 'all', inflict: { ailment: 'sleep', chance: 0.25 } },
+    ],
+    material: { id: 'dreamScale', chance: 0.45 },
+    art: { shape: 'moth', color: '#60a060', accent: '#e0f0a0', size: 0.9 },
+  },
+  {
+    id: 'thoughtworm',
+    name: 'Thoughtworm',
+    hp: 2300, atk: 165, def: 95, mag: 60, res: 60, spd: 36,
+    xp: 255, gold: 125,
+    weak: ['fire'], resist: ['phys'],
+    skills: [
+      { name: 'Burrowing Thought', chance: 0.3, kind: 'phys', element: 'phys', power: 180, target: 'one', inflict: { ailment: 'paralysis', chance: 0.2 } },
+    ],
+    drop: { item: 'clearwater', chance: 0.15 },
+    material: { id: 'thoughtCoil', chance: 0.45 },
+    art: { shape: 'wyrm', color: '#e0a0d0', accent: '#ff4060', size: 0.9 },
+  },
+  {
+    id: 'hailburst',
+    name: 'Hailburst',
+    hp: 2200, atk: 150, def: 110, mag: 140, res: 90, spd: 30,
+    xp: 250, gold: 124,
+    weak: ['fire'], resist: ['frost', 'storm'],
+    skills: [
+      { name: 'Hailstorm', chance: 0.35, kind: 'magic', element: 'frost', power: 95, target: 'all' },
+    ],
+    material: { id: 'hailHeart', chance: 0.45 },
+    art: { shape: 'slime', color: '#60c0f0', accent: '#ffffff', size: 1.0 },
+  },
+  {
+    id: 'skyEye',
+    name: 'Sky-Eye',
+    hp: 2050, atk: 110, def: 65, mag: 150, res: 130, spd: 44,
+    xp: 260, gold: 128,
+    weak: ['phys'], resist: ['storm', 'fire'],
+    ranged: true,
+    skills: [
+      { name: 'Piercing Gaze', chance: 0.35, kind: 'magic', element: 'storm', power: 170, target: 'one', inflict: { ailment: 'paralysis', chance: 0.15 } },
+    ],
+    material: { id: 'skyLens', chance: 0.4 },
+    art: { shape: 'slime', color: '#c040a0', accent: '#ff2040', size: 0.9 },
+  },
+  {
+    id: 'galeSpirit',
+    name: 'Gale Spirit',
+    hp: 2400, atk: 150, def: 50, mag: 150, res: 115, spd: 66,
+    xp: 265, gold: 130,
+    weak: ['frost'], resist: ['phys', 'storm'],
+    skills: [
+      { name: 'Downdraught', chance: 0.3, kind: 'phys', element: 'phys', power: 120, target: 'all' },
+    ],
+    material: { id: 'bottledGale', chance: 0.4 },
+    art: { shape: 'moth', color: '#a0b0b0', accent: '#ffffff', size: 1.1 },
+  },
+  {
+    id: 'thunderwisp',
+    name: 'Thunderwisp',
+    hp: 1500, atk: 100, def: 80, mag: 125, res: 140, spd: 70,
+    xp: 255, gold: 126,
+    weak: ['frost'], resist: ['storm', 'fire'],
+    ranged: true,
+    skills: [
+      { name: 'Arc Lightning', chance: 0.35, kind: 'magic', element: 'storm', power: 95, target: 'all' },
+    ],
+    material: { id: 'stormGlass', chance: 0.4 },
+    art: { shape: 'slime', color: '#2040c0', accent: '#a0e0ff', size: 0.8 },
+  },
+  {
+    id: 'rimewraith',
+    name: 'Rimewraith',
+    hp: 2900, atk: 150, def: 75, mag: 145, res: 125, spd: 48,
+    xp: 265, gold: 130,
+    weak: ['fire'], resist: ['frost', 'phys'],
+    skills: [
+      { name: 'Freezing Touch', chance: 0.35, kind: 'magic', element: 'frost', power: 190, target: 'one', inflict: { ailment: 'paralysis', chance: 0.2 } },
+    ],
+    drop: { item: 'spiritDew', chance: 0.15 },
+    material: { id: 'rimeVeil', chance: 0.4 },
+    art: { shape: 'moth', color: '#4080f0', accent: '#e0f0ff', size: 1.0 },
+  },
+  {
+    id: 'hazeThurs',
+    name: 'Haze Thurs',
+    hp: 4000, atk: 225, def: 120, mag: 50, res: 70, spd: 26,
+    xp: 330, gold: 160,
+    weak: ['storm'], resist: ['frost'],
+    skills: [
+      { name: 'Cloud-Club', chance: 0.3, kind: 'phys', element: 'phys', power: 240, target: 'one' },
+      { name: 'Fogbreath', chance: 0.15, kind: 'magic', element: 'frost', power: 90, target: 'all' },
+    ],
+    material: { id: 'thursEye', chance: 0.4 },
+    art: { shape: 'golem', color: '#d0a080', accent: '#8090a0', size: 1.3 },
+  },
+  {
+    id: 'gloomgriffon',
+    name: 'Gloomgriffon',
+    hp: 36000, atk: 240, def: 125, mag: 120, res: 110, spd: 70,
+    xp: 4200, gold: 1800,
+    weak: ['frost'], resist: ['storm'],
+    skills: [
+      { name: 'Talon Rake', chance: 0.3, kind: 'phys', element: 'phys', power: 230, target: 'one' },
+      { name: 'Diving Gale', chance: 0.2, kind: 'phys', element: 'phys', power: 125, target: 'all' },
+    ],
+    drop: { item: 'tideDraught', chance: 0.8 },
+    material: { id: 'griffonPlume', chance: 1 },
+    art: { shape: 'bat', color: '#a08050', accent: '#f0f0f0', size: 1.4 },
+  },
+  {
+    id: 'thunderwyrm',
+    name: 'Thunderwyrm',
+    hp: 36000, atk: 225, def: 120, mag: 170, res: 130, spd: 40,
+    xp: 4000, gold: 1700,
+    weak: ['frost'], resist: ['storm', 'fire'],
+    skills: [
+      { name: 'Thunderhead', chance: 0.25, kind: 'magic', element: 'storm', power: 125, target: 'all', inflict: { ailment: 'paralysis', chance: 0.2 } },
+      { name: 'Coil Crush', chance: 0.3, kind: 'phys', element: 'phys', power: 220, target: 'one' },
+    ],
+    drop: { item: 'spiritDew', chance: 0.6 },
+    material: { id: 'wyrmCrest', chance: 1 },
+    art: { shape: 'wyrm', color: '#3050d0', accent: '#f0d040', size: 1.4 },
+  },
+  {
+    id: 'fogWatcher',
+    name: 'The Fog-Watcher',
+    hp: 50000, atk: 210, def: 105, mag: 165, res: 110, spd: 34,
+    xp: 4500, gold: 3300,
+    weak: ['fire'], resist: ['frost', 'storm'],
+    skills: [
+      { name: 'Hundred Gazes', chance: 0.25, kind: 'magic', element: 'storm', power: 115, target: 'all', inflict: { ailment: 'paralysis', chance: 0.2 } },
+      { name: 'Fog Grip', chance: 0.3, kind: 'phys', element: 'phys', power: 230, target: 'one' },
+      { name: 'Watchful Mist', chance: 0.15, kind: 'magic', element: 'frost', power: 100, target: 'all', inflict: { ailment: 'sleep', chance: 0.15 } },
+    ],
+    material: { id: 'watcherEye', chance: 1 },
+    art: { shape: 'slime', color: '#e0c0c0', accent: '#202020', size: 1.7 },
+  },
+  {
+    id: 'dreamwarden',
+    name: 'The Dreamwarden',
+    hp: 45000, atk: 245, def: 120, mag: 175, res: 120, spd: 30,
+    xp: 11000, gold: 7000,
+    weak: ['phys'], resist: ['storm', 'frost'],
+    skills: [
+      { name: 'Dream Crush', chance: 0.3, kind: 'phys', element: 'phys', power: 260, target: 'one' },
+      { name: 'Nightmare', chance: 0.2, kind: 'magic', element: 'frost', power: 125, target: 'all', inflict: { ailment: 'sleep', chance: 0.2 } },
+      { name: 'Thunder Thought', chance: 0.2, kind: 'magic', element: 'storm', power: 120, target: 'all', inflict: { ailment: 'paralysis', chance: 0.2 } },
+    ],
+    material: { id: 'dreamShard', chance: 1 },
+    art: { shape: 'slime', color: '#e08030', accent: '#f0d040', size: 1.8 },
+  },
 ];
 
 /**
@@ -648,7 +833,7 @@ const list: EnemyDef[] = [
  * A fifth adventurer helps most against packs, so ordinary monsters gain the most; one big foe gains less.
  * New guardians and prowlers go in these lists too (a test checks that none is missing).
  */
-export const GUARDIAN_IDS = ['blightedElder', 'rootgnawer', 'drownedJarl', 'hafgufa', 'ribwarden', 'hrungnir'];
+export const GUARDIAN_IDS = ['blightedElder', 'rootgnawer', 'drownedJarl', 'hafgufa', 'ribwarden', 'hrungnir', 'fogWatcher', 'dreamwarden'];
 /** Each prowler's own factors: they are tuned one by one against the prowler rules (hopeless, risky, beatable). */
 const PROWLER_SCALE: Record<string, { hp: number; power: number }> = {
   grimtusk: { hp: 1.1, power: 1.15 },
@@ -659,12 +844,16 @@ const PROWLER_SCALE: Record<string, { hp: number; power: number }> = {
   tidecoil: { hp: 1.36, power: 1.24 },
   bergrisi: { hp: 1.18, power: 1.06 },
   ossuaryHound: { hp: 1.18, power: 1.18 },
+  gloomgriffon: { hp: 1.0, power: 1.05 },
+  thunderwyrm: { hp: 0.85, power: 1.2 },
 };
 export const PROWLER_IDS = Object.keys(PROWLER_SCALE);
 const SCALE = {
   monster: { hp: 1.35, power: 1.18 },
   /** The Marrowdeep's packs, from the Marrowgnaw on: a party of five should still meet them a step up. */
   marrowMonster: { hp: 1.45, power: 1.22 },
+  /** The Dreaming Skull's packs (from the Mistling on), tuned for five from the start. */
+  skullMonster: { hp: 1.25, power: 1.08 },
   guardian: { hp: 1.1, power: 1.03 },
 };
 /** Guardians that needed their own factor: a five-strong party should still not rush the Blighted Elder. */
@@ -672,11 +861,12 @@ const GUARDIAN_SCALE: Record<string, { hp: number; power: number }> = {
   blightedElder: { hp: 1.2, power: 1.06 },
 };
 const MARROW_FROM = list.findIndex((e) => e.id === 'marrowgnaw');
+const SKULL_FROM = list.findIndex((e) => e.id === 'mistling');
 
 function scaled(e: EnemyDef, index: number): EnemyDef {
   const k = GUARDIAN_IDS.includes(e.id)
     ? (GUARDIAN_SCALE[e.id] ?? SCALE.guardian)
-    : (PROWLER_SCALE[e.id] ?? (index >= MARROW_FROM ? SCALE.marrowMonster : SCALE.monster));
+    : (PROWLER_SCALE[e.id] ?? (index >= SKULL_FROM ? SCALE.skullMonster : index >= MARROW_FROM ? SCALE.marrowMonster : SCALE.monster));
   return { ...e, hp: Math.round(e.hp * k.hp), atk: Math.round(e.atk * k.power), mag: Math.round(e.mag * k.power) };
 }
 

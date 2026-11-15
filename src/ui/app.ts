@@ -5,6 +5,8 @@ import { sagas } from './sagaView';
 import type { ChartMode } from '../core/chart';
 import type { Combat } from '../core/combat';
 import { ENEMIES } from '../core/data/enemies';
+import { FLOORS } from '../core/data/floors';
+import { CHAPTERS } from '../core/data/chapters';
 import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
 import { ELEMENT_NAMES, elementIcon } from './elements';
 import { EQUIPMENT } from '../core/data/equipment';
@@ -54,6 +56,10 @@ import { ListMenu, type MenuItem } from './menu';
 import { PartyView } from './partyView';
 import { readSave, writeSave } from './storage';
 import { TownView, type TownHost } from './townView';
+
+/** The last chapter there is so far, and the town scene that ends it (then comes "to be continued"). */
+const LAST_CHAPTER = CHAPTERS[CHAPTERS.length - 1];
+const LAST_CHAPTER_END = 'chapterFourEnd';
 
 /** Phones and tablets: the help shows taps instead of keys. */
 const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
@@ -707,7 +713,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     // Scenes waiting in town play one after the other.
     const story = (): void => {
       if (!pendingScene(this.game, 'town')) return tips();
-      this.playStory('town', (id) => (id === 'chapterTwoEnd' ? this.showCredits() : story()));
+      // The end of the last chapter there is so far: a "to be continued" with the party's numbers.
+      this.playStory('town', (id) => (id === LAST_CHAPTER_END ? this.showCredits() : story()));
     };
     story();
   }
@@ -1114,9 +1121,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       el('div', { className: 'title-screen credits' }, [
         el('div', { className: 'logo', text: 'YGDRASSIL' }),
         el('div', { className: 'tagline', text: 'The road to Asgard runs through Ymir' }),
-        el('p', { className: 'credits-line', text: 'End of Chapter II. The road goes on, deeper than the sea.' }),
+        el('p', { className: 'credits-line', text: `End of Chapter ${LAST_CHAPTER.numeral}, ${LAST_CHAPTER.name}. The road goes on.` }),
         el('p', { className: 'credits-line big', text: 'To be continued' }),
-        el('p', { className: 'credits-line small', text: 'Chapter III is being written. Your Wayfinders, your choices and your map will be waiting.' }),
+        el('p', { className: 'credits-line small', text: 'The next chapter is being written. Your Wayfinders, your choices and your map will be waiting.' }),
         el('div', { className: 'rewards' }, [
           el('span', { text: 'Party' }), el('span', { className: 'v', text: s.party.map((m) => `${m.name} Lv ${m.level}`).join(', ') }),
           el('span', { text: 'Steps taken' }), el('span', { className: 'v', text: String(s.steps) }),
@@ -1720,8 +1727,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.save();
     this.openOverlay(
       el('div', { className: 'panel dialog' }, [
-        el('h2', { text: 'The first ward has fallen!' }),
-        el('p', { text: 'The Hafgufa has sunk into the dark, and the first of the gods\' wards is broken.' }),
+        el('h2', { text: `The end of ${LAST_CHAPTER.name}` }),
+        el('p', { text: `${ENEMIES[FLOORS[FLOORS.length - 1].boss?.[0] ?? '']?.name ?? 'The last guardian'} has fallen. Every floor of the Rootdeep open so far is yours to walk; the stairs beyond lead to a chapter still being written.` }),
         el('p', { text: `Steps: ${s.steps} · Battles: ${s.battles} · Gold: ${s.gold} G` }),
         menu.el,
       ]),

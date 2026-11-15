@@ -45,6 +45,12 @@ export const GATHER_TABLES: Record<GatherKind, [string, string, string]>[] = [
     fell: ['petrifiedRoot', 'giantsBeam', 'ironroot'],
     fish: ['blindCavefish', 'glowgill', 'paleEel'],
   },
+  {
+    forage: ['skyThistle', 'mistLily', 'dreamPoppy'],
+    mine: ['skullChalk', 'frostQuartz', 'skyIron'],
+    fell: ['cloudpine', 'stormBirch', 'dreamwood'],
+    fish: ['mistMinnow', 'cloudCarp', 'starEel'],
+  },
 ];
 
 /** How often a spot can be gathered from per visit (spots recover while the party is in town). */

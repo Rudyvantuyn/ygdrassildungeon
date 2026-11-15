@@ -60,4 +60,20 @@ export const BEAST_LORE: Record<string, string> = {
   bergrisi: 'A mountain giant, or a piece of one. It walks the Marrowdeep like it still owns the roads, and perhaps it does.',
   ossuaryHound: 'A hound made of the bones it gnawed. Its howl carries through the whole skeleton, and other things answer.',
   hrungnir: 'The old tales call him the stone-hearted giant, the one with the whetstone. The tales did not say he was waiting down here.',
+
+  // Chapter IV: the Dreaming Skull
+  mistling: 'Ymir\'s brains became the clouds, and the clouds have crumbs. Mistlings drift low and settle on sleepers like a damp blanket.',
+  stormcrone: 'Half woman, half hawk, all temper. Stormcrones shriek a gale at anything that climbs into their sky.',
+  dreamwing: 'Its dust brings sleep, and in that sleep, dreams that are not your own. Wayfinders wake from them homesick for places they never saw.',
+  thoughtworm: 'Worms that live in the folds of the giant\'s brain and eat what is left of his thoughts. They bite like an idea you cannot shake.',
+  hailburst: 'A storm cloud that froze solid and kept raging. Hailbursts rattle when they move.',
+  skyEye: 'A single eye floating in the fog, unblinking. Wherever it looks, something goes still.',
+  galeSpirit: 'A wind that took a shape. Blades pass through it; a hard frost makes it heavy enough to hit.',
+  thunderwisp: 'A ball of lightning that wanders the dome looking for something to strike. It usually finds it.',
+  rimewraith: 'The shade of someone who froze in the mist. It reaches for warm hands.',
+  hazeThurs: 'One-eyed giants of the cloud country, slow and enormous. They swing what they find, and they find whole trees.',
+  gloomgriffon: 'It hunts above the clouds and dives through them. By the time you see the shadow, the talons are already there.',
+  thunderwyrm: 'A sky serpent coiled in the thunderheads, as long as a ship. The storm follows it, or it follows the storm.',
+  fogWatcher: 'A hundred eyes in the fog, and every one of them turned your way. Someone wanted to know who comes this far.',
+  dreamwarden: 'Something guards the dreaming heart of the skull. It does not want you to wake what sleeps there, or perhaps it does not want you to see it.',
 };

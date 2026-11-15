@@ -147,3 +147,36 @@ describe('chapter III balance', { timeout: 120_000 }, () => {
     });
   }
 });
+
+// Chapter IV (the Dreaming Skull), tuned for a party of five (November 2026). A party arrives after Hrungnir around
+// level 46 with tier 15 gear. Measured on purpose: Fog-Watcher 23/60/77% at 46/48/50; Dreamwarden 18/45/68% at
+// 48/52/54; the prowlers 10–18% at 48, about a third to a half at 53.
+describe('chapter IV balance', { timeout: 120_000 }, () => {
+  it('its packs are a step up from chapter III, but a party fresh from Hrungnir wins them', () => {
+    expect(fightWinRate(['mistling', 'mistling', 'mistling'], 46, 15, {})).toBeGreaterThanOrEqual(0.85);
+    expect(fightWinRate(['thunderwisp', 'thunderwisp', 'rimewraith', 'thunderwisp'], 46, 15, {})).toBeGreaterThanOrEqual(0.7);
+    expect(fightWinRate(['stormcrone', 'stormcrone', 'thunderwisp'], 40, 14, {})).toBeLessThan(0.85);
+  });
+
+  it('the Fog-Watcher (middle of the chapter) is a fair fight around level 48', () => {
+    const early = fightWinRate(['fogWatcher'], 48, 16, { boss: true });
+    expect(early).toBeGreaterThanOrEqual(0.25);
+    expect(early).toBeLessThanOrEqual(0.68);
+    expect(fightWinRate(['fogWatcher'], 50, 17, { boss: true })).toBeGreaterThanOrEqual(0.65);
+  });
+
+  it('the Dreamwarden (end of the chapter) needs real training: hopeless on arrival, won around level 54', () => {
+    expect(fightWinRate(['dreamwarden'], 48, 16, { boss: true })).toBeLessThanOrEqual(0.2);
+    expect(fightWinRate(['dreamwarden'], 54, 19, { boss: true })).toBeGreaterThanOrEqual(0.6);
+  });
+
+  for (const id of ['gloomgriffon', 'thunderwyrm']) {
+    it(`${id}: hopeless on arrival, risky at 53, beatable near the top`, () => {
+      expect(fightWinRate([id], 48, 16, { prowler: true })).toBeLessThanOrEqual(0.22);
+      const at53 = fightWinRate([id], 53, 18, { prowler: true });
+      expect(at53).toBeGreaterThanOrEqual(0.08);
+      expect(at53).toBeLessThanOrEqual(0.6);
+      expect(fightWinRate([id], 58, 19, { prowler: true })).toBeGreaterThanOrEqual(0.55);
+    });
+  }
+});

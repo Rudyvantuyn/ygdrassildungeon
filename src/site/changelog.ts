@@ -12,6 +12,10 @@ export const CHANGES: ChangeDay[] = [
   {
     date: '2026-11-15',
     changes: [
+      'New: chapter IV, the Dreaming Skull (floors 16–20): the inside of the sky, where Ymir\'s brains drift as clouds and still dream.',
+      'New: ten creatures, two prowlers and two guardians in chapter IV, each with its own lines in the bestiary.',
+      'New: chapter IV gear, materials and gathering finds, four new requests, two fragments and five more deeds.',
+      'Changed: the "to be continued" moment now comes at the end of the newest chapter, not after chapter II.',
       'New: a party is now five strong, with at most three in a row (front or back, as you like).',
       'New: five adventurers swear the oath for free when you found your party. Older saves can add a fifth from the Oath Hall.',
       'New: expeditions take up to five players.',

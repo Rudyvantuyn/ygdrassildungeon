@@ -94,4 +94,11 @@ export const CHAPTERS: { numeral: string; name: string; floors: string; image: s
     image: 'site/ch3.webp',
     text: 'Ymir\'s bones, turned to stone: the old trade roads of the giants, with every place name scratched away. For the first time the deep is drawn as one whole, with stairs that lead back up and roots that open shortcuts.',
   },
+  {
+    numeral: 'IV',
+    name: 'The Dreaming Skull',
+    floors: 'Floors 16–20',
+    image: 'site/ch4.webp',
+    text: 'Ymir\'s skull became the sky, and his brains the clouds. Past the bones the roots climb into the inside of the sky: a vault of bone over drifting cloud, storms being born, and a giant who still dreams.',
+  },
 ];

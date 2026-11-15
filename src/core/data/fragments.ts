@@ -72,6 +72,18 @@ export const FRAGMENTS: FragmentDef[] = [
     text: 'Hrungnir\'s heart was made a lock while he still lived. It is cold now. Hold it long enough and you will swear it beats, once. Above you, a raven takes wing.',
     where: { guardian: 14 },
   },
+  {
+    id: 'shipChalk',
+    title: 'A ship in chalk',
+    text: 'Scratched into the bone at the top of the stair: a little longship in old chalk, and under it a line of tally marks. Forty-one of them. Someone counted their crew, or counted the ones they lost.',
+    where: { chest: 15 },
+  },
+  {
+    id: 'lastEye',
+    title: 'The last eye',
+    text: 'One eye of the Fog-Watcher did not close. It is small, clouded and still warm, and it turns in your hand, slowly, until it faces up. Whatever it was reporting to is still listening.',
+    where: { guardian: 17 },
+  },
 ];
 
 export const FRAGMENT_BY_ID: Record<string, FragmentDef> = Object.fromEntries(FRAGMENTS.map((f) => [f.id, f]));

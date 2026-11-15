@@ -17,6 +17,7 @@ export const CHAPTERS: ChapterDef[] = [
   { numeral: 'II', name: 'The Drowned Roots', first: 5 },
   // Prepared: playable once its drawn floors are in FLOORS (until then no one can reach floor 11).
   { numeral: 'III', name: 'The Marrowdeep', first: 10 },
+  { numeral: 'IV', name: 'The Dreaming Skull', first: 15 },
 ];
 
 /**

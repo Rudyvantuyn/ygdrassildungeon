@@ -86,6 +86,29 @@ Thijs had geen tijd; dit is een voorstel in zijn lijn. Alles mag hij veranderen.
   de Oath Hall (midgard).
 - Open voor Thijs: wie de raven stuurt (Odin?), wat er onder de botten ligt, en wanneer Eira ontmaskerd wordt.
 
+### Hoofdstuk IV (voorstel, november 2026)
+
+Ook een voorstel in Thijs' lijn; alles mag hij veranderen. Thema gekozen door de eigenaar: **Ymirs schedel en hersenen**
+(de schedel werd de hemel, de hersenen de wolken).
+
+- **Aankomst (Skullgate)**: voorbij Hrungnir klimmen de wortels de schedel in: de binnenkant van de hemel, een gewelf
+  van bot boven drijvende wolken. Reageert op de weg: werelden: een rune van het Frost Court ("As far as we dared");
+  Asgard: Eira's vlam brandt hoger en buigt naar het gewelf; Midgard: er staat al oud krijt, in de vorm van een
+  schip (hint: Hallvards mensen kwamen hier ook).
+- **Cloudmere**: in de wolkenpoelen zie je beelden (Lindholm, je eigen gezichten ouder, een gouden hal): de reus droomt.
+- **The Fog-Watcher** (tussenbaas, verdieping 18): honderd ogen in de mist. Geen ward maar een **wachter**: hij kijkt
+  na zijn val omhoog, alsof hij nog moet rapporteren. Aske vraagt aan wie; Hrodna: "de raven zijn alleen hun nieuwste
+  ogen". (Nieuw geheim: Asgard keek al die tijd mee, ook toen Hallvard hier was.)
+- **Stormcrown**: hier worden de stormen van Midgard geboren, in gedachten van de slapende reus.
+- **The Dreamwarden** (eindbaas, vierde ward): de rune in de dromende hersenen houdt Ymir niet vast maar **in slaap**.
+  Na zijn val ademt Ymir, voor het eerst sinds de wereld van hem gemaakt is; de hoorn klinkt drie keer.
+- **Keuze 5: de droom**: laat hem dromen van de werelden (realms), laat Eira hem weer in slaap brengen (asgard; Aske
+  ziet dat ze zo'n scherf al eens vasthield), of Lindholm houdt zelf de wacht (midgard).
+- Fragmenten: een **krijtschip met 41 streepjes** (Hallvards bemanning?) en **het laatste oog** van de Fog-Watcher
+  dat zich naar boven draait.
+- Open voor Thijs: wat er gebeurt als Ymir wakker wordt; of Asgard de wachters stuurde of iemand anders; wat er boven
+  het gewelf ligt.
+
 ### Geheime klassen (voorstel, november 2026)
 
 Drie klassen die je niet kunt kiezen tot je een verborgen deed haalt. Dan meldt zich een vreemdeling bij Brynja

@@ -50,5 +50,19 @@
  "bergrisi": "hill_giant_new",
  "ossuaryHound": "undead/skeletons/skeleton_quadruped_large_new",
  "ribwarden": "undead/bone_dragon_new",
- "hrungnir": "frost_giant_new"
+ "hrungnir": "frost_giant_new",
+ "mistling": "amorphous/azure_jelly_new",
+ "stormcrone": "harpy",
+ "dreamwing": "moth_of_suppression",
+ "thoughtworm": "animals/brain_worm_new",
+ "hailburst": "nonliving/orb_of_ice",
+ "skyEye": "eyes/shining_eye_new",
+ "galeSpirit": "nonliving/air_elemental_new",
+ "thunderwisp": "nonliving/ball_lightning",
+ "rimewraith": "undead/freezing_wraith",
+ "hazeThurs": "cyclops_new",
+ "gloomgriffon": "griffon",
+ "thunderwyrm": "dragons/storm_dragon_new",
+ "fogWatcher": "eyes/great_orb_of_eyes",
+ "dreamwarden": "giant_orange_brain"
 }

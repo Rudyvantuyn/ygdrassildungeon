@@ -98,6 +98,17 @@ const list: EquipDef[] = [
   { id: 'starmarrowRod', name: 'Starmarrow Rod', slot: 'weapon', classes: CASTERS, tier: 14, price: 16500, bonus: { mag: 69 } },
   { id: 'mountainheartMail', name: 'Mountainheart Mail', slot: 'armor', classes: MAIL, tier: 14, price: 17200, bonus: { def: 62 } },
   { id: 'runeveilRobe', name: 'Runeveil Robe', slot: 'armor', classes: CASTERS, tier: 14, price: 16200, bonus: { def: 39, res: 53 } },
+  // Chapter IV: the Dreaming Skull
+  { id: 'skysteelBlade', name: 'Skysteel Blade', slot: 'weapon', classes: BLADES, tier: 16, price: 22000, bonus: { atk: 90 } },
+  { id: 'galebornBow', name: 'Galeborn Bow', slot: 'weapon', classes: ['strider'], tier: 16, price: 21800, bonus: { atk: 86, spd: 7 } },
+  { id: 'cloudglassRod', name: 'Cloudglass Rod', slot: 'weapon', classes: CASTERS, tier: 16, price: 21500, bonus: { mag: 78 } },
+  { id: 'stormplateMail', name: 'Stormplate Mail', slot: 'armor', classes: MAIL, tier: 16, price: 22500, bonus: { def: 70 } },
+  { id: 'mistweaveRobe', name: 'Mistweave Robe', slot: 'armor', classes: CASTERS, tier: 16, price: 21000, bonus: { def: 44, res: 59 } },
+  { id: 'thundersteelAxe', name: 'Thundersteel Axe', slot: 'weapon', classes: BLADES, tier: 18, price: 28000, bonus: { atk: 100 } },
+  { id: 'starwindBow', name: 'Starwind Bow', slot: 'weapon', classes: ['strider'], tier: 18, price: 27800, bonus: { atk: 95, spd: 7 } },
+  { id: 'dreamglassRod', name: 'Dreamglass Rod', slot: 'weapon', classes: CASTERS, tier: 18, price: 27500, bonus: { mag: 87 } },
+  { id: 'skyvaultMail', name: 'Skyvault Mail', slot: 'armor', classes: MAIL, tier: 18, price: 28500, bonus: { def: 78 } },
+  { id: 'dreamveilRobe', name: 'Dreamveil Robe', slot: 'armor', classes: CASTERS, tier: 18, price: 27000, bonus: { def: 49, res: 66 } },
   // Special gear, unlocked by selling materials. It should always beat the shop gear of the next floor down:
   // that is the reward for hunting a kind of monster on purpose.
   { id: 'briarthornSpear', name: 'Briarthorn Spear', slot: 'weapon', classes: BLADES, tier: 0, price: 220, bonus: { atk: 11 }, requires: { material: 'briarQuill', qty: 5 } },
@@ -144,6 +155,21 @@ const list: EquipDef[] = [
   { id: 'runequartzBlade', name: 'Runequartz Blade', slot: 'weapon', classes: BLADES, tier: 11, price: 11500, bonus: { atk: 74 }, requires: { material: 'runeQuartz', qty: 3 } },
   { id: 'ironrootBow', name: 'Ironroot Bow', slot: 'weapon', classes: ['strider'], tier: 11, price: 11500, bonus: { atk: 71, spd: 7 }, requires: { material: 'ironroot', qty: 3 } },
   { id: 'paleeelMail', name: 'Pale-Eel Mail', slot: 'armor', classes: MAIL, tier: 11, price: 11500, bonus: { def: 59, spd: 1 }, requires: { material: 'paleEel', qty: 3 } },
+  // Chapter IV: from the Dreaming Skull's creatures, prowlers, guardians and gathering spots
+  { id: 'mistgelRobe', name: 'Mistgel Robe', slot: 'armor', classes: CASTERS, tier: 15, price: 20000, bonus: { def: 47, res: 62 }, requires: { material: 'mistGel', qty: 6 } },
+  { id: 'cronefeatherBow', name: 'Cronefeather Bow', slot: 'weapon', classes: ['strider'], tier: 15, price: 20500, bonus: { atk: 92, spd: 8 }, requires: { material: 'croneFeather', qty: 5 } },
+  { id: 'thoughtcoilBlade', name: 'Thought-Coil Blade', slot: 'weapon', classes: BLADES, tier: 16, price: 23000, bonus: { atk: 96 }, requires: { material: 'thoughtCoil', qty: 6 } },
+  { id: 'hailheartMail', name: 'Hailheart Mail', slot: 'armor', classes: MAIL, tier: 16, price: 23500, bonus: { def: 74 }, requires: { material: 'hailHeart', qty: 5 } },
+  { id: 'skylensRod', name: 'Sky-Lens Rod', slot: 'weapon', classes: CASTERS, tier: 17, price: 25000, bonus: { mag: 86 }, requires: { material: 'skyLens', qty: 5 } },
+  { id: 'thurseyeCloak', name: 'Thurs-Eye Cloak', slot: 'armor', classes: ALL, tier: 17, price: 24000, bonus: { def: 52, res: 52 }, requires: { material: 'thursEye', qty: 5 } },
+  { id: 'griffonBow', name: 'Griffon Bow', slot: 'weapon', classes: ['strider'], tier: 18, price: 30000, bonus: { atk: 104, spd: 9 }, requires: { material: 'griffonPlume', qty: 1 } },
+  { id: 'wyrmcrestRod', name: 'Wyrmcrest Rod', slot: 'weapon', classes: CASTERS, tier: 18, price: 30000, bonus: { mag: 95, spd: 2 }, requires: { material: 'wyrmCrest', qty: 1 } },
+  { id: 'watcherPlate', name: "Watcher's Plate", slot: 'armor', classes: ['bastion'], tier: 17, price: 29000, bonus: { def: 84, res: 14 }, requires: { material: 'watcherEye', qty: 1 } },
+  { id: 'dreamshardBlade', name: 'Dreamshard Blade', slot: 'weapon', classes: BLADES, tier: 19, price: 36000, bonus: { atk: 112 }, requires: { material: 'dreamShard', qty: 1 } },
+  { id: 'dreampoppyRobe', name: 'Dreampoppy Robe', slot: 'armor', classes: CASTERS, tier: 16, price: 24000, bonus: { def: 50, res: 66 }, requires: { material: 'dreamPoppy', qty: 3 } },
+  { id: 'skyironBlade', name: 'Sky-Iron Blade', slot: 'weapon', classes: BLADES, tier: 16, price: 24500, bonus: { atk: 98 }, requires: { material: 'skyIron', qty: 3 } },
+  { id: 'dreamwoodBow', name: 'Dreamwood Bow', slot: 'weapon', classes: ['strider'], tier: 16, price: 24500, bonus: { atk: 94, spd: 8 }, requires: { material: 'dreamwood', qty: 3 } },
+  { id: 'stareelMail', name: 'Star-Eel Mail', slot: 'armor', classes: MAIL, tier: 16, price: 24500, bonus: { def: 75, spd: 1 }, requires: { material: 'starEel', qty: 3 } },
 ];
 
 export const EQUIPMENT: Record<string, EquipDef> = Object.fromEntries(list.map((e) => [e.id, e]));

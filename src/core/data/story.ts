@@ -651,6 +651,165 @@ export const STORY: StoryScene[] = [
       { speaker: SIGRID, text: 'Below the bones lies something else. Hrodna will not say what. Eira just smiles. Rest, Wayfinders. We are close to something.' },
     ],
   },
+
+  // ── Chapter IV: the Dreaming Skull ─────────────────────────────────────────
+  // Also a proposal while Thijs is busy (see docs/verhaal.md).
+  {
+    id: 'skullGate',
+    title: 'The inside of the sky',
+    when: 'floor',
+    ready: on(15),
+    lines: [
+      { speaker: NARRATOR, text: 'Past Hrungnir the roots climb, and climb, and then the bone opens into a space so wide you cannot see its far side.' },
+      { speaker: NARRATOR, text: 'Clouds drift under a vault of bone. You are inside Ymir\'s skull: the sky the gods set over Midgard, seen from within.' },
+      { speaker: NARRATOR, text: 'His brains became the clouds. Here they still drift, and still think.' },
+    ],
+  },
+  {
+    id: 'skullRealms',
+    title: 'Frost on the bone',
+    when: 'floor',
+    ready: (g) => on(15)(g) && road(g) === 'realms',
+    lines: [
+      { speaker: NARRATOR, text: 'Someone has been here before you. A rune of the Frost Court is cut into the bone at the stair, still rimed with ice.' },
+      { speaker: NARRATOR, text: 'It reads: "As far as we dared. Go on, Wayfinders."' },
+    ],
+  },
+  {
+    id: 'skullAsgard',
+    title: 'A brighter flame',
+    when: 'floor',
+    ready: (g) => on(15)(g) && road(g) === 'asgard',
+    lines: [
+      { speaker: NARRATOR, text: 'The little flame in its glass, Eira\'s flame, burns higher here than it ever did. It leans upward, toward the vault, like a dog that smells home.' },
+    ],
+  },
+  {
+    id: 'skullMidgard',
+    title: 'Old chalk',
+    when: 'floor',
+    ready: (g) => on(15)(g) && road(g) === 'midgard',
+    lines: [
+      { speaker: NARRATOR, text: 'You reach for Brynja\'s chalk to mark the stair and stop. There is already a mark. Old chalk, in the shape of a ship.' },
+    ],
+  },
+  {
+    id: 'cloudmere',
+    title: 'Pictures in the clouds',
+    when: 'floor',
+    ready: on(16),
+    lines: [
+      { speaker: NARRATOR, text: 'The cloud pools show pictures when you look into them. Lindholm at night. Your own faces, older. A hall full of gold that none of you has ever seen.' },
+      { speaker: NARRATOR, text: 'The giant is dreaming. You are walking through his dream.' },
+    ],
+  },
+  {
+    id: 'thinkingFog',
+    title: 'The fog has eyes',
+    when: 'floor',
+    ready: on(17),
+    lines: [
+      { speaker: NARRATOR, text: 'The fog thickens until you cannot see your own hands. Then, all around you, eyes open in it. Dozens. Watching, and patient.' },
+    ],
+  },
+  {
+    id: 'fogWatcherFallen',
+    title: 'One eye left',
+    when: 'victory',
+    ready: beaten(17),
+    lines: [
+      { speaker: NARRATOR, text: 'The Fog-Watcher\'s eyes close one by one. The last one does not look at you. It looks up, at the vault, as if it still has something to report.' },
+      { speaker: NARRATOR, text: 'There is no rune on it. This was no ward. It was a watchman.' },
+    ],
+  },
+  {
+    id: 'watchmen',
+    title: 'A watchman in the sky',
+    when: 'town',
+    ready: beaten(17),
+    lines: [
+      { speaker: ASKE, text: 'A watchman, inside the sky, with a hundred eyes. Watching for whom? And reporting to whom?' },
+      { speaker: HRODNA, text: 'You know to whom, healer. The ravens are only the newest of their eyes.' },
+      { speaker: SIGRID, text: 'Then they have seen every Wayfinder who ever came this far. Hallvard\'s people too.' },
+    ],
+  },
+  {
+    id: 'stormcrown',
+    title: 'Where storms are born',
+    when: 'floor',
+    ready: on(18),
+    lines: [
+      { speaker: NARRATOR, text: 'Thunderheads gather under the vault and drift away over your heads, toward Midgard.' },
+      { speaker: NARRATOR, text: 'Every storm that ever broke over Lindholm started here, in a thought of the sleeping giant.' },
+    ],
+  },
+  {
+    id: 'dreamingDome',
+    title: 'The dreaming heart',
+    when: 'floor',
+    ready: on(19),
+    lines: [
+      { speaker: NARRATOR, text: 'At the top of the skull the clouds fold together into something like a heart, or a mind. It glows faintly, and it is warm.' },
+      { speaker: NARRATOR, text: 'A golden rune is pressed into it, deep. The fourth ward. It does not hold him down like the others. It keeps him asleep.' },
+    ],
+  },
+  {
+    id: 'dreamwardenFallen',
+    title: 'The fourth ward',
+    when: 'victory',
+    ready: beaten(19),
+    lines: [
+      { speaker: NARRATOR, text: 'The Dreamwarden comes apart like fog in the morning. The rune cracks, and a sound fills the whole skull at once.' },
+      { speaker: NARRATOR, text: 'A breath. Long, slow, and deep. The first one Ymir has taken since the world was made from him.' },
+      { speaker: NARRATOR, text: 'Far above, the horn sounds three times.' },
+    ],
+  },
+  {
+    id: 'fourthWard',
+    title: 'He breathes',
+    when: 'town',
+    ready: beaten(19),
+    lines: [
+      { speaker: SIGRID, text: 'The ground shook all night. The well water tastes of salt. And the clouds over Lindholm moved against the wind.' },
+      { speaker: HRODNA, text: 'He is not awake. He is dreaming lighter. Let him dream of his children, of the realms that loved him. A giant who remembers us will not crush us.' },
+      { speaker: EIRA, text: 'Or let him sleep again. Give me the shard of the dream and I will put it back where it belongs. A sleeping giant hurts no one.' },
+      { speaker: BRYNJA, text: 'Or we keep watch ourselves. Lindholm stands on him. We should be the ones to know when he stirs.' },
+    ],
+    choice: {
+      prompt: 'What do you do with the giant\'s dream?',
+      options: [
+        {
+          id: 'hrodna', label: 'Let him dream of the realms', leaning: 'realms',
+          reply: [
+            { speaker: HRODNA, text: 'Then I will sing to him from the Frost Court, as our grandmothers did. Perhaps he will hear it.' },
+          ],
+        },
+        {
+          id: 'eira', label: 'Let Eira put him back to sleep', leaning: 'asgard',
+          reply: [
+            { speaker: EIRA, text: 'Thank you. Sleep is a mercy. For him, and for you.' },
+            { speaker: ASKE, text: 'She held the shard as if she had held one before.' },
+          ],
+        },
+        {
+          id: 'watch', label: 'Lindholm keeps watch', leaning: 'midgard',
+          reply: [
+            { speaker: BRYNJA, text: 'A watch-fire on the Oath Hall, then, and a Wayfinder awake beside it every night. We will know before anyone else does.' },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'chapterFourEnd',
+    title: 'Lighter sleep',
+    when: 'town',
+    ready: (g) => beaten(19)(g) && g.state.story.includes('fourthWard'),
+    lines: [
+      { speaker: SIGRID, text: 'Four wards broken. Ymir breathes in his sleep, Asgard has stopped pretending not to watch, and every realm is waiting to see what we do next.' },
+      { speaker: SIGRID, text: 'Rest while you can, Wayfinders. The deep is not done with us.' },
+    ],
+  },
 ];
 
 /** The road the party's choices lean toward most; a tie goes to Midgard's own third way. */
