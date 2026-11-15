@@ -239,6 +239,74 @@ export const MEMORIES: MemoryDef[] = [
       },
     ],
   },
+  {
+    // Written by Thijs (November 2026): a smith who waited for his valkyrie wife, a greedy king, wings, revenge.
+    // Only the last shard names him (Völundr).
+    id: 'sevenHundredRings',
+    title: 'Seven Hundred Rings',
+    shards: [
+      {
+        text: "I met him at the edge of a lake in the wolf-dales: a smith at his anvil, his face turned to the sky, as if listening for wings.",
+        heimdall: "I was watching that lake for my own reasons. I knew who had flown from it.",
+      },
+      {
+        text: "\"She was a swan when I found her,\" the smith told me. \"A shieldmaiden of the high halls, sitting on this shore with her feathers beside her. We had seven years.\"",
+        heimdall: "Seven years is a long leave for a valkyrie. Someone allowed it. Someone ended it.",
+      },
+      {
+        text: "One morning she put her feathers back on and flew, and did not come back. When I met him he had waited twenty-five years, and still he looked up at every shadow.",
+        heimdall: "I knew where she had gone. Valkyries go where they are called.",
+      },
+      {
+        text: "While he waited, he forged rings of red gold, one after another, for when she came home. Seven hundred hung on a cord by his door, chiming in the wind.",
+        heimdall: "I counted them. Seven hundred. I am the one who always counts.",
+      },
+      {
+        text: "His brothers searched for her the whole first year. They came back with sore feet and nothing to tell. \"She does not want to be found,\" they said. He did not believe them.",
+        heimdall: "She did want to be found. She was not allowed.",
+      },
+      {
+        text: "Then a king came to the lake, with soft boots and hard eyes. \"Work for me, and my riders will search every land until they find your wife.\" The smith said yes before the king had finished.",
+        heimdall: "I saw the king's riders. They never left his own borders.",
+      },
+      {
+        text: "For years the smith worked in the king's forge: swords, crowns, cups. Every evening he asked if there was news. Every evening the king said: soon.",
+        heimdall: "Soon is the cruellest word I know.",
+      },
+      {
+        text: "I noticed it before he did: the cord of rings by his door grew shorter. Every month, a few fewer.",
+        heimdall: "I noticed. I said nothing. I told myself it was not my place.",
+      },
+      {
+        text: "When he found out, he did not shout. He stood at the empty cord for a long time, then went back to the forge and worked through the night. The hammering sounded different.",
+        heimdall: "I know the sound of grief. That night it turned into something else.",
+      },
+      {
+        text: "\"The king never sent anyone,\" he told me. \"He only wanted my gold, and my hands.\" His voice was very calm. I was afraid of that calm.",
+        heimdall: "He heard it from someone in the king's own hall. Not from me. I had known for years.",
+      },
+      {
+        text: "In secret, at night, he began to forge something new: feathers of thin metal, hundreds of them, each one lighter than the last.",
+        heimdall: "He was making the one thing she had. Wings.",
+      },
+      {
+        text: "The king had one son, a boy who liked to sit in the forge and watch the sparks. The smith let him stay. I thought it was kindness.",
+        heimdall: "I saw the boy go in that last day. I could have called him back.",
+      },
+      {
+        text: "The boy did not come out of the forge. When the king came looking, the smith was already standing on the roof with the metal wings on his back.",
+        heimdall: "I have heard many terrible things. Nothing louder than that king's silence.",
+      },
+      {
+        text: "He rose over the hall, slowly at first, then high, and from the air he told the king everything: the boy, the gold, the riders who never rode.",
+        heimdall: "I watched him all the way to the clouds and did not stop him. Part of me thought he was owed it. I am still ashamed of that part.",
+      },
+      {
+        text: "His last words came down from the sky like a hammer on iron: \"You will never forget the name Völundr.\" The king never did. Neither have I.",
+        heimdall: "She was in Valhalla all along, pouring mead for Odin's dead. I could have told him on the first day. A boy would have lived.",
+      },
+    ],
+  },
 ];
 
 export const MEMORY_BY_ID: Record<string, MemoryDef> = Object.fromEntries(MEMORIES.map((m) => [m.id, m]));

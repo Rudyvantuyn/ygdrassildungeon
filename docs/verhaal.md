@@ -158,7 +158,7 @@ Gekozen personages (volgorde vrij):
 | 1 | Frigg: de lange tocht langs alle werelden om de oorlog te voorkomen | klaar ("The Long Walk") |
 | 2 | Ratatoskr, de eekhoorn tussen de adelaar en Níðhöggr | klaar ("The Strange Squirrel"; de eekhoorn maakte de Rootgnawer om de verteller uit de boom te jagen) |
 | 3 | Gullveig, de zieneres die drie keer verbrand werd | klaar ("My Friend in the Hall"; Heimdall vertelde het als eerste rond, zo begon de oorlog met de Vanir) |
-| 4 | Völundr, de smid en vorst van de elfen | |
+| 4 | Völundr, de smid en vorst van de elfen | klaar ("Seven Hundred Rings"; Heimdall wist dat zijn vrouw in Valhalla was) |
 | 5 | Freyr, god van oogst en vrede, heer van Álfheim | |
 | 6 | Ríg en zijn zonen Þræll, Karl en Jarl (verteld alsof Heimdall erbij was; het gaat om hemzelf) | |
 | 7 | Þrymr, de reuzenkoning die Thors hamer stal | |
