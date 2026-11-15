@@ -10,6 +10,8 @@ import { createMember, xpForLevel } from './party';
 import { Rng } from './rng';
 import { wyrdFloors } from './wyrd';
 import { ENEMIES } from './data/enemies';
+import { BEAST_LORE } from './data/beastLore';
+import { bestiaryOrder } from './bestiary';
 
 describe('fights rebuilt from a snapshot (expeditions)', () => {
   it('remember who the Norn-Spun Mantle already saved', () => {
@@ -128,5 +130,13 @@ describe('a fallen party', () => {
     expect(g.state.materials.bogJelly).toBe(2);
     expect(g.state.party.every((m) => m.hp === 1)).toBe(true);
     expect(g.state.counters?.carriedHome).toBe(1);
+  });
+});
+
+describe('the bestiary', () => {
+  it('has a few lines about every creature of the Rootdeep, and none for creatures that do not exist', () => {
+    const ids = bestiaryOrder().map((b) => b.def.id);
+    expect(ids.filter((id) => !BEAST_LORE[id])).toEqual([]);
+    expect(Object.keys(BEAST_LORE).filter((id) => !ids.includes(id))).toEqual([]);
   });
 });

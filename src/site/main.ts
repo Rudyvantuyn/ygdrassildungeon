@@ -12,7 +12,11 @@ import '@fontsource/alegreya/latin-400.css';
 import '@fontsource/alegreya/latin-400-italic.css';
 import '@fontsource/alegreya/latin-700.css';
 import './site.css';
-import { bestiaryOrder } from '../core/bestiary';
+import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
+import { BEAST_LORE } from '../core/data/beastLore';
+import { MATERIALS } from '../core/data/materials';
+import { ITEMS } from '../core/data/items';
+import { ELEMENT_NAMES, elementIcon } from '../ui/elements';
 import { CHAPTERS as GAME_CHAPTERS } from '../core/data/chapters';
 import { CLASSES } from '../core/data/classes';
 import type { ClassId } from '../core/types';
@@ -290,13 +294,15 @@ function bestiary(): HTMLElement[] {
         { class: 'beasts' },
         ...beasts.map((b) => {
           const open = met(b.def.id);
-          return h(
-            'div',
-            { class: `beast ${b.kind} ${open ? '' : 'unknown'}` },
+          const card = h(
+            open ? 'button' : 'div',
+            { class: `beast ${b.kind} ${open ? '' : 'unknown'}`, ...(open ? { type: 'button', title: `Read about the ${b.def.name}` } : {}) },
             img(`monsters/${b.def.id}.webp`, open ? b.def.name : 'Unknown'),
             h('b', {}, open ? b.def.name : '???'),
             h('span', { class: 'muted' }, open ? (b.kind === 'boss' ? 'Guardian' : b.kind === 'prowler' ? 'Prowler' : `Floor ${b.floors.join(', ')}`) : ''),
           );
+          if (open) card.addEventListener('click', () => showBeastPage(b));
+          return card;
         }),
       ),
     );
@@ -306,6 +312,58 @@ function bestiary(): HTMLElement[] {
     h('section', { class: 'block' }, intro ? h('p', {}, intro) : h('p', {}, 'Only shadows, for now. ', h('a', { href: 'wayfinder.html' }, 'Sign in'), ' and every creature you meet in the game appears here, page by page. Their weaknesses you will still have to find yourself.')),
     ...blocks,
   ];
+}
+
+/**
+ * One creature's page: picture, a few lines about it, and what this player has learned of it in the game.
+ * Weaknesses show only once tried, numbers only once one was defeated (as in the game's own bestiary).
+ */
+function showBeastPage(b: ReturnType<typeof bestiaryOrder>[number]): void {
+  const def = b.def;
+  const entry = me?.save?.bestiary?.[def.id];
+  const defeated = (entry?.defeated ?? 0) > 0;
+  const kind = b.kind === 'boss' ? 'Guardian of the chapter' : b.kind === 'prowler' ? 'Prowler: roams the floor, best avoided' : 'Monster';
+  const WORDS = { weak: 'Weak', resists: 'Resists', normal: 'Normal', unknown: '?' } as const;
+  const chips = ELEMENTS.map((x) => {
+    const k = elementKnown(def, entry, x);
+    const icon = h('img', { src: elementIcon(x), alt: '', class: 'el-icon' });
+    return h('span', { class: `beast-el ${k}` }, icon, `${ELEMENT_NAMES[x]}: ${WORDS[k]}`);
+  });
+  const facts: Child[] = [];
+  if (defeated) {
+    const stat = (k: string, v: number) => [h('span', {}, k), h('b', {}, String(v))];
+    facts.push(
+      h('div', { class: 'beast-stats' }, ...stat('HP', def.hp), ...stat('ATK', def.atk), ...stat('DEF', def.def), ...stat('MAG', def.mag), ...stat('RES', def.res), ...stat('SPD', def.spd)),
+    );
+    if (def.ranged) facts.push(h('p', {}, 'Reaches the back row.'));
+    if (def.skills?.length) facts.push(h('p', {}, h('b', {}, 'Uses: '), def.skills.map((s) => s.name).join(', ')));
+    const leaves = [def.material && MATERIALS[def.material.id]?.name, def.drop && ITEMS[def.drop.item]?.name].filter(Boolean);
+    if (leaves.length) facts.push(h('p', {}, h('b', {}, 'Leaves behind: '), leaves.join(', ')));
+  } else {
+    facts.push(h('p', { class: 'muted' }, me?.save ? 'Defeat one in the game to learn its strength and what it leaves behind.' : 'Sign in and keep your game with your account: what you learn about it in the game shows here.'));
+    (facts.at(-1) as HTMLElement).classList.add('small');
+  }
+  const close = h('button', { class: 'btn ghost', type: 'button' }, 'Close');
+  const dialog = h(
+    'dialog',
+    { class: 'beast-page' },
+    h('div', { class: 'beast-page-head' }, img(`monsters/${def.id}.webp`, def.name, 'beast-page-pic'), h('div', {}, h('h2', {}, def.name), h('p', { class: 'muted' }, `${kind} · floor ${b.floors.join(', ')}`), entry ? h('p', { class: 'muted' }, `Met ${entry.seen}, defeated ${entry.defeated}`) : null)),
+    h('p', { class: 'beast-lore' }, BEAST_LORE[def.id] ?? ''),
+    h('h3', {}, 'Weaknesses and resistances'),
+    h('div', { class: 'beast-elements' }, ...chips),
+    entry ? null : h('p', { class: 'muted small' }, 'Every element you try on it in the game shows here.'),
+    ...facts,
+    close,
+  ) as HTMLDialogElement;
+  const done = () => {
+    dialog.close();
+    dialog.remove();
+  };
+  close.addEventListener('click', done);
+  dialog.addEventListener('click', (e) => e.target === dialog && done());
+  dialog.addEventListener('close', () => dialog.remove());
+  document.body.append(dialog);
+  dialog.showModal();
 }
 
 function devlog(): HTMLElement[] {

@@ -1,0 +1,63 @@
+/**
+ * A few lines about every creature of the Rootdeep, for the bestiary (in the game and on the website). Told as
+ * Wayfinders would tell it: what it is like to meet one. Hints, never the story's secrets (docs/verhaal.md).
+ */
+export const BEAST_LORE: Record<string, string> = {
+  // Chapter I: the Greenwood Roots
+  bogling: 'A mouthful of bog that learned to crawl. Boglings gather where the roots weep, and dry out to a crust near a flame.',
+  duskwing: 'Small, quick and everywhere the light fails. Duskwings nest upside down in the root vaults and hate the crackle of a storm.',
+  briarGnawer: 'It chews the thorns off the roots and anything that walks between them. The first thing most Wayfinders ever fight.',
+  hollowHound: 'Lean dogs with nothing behind the eyes. Shepherds above ground say they hear them baying under the fields at night.',
+  puffcap: 'A fat mushroom that bursts when kicked. Its spores put strong men to sleep; dried, Lindholm uses them for exactly that.',
+  shellbark: 'A beetle wearing a slab of bark as armour. Blades bounce off. Fire and a good jolt do not.',
+  gloamMoth: 'Its wings shed a dust that dims the eyes. Gloam Moths drift towards torchlight and put it out, one wingbeat at a time.',
+  rootColossus: 'Roots that knotted themselves into a shape and stood up. Slow, patient, and very hard to cut.',
+  blightedElder: 'Something is rotting the roots, and the rot has a heart. The Elder was a great tree once. Now it only spreads.',
+  hrimwolf: 'Frost from Niflheim creeps up through the deep, and the Hrimwolves run ahead of it. Their bite leaves a rime on the wound.',
+  frostcap: 'A cousin of the Puffcap that grew where the cold seeps in. Its spores freeze in the air before they land.',
+  rimeshell: 'A beetle under a crust of ice as thick as a shield. Warm it, or shake it apart.',
+  snowveil: 'White wings in a white haze. When the Snowveil flies, the corridor fills with snow and the map in your head goes blank.',
+  cinderwing: 'Where the roots run near the fire beyond the gap, the bats burn. Cinderwings dive trailing sparks.',
+  emberling: 'A Bogling that crawled too close to the heat and never cooled down. It flares when struck.',
+  rootfiend: 'A hunter grown out of the roots themselves, all claws and splinters. It drags its prey down into the soil.',
+  ashenColossus: 'A Root Colossus that burned and kept walking. Ash falls from it with every step.',
+  grimtusk: 'A boar the size of a cart, scarred by every party that failed to bring it down. It roams the deep floors and charges whatever it hears.',
+  rootDraugr: 'A dead thing that will not lie still, wrapped in roots as if the tree tried to bury it again. Its grip is cold as the barrow.',
+  fenwraith: 'A wailing shape over the bog water, there and gone. It strikes hard and fast, and fades just as quickly when hurt.',
+  rootgnawer: 'Something has been eating the roots from below. Lindholm felt the ground shake for years before anyone saw what it was.',
+
+  // Chapter II: the Drowned Roots
+  brineling: 'The sea under the world has its own Boglings, salty and slick. They crackle and burst when lightning finds them.',
+  skerrywing: 'Sea bats that sleep on the drowned skerries and drop on anything that floats.',
+  reefclaw: 'A crab that grew into the reef and then grew out of it. Its pincers can snap a spear shaft.',
+  kelpStrangler: 'A forest of kelp that moves when nothing else does. It wraps around ankles and pulls.',
+  brinecap: 'Mushrooms that grow on salt and drowned wood. Their spores sting like sea spray in a cut.',
+  seahound: 'They hunt in packs along the tide lines, and their bite pulls like a riptide.',
+  skerryjaw: 'All teeth and hunger. Skerryjaws roam the drowned floors and bite at anything, even each other.',
+  pearlmoth: 'Its wings shine like the inside of a shell. One glance into that glare and your eyes swim.',
+  coralback: 'A walking reef. Coral grew over something large and slow, and it never noticed.',
+  tidecaller: 'A pool of brine that pulls the water after it. Stand too close and the undertow takes your feet.',
+  drownedJarl: 'A ship came down here long before Lindholm\'s Wayfinders did. Its jarl never left it, and he does not welcome guests.',
+  nykur: 'A grey horse standing in the shallows, saddled and waiting. Those who climb on are never seen again.',
+  saltwight: 'A drowned sailor crusted white with salt. It mutters curses in a language nobody in Lindholm speaks.',
+  gloomEel: 'Long, dark and humming with stored lightning. Gloom Eels light the deep water in short, painful flashes.',
+  brineDraugr: 'A dead sailor still at his post, an anchor for a weapon. The cold of the sea floor comes off him in waves.',
+  deepmaw: 'Mostly mouth. Deepmaws lie in the dark water with their jaws open and wait for the current to bring them supper.',
+  wavemaid: 'She sings from the rocks, and the song makes the water rise. Wayfinders learn to fight with their ears stuffed with wax.',
+  fathomstone: 'A boulder from the sea floor that rolled up to see the world. It carries the weight of the whole sea with it.',
+  tidecoil: 'A sea serpent that circles the deepest pools, stirring whirlpools that pull boats and Wayfinders alike.',
+  hafgufa: 'Sailors\' tales speak of an island that sinks when you land on it. In the Drowned Roots, the tale has teeth.',
+
+  // Chapter III: the Marrowdeep
+  marrowgnaw: 'Below the sea lie Ymir\'s bones, and these creatures live off them. Their hides are as hard as the bones they chew, and blades skid off.',
+  bonewing: 'Bats with bone for wings, screeching through the hollows of the giant\'s skeleton. Fire only makes them louder.',
+  chalkCrawler: 'Spiders the colour of old bone, spinning webs of chalk across the ancient roads. The webs set like plaster.',
+  stonehorn: 'Rams of the stone roads, with horns like boulders. They charge downhill and do not stop.',
+  cairnWight: 'Someone was buried here with honours, under a cairn, long ago. The cairn has fallen; its guest is up.',
+  shardling: 'A shard of crystal from deep in the marrow, sharp and bright. Frost and storm slide off it; a plain heavy blow shatters it.',
+  ribwarden: 'Something guards the ribs of the giant as if they were a hall. Nobody has gone past it and come back to say what.',
+  rimeTroll: 'Trolls of the old giants\' roads, frosted white and twice as tall as a man. They roar before they swing, which helps.',
+  bergrisi: 'A mountain giant, or a piece of one. It walks the Marrowdeep like it still owns the roads, and perhaps it does.',
+  ossuaryHound: 'A hound made of the bones it gnawed. Its howl carries through the whole skeleton, and other things answer.',
+  hrungnir: 'The old tales call him the stone-hearted giant, the one with the whetstone. The tales did not say he was waiting down here.',
+};

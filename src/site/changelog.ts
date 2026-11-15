@@ -19,6 +19,8 @@ export const CHANGES: ChangeDay[] = [
       'Changed: a fallen party is no longer the end. The roots carry it home to Lindholm, but the deep keeps half your gold, items and materials (gear and Oath Tokens are kept).',
       'New: a deed for the first time the roots carry you home.',
       'Fixed: signing in with Google sometimes only worked the second time.',
+      'New: every creature has a few lines of its own in the bestiary, in the game and on the site.',
+      'Site: click a creature you have met in the bestiary to read about it, with the weaknesses you found and, once defeated, its numbers.',
       'Changed: monsters, prowlers and guardians are stronger, to match a party of five. Raven Run scouts meet them as before.',
     ],
   },

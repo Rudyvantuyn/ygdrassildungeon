@@ -1,3 +1,4 @@
+import { BEAST_LORE } from '../core/data/beastLore';
 import { FRAGMENTS, type FragmentDef } from '../core/data/fragments';
 import { fullName } from '../core/sagas';
 import { sagas } from './sagaView';
@@ -934,6 +935,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const lines: HTMLElement[] = [];
     const kind = row.kind === 'boss' ? 'Guardian of the chapter' : row.kind === 'prowler' ? 'Prowler: roams the floor, best avoided' : 'Monster';
     lines.push(el('p', { text: `${kind} · floor ${row.floors.join(', ')} · met ${e?.seen ?? 0}, defeated ${e?.defeated ?? 0}` }));
+    if (BEAST_LORE[id]) lines.push(el('p', { className: 'beast-lore', text: BEAST_LORE[id] }));
     const WORDS = { weak: 'weak!', resists: 'resists', normal: 'normal', unknown: '?' } as const;
     lines.push(
       el('div', { className: 'beast-elements' }, ELEMENTS.map((x) => {

@@ -2705,6 +2705,12 @@ body { word-spacing: 0.18em; }
   image-rendering: pixelated;
 }
 
+.beast-lore {
+  color: #d8e2ec;
+  line-height: 1.45;
+  margin: 2px 0 8px;
+}
+
 .beast-elements {
   display: flex;
   flex-wrap: wrap;
