@@ -62,7 +62,9 @@ export type DeedCounter =
   | 'longWayHome'
   | 'nightOwl'
   | 'bareHands'
-  | 'carriedHome';
+  | 'carriedHome'
+  /** Echo fights won in the Hall of Echoes. */
+  | 'echoes';
 
 /** Expeditions shared with another player (older saves only kept the list of shares collected). */
 function expeditionsHome(g: Game): number {

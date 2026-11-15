@@ -44,6 +44,14 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     price: 0,
     description: 'A shard of Ymir\'s bone. The Oath Hall needs one to swear in each new adventurer. Guardians, prowlers (the first time they fall) and a few chests hold them.',
   },
+  dreamEmber: {
+    id: 'dreamEmber',
+    name: 'Dream Ember',
+    effect: 'token',
+    amount: 0,
+    price: 0,
+    description: 'A warm spark from the giant\'s dream. Ten of them wake an echo in the Hall of Echoes. Found deep in the Rootdeep.',
+  },
 };
 
 /** A full inventory (every item present) from just the items you name. */

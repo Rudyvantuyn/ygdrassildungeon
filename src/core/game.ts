@@ -18,6 +18,7 @@ import { WYRD_REWARD_SCALE, wyrdChapter, wyrdFloorCode, wyrdFloors } from './wyr
 import { count, setCount, type DeedCounter, type EarnedDeed } from './deeds';
 import { addToSaga, type Byname } from './sagas';
 import { fragmentAt, type FragmentDef } from './data/fragments';
+import { EMBER_CHANCE, EMBER_FLOOR, GUARDIAN_LEVEL, SHARD_FLOOR, rollShard, shardChance } from './echoes';
 import type { Dir, ItemId, Loot, Member } from './types';
 
 /** Bump when the save format changes incompatibly; older saves are then discarded. */
@@ -112,6 +113,8 @@ export interface GameState {
   runesRead?: number[];
   /** Fragments of the Rootdeep's past found (ids, src/core/data/fragments.ts). */
   fragments?: string[];
+  /** Memory shards found: shard indexes per memory id (src/core/data/memories.ts). */
+  memories?: Record<string, number[]>;
   /** Guardians beaten before sagas were kept: they count for Guardians' Bane, since nobody can strike them again. */
   guardiansBefore?: string[];
   /** Deeds earned (Book of Deeds), by id. */
@@ -184,7 +187,7 @@ export class SaveVersionError extends Error {
 
 export class Game {
   map: FloorMap;
-  private rng: Rng;
+  rng: Rng;
 
   private constructor(
     public state: GameState,
@@ -585,6 +588,9 @@ export class Game {
     return true;
   }
 
+  /** A memory shard found with the guardian just beaten (for the UI to show); not saved. */
+  foundShard: { memory: string; shard: number } | null = null;
+
   /** A fragment found with the guardian just beaten (for the UI to show); not saved. */
   foundFragment: FragmentDef | null = null;
   /** Share of the usual XP and gold (lower in the Wyrdweave). Not saved: a run is never saved. */
@@ -598,7 +604,9 @@ export class Game {
   }
 
   startCombat(enemies: string[]): Combat {
-    return new Combat(this.state.party, enemies, this.state.inventory, this.rng, { rewardScale: this.rewardScale });
+    // From chapter VI on, monsters may leave a Dream Ember (for the Hall of Echoes).
+    const emberChance = this.floors === FLOORS && this.depth >= EMBER_FLOOR ? EMBER_CHANCE : 0;
+    return new Combat(this.state.party, enemies, this.state.inventory, this.rng, { rewardScale: this.rewardScale, emberChance });
   }
 
   /** Index of the active prowler standing on (x, y), or -1. */
@@ -657,7 +665,13 @@ export class Game {
       this.state.gold += combat.rewards.gold;
       for (const id of combat.rewards.materials) this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
       for (const e of combat.enemies) this.state.kills[e.def.id] = (this.state.kills[e.def.id] ?? 0) + 1;
+      if (combat.echo) {
+        count(this, 'echoes');
+        return earned;
+      }
       if (combat.boss) {
+        // From chapter V on a guardian may leave a memory shard.
+        if (this.floors === FLOORS && this.state.floor >= SHARD_FLOOR) this.foundShard = rollShard(this, shardChance(GUARDIAN_LEVEL[combat.enemies[0].def.id] ?? 50), this.rng);
         this.foundFragment = this.findFragment('guardian') ?? null;
         this.progress.bossDefeated = true;
         if (this.isLastFloor) this.state.cleared = true;

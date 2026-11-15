@@ -4,7 +4,7 @@ import type { SkillDef } from './data/skills';
 import { autoSpend, passiveBonus, skillFor } from './skilltree';
 import type { ClassId, Member, Stats } from './types';
 
-export const MAX_LEVEL = 60;
+export const MAX_LEVEL = 150;
 
 export function createMember(name: string, classId: ClassId, look?: number): Member {
   const def = CLASSES[classId];

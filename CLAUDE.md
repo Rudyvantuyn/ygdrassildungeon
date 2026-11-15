@@ -63,6 +63,20 @@ Add new names there and keep the glossary in sync.
   (`SCALE`, `PROWLER_SCALE` and `GUARDIAN_SCALE` at the end of `src/core/data/enemies.ts`, measured with the
   balance tests, which play with a party of five); Raven Run scouts still
   meet them at their old strength (`SMALL_BAND_ENEMIES`).
+- **The story ends with chapter X; the game never does** (decided November 2026, with Thijs):
+  - **Memory shards**: from chapter V on, glimpses of how Midgard was made, and of Ymir before it, so players come to
+    love Ymir and regret Midgard. They come from someone who is never named (it is Heimdall; never say so). Shown with
+    a golden glow (the same gold as the wards' runes), as text with pictures (real photos through the pixel filter,
+    no AI). 10 memories of 15 shards each (`src/core/data/memories.ts`, written by Thijs). Shards drop at random and
+    rarely from guardians (chapter V on, and echo fights); a shard already found never drops again.
+  - **The Hall of Echoes**: a place in Lindholm that opens once chapter V's guardian has fallen. Any guardian beaten
+    before can be fought again as an echo, at a level the player picks (10, 20, … up to the party's level, at most
+    150); a higher level gives a higher shard chance. One echo fight costs **10 Dream Embers**, which drop from
+    chapter VI on (`src/core/echoes.ts`).
+  - **Level cap 150** (`MAX_LEVEL`). What comes after 150 is still open (proposal: Oath Marks, small capped bonuses).
+  - **After chapter X Ymir dreams the world again**: a new round with the mazes of I–X, monsters as dreamed versions
+    (other colours, mixed between chapters, scaled to the chapter's level, other skills and weaknesses), and a slightly
+    higher shard chance each round.
 - **No game over**: when the whole party falls, the roots carry it home to Lindholm (`Game.carriedHome`): half the
   gold, half of every item and material stay in the deep; gear and Oath Tokens are kept, the fallen wake with 1 HP.
   Never send players back to an old save or the title screen for it.

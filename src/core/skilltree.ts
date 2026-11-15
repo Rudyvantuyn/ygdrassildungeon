@@ -47,7 +47,13 @@ export function spentPoints(m: Member): number {
 }
 
 export function unspentPoints(m: Member): number {
-  return pointsFor(m.level) - spentPoints(m);
+  // Points beyond what the whole tree can hold are not shown as waiting (high levels outgrow a tree).
+  return Math.min(pointsFor(m.level) - spentPoints(m), treeCapacity(m.classId) - spentPoints(m));
+}
+
+/** Every rank of every skill in the class's tree: the most points a tree can take. */
+export function treeCapacity(classId: ClassId): number {
+  return CLASSES[classId].skills.reduce((n, e) => n + maxRankOf(e.skill), 0);
 }
 
 export function treeEntry(classId: ClassId, id: SkillId): TreeEntry | undefined {

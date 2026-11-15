@@ -114,6 +114,12 @@ export interface CombatOptions {
   oathToken?: boolean;
   /** Share of the usual XP and gold (the Wyrdweave pays less: it is about the threads). */
   rewardScale?: number;
+  /** Enemies as they are in this fight, by id, instead of the usual ones (an echo of a guardian, src/core/echoes.ts). */
+  enemyDefs?: Record<string, EnemyDef>;
+  /** An echo fight in the Hall of Echoes: no guardian falls for good, nothing is unlocked by it. */
+  echo?: boolean;
+  /** Chance that the fight leaves a Dream Ember (chapter VI on). */
+  emberChance?: number;
 }
 
 const WEAK_MULT = 1.5;
@@ -141,6 +147,8 @@ export class Combat {
   readonly boss: boolean;
   readonly prowler: boolean;
   private readonly oathToken: boolean;
+  readonly echo: boolean;
+  private readonly emberChance: number;
   round = 1;
   /** Round of the party's last escape attempt (one per round). */
   private fleeTried = 0;
@@ -168,9 +176,11 @@ export class Combat {
     this.prowler = !!opts.prowler;
     this.oathToken = opts.oathToken ?? (this.boss || this.prowler);
     this.rewardScale = opts.rewardScale ?? 1;
+    this.echo = !!opts.echo;
+    this.emberChance = opts.emberChance ?? 0;
     this.deeds = party.map(() => ({ kills: 0, crits: 0, weakHits: 0, healed: 0, revives: 0, taken: 0, guardians: [], prowlers: 0 }));
     this.enemies = enemyIds.map((id) => {
-      const def = ENEMIES[id];
+      const def = opts.enemyDefs?.[id] ?? ENEMIES[id];
       if (!def) throw new Error(`Unknown enemy "${id}"`);
       return { def, name: def.name, hp: def.hp, maxHp: def.hp, ailment: null, ailmentTurns: 0 };
     });
@@ -758,6 +768,7 @@ export class Combat {
     }
     // Guardians, and prowlers the first time they fall, leave an Oath Token: the way to grow the roster.
     if (this.oathToken) drops.push('oathToken');
+    if (this.emberChance > 0 && this.rng.chance(this.emberChance)) drops.push('dreamEmber');
     for (const item of drops) this.inventory[item] = (this.inventory[item] ?? 0) + 1;
     const materials: string[] = [];
     for (const e of this.enemies) {
