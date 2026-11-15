@@ -36,7 +36,8 @@ Add new names there and keep the glossary in sync.
 - The dungeon is told in **chapters of five floors**, each with its own theme and matching monsters, always ending
   with a boss. Chapter I is forest (floors 1–5), chapter II ocean (floors 6–10), chapter III
   Ymir's bones (11–15), chapter IV his skull and brain, the inside of the sky (16–20), chapter V Ginnungagap, the gap of ice and fire the world
-  was built over (21–25; IV and V are first drafts the owner may redraw at the Drafting Table). The owner wants to draw dungeons
+  was built over (21–25; IV and V are first drafts the owner may redraw at the Drafting Table). **From chapter VI on the floors are bigger:**
+  chapter VI at least 35×25 (wide × high), and every chapter after that 5 wider and 5 higher (VII 40×30, VIII 45×35, …). The owner wants to draw dungeons
   themselves later (a dungeon editor). The editor (the Drafting Table) is a maker tool, not a player feature: it only
   shows with `?maker` in the address.
 - **Character growth is dynamic**: skill points per level, spent in a skill tree per class; skills have ranks 1–10.
@@ -77,7 +78,7 @@ Add new names there and keep the glossary in sync.
   - **The Hall of Echoes**: a place in Lindholm that opens once chapter V's guardian has fallen. Any guardian beaten
     before can be fought again as an echo, at a level the player picks (10, 20, … up to the party's level, at most
     150); a higher level gives a higher shard chance. One echo fight costs **10 Dream Embers**, which drop from
-    chapter VI on (`src/core/echoes.ts`).
+    chapter VI on (`src/core/echoes.ts`); the Gapwarden (end of chapter V) leaves 10 once, so the hall can be tried.
   - **Level cap 150** (`MAX_LEVEL`). What comes after 150 is still open (proposal: Oath Marks, small capped bonuses).
   - **After chapter X Ymir dreams the world again**: a new round with the mazes of I–X, monsters as dreamed versions
     (other colours, mixed between chapters, scaled to the chapter's level, other skills and weaknesses), and a slightly

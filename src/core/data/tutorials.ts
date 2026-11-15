@@ -249,7 +249,7 @@ export const TIPS: TipDef[] = [
     pages: [
       'The stone down here remembers every voice that rang in the deep. Burn ten Dream Embers on the hearth and a guardian you have beaten answers, as an echo.',
       'You choose how strong it rises, in steps of ten levels, up to your strongest adventurer. A stronger echo is likelier to leave a memory shard.',
-      'The embers are spent win or lose. Lose, and the echo only fades: you keep everything else. Dream Embers come from the monsters deep below, past the fifth guardian.',
+      'The embers are spent win or lose. Lose, and the echo only fades: you keep everything else. The fifth guardian leaves a first handful; after that, Dream Embers come from the monsters deeper down.',
     ],
   },
   {

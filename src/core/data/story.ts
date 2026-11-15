@@ -971,8 +971,8 @@ export const STORY: StoryScene[] = [
     lines: [
       { speaker: TORVALD, text: 'Since the fifth ward broke, the old root under my workshop rings like a bell.' },
       { speaker: TORVALD, text: 'Go down there and you hear them: every guardian you ever fought, still fighting, in the stone.' },
-      { speaker: TORVALD, text: 'I have cleared it out and put a hearth in. The Hall of Echoes, I call it. The stories say embers from a dream make the echoes rise. Dream Embers.' },
-      { speaker: TORVALD, text: 'Nobody here has ever seen one. But the deep has always had more than we have.' },
+      { speaker: TORVALD, text: 'I have cleared it out and put a hearth in. The Hall of Echoes, I call it. The stories say embers from a dream make the echoes rise.' },
+      { speaker: TORVALD, text: 'The Gapwarden left some behind, did it not? Dream Embers. Ten will wake one echo. Where more come from, only the deep knows.' },
     ],
   },
   {

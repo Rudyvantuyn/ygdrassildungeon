@@ -18,7 +18,7 @@ import { WYRD_REWARD_SCALE, wyrdChapter, wyrdFloorCode, wyrdFloors } from './wyr
 import { count, setCount, type DeedCounter, type EarnedDeed } from './deeds';
 import { addToSaga, type Byname } from './sagas';
 import { fragmentAt, type FragmentDef } from './data/fragments';
-import { EMBER_CHANCE, EMBER_FLOOR, GUARDIAN_LEVEL, SHARD_FLOOR, rollShard, shardChance } from './echoes';
+import { ECHO_COST, ECHO_HALL_FLOOR, EMBER_CHANCE, EMBER_FLOOR, GUARDIAN_LEVEL, SHARD_FLOOR, rollShard, shardChance } from './echoes';
 import type { Dir, ItemId, Loot, Member } from './types';
 
 /** Bump when the save format changes incompatibly; older saves are then discarded. */
@@ -670,6 +670,11 @@ export class Game {
         // From chapter V on a guardian may leave a memory shard.
         if (this.floors === FLOORS && this.state.floor >= SHARD_FLOOR) this.foundShard = rollShard(this, shardChance(GUARDIAN_LEVEL[combat.enemies[0].def.id] ?? 50), this.rng);
         this.foundFragment = this.findFragment('guardian') ?? null;
+        // The Gapwarden, the first time it falls, leaves enough Dream Embers to try the Hall of Echoes once.
+        if (this.floors === FLOORS && this.state.floor === ECHO_HALL_FLOOR && !this.progress.bossDefeated) {
+          this.state.inventory.dreamEmber = (this.state.inventory.dreamEmber ?? 0) + ECHO_COST;
+          for (let i = 0; i < ECHO_COST; i++) combat.rewards.drops.push('dreamEmber');
+        }
         this.progress.bossDefeated = true;
         if (this.isLastFloor) this.state.cleared = true;
       }

@@ -149,3 +149,17 @@ describe('echo balance', { timeout: 300_000 }, () => {
     });
   }
 });
+
+describe('the first Dream Embers', () => {
+  it('come from the Gapwarden, once, enough for one echo', () => {
+    const g = Game.newGame(6);
+    g.enterFloor(24, true);
+    for (let i = 0; i < 2; i++) {
+      const c = g.startBossCombat();
+      c.outcome = 'victory';
+      c.rewards = { xp: 0, gold: 0, drops: [], materials: [], levelUps: [] } as unknown as Combat['rewards'];
+      g.finishCombat(c);
+    }
+    expect(g.state.inventory.dreamEmber).toBe(ECHO_COST);
+  });
+});

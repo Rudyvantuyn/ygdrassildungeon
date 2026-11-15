@@ -15,6 +15,7 @@ export const CHANGES: ChangeDay[] = [
       'New: chapter V, Ginnungagap (floors 21–25): below the skull, the gap of ice and fire the world was built over.',
       'New: ten creatures, two prowlers and two guardians in chapter V, each with its own lines in the bestiary.',
       'New: chapter V gear, materials and gathering finds, four new requests, two fragments and five more deeds.',
+      'New: the guardian at the end of chapter V leaves a first handful of a rare kind of ember.',
       'New: chapter IV, the Dreaming Skull (floors 16–20): the inside of the sky, where Ymir\'s brains drift as clouds and still dream.',
       'New: ten creatures, two prowlers and two guardians in chapter IV, each with its own lines in the bestiary.',
       'New: chapter IV gear, materials and gathering finds, four new requests, two fragments and five more deeds.',

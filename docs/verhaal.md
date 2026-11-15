@@ -134,8 +134,8 @@ werd Ymir geboren). Midgard is eroverheen gebouwd "als een deksel op een put". V
   (realms); laat Eira de kloof weer sluiten (asgard; "ik heb gezien wat de kloof maakt", Aske: alsof ze erbij was
   toen hij open was); Lindholm voedt hem zelf op (midgard; een wieg bij de haard van de Oath Hall).
 - **De Hall of Echoes**: Torvald hoort onder zijn werkplaats de oude wortel zingen; daar klinken alle verslagen
-  eindbazen na. Dream Embers laten de echo's opstaan, maar niemand heeft er ooit een gezien (die komen pas vanaf
-  hoofdstuk VI).
+  eindbazen na. Dream Embers laten de echo's opstaan: de Gapwarden liet er eenmalig tien achter (genoeg voor één
+  echo); daarna komen ze pas vanaf hoofdstuk VI.
 - Fragmenten: **een hoefafdruk in het zout** met een gelikte groef ernaast (Auðumbla) en, veel later, laarsafdrukken
   die de andere kant op gaan (hint: iemand liep hier al vroeg; Heimdall?), en **goud dat geen metaal is** uit het
   hart van de Rimewell ("iets wat iemand zo hard herinnerde dat het stolde").
