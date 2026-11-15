@@ -118,6 +118,8 @@ export interface CombatOptions {
   enemyDefs?: Record<string, EnemyDef>;
   /** An echo fight in the Hall of Echoes: no guardian falls for good, nothing is unlocked by it. */
   echo?: boolean;
+  /** The level the echo was called at (its shard chance depends on it). */
+  echoLevel?: number;
   /** Chance that the fight leaves a Dream Ember (chapter VI on). */
   emberChance?: number;
 }
@@ -148,6 +150,7 @@ export class Combat {
   readonly prowler: boolean;
   private readonly oathToken: boolean;
   readonly echo: boolean;
+  readonly echoLevel: number;
   private readonly emberChance: number;
   round = 1;
   /** Round of the party's last escape attempt (one per round). */
@@ -177,6 +180,7 @@ export class Combat {
     this.oathToken = opts.oathToken ?? (this.boss || this.prowler);
     this.rewardScale = opts.rewardScale ?? 1;
     this.echo = !!opts.echo;
+    this.echoLevel = opts.echoLevel ?? 0;
     this.emberChance = opts.emberChance ?? 0;
     this.deeds = party.map(() => ({ kills: 0, crits: 0, weakHits: 0, healed: 0, revives: 0, taken: 0, guardians: [], prowlers: 0 }));
     this.enemies = enemyIds.map((id) => {

@@ -39,6 +39,8 @@ import { el, floater } from './dom';
 import { MapEditor } from './mapEditor';
 import { SideMapPen } from './sideMap';
 import { Designer, isMaker, loadDraft } from './designer';
+import { showMemories, showShardFound, shardsFound } from './memoriesView';
+import { startEchoFight } from '../core/echoes';
 import { memberPicker, showSkillTree } from './skillsView';
 import { gatherPrompt } from './gatherView';
 import { Founding } from './founding';
@@ -1616,6 +1618,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       audio.music(null);
       audio.play('defeat');
       if (this.coop) return this.coop.combatOver();
+      if (combat.echo) return this.endEcho(combat);
       if (!this.trial) reportShade(this.game, combat.enemies[0].def.id);
       if (this.wyrd) return this.endWyrd(true);
       return this.showGameOver();
@@ -1654,17 +1657,21 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const done = () => {
       this.closeOverlay();
       if (this.coop) return this.coop.combatOver();
+      if (combat.echo) return this.endEcho(combat);
       if (!combat.boss) return this.enterExplore();
       this.playStory('victory', () => {
         const fragment = this.game.foundFragment;
+        const shard = this.game.foundShard;
         this.game.foundFragment = null;
+        this.game.foundShard = null;
         const after = () => {
           if (this.game.state.cleared && !this.trial) return this.showCleared();
           this.enterExplore();
           this.toast(`${combat.enemies[0].def.name} has fallen. The way down lies open.`);
         };
-        if (fragment) return this.showFragment(fragment, after);
-        after();
+        const withShard = () => (shard ? this.showShard(shard, after) : after());
+        if (fragment) return this.showFragment(fragment, withShard);
+        withShard();
       });
     };
     const menu = new ListMenu([{ label: 'Continue', onSelect: done }], { onCancel: done });
@@ -1672,6 +1679,51 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       el('div', { className: 'panel dialog' }, [el('h2', { text: 'Victory!' }), lines, ...levelUps, menu.el]),
       menu,
     );
+  }
+
+  /** Calls an echo in the Hall of Echoes (the embers are spent at once) and fights it. */
+  startEcho(id: string, level: number): void {
+    const combat = startEchoFight(this.game, id, level);
+    if (typeof combat === 'string') return this.toast(combat);
+    this.save();
+    this.startCombat(combat);
+  }
+
+  /** After an echo fight: back to the hall's town card, with a memory shard if one was found. Losing costs nothing more. */
+  private endEcho(combat: Combat): void {
+    const shard = this.game.foundShard;
+    this.game.foundShard = null;
+    this.save();
+    // Fought from Lindholm: no dungeon panels behind what comes next.
+    this.showSide('town');
+    const home = () => {
+      this.closeOverlay();
+      this.enterTown();
+    };
+    if (combat.outcome === 'victory') {
+      this.closeOverlay();
+      if (shard) return this.showShard(shard, home);
+      return home();
+    }
+    const menu = new ListMenu([{ label: 'Get up', onSelect: home }], { onCancel: home, backRow: false });
+    this.openOverlay(
+      el('div', { className: 'panel dialog' }, [
+        el('h2', { text: 'The echo fades' }),
+        el('p', { text: 'The echo was stronger than you. It fades back into the stone, and your party wakes on the cold floor of the hall, bruised but alive. Only the embers are gone.' }),
+        menu.el,
+      ]),
+      menu,
+    );
+  }
+
+  /** A memory shard, just found. */
+  private showShard(found: { memory: string; shard: number }, then: () => void): void {
+    audio.play('levelUp');
+    showShardFound(found, (c, m) => this.openOverlay(c, m), () => {
+      this.closeOverlay();
+      then();
+    });
+    this.noticeTip('memories');
   }
 
   private showSide(panel: SidePanel): void {
@@ -1829,6 +1881,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           ? []
           : [
               { label: 'Fragments', detail: `${s.fragments?.length ?? 0}/${FRAGMENTS.length}`, description: 'Pieces of the Rootdeep\'s past you have found.', onSelect: () => this.showFragments(back) },
+              ...(shardsFound(this.game)
+                ? [{ label: 'Memories', detail: String(shardsFound(this.game)), description: 'The memory shards you have found, each in its place.', onSelect: () => showMemories(this.game, (c, m) => this.openOverlay(c, m), back) }]
+                : []),
               { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(back) },
               { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(back) },
               { label: 'Bestiary', description: 'Every monster you have met: where it lives, what it leaves behind, and the weaknesses you have found.', onSelect: () => this.tips(['bestiary'], () => this.showBestiary(back)) },

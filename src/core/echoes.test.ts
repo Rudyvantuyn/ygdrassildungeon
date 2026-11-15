@@ -58,6 +58,31 @@ describe('the Hall of Echoes', () => {
     expect((c as Combat).enemies[0].name).toBe('Echo of the Blighted Elder');
   });
 
+  it('ends an echo in Lindholm: a loss costs nothing more, a win may leave a shard', () => {
+    const g = Game.newGame(5);
+    g.state.progress[2].bossDefeated = true;
+    g.state.party.forEach((m) => (m.level = 20));
+    g.state.inventory.dreamEmber = 2 * ECHO_COST;
+    g.state.gold = 500;
+    const lost = startEchoFight(g, 'blightedElder', 20) as Combat;
+    lost.outcome = 'defeat';
+    g.state.party.forEach((m) => (m.hp = 0));
+    g.finishCombat(lost);
+    expect(g.state.gold).toBe(500);
+    expect(g.state.party.every((m) => m.hp === 1)).toBe(true);
+    expect(g.state.location).toBe('town');
+    const won = startEchoFight(g, 'blightedElder', 20) as Combat;
+    for (let r = 0; r < 150 && !won.outcome; r++) {
+      fullRestore(g.state.party);
+      won.resolveRound(chooseCommands(won));
+    }
+    expect(won.outcome).toBe('victory');
+    g.rng = new Rng(1);
+    g.finishCombat(won);
+    expect(g.state.counters?.echoes).toBe(1);
+    expect(g.state.progress[2].bossDefeated).toBe(true);
+  });
+
   it('gives a better shard chance at higher levels, and never the same shard twice', () => {
     expect(shardChance(150)).toBeGreaterThan(shardChance(10));
     expect(shardChance(10, 2)).toBeGreaterThan(shardChance(10));

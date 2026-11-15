@@ -4,9 +4,9 @@
  */
 import { sprite } from './sprites';
 
-export type TownSpot = 'inn' | 'hall' | 'shop' | 'board' | 'rootdeep' | 'horn';
+export type TownSpot = 'inn' | 'hall' | 'shop' | 'board' | 'rootdeep' | 'horn' | 'echoes';
 
-const SPOTS: Record<TownSpot, { x: number; label: string }> = {
+const SPOTS: Partial<Record<TownSpot, { x: number; label: string }>> = {
   inn: { x: 92, label: 'Inn' },
   hall: { x: 260, label: 'Oath Hall' },
   shop: { x: 428, label: 'Shop' },
@@ -77,7 +77,7 @@ export function drawTown(ctx: CanvasRenderingContext2D, w: number, h: number, ti
   ctx.fillStyle = street;
   ctx.fillRect(0, h * 0.8, w, h * 0.2);
 
-  for (const [spot, def] of Object.entries(SPOTS) as [TownSpot, (typeof SPOTS)[TownSpot]][]) {
+  for (const [spot, def] of Object.entries(SPOTS) as [TownSpot, { x: number; label: string }][]) {
     drawSign(ctx, def.x, h * 0.8, def.label, spot === focus, time, spot);
   }
 
@@ -333,6 +333,7 @@ const SCENES: Record<TownSpot | 'town' | 'title', { image: string; caption: stri
   board: { image: 'board', caption: 'The Notice Board' },
   rootdeep: { image: 'rootdeep', caption: 'The Rootdeep' },
   horn: { image: 'hornstone', caption: 'The Hornstone' },
+  echoes: { image: 'echoes', caption: 'The Hall of Echoes' },
 };
 
 const FADE_MS = 450;

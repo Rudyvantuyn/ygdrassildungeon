@@ -27,6 +27,8 @@ export const CHANGES: ChangeDay[] = [
       'New: every creature has a few lines of its own in the bestiary, in the game and on the site.',
       'New: the byname an adventurer bears shows under their name in the party bar, also for the others on an expedition.',
       'New: seven more bynames for the long road, and five more deeds, among them one per chapter for finding every weakness.',
+      'New: memory shards in the game: a golden moment when one turns up, and a Memories page in the Journal with every shard in its place.',
+      'New: a seventh place in Lindholm, for those who go deep enough. Its card is ready; the road to it is not, yet.',
       'Site: click a creature you have met in the bestiary to read about it, with the weaknesses you found and, once defeated, its numbers.',
       'Changed: monsters, prowlers and guardians are stronger, to match a party of five. Raven Run scouts meet them as before.',
     ],

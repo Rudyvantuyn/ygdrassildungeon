@@ -14,6 +14,7 @@ import type { ModStat } from '../core/types';
 import type { ItemId } from '../core/types';
 import type { CorridorRenderer } from '../render/corridor';
 import { drawMonster, monsterSprite } from '../render/monsters';
+import { drawTownScene } from '../render/town';
 import { hasPainting, monsterPainting } from '../render/paintings';
 import { audio, type Sfx } from '../audio/audio';
 import type { Ailment, Element } from '../core/types';
@@ -137,8 +138,9 @@ export class CombatView {
       this.drawPainted(ctx, w, h, time);
       return;
     }
-    // The party stands still during a fight: draw the corridor once and reuse the picture.
-    if (!this.backdrop) {
+    // An echo is fought in the Hall of Echoes; otherwise the party stands still, so the corridor is drawn once.
+    if (this.combat.echo) drawTownScene(ctx, w, h, time, 'echoes', false, false);
+    else if (!this.backdrop) {
       this.host.corridor.draw(this.host.game, time);
       this.backdrop = document.createElement('canvas');
       this.backdrop.width = ctx.canvas.width;
@@ -146,7 +148,7 @@ export class CombatView {
       this.backdrop.getContext('2d')!.drawImage(ctx.canvas, 0, 0);
     } else ctx.drawImage(this.backdrop, 0, 0);
     if (this.statusEl && this.driver?.status) this.statusEl.textContent = this.driver.status();
-    ctx.fillStyle = this.combat.boss ? 'rgba(40,0,0,0.5)' : this.combat.prowler ? 'rgba(40,16,0,0.5)' : 'rgba(0,0,0,0.45)';
+    ctx.fillStyle = this.combat.echo ? 'rgba(18,12,40,0.5)' : this.combat.boss ? 'rgba(40,0,0,0.5)' : this.combat.prowler ? 'rgba(40,16,0,0.5)' : 'rgba(0,0,0,0.45)';
     ctx.fillRect(0, 0, w, h);
 
     this.combat.enemies.forEach((enemy, i) => {

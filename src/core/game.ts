@@ -631,6 +631,7 @@ export class Game {
 
   /** Call after a combat is over, with the finished combat. Returns the bynames earned in it (sagas). */
   finishCombat(combat: Combat): { member: Member; byname: Byname }[] {
+    if (combat.echo) return this.finishEcho(combat);
     const earned = this.addFightToSagas(combat);
     this.state.battles += 1;
     this.state.danger = 0;
@@ -665,10 +666,6 @@ export class Game {
       this.state.gold += combat.rewards.gold;
       for (const id of combat.rewards.materials) this.state.materials[id] = (this.state.materials[id] ?? 0) + 1;
       for (const e of combat.enemies) this.state.kills[e.def.id] = (this.state.kills[e.def.id] ?? 0) + 1;
-      if (combat.echo) {
-        count(this, 'echoes');
-        return earned;
-      }
       if (combat.boss) {
         // From chapter V on a guardian may leave a memory shard.
         if (this.floors === FLOORS && this.state.floor >= SHARD_FLOOR) this.foundShard = rollShard(this, shardChance(GUARDIAN_LEVEL[combat.enemies[0].def.id] ?? 50), this.rng);
@@ -676,6 +673,25 @@ export class Game {
         this.progress.bossDefeated = true;
         if (this.isLastFloor) this.state.cleared = true;
       }
+    }
+    return earned;
+  }
+
+  /**
+   * An echo fight in the Hall of Echoes, fought from Lindholm: nothing in the Rootdeep changes. A win may leave a
+   * memory shard; a loss costs nothing more than the embers already spent (the fallen wake with 1 HP).
+   */
+  private finishEcho(combat: Combat): { member: Member; byname: Byname }[] {
+    const earned = this.addFightToSagas(combat);
+    this.state.battles += 1;
+    this.foundShard = null;
+    if (combat.outcome === 'victory' && combat.rewards) {
+      this.state.gold += combat.rewards.gold;
+      for (const e of combat.enemies) this.state.kills[e.def.id] = (this.state.kills[e.def.id] ?? 0) + 1;
+      count(this, 'echoes');
+      this.foundShard = rollShard(this, shardChance(combat.echoLevel), this.rng);
+    } else {
+      for (const m of this.state.party) if (m.hp <= 0) m.hp = 1;
     }
     return earned;
   }

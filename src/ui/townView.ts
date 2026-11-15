@@ -39,6 +39,11 @@ import { healWound, healerCost, isWounded, unavailable } from '../core/ravens';
 import { classUnlocked } from '../core/deeds';
 import { WYRD_GEAR, nextWeaveCost, wearWyrd, weave, wyrdDay, wyrdDayNumber, wyrdDoneToday, wyrdOpen } from '../core/wyrd';
 import { clockNow } from '../net/clock';
+import { ECHO_COST, ECHO_STEP, GUARDIAN_LEVEL, echoBlocker, echoGuardians, echoLevels, echoName, hallOfEchoesOpen, missingShards, shardChance } from '../core/echoes';
+import { ENEMIES } from '../core/data/enemies';
+import { BEAST_LORE } from '../core/data/beastLore';
+import { isMaker } from './designer';
+import { showMemories } from './memoriesView';
 
 export interface TownHost {
   game: Game;
@@ -59,6 +64,8 @@ export interface TownHost {
   openHornstone(): void;
   /** Today's Wyrdweave (the Well of Urd). */
   startWyrd(): void;
+  /** Calls an echo in the Hall of Echoes and fights it. */
+  startEcho(id: string, level: number): void;
   confirm(title: string, text: string, yes: () => void, back?: () => void): void;
   /** Shows tips not seen yet, then continues. */
   tips(ids: string[], then: () => void): void;
@@ -102,6 +109,10 @@ export class TownView {
       { spot: 'board', name: 'The Notice Board', detail: this.boardBadge() || 'Requests', description: 'Requests from the people of Lindholm. Finished work pays well.', onSelect: () => this.host.tips(['quests'], () => this.board()) },
       { spot: 'horn', name: 'The Hornstone', detail: 'Play together', description: 'Sound the horn to descend together with players from other halls.', onSelect: () => this.host.tips(['hornstone'], () => this.host.openHornstone()) },
     ];
+    // The Hall of Echoes, once chapter V's guardian has fallen (makers see it early, to try it).
+    if (hallOfEchoesOpen(this.game) || isMaker()) {
+      places.push({ spot: 'echoes', name: 'The Hall of Echoes', detail: `${s.inventory.dreamEmber ?? 0} Dream Embers`, description: 'Burn Dream Embers to call back a guardian you have beaten, as strong as you dare.', onSelect: () => this.host.tips(['echoes'], () => this.echoes()) });
+    }
     const all = places;
     const nodes: HTMLElement[] = [];
     const desc = el('div', { className: 'town-desc' });
@@ -141,10 +152,10 @@ export class TownView {
         el('div', { className: 'town-gold', text: `${s.gold} G` }),
         menuButton,
       ]),
-      el('div', { className: 'town-cards' }, nodes),
+      el('div', { className: `town-cards${places.length > 6 ? ' seven' : ''}` }, nodes),
     );
     select(Math.min(this.lastIndex, all.length - 1));
-    const cols = 3;
+    const cols = places.length > 6 ? 4 : 3;
     this.menu = {
       handleKey: (key: string): boolean => {
         const i = this.lastIndex;
@@ -721,6 +732,63 @@ export class TownView {
   }
 
   // ── Rootdeep ──────────────────────────────────────────────────────────────
+
+  // ── Hall of Echoes ─────────────────────────────────────────────────────────
+
+  private echoes(start = 0): void {
+    const back = () => this.host.closeOverlay();
+    const embers = this.game.state.inventory.dreamEmber ?? 0;
+    const guardians = echoGuardians(this.game);
+    const items: MenuItem[] = guardians.map((id, i) => ({
+      label: ENEMIES[id].name,
+      detail: `fought at Lv ${GUARDIAN_LEVEL[id] ?? '?'}`,
+      description: BEAST_LORE[id] ?? '',
+      onSelect: () => this.echoLevel(id, () => this.echoes(i)),
+    }));
+    if (!items.length) items.push({ label: 'No echo answers yet', description: 'Only a guardian you have beaten leaves an echo in the stone.', disabled: true, onSelect: () => {} });
+    items.push({ label: 'Memories', description: 'The memory shards you have found, each in its place.', onSelect: () => showMemories(this.game, (c, m) => this.host.openOverlay(c, m), () => this.echoes(items.length - 2)) });
+    items.push({ label: 'Leave', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back, startIndex: start });
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    this.host.openOverlay(
+      el('div', { className: 'panel dialog wide' }, [
+        el('h2', { text: 'The Hall of Echoes' }),
+        el('p', { text: 'Under the oldest root of Lindholm the stone remembers every voice that ever rang in the deep. Burn ten Dream Embers on the hearth, and a guardian you have beaten answers: an echo of it, as strong as you call it.' }),
+        el('p', { className: 'gold-line', text: `${embers} Dream Ember${embers === 1 ? '' : 's'} · an echo costs ${ECHO_COST}` }),
+        menu.el,
+        desc,
+      ]),
+      menu,
+    );
+  }
+
+  private echoLevel(id: string, back: () => void): void {
+    const embers = this.game.state.inventory.dreamEmber ?? 0;
+    const levels = echoLevels(this.game);
+    const allFound = missingShards(this.game).length === 0;
+    const items: MenuItem[] = levels.map((level) => {
+      const chance = Math.round(shardChance(level) * 100);
+      const blocked = echoBlocker(this.game, id, level);
+      return {
+        label: `Level ${level}`,
+        detail: allFound ? undefined : `shard ${chance}%`,
+        description: blocked ?? `Costs ${ECHO_COST} of your ${embers} Dream Embers, win or lose. ${allFound ? 'Every memory shard is found.' : `A win leaves a memory shard ${chance}% of the time.`} Losing costs nothing more: the echo just fades.`,
+        disabled: !!blocked,
+        onSelect: () =>
+          this.host.confirm(`Call the echo at level ${level}?`, `The embers burn on the hearth (${ECHO_COST} of ${embers}), and its echo rises from the stone.`, () => this.host.startEcho(id, level), () => this.echoLevel(id, back)),
+      };
+    });
+    if (!items.length) items.push({ label: 'Not yet', description: `Echoes answer from level ${ECHO_STEP}. Train your party first.`, disabled: true, onSelect: () => {} });
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back, startIndex: Math.max(0, levels.length - 1) });
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    this.host.openOverlay(
+      el('div', { className: 'panel dialog' }, [el('h2', { text: echoName(id) }), el('p', { text: 'How strong should it rise? The stronger the echo, the likelier it leaves a shard of an old memory.' }), menu.el, desc]),
+      menu,
+    );
+  }
 
   private rootdeep(): void {
     const back = () => this.back();

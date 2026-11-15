@@ -122,6 +122,12 @@ function reference(level: number): Stats {
   return out;
 }
 
+/** "Echo of the Blighted Elder". */
+export function echoName(id: string): string {
+  const name = ENEMIES[id].name;
+  return `Echo of ${name.replace(/^The /, 'the ')}`;
+}
+
 /**
  * A guardian as its echo at `level`: as hard for a party of that level as the guardian was at its own. Its hide keeps
  * pace with the party's blows, and its blows with the party's health and armour.
@@ -139,10 +145,9 @@ export function echoDef(id: string, level: number): EnemyDef {
   };
   // Below its own level a guardian's tricks weigh more than its numbers: its echo is softened, so it stays fair.
   const tough = (ECHO_TOUGHNESS[id] ?? 1) * (level < native ? 0.5 + (0.5 * level) / native : 1);
-  const the = /^the /i.test(def.name) ? def.name.replace(/^The /, 'the ') : def.name;
   return {
     ...def,
-    name: `Echo of ${the}`,
+    name: echoName(id),
     hp: Math.round(def.hp * offense * tough),
     atk: Math.round(keep(def.atk, n.def, r.def) * Math.sqrt(tough)),
     mag: Math.round(keep(def.mag, n.res, r.res) * Math.sqrt(tough)),
@@ -171,7 +176,7 @@ export function startEchoFight(game: Game, id: string, level: number): Combat | 
   const blocked = echoBlocker(game, id, level);
   if (blocked) return blocked;
   game.state.inventory.dreamEmber -= ECHO_COST;
-  return new Combat(game.state.party, [id], game.state.inventory, game.rng, { boss: true, echo: true, oathToken: false, enemyDefs: { [id]: echoDef(id, level) } });
+  return new Combat(game.state.party, [id], game.state.inventory, game.rng, { boss: true, echo: true, echoLevel: level, oathToken: false, enemyDefs: { [id]: echoDef(id, level) } });
 }
 
 /**

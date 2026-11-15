@@ -1654,6 +1654,10 @@ table.stats thead th {
   gap: 10px;
   min-height: 0;
 }
+/* With the Hall of Echoes: seven places, four on top. */
+.town-cards.seven {
+  grid-template-columns: repeat(4, 1fr);
+}
 
 .town-card {
   position: relative;
@@ -1707,6 +1711,7 @@ table.stats thead th {
 .spot-hall { background-image: url('/art/places/hall.webp'); }
 .spot-board { background-image: url('/art/places/board.webp'); }
 .spot-horn { background-image: url('/art/places/hornstone.webp'); }
+.spot-echoes { background-image: url('/art/places/echoes.webp'); }
 
 .town-buttons {
   display: grid;
@@ -1750,6 +1755,7 @@ table.stats thead th {
 #town-grid .town-card.spot-hall { background-image: url('/art/places/hall.webp'); }
 #town-grid .town-card.spot-board { background-image: url('/art/places/board.webp'); }
 #town-grid .town-card.spot-horn { background-image: url('/art/places/hornstone.webp'); }
+#town-grid .town-card.spot-echoes { background-image: url('/art/places/echoes.webp'); }
 
 #town-grid .town-button:hover {
   color: #fff1cf;
@@ -2990,4 +2996,50 @@ body.phone .deed-banner { top: 6px; max-width: 460px; }
 .fragment-text {
   font-style: italic;
   line-height: 1.5;
+}
+
+/* ── Memories: shards glow with the same gold as the wards' runes ─────────── */
+
+.memory-glow {
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(240, 207, 106, 0.55), 0 0 22px rgba(240, 207, 106, 0.3);
+}
+.memory-shards {
+  max-height: 52vh;
+  overflow-y: auto;
+  margin: 8px 0 12px;
+  padding-left: 2.2em;
+  display: grid;
+  gap: 8px;
+  line-height: 1.5;
+}
+.memory-shards li.missing {
+  color: var(--muted, #8a95a0);
+  letter-spacing: 2px;
+}
+.memory-shards li.found {
+  color: #f6e2a6;
+  text-shadow: 0 0 8px rgba(240, 207, 106, 0.25);
+}
+.shard-found {
+  box-shadow: 0 0 0 2px #000, 0 0 28px rgba(240, 207, 106, 0.45);
+  border-color: var(--gold);
+  animation: shard-glow 2.4s ease-in-out infinite alternate;
+}
+@keyframes shard-glow {
+  from { box-shadow: 0 0 0 2px #000, 0 0 16px rgba(240, 207, 106, 0.3); }
+  to { box-shadow: 0 0 0 2px #000, 0 0 34px rgba(240, 207, 106, 0.6); }
+}
+.shard-text {
+  font-style: italic;
+  line-height: 1.55;
+  color: #f6e2a6;
+  text-shadow: 0 0 8px rgba(240, 207, 106, 0.3);
+}
+.shard-whole {
+  color: var(--gold);
+  font-weight: 800;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shard-found { animation: none; }
 }

@@ -233,6 +233,26 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'memories',
+    title: 'Memory shards',
+    speaker: 'torvald',
+    pages: [
+      'That glow is not from any torch. It is a shard of a memory, and an old one: older than Lindholm, older than the Tree, maybe.',
+      'Every memory has fifteen shards and they come in no order, except the last, which always comes last. Only the whole memory tells you whose it is.',
+      'Read them in the Journal, under Memories, each in its place. Signed in, they also appear on the Memories page of the Wayfinders\' site.',
+    ],
+  },
+  {
+    id: 'echoes',
+    title: 'The Hall of Echoes',
+    speaker: 'torvald',
+    pages: [
+      'The stone down here remembers every voice that rang in the deep. Burn ten Dream Embers on the hearth and a guardian you have beaten answers, as an echo.',
+      'You choose how strong it rises, in steps of ten levels, up to your strongest adventurer. A stronger echo is likelier to leave a memory shard.',
+      'The embers are spent win or lose. Lose, and the echo only fades: you keep everything else. Dream Embers come from the monsters deep below, past the fifth guardian.',
+    ],
+  },
+  {
     id: 'sagas',
     title: 'Sagas and bynames',
     speaker: 'brynja',
