@@ -145,6 +145,28 @@ Spelsystemen met een eigen stukje mythe. *Voorstel, Thijs mag het aanpassen.*
 - **Sagas**: skalds bezingen wat avonturiers doen, en geven ze een bijnaam ("Wolf-Feeder", "Bane of the Blighted
   Elder"). Alleen eer, geen voordeel.
 
+### Herinneringen (memory shards), met Thijs (november 2026)
+
+Elke herinnering: 15 shards, willekeurig gevonden; de laatste komt altijd als laatste en zegt pas wie het is. Verteld
+door een naamloze "ik" (Heimdall); vanaf de tweede ronde toont elke shard ook Heimdalls eigen aandeel en spijt.
+Teksten in `src/core/data/memories.ts`.
+
+Gekozen personages (volgorde vrij):
+
+| # | Personage | Status |
+| --- | --- | --- |
+| 1 | Frigg: de lange tocht langs alle werelden om de oorlog te voorkomen | klaar ("The Long Walk") |
+| 2 | Ratatoskr, de eekhoorn tussen de adelaar en Níðhöggr | bezig |
+| 3 | Gullveig, de zieneres die drie keer verbrand werd | |
+| 4 | Völundr, de smid en vorst van de elfen | |
+| 5 | Freyr, god van oogst en vrede, heer van Álfheim | |
+| 6 | Ríg en zijn zonen Þræll, Karl en Jarl (verteld alsof Heimdall erbij was; het gaat om hemzelf) | |
+| 7 | Þrymr, de reuzenkoning die Thors hamer stal | |
+| 8 | Ymir, waar het ijs het vuur raakte | |
+| 9 | De zonen van Muspell, het naamloze vuurleger | |
+| 10 | Andvari en de vervloekte ring | |
+| 11 | Móðguðr, de wachteres van de brug naar Hel | |
+
 ### Keuzes (de drie wegen)
 
 Op drie momenten kiest de speler. Dat wordt opgeslagen (`state.choices`) en telt op richting **asgard**, **realms**
