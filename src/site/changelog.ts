@@ -23,6 +23,7 @@ export const CHANGES: ChangeDay[] = [
       'Changed: a fallen party is no longer the end. The roots carry it home to Lindholm, but the deep keeps half your gold, items and materials (gear and Oath Tokens are kept).',
       'New: a deed for the first time the roots carry you home.',
       'Fixed: signing in with Google sometimes only worked the second time.',
+      'Site: a Memories page for signed-in players, where gathered memory shards are kept, story by story.',
       'New: every creature has a few lines of its own in the bestiary, in the game and on the site.',
       'New: the byname an adventurer bears shows under their name in the party bar, also for the others on an expedition.',
       'New: seven more bynames for the long road, and five more deeds, among them one per chapter for finding every weakness.',

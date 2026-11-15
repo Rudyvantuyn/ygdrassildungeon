@@ -77,11 +77,20 @@ describe('the Hall of Echoes', () => {
     }
   });
 
+  it('names who a memory is about in its last shard only', () => {
+    for (const m of MEMORIES) {
+      const name = m.subject.replace(/^the /, '');
+      expect(m.shards[14].text, m.id).toContain(name);
+      m.shards.slice(0, 14).forEach((sh, i) => expect(sh.text, `${m.id} shard ${i + 1}`).not.toContain(name));
+      expect(m.title, m.id).not.toContain(name);
+    }
+  });
+
   it('keeps a memory\'s last shard for last', () => {
     const g = Game.newGame(5);
     // Only the test memory is still to be found.
     g.state.memories = Object.fromEntries(MEMORIES.map((m) => [m.id, m.shards.map((_, i) => i)]));
-    MEMORIES.push({ id: 'zzTest', title: 'Test', shards: Array.from({ length: 15 }, (_, i) => ({ text: `shard ${i}` })) });
+    MEMORIES.push({ id: 'zzTest', title: 'Test', subject: 'Tester', shards: Array.from({ length: 15 }, (_, i) => ({ text: `shard ${i}` })) });
     try {
       const rng = new Rng(9);
       const order: number[] = [];

@@ -209,3 +209,15 @@ button.btn { border: 0; cursor: pointer; font-size: 16px; }
 .fragment.sealed { opacity: 0.6; }
 .fragment.sealed p { font-style: normal; }
 .member .saga-line { display: block; margin-top: 2px; }
+
+/* Memories: shards glow with the same gold as the wards' runes */
+.memories { display: grid; gap: 16px; }
+.memory { background: var(--panel); padding: 18px 20px; box-shadow: inset 0 0 0 2px var(--rim), 0 0 0 2px #000; }
+.memory h3 { margin: 0 0 4px; color: var(--gold); text-shadow: 0 0 12px rgba(240, 207, 106, 0.35); }
+.memory.sealed h3 { color: var(--muted); text-shadow: none; }
+.memory.whole { box-shadow: inset 0 0 0 2px var(--gold-dark), 0 0 0 2px #000, 0 0 28px rgba(240, 207, 106, 0.18); }
+.shards { margin: 12px 0 0; padding-left: 26px; display: grid; gap: 8px; }
+.shard.found { color: #f6ebcc; line-height: 1.5; text-shadow: 0 0 10px rgba(240, 207, 106, 0.28); }
+.shard.found::marker { color: var(--gold); }
+.shard.missing { color: #3c4c58; }
+.shard.missing::marker { color: #3c4c58; }

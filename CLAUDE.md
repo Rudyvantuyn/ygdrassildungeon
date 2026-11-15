@@ -68,7 +68,8 @@ Add new names there and keep the glossary in sync.
     love Ymir and regret Midgard. In the first round they come from someone who is never named (it is Heimdall);
     from the second round on the same shards are collected again and reveal it is Heimdall's memory, with his own part
     in it and how he feels about it now (e.g. regret that knowledge he shared got a village killed). Shown with
-    a golden glow (the same gold as the wards' runes), as text with pictures (real photos through the pixel filter,
+    a golden glow (the same gold as the wards' runes) in the game and on the site's Memories page (`memories.html`,
+    signed in; who a memory is about shows only once all 15 shards are found), as text with pictures (real photos through the pixel filter,
     no AI). 10 memories of 15 shards each (`src/core/data/memories.ts`, written by Thijs). Shards drop at random and
     rarely from guardians (chapter V on, and echo fights); a shard already found never drops again. A memory stays vague
     about who it is about until its last shard, which always comes last (only once the other 14 are found).

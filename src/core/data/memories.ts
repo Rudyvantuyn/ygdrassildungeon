@@ -28,6 +28,8 @@ export interface MemoryShard {
 export interface MemoryDef {
   id: string;
   title: string;
+  /** Who the memory is about. Shown only once all of its shards are found (it is named in the last shard only). */
+  subject: string;
   /** In reading order; found at random. */
   shards: MemoryShard[];
 }
@@ -40,6 +42,7 @@ export const MEMORIES: MemoryDef[] = [
     // with her. Only the last shard says who she is.
     id: 'longWalk',
     title: 'The Long Walk',
+    subject: 'Frigg',
     shards: [
       {
         text: "She left before dawn, without guards, and without telling her husband. Only I went with her. I did not ask why; I think she was glad of that.",
@@ -108,6 +111,7 @@ export const MEMORIES: MemoryDef[] = [
     // thing he made (the Rootgnawer of chapter I). Only the last shard names the squirrel.
     id: 'strangeSquirrel',
     title: 'The Strange Squirrel',
+    subject: 'Ratatoskr',
     shards: [
       {
         text: "I do not know how I came to be in the tree. One moment I was where I always am; the next I stood on a branch wider than a road, with the worlds hanging below me in the leaves.",
@@ -176,6 +180,7 @@ export const MEMORIES: MemoryDef[] = [
     // Only the last shard names her (Gullveig, then Heiðr).
     id: 'friendInTheHall',
     title: 'My Friend in the Hall',
+    subject: 'Gullveig',
     shards: [
       {
         text: "I was young then, and knew nothing of the world. I walked into the great hall with my best friend at my side, and we laughed at how loud it was.",
@@ -244,6 +249,7 @@ export const MEMORIES: MemoryDef[] = [
     // Only the last shard names him (Völundr).
     id: 'sevenHundredRings',
     title: 'Seven Hundred Rings',
+    subject: 'Völundr',
     shards: [
       {
         text: "I met him at the edge of a lake in the wolf-dales: a smith at his anvil, his face turned to the sky, as if listening for wings.",
@@ -311,6 +317,7 @@ export const MEMORIES: MemoryDef[] = [
     // Written by Thijs (November 2026). Freyr: a young god of harvest and peace, lost for years, found again in Álfheim, where he ended its war with a field. Named only in the last shard.
     id: 'seedsAndSwords',
     title: "Seeds and Swords",
+    subject: 'Freyr',
     shards: [
       {
         text: "The first time I saw him, he was knee-deep in a barley field, laughing, and the barley grew while he laughed.",
@@ -378,6 +385,7 @@ export const MEMORIES: MemoryDef[] = [
     // Written by Thijs (November 2026). Ríg: a traveller from the bright halls who sorted people into thralls, farmers and earls and taught one son the runes, and regretted it. Told as if by someone else; in the second round it is Heimdall himself.
     id: 'theTraveller',
     title: "The Traveller",
+    subject: 'Ríg',
     shards: [
       {
         text: "Long ago a traveller left the bright halls to walk in the new realm of people, to see with his own eyes what had been made out of the giant.",
@@ -445,6 +453,7 @@ export const MEMORIES: MemoryDef[] = [
     // Written by Thijs (November 2026). Þrymr: a giant king and the narrator, drunk, steal the thunder god's hammer; the trick to get it back, and the spell that followed. Named only in the last shard.
     id: 'nightOfMead',
     title: "A Night of Mead",
+    subject: 'Þrymr',
     shards: [
       {
         text: "The giant king of the frost hills could drink like a river. That night I tried to keep up with him, which was my first mistake.",
@@ -512,6 +521,7 @@ export const MEMORIES: MemoryDef[] = [
     // Written by Thijs (November 2026). Ymir: the first giant, loved by every realm but Asgard; the narrator was there when he woke and met him though he was not allowed to; Ymir kept every impossible promise, and everything he made died with him. Named only in the last shard.
     id: 'beforeTheWorld',
     title: "Before the World",
+    subject: 'Ymir',
     shards: [
       {
         text: "I was there when he woke. Where the ice of the north met the sparks of the south, something enormous opened its eyes and laughed.",
@@ -579,6 +589,7 @@ export const MEMORIES: MemoryDef[] = [
     // Written by Thijs (November 2026). The sons of Muspell: three nameless brothers who doubled every day until they became the nameless fire army. Named only in the last shard.
     id: 'threeBrothers',
     title: "Three Brothers",
+    subject: 'the sons of Muspell',
     shards: [
       {
         text: "I met three brothers once at the edge of the fire lands, warming their hands at a flame that was already part of them.",
@@ -646,6 +657,7 @@ export const MEMORIES: MemoryDef[] = [
     // Written by Thijs (November 2026). Andvari: the luckiest dwarf in the worlds, until a ring burned into his finger and brought bad luck to everyone near him, so he chose to live alone. Named only in the last shard.
     id: 'luckiestFriend',
     title: "The Luckiest Friend",
+    subject: 'Andvari',
     shards: [
       {
         text: "I had a friend once who was the luckiest person in all the worlds. If he dropped his bread, it landed butter side up. If he dug, he found gold.",
@@ -713,6 +725,7 @@ export const MEMORIES: MemoryDef[] = [
     // Written by Thijs (November 2026). Móðguðr: a girl sent to Hel whose magic drove everyone near her mad, so Hel, with pain in her heart, made her vast and set her outside the gates as keeper of the bridge. Named only in the last shard.
     id: 'girlOnTheRoad',
     title: "The Girl on the Road",
+    subject: 'Móðguðr',
     shards: [
       {
         text: "I saw a girl come down the long road to the realm of the dead. She was very young, and she was not afraid at all.",

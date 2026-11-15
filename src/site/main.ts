@@ -14,6 +14,7 @@ import '@fontsource/alegreya/latin-700.css';
 import './site.css';
 import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
 import { BEAST_LORE } from '../core/data/beastLore';
+import { MEMORIES, SHARDS_PER_MEMORY } from '../core/data/memories';
 import { MATERIALS } from '../core/data/materials';
 import { ITEMS } from '../core/data/items';
 import { ELEMENT_NAMES, elementIcon } from '../ui/elements';
@@ -91,7 +92,7 @@ function header(): HTMLElement {
       'nav',
       {},
       ...NAV.map(([p, label]) => h('a', { href: `${p}.html`, class: p === page || (p === 'devlog' && page === 'changelog') ? 'on' : '' }, label)),
-      h('a', { href: 'wayfinder.html', class: `account ${page === 'wayfinder' ? 'on' : ''}` }, me ? me.name : 'Sign in'),
+      h('a', { href: 'wayfinder.html', class: `account ${page === 'wayfinder' || page === 'memories' ? 'on' : ''}` }, me ? me.name : 'Sign in'),
       h('a', { class: 'btn play', href: 'play.html' }, 'Play'),
     ),
   );
@@ -422,6 +423,32 @@ function signInBox(): HTMLElement {
   );
 }
 
+/**
+ * The memories a player has gathered, story by story. Shards not found yet are dark; who a memory is about shows only
+ * once every one of its shards is found (src/core/data/memories.ts).
+ */
+function memoriesPage(): HTMLElement[] {
+  const head = h('section', { class: 'page-head' }, h('h1', {}, 'Memories'), h('p', { class: 'tagline' }, 'Someone remembers how the world was made'));
+  if (!me) return [head, h('section', { class: 'block' }, h('p', {}, 'Sign in to see the memories your Wayfinders have gathered.')), signInBox()];
+  const found = me.save?.memories ?? {};
+  const intro = me.save
+    ? 'Some guardians, deep in the Rootdeep, leave behind a shard of an old memory. Every memory has fifteen; they come in no order, except the last, which always comes last.'
+    : 'Keep your game with your account (in the game: the Hornstone, Account) and the memories you gather show here.';
+  const cards = MEMORIES.map((m) => {
+    const have = new Set(found[m.id] ?? []);
+    if (!have.size) return h('article', { class: 'memory sealed' }, h('h3', {}, 'An unknown memory'), h('p', { class: 'muted' }, `0 of ${SHARDS_PER_MEMORY} shards`));
+    const whole = have.size >= m.shards.length;
+    return h(
+      'article',
+      { class: `memory ${whole ? 'whole' : ''}` },
+      h('h3', {}, m.title),
+      h('p', { class: 'muted' }, whole ? `A memory of ${m.subject}` : `${have.size} of ${m.shards.length} shards`),
+      h('ol', { class: 'shards' }, ...m.shards.map((sh, i) => (have.has(i) ? h('li', { class: 'shard found' }, sh.text) : h('li', { class: 'shard missing' }, '…')))),
+    );
+  });
+  return [head, h('section', { class: 'block' }, h('p', {}, intro), h('div', { class: 'memories' }, ...cards))];
+}
+
 function wayfinder(): HTMLElement[] {
   const head = h('section', { class: 'page-head' }, h('h1', {}, 'My Wayfinder'), h('p', { class: 'tagline' }, me ? `Sworn in as ${me.name}` : 'Your medals and your party'));
   if (!me) return [head, signInBox()];
@@ -447,6 +474,8 @@ function wayfinder(): HTMLElement[] {
     .map(([id, e]) => medalCard(id, e))
     .filter((x): x is HTMLElement => !!x);
   out.push(section('Book of Deeds', medals.length ? h('div', { class: 'medal-case' }, ...medals) : h('p', {}, 'No medals yet. Nobody will tell you what counts as a deed.')));
+  const shardsFound = Object.values(s?.memories ?? {}).reduce((n, list) => n + list.length, 0);
+  out.push(section('Memories', h('p', {}, shardsFound ? `You have gathered ${shardsFound} memory shard${shardsFound === 1 ? '' : 's'}. ` : 'Deep in the Rootdeep, some guardians leave behind a shard of an old memory, glowing faintly gold. ', h('a', { href: 'memories.html' }, 'Your memories'), '.')));
   const metCount = Object.values(s?.bestiary ?? {}).filter((e) => e.seen > 0).length;
   out.push(section('The Rootdeep', h('p', {}, `You have reached ${me.chapters === 1 ? 'the first chapter' : `${me.chapters} chapters`}, and met ${metCount} kinds of creature: they are in your `, h('a', { href: 'bestiary.html' }, 'bestiary'), '.')));
   const nameInput = h('input', { type: 'text', maxlength: '16', value: me.name, 'aria-label': 'Player name' }) as HTMLInputElement;
@@ -464,7 +493,7 @@ function wayfinder(): HTMLElement[] {
   return out;
 }
 
-const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog, changelog, wayfinder };
+const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog, changelog, wayfinder, memories: memoriesPage };
 
 void (async () => {
   if (await leaveOldAddress()) return;
