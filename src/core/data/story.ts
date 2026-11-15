@@ -47,6 +47,7 @@ export const HRODNA = 'Hrodna, Envoy of the Frost Court';
 export const EIRA = 'Eira the Wanderer';
 const BRYNJA = 'Brynja, Master of the Oath Hall';
 const ASKE = 'Brother Aske, healer';
+const TORVALD = 'Torvald the carver';
 const NARRATOR = '';
 
 const beaten = (floor: number) => (g: Game) => g.state.progress[floor]?.bossDefeated === true;
@@ -808,6 +809,180 @@ export const STORY: StoryScene[] = [
     lines: [
       { speaker: SIGRID, text: 'Four wards broken. Ymir breathes in his sleep, Asgard has stopped pretending not to watch, and every realm is waiting to see what we do next.' },
       { speaker: SIGRID, text: 'Rest while you can, Wayfinders. The deep is not done with us.' },
+    ],
+  },
+
+  // ── Chapter V: Ginnungagap ─────────────────────────────────────────────────
+  // A proposal in Thijs' line (see docs/verhaal.md); he may change all of it.
+  {
+    id: 'gapArrival',
+    title: 'The gap before the world',
+    when: 'floor',
+    ready: on(20),
+    lines: [
+      { speaker: NARRATOR, text: 'Past the Dreamwarden the roots stop climbing. They turn and fall, down through bone and cloud, until there is no more bone.' },
+      { speaker: NARRATOR, text: 'Cold from one side, heat from the other, and between them nothing at all, very wide. Ginnungagap: the gap that was here before the world.' },
+      { speaker: NARRATOR, text: 'Midgard was built across it like a lid on a well. You are standing under the lid.' },
+      { speaker: NARRATOR, text: 'Frozen rivers run out of the north into the dark. The old songs call them Élivágar. Where their venom froze, the rime is still alive.' },
+    ],
+  },
+  {
+    id: 'gapRealms',
+    title: 'A song in the ice',
+    when: 'floor',
+    ready: (g) => on(20)(g) && road(g) === 'realms',
+    lines: [
+      { speaker: NARRATOR, text: 'The ice at the stair hums. It is a song, very low: the one Hrodna sings to the sleeping giant. The frost carried it all the way down here.' },
+    ],
+  },
+  {
+    id: 'gapAsgard',
+    title: 'The flame bows',
+    when: 'floor',
+    ready: (g) => on(20)(g) && road(g) === 'asgard',
+    lines: [
+      { speaker: NARRATOR, text: 'Eira\'s little flame, which leaned up toward the sky in the skull, bends down here. It points into the gap, and it shivers.' },
+    ],
+  },
+  {
+    id: 'gapMidgard',
+    title: 'The watch-fire',
+    when: 'floor',
+    ready: (g) => on(20)(g) && road(g) === 'midgard',
+    lines: [
+      { speaker: NARRATOR, text: 'Far, far above, through every layer of the giant, you can still make out one warm point of light. Lindholm\'s watch-fire. They kept it burning.' },
+    ],
+  },
+  {
+    id: 'rimeDrifts',
+    title: 'Shapes in the rime',
+    when: 'floor',
+    ready: on(21),
+    lines: [
+      { speaker: NARRATOR, text: 'There are shapes in the rime drifts. A hand. A knee. Half a face. As if the frost tried to become someone, over and over, and almost managed.' },
+    ],
+  },
+  {
+    id: 'sparkfall',
+    title: 'Sparks from the south',
+    when: 'floor',
+    ready: on(22),
+    lines: [
+      { speaker: NARRATOR, text: 'Sparks blow over the ice from the south, from a country that is only fire. Where they land, the rime sighs, and something underneath it stirs.' },
+    ],
+  },
+  {
+    id: 'rimewellFallen',
+    title: 'A glint of gold',
+    when: 'victory',
+    ready: beaten(22),
+    lines: [
+      { speaker: NARRATOR, text: 'The Rimewell cracks from top to bottom, and the last of the venom runs out of it, thin as thread.' },
+      { speaker: NARRATOR, text: 'For a moment the ice at its heart glows gold, the gold of the wards.' },
+      { speaker: NARRATOR, text: 'And you remember something you never saw: a vast voice laughing, and the ice cracking for joy. Then it is gone.' },
+    ],
+  },
+  {
+    id: 'goldInTheIce',
+    title: 'Someone remembers',
+    when: 'town',
+    ready: beaten(22),
+    lines: [
+      { speaker: ASKE, text: 'You saw it too? The gold, and the laughing? I have not slept since.' },
+      { speaker: HRODNA, text: 'That was no ward. It was a memory, caught in the ice. Old memories sink, healer, and down there is where everything began.' },
+      { speaker: SIGRID, text: 'Whose memory?' },
+      { speaker: HRODNA, text: 'I do not know. And that frightens me more than Asgard does.' },
+      { speaker: NARRATOR, text: 'Eira says nothing. For once, she does not look at you.' },
+    ],
+  },
+  {
+    id: 'theThaw',
+    title: 'The thaw',
+    when: 'floor',
+    ready: on(23),
+    lines: [
+      { speaker: NARRATOR, text: 'Here the ice from the north meets the fire from the south. The floor runs with meltwater, and the steam is as warm as breath.' },
+      { speaker: NARRATOR, text: 'The songs say this is where the drops quickened, and the first giant woke.' },
+    ],
+  },
+  {
+    id: 'ymirsCradle',
+    title: 'The cradle',
+    when: 'floor',
+    ready: on(24),
+    lines: [
+      { speaker: NARRATOR, text: 'At the very bottom of the gap: a hollow in the ice as big as a hall, in the shape of someone who once lay here curled up. Ymir\'s cradle.' },
+      { speaker: NARRATOR, text: 'A golden rune is set across the gap above it, like a bar across a door: the fifth ward.' },
+      { speaker: NARRATOR, text: 'It does not hold Ymir. It holds the gap shut, so that nothing new can ever be born here again.' },
+    ],
+  },
+  {
+    id: 'gapwardenFallen',
+    title: 'The fifth ward',
+    when: 'victory',
+    ready: beaten(24),
+    lines: [
+      { speaker: NARRATOR, text: 'The Gapwarden comes apart, half into frost and half into cinders, and the rune above the cradle breaks.' },
+      { speaker: NARRATOR, text: 'A warm wind meets a cold one, the way it did before there was anything. In the hollow, one drop of rime begins, very slowly, to move.' },
+      { speaker: NARRATOR, text: 'Far above, the horn sounds four times.' },
+    ],
+  },
+  {
+    id: 'fifthWard',
+    title: 'Something stirs',
+    when: 'town',
+    ready: beaten(24),
+    lines: [
+      { speaker: SIGRID, text: 'Five wards. Something new is stirring at the bottom of the world, and it is stirring because of us.' },
+      { speaker: HRODNA, text: 'A giant, born the old way, the first in an age. Let the realms raise it. It will grow up remembering that Midgard set it free.' },
+      { speaker: EIRA, text: 'Or let me close the gap again. What is born there will not be yours, or theirs. It will only be hungry. Give me the seal.' },
+      { speaker: BRYNJA, text: 'Or Lindholm takes it in. A child is a child. We raise it ourselves, and it learns from us what Midgard is.' },
+    ],
+    choice: {
+      prompt: 'What becomes of what stirs in the gap?',
+      options: [
+        {
+          id: 'hrodna', label: 'Let the realms raise it', leaning: 'realms',
+          reply: [
+            { speaker: HRODNA, text: 'The Frost Court will send its oldest nurse. And it will hear, every day, who opened the door.' },
+          ],
+        },
+        {
+          id: 'eira', label: 'Let Eira close the gap', leaning: 'asgard',
+          reply: [
+            { speaker: EIRA, text: 'It is kinder this way. Believe me. I have seen what the gap makes.' },
+            { speaker: ASKE, text: 'Seen? She speaks as if she had been there when it was open.' },
+          ],
+        },
+        {
+          id: 'brynja', label: 'Lindholm raises it', leaning: 'midgard',
+          reply: [
+            { speaker: BRYNJA, text: 'Then it gets a cot by the hearth in the Oath Hall, and a name when it is ready for one. Not before.' },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'echoHall',
+    title: 'The stone remembers',
+    when: 'town',
+    ready: (g) => beaten(24)(g) && g.state.story.includes('fifthWard'),
+    lines: [
+      { speaker: TORVALD, text: 'Since the fifth ward broke, the old root under my workshop rings like a bell.' },
+      { speaker: TORVALD, text: 'Go down there and you hear them: every guardian you ever fought, still fighting, in the stone.' },
+      { speaker: TORVALD, text: 'I have cleared it out and put a hearth in. The Hall of Echoes, I call it. The stories say embers from a dream make the echoes rise. Dream Embers.' },
+      { speaker: TORVALD, text: 'Nobody here has ever seen one. But the deep has always had more than we have.' },
+    ],
+  },
+  {
+    id: 'chapterFiveEnd',
+    title: 'Below the beginning',
+    when: 'town',
+    ready: (g) => beaten(24)(g) && g.state.story.includes('echoHall'),
+    lines: [
+      { speaker: SIGRID, text: 'Five wards broken, and the roots go on down. Past the beginning of everything. I did not know there was a past the beginning.' },
+      { speaker: SIGRID, text: 'Whatever comes next, it was here before the gods. Go carefully, Wayfinders.' },
     ],
   },
 ];

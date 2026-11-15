@@ -69,7 +69,7 @@ chunky pixels as the walls (`src/render/corridor.ts`). Nothing to credit.
 
 ## Website pictures (`public/art/site`)
 
-- `ch1.webp`, `ch2.webp`, `ch3.webp`, `shot-*.webp`: screenshots of the game itself (its corridors, a fight, the map,
+- `ch1.webp` to `ch5.webp`, `shot-*.webp`: screenshots of the game itself (its corridors, a fight, the map,
   the town), so they are made only of the assets listed on this page. Retake them when the art changes.
 
 ## Map icons (`public/art/icons`)

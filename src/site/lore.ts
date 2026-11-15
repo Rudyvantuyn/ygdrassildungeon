@@ -101,4 +101,11 @@ export const CHAPTERS: { numeral: string; name: string; floors: string; image: s
     image: 'site/ch4.webp',
     text: 'Ymir\'s skull became the sky, and his brains the clouds. Past the bones the roots climb into the inside of the sky: a vault of bone over drifting cloud, storms being born, and a giant who still dreams.',
   },
+  {
+    numeral: 'V',
+    name: 'Ginnungagap',
+    floors: 'Floors 21–25',
+    image: 'site/ch5.webp',
+    text: 'Below the skull the roots fall into the gap the world was built across: ice from the north, fire from the south, and between them the place where the first giant woke. The rime there is still alive.',
+  },
 ];

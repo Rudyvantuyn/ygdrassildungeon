@@ -180,3 +180,36 @@ describe('chapter IV balance', { timeout: 120_000 }, () => {
     });
   }
 });
+
+// Chapter V (Ginnungagap), tuned for a party of five (November 2026). A party arrives after the Dreamwarden around
+// level 55 with tier 20 gear. Measured on purpose: Rimewell 35/67/73% at 58/60/62; Gapwarden 17/40/67% at 58/62/66;
+// the prowlers about a fifth at 58, a third to a half at 63, two in three at 68.
+describe('chapter V balance', { timeout: 180_000 }, () => {
+  it('its packs are a step up from chapter IV, but a party fresh from the Dreamwarden wins them', () => {
+    expect(fightWinRate(['rimeling', 'rimeling', 'rimeling'], 55, 20, {})).toBeGreaterThanOrEqual(0.85);
+    expect(fightWinRate(['muspelSpark', 'muspelSpark', 'steamwraith', 'muspelSpark'], 55, 20, {})).toBeGreaterThanOrEqual(0.7);
+    expect(fightWinRate(['cinderwhirl', 'sparkadder', 'rimeling'], 48, 18, {})).toBeLessThan(0.85);
+  });
+
+  it('the Rimewell (middle of the chapter) is a fair fight around level 59', () => {
+    const early = fightWinRate(['rimewell'], 58, 20, { boss: true });
+    expect(early).toBeGreaterThanOrEqual(0.25);
+    expect(early).toBeLessThanOrEqual(0.68);
+    expect(fightWinRate(['rimewell'], 62, 22, { boss: true })).toBeGreaterThanOrEqual(0.65);
+  });
+
+  it('the Gapwarden (end of the chapter) needs real training: hopeless on arrival, won around level 66', () => {
+    expect(fightWinRate(['gapwarden'], 58, 20, { boss: true })).toBeLessThanOrEqual(0.22);
+    expect(fightWinRate(['gapwarden'], 66, 22, { boss: true })).toBeGreaterThanOrEqual(0.6);
+  });
+
+  for (const id of ['rimedrake', 'emberjotun']) {
+    it(`${id}: hopeless on arrival, risky at 63, beatable near the top`, () => {
+      expect(fightWinRate([id], 58, 20, { prowler: true })).toBeLessThanOrEqual(0.25);
+      const at63 = fightWinRate([id], 63, 22, { prowler: true });
+      expect(at63).toBeGreaterThanOrEqual(0.08);
+      expect(at63).toBeLessThanOrEqual(0.6);
+      expect(fightWinRate([id], 68, 22, { prowler: true })).toBeGreaterThanOrEqual(0.55);
+    });
+  }
+});

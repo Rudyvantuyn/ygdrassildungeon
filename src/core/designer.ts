@@ -67,6 +67,7 @@ export const THEMES: ThemeDef[] = (() => {
     coral: 'Coral',
     abyss: 'Abyss',
     marrow: 'Marrowdeep',
+    rime: 'Ginnungagap',
   };
   const seen = new Map<string, ThemeDef>();
   for (const f of FLOORS) {

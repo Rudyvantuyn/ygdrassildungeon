@@ -210,5 +210,26 @@
     "file": "File:Lava_River_Cave.jpg",
     "author": "Coconino National Forest (US Forest Service)",
     "license": "public domain"
+  },
+  {
+    "use": "Ginnungagap wall",
+    "asset": "dungeon/rime-wall.webp",
+    "file": "File:Ätna_Eishöhle.jpg",
+    "author": "Simon Höger",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Ginnungagap floor",
+    "asset": "dungeon/rime-floor.webp",
+    "file": "File:Ätna_Eishöhle.jpg",
+    "author": "Simon Höger",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Ginnungagap ceiling",
+    "asset": "dungeon/rime-ceiling.webp",
+    "file": "File:Ätna_Eishöhle.jpg",
+    "author": "Simon Höger",
+    "license": "CC0 1.0"
   }
 ]

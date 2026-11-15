@@ -76,4 +76,20 @@ export const BEAST_LORE: Record<string, string> = {
   thunderwyrm: 'A sky serpent coiled in the thunderheads, as long as a ship. The storm follows it, or it follows the storm.',
   fogWatcher: 'A hundred eyes in the fog, and every one of them turned your way. Someone wanted to know who comes this far.',
   dreamwarden: 'Something guards the dreaming heart of the skull. It does not want you to wake what sleeps there, or perhaps it does not want you to see it.',
+
+  // Chapter V: Ginnungagap
+  rimeling: 'The venom rivers froze where they met the gap, and the rime they left is still alive. Rimelings are crumbs of it, and they sting.',
+  eitrDrop: 'A single drop of the venom that ran in the first rivers. It wobbles, it hisses, and it eats through boots.',
+  muspelSpark: 'Sparks blow north out of the fire country and never land. They dance over the ice until they find something that burns.',
+  emberworm: 'It swims through hot rock the way a fish swims through water, and it leaves the rock glowing behind it.',
+  sparkadder: 'A lizard of the fire side, coiled and quick. Its bite burns twice: once going in, and once all night after.',
+  cinderwhirl: 'A whirlwind of ash and embers that never settles. Blades go through it. Cold does not.',
+  steamwraith: 'Where fire meets ice there is steam, and some of the steam remembers being alive. It drifts toward warm breath.',
+  rimeclaw: 'A beast grown out of the frost, all white fur and blue claws. It hunts by the sound of chattering teeth.',
+  saltAurochs: 'Huge pale cattle that lick the salt from the ice, as the very first cow is said to have done. Leave them their salt.',
+  hrimthurs: 'Frost giants, born of the rime as the oldest of them was. They do not like that the world is here, standing on their grandfather.',
+  rimedrake: 'A drake of the cold side, white as the ice it sleeps in. When it breathes, the corridor freezes from wall to wall.',
+  emberjotun: 'A giant from the fire country, wandered far north of where it should be. The ice hisses where it walks.',
+  rimewell: 'A spring older than the rivers it feeds. The venom and the cold both come from here, and something in it still wells up.',
+  gapwarden: 'It stands where ice meets fire, holding the two apart. Someone set it there so that nothing new would ever be born in the gap again.',
 };

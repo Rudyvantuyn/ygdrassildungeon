@@ -825,6 +825,189 @@ const list: EnemyDef[] = [
     material: { id: 'dreamShard', chance: 1 },
     art: { shape: 'slime', color: '#e08030', accent: '#f0d040', size: 1.8 },
   },
+  // ── Chapter V: Ginnungagap (the yawning gap where the world began, floors 21–25) ──
+  {
+    id: 'rimeling',
+    name: 'Rimeling',
+    hp: 2400, atk: 165, def: 85, mag: 150, res: 120, spd: 42,
+    xp: 320, gold: 155,
+    weak: ['fire'], resist: ['frost', 'phys'],
+    skills: [
+      { name: 'Venom Rime', chance: 0.3, kind: 'magic', element: 'frost', power: 100, target: 'all', inflict: { ailment: 'poison', chance: 0.25 } },
+    ],
+    drop: { item: 'spiritDew', chance: 0.1 },
+    material: { id: 'rimeJelly', chance: 0.45 },
+    art: { shape: 'slime', color: '#3060c0', accent: '#e04040', size: 0.9 },
+  },
+  {
+    id: 'eitrDrop',
+    name: 'Eitr Drop',
+    hp: 2500, atk: 160, def: 75, mag: 175, res: 100, spd: 46,
+    xp: 315, gold: 152,
+    weak: ['storm'], resist: ['frost', 'fire'],
+    skills: [
+      { name: 'Eitr Splash', chance: 0.35, kind: 'magic', element: 'frost', power: 190, target: 'one', inflict: { ailment: 'poison', chance: 0.4 } },
+    ],
+    drop: { item: 'clearwater', chance: 0.15 },
+    material: { id: 'eitrBead', chance: 0.45 },
+    art: { shape: 'slime', color: '#c02060', accent: '#f080a0', size: 0.8 },
+  },
+  {
+    id: 'muspelSpark',
+    name: 'Muspel Spark',
+    hp: 2000, atk: 130, def: 90, mag: 150, res: 150, spd: 72,
+    xp: 320, gold: 156,
+    weak: ['frost'], resist: ['fire', 'storm'],
+    ranged: true,
+    skills: [
+      { name: 'Sparkfall', chance: 0.3, kind: 'magic', element: 'fire', power: 95, target: 'all' },
+    ],
+    material: { id: 'muspelCinder', chance: 0.45 },
+    art: { shape: 'slime', color: '#f0a020', accent: '#fff0a0', size: 0.8 },
+  },
+  {
+    id: 'emberworm',
+    name: 'Emberworm',
+    hp: 3000, atk: 200, def: 120, mag: 70, res: 70, spd: 36,
+    xp: 330, gold: 160,
+    weak: ['frost'], resist: ['fire'],
+    skills: [
+      { name: 'Molten Bite', chance: 0.3, kind: 'phys', element: 'fire', power: 200, target: 'one' },
+    ],
+    material: { id: 'emberSegment', chance: 0.45 },
+    art: { shape: 'wyrm', color: '#e06020', accent: '#ffd040', size: 1.0 },
+  },
+  {
+    id: 'sparkadder',
+    name: 'Sparkadder',
+    hp: 2600, atk: 190, def: 80, mag: 150, res: 95, spd: 66,
+    xp: 325, gold: 158,
+    weak: ['frost'], resist: ['fire'],
+    skills: [
+      { name: 'Ember Fang', chance: 0.3, kind: 'phys', element: 'fire', power: 185, target: 'one', inflict: { ailment: 'poison', chance: 0.2 } },
+    ],
+    material: { id: 'adderScale', chance: 0.45 },
+    art: { shape: 'wyrm', color: '#c03020', accent: '#f0c040', size: 0.9 },
+  },
+  {
+    id: 'cinderwhirl',
+    name: 'Cinderwhirl',
+    hp: 2800, atk: 175, def: 55, mag: 170, res: 125, spd: 70,
+    xp: 335, gold: 162,
+    weak: ['frost'], resist: ['phys', 'fire'],
+    skills: [
+      { name: 'Burning Wind', chance: 0.3, kind: 'magic', element: 'fire', power: 110, target: 'all' },
+    ],
+    material: { id: 'whirlAsh', chance: 0.4 },
+    art: { shape: 'moth', color: '#d02020', accent: '#ffa040', size: 1.0 },
+  },
+  {
+    id: 'steamwraith',
+    name: 'Steamwraith',
+    hp: 2900, atk: 160, def: 70, mag: 165, res: 140, spd: 52,
+    xp: 340, gold: 165,
+    weak: ['storm'], resist: ['phys', 'frost', 'fire'],
+    skills: [
+      { name: 'Scalding Mist', chance: 0.35, kind: 'magic', element: 'fire', power: 105, target: 'all', inflict: { ailment: 'sleep', chance: 0.12 } },
+    ],
+    drop: { item: 'spiritDew', chance: 0.15 },
+    material: { id: 'steamVeil', chance: 0.4 },
+    art: { shape: 'moth', color: '#e0e0e0', accent: '#a0c0d0', size: 1.0 },
+  },
+  {
+    id: 'rimeclaw',
+    name: 'Rimeclaw',
+    hp: 3200, atk: 205, def: 105, mag: 60, res: 80, spd: 58,
+    xp: 335, gold: 162,
+    weak: ['fire'], resist: ['frost'],
+    skills: [
+      { name: 'Frost Rend', chance: 0.3, kind: 'phys', element: 'frost', power: 205, target: 'one', inflict: { ailment: 'paralysis', chance: 0.15 } },
+    ],
+    material: { id: 'rimeclawTalon', chance: 0.4 },
+    art: { shape: 'beast', color: '#a0e0f0', accent: '#ffffff', size: 1.0 },
+  },
+  {
+    id: 'saltAurochs',
+    name: 'Salt Aurochs',
+    hp: 4400, atk: 230, def: 135, mag: 40, res: 60, spd: 30,
+    xp: 380, gold: 185,
+    weak: ['storm'], resist: ['frost'],
+    skills: [
+      { name: 'Trample', chance: 0.25, kind: 'phys', element: 'phys', power: 130, target: 'all' },
+    ],
+    drop: { item: 'tideDraught', chance: 0.12 },
+    material: { id: 'aurochsHorn', chance: 0.4 },
+    art: { shape: 'beast', color: '#d8d0c0', accent: '#806040', size: 1.2 },
+  },
+  {
+    id: 'hrimthurs',
+    name: 'Hrimthurs',
+    hp: 5200, atk: 265, def: 140, mag: 70, res: 80, spd: 26,
+    xp: 420, gold: 205,
+    weak: ['fire'], resist: ['frost', 'storm'],
+    skills: [
+      { name: 'Rime-Fist', chance: 0.3, kind: 'phys', element: 'frost', power: 260, target: 'one' },
+      { name: 'Hoarfrost Breath', chance: 0.15, kind: 'magic', element: 'frost', power: 100, target: 'all' },
+    ],
+    material: { id: 'thursRime', chance: 0.4 },
+    art: { shape: 'golem', color: '#80c0e0', accent: '#ffffff', size: 1.3 },
+  },
+  {
+    id: 'rimedrake',
+    name: 'Rimedrake',
+    hp: 44000, atk: 280, def: 140, mag: 200, res: 130, spd: 52,
+    xp: 5400, gold: 2300,
+    weak: ['fire'], resist: ['frost', 'storm'],
+    skills: [
+      { name: 'Glacier Breath', chance: 0.25, kind: 'magic', element: 'frost', power: 135, target: 'all', inflict: { ailment: 'paralysis', chance: 0.15 } },
+      { name: 'Ice Talon', chance: 0.3, kind: 'phys', element: 'phys', power: 250, target: 'one' },
+    ],
+    drop: { item: 'tideDraught', chance: 0.8 },
+    material: { id: 'drakeRime', chance: 1 },
+    art: { shape: 'wyrm', color: '#c0d0e0', accent: '#4060a0', size: 1.4 },
+  },
+  {
+    id: 'emberjotun',
+    name: 'Emberjotun',
+    hp: 46000, atk: 295, def: 135, mag: 150, res: 115, spd: 38,
+    xp: 5600, gold: 2400,
+    weak: ['frost'], resist: ['fire'],
+    skills: [
+      { name: 'Muspel Brand', chance: 0.3, kind: 'phys', element: 'fire', power: 260, target: 'one' },
+      { name: 'Ember Rain', chance: 0.2, kind: 'magic', element: 'fire', power: 130, target: 'all' },
+    ],
+    drop: { item: 'spiritDew', chance: 0.6 },
+    material: { id: 'jotunEmber', chance: 1 },
+    art: { shape: 'golem', color: '#c03020', accent: '#f0a040', size: 1.4 },
+  },
+  {
+    id: 'rimewell',
+    name: 'The Rimewell',
+    hp: 50000, atk: 240, def: 130, mag: 185, res: 140, spd: 32,
+    xp: 6000, gold: 4200,
+    weak: ['fire'], resist: ['frost', 'phys'],
+    skills: [
+      { name: 'Venom Spring', chance: 0.25, kind: 'magic', element: 'frost', power: 130, target: 'all', inflict: { ailment: 'poison', chance: 0.3 } },
+      { name: 'Ice Lance', chance: 0.3, kind: 'magic', element: 'frost', power: 250, target: 'one' },
+      { name: 'Deep Cold', chance: 0.15, kind: 'magic', element: 'frost', power: 115, target: 'all', inflict: { ailment: 'paralysis', chance: 0.15 } },
+    ],
+    material: { id: 'wellHeart', chance: 1 },
+    art: { shape: 'golem', color: '#80f0f0', accent: '#ffffff', size: 1.7 },
+  },
+  {
+    id: 'gapwarden',
+    name: 'The Gapwarden',
+    hp: 66000, atk: 300, def: 140, mag: 225, res: 135, spd: 34,
+    xp: 14000, gold: 9000,
+    weak: ['storm'], resist: ['fire', 'frost'],
+    skills: [
+      { name: 'Ice and Fire', chance: 0.25, kind: 'magic', element: 'fire', power: 135, target: 'all' },
+      { name: 'Rime and Spark', chance: 0.2, kind: 'magic', element: 'frost', power: 135, target: 'all', inflict: { ailment: 'paralysis', chance: 0.15 } },
+      { name: 'Closing Gap', chance: 0.3, kind: 'phys', element: 'phys', power: 300, target: 'one' },
+    ],
+    material: { id: 'gapSeal', chance: 1 },
+    art: { shape: 'slime', color: '#c060c0', accent: '#f0f0ff', size: 1.8 },
+  },
 ];
 
 /**
@@ -833,7 +1016,7 @@ const list: EnemyDef[] = [
  * A fifth adventurer helps most against packs, so ordinary monsters gain the most; one big foe gains less.
  * New guardians and prowlers go in these lists too (a test checks that none is missing).
  */
-export const GUARDIAN_IDS = ['blightedElder', 'rootgnawer', 'drownedJarl', 'hafgufa', 'ribwarden', 'hrungnir', 'fogWatcher', 'dreamwarden'];
+export const GUARDIAN_IDS = ['blightedElder', 'rootgnawer', 'drownedJarl', 'hafgufa', 'ribwarden', 'hrungnir', 'fogWatcher', 'dreamwarden', 'rimewell', 'gapwarden'];
 /** Each prowler's own factors: they are tuned one by one against the prowler rules (hopeless, risky, beatable). */
 const PROWLER_SCALE: Record<string, { hp: number; power: number }> = {
   grimtusk: { hp: 1.1, power: 1.15 },
@@ -846,6 +1029,8 @@ const PROWLER_SCALE: Record<string, { hp: number; power: number }> = {
   ossuaryHound: { hp: 1.18, power: 1.18 },
   gloomgriffon: { hp: 1.0, power: 1.05 },
   thunderwyrm: { hp: 0.85, power: 1.2 },
+  rimedrake: { hp: 1.4, power: 1.05 },
+  emberjotun: { hp: 1.45, power: 1.02 },
 };
 export const PROWLER_IDS = Object.keys(PROWLER_SCALE);
 const SCALE = {
@@ -854,6 +1039,8 @@ const SCALE = {
   marrowMonster: { hp: 1.45, power: 1.22 },
   /** The Dreaming Skull's packs (from the Mistling on), tuned for five from the start. */
   skullMonster: { hp: 1.25, power: 1.08 },
+  /** Ginnungagap's packs (from the Rimeling on), tuned for five from the start. */
+  gapMonster: { hp: 1.25, power: 1.08 },
   guardian: { hp: 1.1, power: 1.03 },
 };
 /** Guardians that needed their own factor: a five-strong party should still not rush the Blighted Elder. */
@@ -862,11 +1049,12 @@ const GUARDIAN_SCALE: Record<string, { hp: number; power: number }> = {
 };
 const MARROW_FROM = list.findIndex((e) => e.id === 'marrowgnaw');
 const SKULL_FROM = list.findIndex((e) => e.id === 'mistling');
+const GAP_FROM = list.findIndex((e) => e.id === 'rimeling');
 
 function scaled(e: EnemyDef, index: number): EnemyDef {
   const k = GUARDIAN_IDS.includes(e.id)
     ? (GUARDIAN_SCALE[e.id] ?? SCALE.guardian)
-    : (PROWLER_SCALE[e.id] ?? (index >= SKULL_FROM ? SCALE.skullMonster : index >= MARROW_FROM ? SCALE.marrowMonster : SCALE.monster));
+    : (PROWLER_SCALE[e.id] ?? (index >= GAP_FROM ? SCALE.gapMonster : index >= SKULL_FROM ? SCALE.skullMonster : index >= MARROW_FROM ? SCALE.marrowMonster : SCALE.monster));
   return { ...e, hp: Math.round(e.hp * k.hp), atk: Math.round(e.atk * k.power), mag: Math.round(e.mag * k.power) };
 }
 

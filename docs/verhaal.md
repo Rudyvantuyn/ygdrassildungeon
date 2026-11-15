@@ -109,6 +109,39 @@ Ook een voorstel in Thijs' lijn; alles mag hij veranderen. Thema gekozen door de
 - Open voor Thijs: wat er gebeurt als Ymir wakker wordt; of Asgard de wachters stuurde of iemand anders; wat er boven
   het gewelf ligt.
 
+### Hoofdstuk V (voorstel, november 2026)
+
+Ook een voorstel in Thijs' lijn; alles mag hij veranderen. Thema gekozen door de eigenaar: **Ginnungagap**, de gapende
+leegte van vóór de wereld (ijs uit Niflheim in het noorden, vuur uit Muspelheim in het zuiden; waar ze elkaar raakten
+werd Ymir geboren). Midgard is eroverheen gebouwd "als een deksel op een put". Vanaf hier vallen ook de
+**memory shards** (zie hieronder) en na dit hoofdstuk gaat de **Hall of Echoes** open.
+
+- **Aankomst (Élivágar)**: voorbij de Dreamwarden vallen de wortels naar beneden, de leegte in. Bevroren gifrivieren
+  (Élivágar); waar het gif bevroor, leeft de rijp nog. Reageert op de weg: werelden: het ijs neuriet Hrodna's lied;
+  Asgard: Eira's vlam buigt hier naar beneden en rilt; Midgard: hoog boven zie je nog het wachtvuur van Lindholm.
+- **The Rime Drifts**: in de rijp zitten vormen (een hand, een knie, een half gezicht): de rijp probeerde iemand te worden.
+- **Sparkfall**: vonken uit het zuiden waaien over het ijs; waar ze landen, roert er iets.
+- **The Rimewell** (tussenbaas, verdieping 23): de oudste bron, waar het gif en de kou vandaan komen. Geen ward. Bij
+  zijn val gloeit het ijs **goud** en "herinner" je iets wat je nooit zag: een reusachtige stem die lacht, ijs dat
+  barst van vreugde (Ymir; dezelfde gloed als de memory shards). In de stad: Hrodna zegt dat het een herinnering was,
+  gevangen in het ijs, en dat ze niet weet van wie ("dat maakt me banger dan Asgard"); Eira zwijgt en kijkt je niet aan.
+- **The Thaw**: waar ijs en vuur elkaar raken, smeltwater en warme damp: hier werden de druppels levend.
+- **Ymir's Cradle** en **the Gapwarden** (eindbaas, vijfde ward): een holte in het ijs zo groot als een hal, in de vorm
+  van iemand die hier opgerold lag. De rune houdt Ymir niet vast maar **houdt de kloof dicht**, zodat er nooit meer
+  iets nieuws geboren wordt. Na zijn val: warme wind ontmoet koude, en in de holte begint één druppel rijp te
+  bewegen. De hoorn klinkt vier keer.
+- **Keuze 6: wat er in de kloof roert** (een nieuwe reus, op de oude manier geboren): laat de werelden hem opvoeden
+  (realms); laat Eira de kloof weer sluiten (asgard; "ik heb gezien wat de kloof maakt", Aske: alsof ze erbij was
+  toen hij open was); Lindholm voedt hem zelf op (midgard; een wieg bij de haard van de Oath Hall).
+- **De Hall of Echoes**: Torvald hoort onder zijn werkplaats de oude wortel zingen; daar klinken alle verslagen
+  eindbazen na. Dream Embers laten de echo's opstaan, maar niemand heeft er ooit een gezien (die komen pas vanaf
+  hoofdstuk VI).
+- Fragmenten: **een hoefafdruk in het zout** met een gelikte groef ernaast (Auðumbla) en, veel later, laarsafdrukken
+  die de andere kant op gaan (hint: iemand liep hier al vroeg; Heimdall?), en **goud dat geen metaal is** uit het
+  hart van de Rimewell ("iets wat iemand zo hard herinnerde dat het stolde").
+- Open voor Thijs: wat er met de nieuwe reus gebeurt per weg; of Eira bij het begin van de wereld was; wat er onder
+  de kloof ligt (hoofdstuk VI).
+
 ### Geheime klassen (voorstel, november 2026)
 
 Drie klassen die je niet kunt kiezen tot je een verborgen deed haalt. Dan meldt zich een vreemdeling bij Brynja
@@ -178,6 +211,8 @@ of **midgard** (de derde weg):
 | Na de Drowned Jarl: Hallvards logboek | aan Hrodna | Eira verbrandt het | zelf lezen (je leert over de lantaarn) |
 | Na de Hafgufa: scherf van de ward | aan Hrodna | aan Eira ("iemand zal blij zijn hem terug te zien") | verborgen in Lindholm |
 | Na Hrungnir: het stenen hart (voorstel) | terug naar de reuzen | Eira brengt het "naar huis" | begraven onder de Oath Hall |
+| Na de Dreamwarden: de droom (voorstel) | laat hem dromen van de werelden | Eira brengt hem weer in slaap | Lindholm houdt de wacht |
+| Na de Gapwarden: wat er in de kloof roert (voorstel) | de werelden voeden hem op | Eira sluit de kloof | Lindholm voedt hem op |
 
 Na de eerste keuze volgt in hoofdstuk II een korte scène die erop reageert. Latere hoofdstukken moeten er ook op
 reageren. Uiteindelijk kunnen de drie uitkomsten van Thijs hier vandaan vertakken.

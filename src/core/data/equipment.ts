@@ -109,6 +109,17 @@ const list: EquipDef[] = [
   { id: 'dreamglassRod', name: 'Dreamglass Rod', slot: 'weapon', classes: CASTERS, tier: 18, price: 27500, bonus: { mag: 87 } },
   { id: 'skyvaultMail', name: 'Skyvault Mail', slot: 'armor', classes: MAIL, tier: 18, price: 28500, bonus: { def: 78 } },
   { id: 'dreamveilRobe', name: 'Dreamveil Robe', slot: 'armor', classes: CASTERS, tier: 18, price: 27000, bonus: { def: 49, res: 66 } },
+  // Chapter V: Ginnungagap
+  { id: 'rimesteelBlade', name: 'Rimesteel Blade', slot: 'weapon', classes: BLADES, tier: 20, price: 34000, bonus: { atk: 110 } },
+  { id: 'sparkstringBow', name: 'Sparkstring Bow', slot: 'weapon', classes: ['strider'], tier: 20, price: 33800, bonus: { atk: 104, spd: 8 } },
+  { id: 'frostfireRod', name: 'Frostfire Rod', slot: 'weapon', classes: CASTERS, tier: 20, price: 33500, bonus: { mag: 96 } },
+  { id: 'hoarplateMail', name: 'Hoarplate Mail', slot: 'armor', classes: MAIL, tier: 20, price: 34500, bonus: { def: 86 } },
+  { id: 'rimeweftRobe', name: 'Rimeweft Robe', slot: 'armor', classes: CASTERS, tier: 20, price: 33000, bonus: { def: 54, res: 73 } },
+  { id: 'gapforgedAxe', name: 'Gapforged Axe', slot: 'weapon', classes: BLADES, tier: 22, price: 41000, bonus: { atk: 120 } },
+  { id: 'emberwindBow', name: 'Emberwind Bow', slot: 'weapon', classes: ['strider'], tier: 22, price: 40800, bonus: { atk: 113, spd: 8 } },
+  { id: 'firstfrostRod', name: 'Firstfrost Rod', slot: 'weapon', classes: CASTERS, tier: 22, price: 40500, bonus: { mag: 105 } },
+  { id: 'rimeheartMail', name: 'Rimeheart Mail', slot: 'armor', classes: MAIL, tier: 22, price: 41500, bonus: { def: 94 } },
+  { id: 'steamsilkRobe', name: 'Steamsilk Robe', slot: 'armor', classes: CASTERS, tier: 22, price: 40000, bonus: { def: 59, res: 80 } },
   // Special gear, unlocked by selling materials. It should always beat the shop gear of the next floor down:
   // that is the reward for hunting a kind of monster on purpose.
   { id: 'briarthornSpear', name: 'Briarthorn Spear', slot: 'weapon', classes: BLADES, tier: 0, price: 220, bonus: { atk: 11 }, requires: { material: 'briarQuill', qty: 5 } },
@@ -170,6 +181,21 @@ const list: EquipDef[] = [
   { id: 'skyironBlade', name: 'Sky-Iron Blade', slot: 'weapon', classes: BLADES, tier: 16, price: 24500, bonus: { atk: 98 }, requires: { material: 'skyIron', qty: 3 } },
   { id: 'dreamwoodBow', name: 'Dreamwood Bow', slot: 'weapon', classes: ['strider'], tier: 16, price: 24500, bonus: { atk: 94, spd: 8 }, requires: { material: 'dreamwood', qty: 3 } },
   { id: 'stareelMail', name: 'Star-Eel Mail', slot: 'armor', classes: MAIL, tier: 16, price: 24500, bonus: { def: 75, spd: 1 }, requires: { material: 'starEel', qty: 3 } },
+  // Chapter V: from Ginnungagap's creatures, prowlers, guardians and gathering spots
+  { id: 'rimejellyRobe', name: 'Rime-Jelly Robe', slot: 'armor', classes: CASTERS, tier: 20, price: 34000, bonus: { def: 56, res: 76 }, requires: { material: 'rimeJelly', qty: 6 } },
+  { id: 'adderscaleBow', name: 'Adderscale Bow', slot: 'weapon', classes: ['strider'], tier: 20, price: 34500, bonus: { atk: 110, spd: 9 }, requires: { material: 'adderScale', qty: 5 } },
+  { id: 'embersegmentBlade', name: 'Ember-Ring Blade', slot: 'weapon', classes: BLADES, tier: 21, price: 37000, bonus: { atk: 116 }, requires: { material: 'emberSegment', qty: 6 } },
+  { id: 'rimeclawMail', name: 'Rimeclaw Mail', slot: 'armor', classes: MAIL, tier: 21, price: 37500, bonus: { def: 90 }, requires: { material: 'rimeclawTalon', qty: 5 } },
+  { id: 'eitrRod', name: 'Eitr Rod', slot: 'weapon', classes: CASTERS, tier: 21, price: 38000, bonus: { mag: 103 }, requires: { material: 'eitrBead', qty: 6 } },
+  { id: 'aurochsCloak', name: 'Aurochs Cloak', slot: 'armor', classes: ALL, tier: 22, price: 38000, bonus: { def: 62, res: 62 }, requires: { material: 'aurochsHorn', qty: 5 } },
+  { id: 'drakerimeBow', name: 'Drakerime Bow', slot: 'weapon', classes: ['strider'], tier: 23, price: 46000, bonus: { atk: 122, spd: 10 }, requires: { material: 'drakeRime', qty: 1 } },
+  { id: 'jotunemberRod', name: 'Jotun-Ember Rod', slot: 'weapon', classes: CASTERS, tier: 23, price: 46000, bonus: { mag: 113, spd: 2 }, requires: { material: 'jotunEmber', qty: 1 } },
+  { id: 'wellheartPlate', name: 'Wellheart Plate', slot: 'armor', classes: ['bastion'], tier: 22, price: 44000, bonus: { def: 101, res: 18 }, requires: { material: 'wellHeart', qty: 1 } },
+  { id: 'gapsealBlade', name: 'Gapseal Blade', slot: 'weapon', classes: BLADES, tier: 24, price: 54000, bonus: { atk: 132 }, requires: { material: 'gapSeal', qty: 1 } },
+  { id: 'emberthornRobe', name: 'Emberthorn Robe', slot: 'armor', classes: CASTERS, tier: 21, price: 38000, bonus: { def: 58, res: 79 }, requires: { material: 'emberThorn', qty: 3 } },
+  { id: 'muspelironBlade', name: 'Muspel-Iron Blade', slot: 'weapon', classes: BLADES, tier: 21, price: 38500, bonus: { atk: 118 }, requires: { material: 'muspelIron', qty: 3 } },
+  { id: 'firstwoodBow', name: 'Firstwood Bow', slot: 'weapon', classes: ['strider'], tier: 21, price: 38500, bonus: { atk: 112, spd: 9 }, requires: { material: 'firstwood', qty: 3 } },
+  { id: 'sparkfinMail', name: 'Sparkfin Mail', slot: 'armor', classes: MAIL, tier: 21, price: 38500, bonus: { def: 91, spd: 1 }, requires: { material: 'sparkfin', qty: 3 } },
 ];
 
 export const EQUIPMENT: Record<string, EquipDef> = Object.fromEntries(list.map((e) => [e.id, e]));

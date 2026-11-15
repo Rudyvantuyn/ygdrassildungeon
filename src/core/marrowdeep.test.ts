@@ -79,3 +79,25 @@ describe('chapter III draft rules', () => {
     }
   });
 });
+
+describe('chapters IV and V, first drafts in the Rootdeep', () => {
+  it('follow every rule of a drawn chapter, so they can be reshaped at the drafting table', async () => {
+    const { rootdeepChapter, chapterProblems, decodeChapter, encodeChapter } = await import('./designer');
+    for (const [first, name] of [[15, 'The Dreaming Skull'], [20, 'Ginnungagap']] as const) {
+      const c = rootdeepChapter(first, name);
+      expect(chapterProblems(c), name).toEqual([]);
+      expect(chapterProblems(decodeChapter(encodeChapter(c))!), name).toEqual([]);
+    }
+  });
+
+  it('chapter V has its own monsters, guardians, prowlers and art', async () => {
+    const { ENEMIES } = await import('./data/enemies');
+    const { existsSync } = await import('node:fs');
+    const ids = new Set(FLOORS.slice(20, 25).flatMap((f) => [...f.encounters.flatMap((e) => e.enemies), ...(f.boss ?? []), ...f.prowlers.flatMap((p) => p.enemies)]));
+    expect(ids.size).toBe(14);
+    for (const id of ids) {
+      expect(ENEMIES[id], id).toBeDefined();
+      expect(existsSync(`public/art/monsters/${id}.webp`), id).toBe(true);
+    }
+  });
+});

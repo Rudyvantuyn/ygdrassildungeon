@@ -84,6 +84,18 @@ export const FRAGMENTS: FragmentDef[] = [
     text: 'One eye of the Fog-Watcher did not close. It is small, clouded and still warm, and it turns in your hand, slowly, until it faces up. Whatever it was reporting to is still listening.',
     where: { guardian: 17 },
   },
+  {
+    id: 'hoofprint',
+    title: 'A hoofprint in the salt',
+    text: 'In the salt ice at the edge of the gap: a hoofprint as big as a shield, and beside it a groove licked deep into the ice by a tongue. The songs say a cow licked the first gods out of the salt. Next to the groove, much later, someone left boot prints. They go the other way.',
+    where: { chest: 20 },
+  },
+  {
+    id: 'setGold',
+    title: 'Gold that is not metal',
+    text: 'A sliver of ice from the Rimewell\'s heart, with a fleck of gold inside that moves when nothing else does. Brother Aske turns it over for a long time. "That is not metal," he says at last. "That is something someone remembered so hard that it set."',
+    where: { guardian: 22 },
+  },
 ];
 
 export const FRAGMENT_BY_ID: Record<string, FragmentDef> = Object.fromEntries(FRAGMENTS.map((f) => [f.id, f]));

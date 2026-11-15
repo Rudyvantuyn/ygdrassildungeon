@@ -64,5 +64,19 @@
  "gloomgriffon": "griffon",
  "thunderwyrm": "dragons/storm_dragon_new",
  "fogWatcher": "eyes/great_orb_of_eyes",
- "dreamwarden": "giant_orange_brain"
+ "dreamwarden": "giant_orange_brain",
+ "rimeling": "amorphous/azure_jelly_old",
+ "eitrDrop": "amorphous/acid_blob",
+ "muspelSpark": "nonliving/orb_of_fire_new",
+ "emberworm": "animals/lava_worm",
+ "sparkadder": "salamander",
+ "cinderwhirl": "nonliving/fire_vortex",
+ "steamwraith": "nonliving/vapour",
+ "rimeclaw": "animals/ice_beast",
+ "saltAurochs": "animals/yak_old",
+ "hrimthurs": "frost_giant_old",
+ "rimedrake": "dragons/ice_dragon_new",
+ "emberjotun": "fire_giant_new",
+ "rimewell": "nonliving/crystal_golem",
+ "gapwarden": "abyss/worldbinder"
 }
