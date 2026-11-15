@@ -14,7 +14,7 @@ import '@fontsource/alegreya/latin-700.css';
 import './site.css';
 import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
 import { BEAST_LORE } from '../core/data/beastLore';
-import { MEMORIES, SHARDS_PER_MEMORY } from '../core/data/memories';
+import { MEMORIES } from '../core/data/memories';
 import { MATERIALS } from '../core/data/materials';
 import { ITEMS } from '../core/data/items';
 import { ELEMENT_NAMES, elementIcon } from '../ui/elements';
@@ -434,16 +434,17 @@ function memoriesPage(): HTMLElement[] {
   const intro = me.save
     ? 'Some guardians, deep in the Rootdeep, leave behind a shard of an old memory. Every memory has fifteen; they come in no order, except the last, which always comes last.'
     : 'Keep your game with your account (in the game: the Hornstone, Account) and the memories you gather show here.';
+  // Every memory opens to its fifteen places: ??? until that shard is found, then its piece of the story, in place.
   const cards = MEMORIES.map((m) => {
     const have = new Set(found[m.id] ?? []);
-    if (!have.size) return h('article', { class: 'memory sealed' }, h('h3', {}, 'An unknown memory'), h('p', { class: 'muted' }, `0 of ${SHARDS_PER_MEMORY} shards`));
     const whole = have.size >= m.shards.length;
+    const title = have.size ? m.title : 'An unknown memory';
+    const count = whole ? `A memory of ${m.subject}` : `${have.size} of ${m.shards.length} shards`;
     return h(
-      'article',
-      { class: `memory ${whole ? 'whole' : ''}` },
-      h('h3', {}, m.title),
-      h('p', { class: 'muted' }, whole ? `A memory of ${m.subject}` : `${have.size} of ${m.shards.length} shards`),
-      h('ol', { class: 'shards' }, ...m.shards.map((sh, i) => (have.has(i) ? h('li', { class: 'shard found' }, sh.text) : h('li', { class: 'shard missing' }, '…')))),
+      'details',
+      { class: `memory ${have.size ? '' : 'sealed'} ${whole ? 'whole' : ''}` },
+      h('summary', {}, h('span', { class: 'memory-title' }, title), h('span', { class: 'muted memory-count' }, count)),
+      h('ol', { class: 'shards' }, ...m.shards.map((sh, i) => (have.has(i) ? h('li', { class: 'shard found' }, sh.text) : h('li', { class: 'shard missing' }, '???')))),
     );
   });
   return [head, h('section', { class: 'block' }, h('p', {}, intro), h('div', { class: 'memories' }, ...cards))];
