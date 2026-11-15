@@ -62,12 +62,25 @@ describe('the Hall of Echoes', () => {
     expect(shardChance(150)).toBeGreaterThan(shardChance(10));
     expect(shardChance(10, 2)).toBeGreaterThan(shardChance(10));
     const g = Game.newGame(4);
-    // No memories written yet: nothing can drop.
+    // Every written shard found: nothing more can drop.
+    g.state.memories = Object.fromEntries(MEMORIES.map((m) => [m.id, m.shards.map((_, i) => i)]));
     expect(rollShard(g, 1, new Rng(1))).toBeNull();
+  });
+
+  it('has memories of 15 shards each, every shard with its Heimdall layer', () => {
+    for (const m of MEMORIES) {
+      expect(m.shards, m.id).toHaveLength(15);
+      for (const sh of m.shards) {
+        expect(sh.text.length, m.id).toBeGreaterThan(0);
+        expect(sh.heimdall, m.id).toBeTruthy();
+      }
+    }
   });
 
   it('keeps a memory\'s last shard for last', () => {
     const g = Game.newGame(5);
+    // Only the test memory is still to be found.
+    g.state.memories = Object.fromEntries(MEMORIES.map((m) => [m.id, m.shards.map((_, i) => i)]));
     MEMORIES.push({ id: 'zzTest', title: 'Test', shards: Array.from({ length: 15 }, (_, i) => ({ text: `shard ${i}` })) });
     try {
       const rng = new Rng(9);
