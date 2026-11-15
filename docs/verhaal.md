@@ -159,13 +159,13 @@ Gekozen personages (volgorde vrij):
 | 2 | Ratatoskr, de eekhoorn tussen de adelaar en Níðhöggr | klaar ("The Strange Squirrel"; de eekhoorn maakte de Rootgnawer om de verteller uit de boom te jagen) |
 | 3 | Gullveig, de zieneres die drie keer verbrand werd | klaar ("My Friend in the Hall"; Heimdall vertelde het als eerste rond, zo begon de oorlog met de Vanir) |
 | 4 | Völundr, de smid en vorst van de elfen | klaar ("Seven Hundred Rings"; Heimdall wist dat zijn vrouw in Valhalla was) |
-| 5 | Freyr, god van oogst en vrede, heer van Álfheim | |
-| 6 | Ríg en zijn zonen Þræll, Karl en Jarl (verteld alsof Heimdall erbij was; het gaat om hemzelf) | |
-| 7 | Þrymr, de reuzenkoning die Thors hamer stal | |
-| 8 | Ymir, waar het ijs het vuur raakte | |
-| 9 | De zonen van Muspell, het naamloze vuurleger | |
-| 10 | Andvari en de vervloekte ring | |
-| 11 | Móðguðr, de wachteres van de brug naar Hel | |
+| 5 | Freyr, god van oogst en vrede, heer van Álfheim | klaar ("Seeds and Swords") |
+| 6 | Ríg en zijn zonen Þræll, Karl en Jarl (verteld alsof Heimdall erbij was; het gaat om hemzelf) | klaar ("The Traveller") |
+| 7 | Þrymr, de reuzenkoning die Thors hamer stal | klaar ("A Night of Mead") |
+| 8 | Ymir, waar het ijs het vuur raakte | klaar ("Before the World") |
+| 9 | De zonen van Muspell, het naamloze vuurleger | klaar ("Three Brothers") |
+| 10 | Andvari en de vervloekte ring | klaar ("The Luckiest Friend") |
+| 11 | Móðguðr, de wachteres van de brug naar Hel | klaar ("The Girl on the Road") |
 
 ### Keuzes (de drie wegen)
 
