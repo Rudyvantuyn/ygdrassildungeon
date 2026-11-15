@@ -1589,6 +1589,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.toastEl.classList.add('hidden');
     this.showSide('combat');
     audio.music(themeFor({ location: 'dungeon', combat: combat.boss ? 'boss' : combat.prowler ? 'prowler' : 'normal' }));
+    // Level and XP stay as they were until the fight is over: the outcome is worked out before it is played back.
+    this.party.holdProgress(combat.party);
     this.combatView = new CombatView(this, combat, (c) => this.endCombat(c), driver);
     void this.combatView.start();
   }
@@ -1597,6 +1599,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     // On an expedition the server has already settled the fight.
     const bynames = this.coop ? [] : this.game.finishCombat(combat);
     this.combatView = null;
+    this.party.releaseProgress();
     this.showSide('explore');
     this.updateHud();
 

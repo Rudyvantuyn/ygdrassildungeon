@@ -36,8 +36,22 @@ export class PartyView {
   private cards: Card[] = [];
   /** Who the cards were built for; rebuilt when the line-up, order or rows change. */
   private lineup = '';
+  /**
+   * Level and XP as they were when a fight began. A fight is worked out before it is played back, so the real
+   * numbers would give the outcome away; the bar fills only once the fight is over (the victory screen).
+   */
+  private held: Map<Member, { level: number; xp: number }> | null = null;
 
   constructor(private readonly container: HTMLElement) {}
+
+  /** Keep showing the party's level and XP as they are now, until release(). */
+  holdProgress(party: Member[]): void {
+    this.held = new Map(party.map((m) => [m, { level: m.level, xp: m.xp }]));
+  }
+
+  releaseProgress(): void {
+    this.held = null;
+  }
 
   render(party: Member[], display: PartyDisplay = {}): void {
     const lineup = party.map((m) => `${m.name}|${m.classId}|${m.row}|${m.look}`).join(',');
@@ -51,8 +65,9 @@ export class PartyView {
       const hp = display.hp?.[i] ?? m.hp;
       const sp = display.sp?.[i] ?? m.sp;
       const ratio = hp / stats.hp;
-      const points = unspentPoints(m);
-      card.level.textContent = `${points > 0 ? '✦ ' : ''}Lv ${m.level} ${CLASSES[m.classId].name}`;
+      const shown = this.held?.get(m) ?? { level: m.level, xp: m.xp };
+      const points = this.held ? 0 : unspentPoints(m);
+      card.level.textContent = `${points > 0 ? '✦ ' : ''}Lv ${shown.level} ${CLASSES[m.classId].name}`;
       card.level.title = points > 0 ? `${points} skill point${points === 1 ? '' : 's'} to spend` : '';
       card.hpFill.style.width = `${Math.max(0, ratio) * 100}%`;
       card.hpBar.classList.toggle('low', ratio <= 0.5 && ratio > 0.25);
@@ -61,11 +76,11 @@ export class PartyView {
       card.spFill.style.width = `${(sp / stats.sp) * 100}%`;
       card.spText.textContent = `${sp} / ${stats.sp}`;
       // Experience toward the next level: fills up as the next level comes closer.
-      const from = xpForLevel(m.level);
-      const to = m.level >= MAX_LEVEL ? from : xpForLevel(m.level + 1);
-      const xpRatio = to > from ? Math.min(1, Math.max(0, (m.xp - from) / (to - from))) : 1;
+      const from = xpForLevel(shown.level);
+      const to = shown.level >= MAX_LEVEL ? from : xpForLevel(shown.level + 1);
+      const xpRatio = to > from ? Math.min(1, Math.max(0, (shown.xp - from) / (to - from))) : 1;
       card.xpFill.style.width = `${xpRatio * 100}%`;
-      card.xpBar.title = m.level >= MAX_LEVEL ? 'Highest level reached' : `XP ${m.xp - from} / ${to - from} to level ${m.level + 1}`;
+      card.xpBar.title = shown.level >= MAX_LEVEL ? 'Highest level reached' : `XP ${shown.xp - from} / ${to - from} to level ${shown.level + 1}`;
       card.root.classList.toggle('ko', hp <= 0);
       const ailment = display.ailments?.[i] ?? null;
       card.ailment.textContent = ailment ? AILMENT_BADGE[ailment].short : '';

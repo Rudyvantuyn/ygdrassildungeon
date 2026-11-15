@@ -15,7 +15,7 @@ export const CHANGES: ChangeDay[] = [
       'New: a party is now five strong, with at most three in a row (front or back, as you like).',
       'New: five adventurers swear the oath for free when you found your party. Older saves can add a fifth from the Oath Hall.',
       'New: expeditions take up to five players.',
-      'New: an experience bar under every adventurer, filling up toward the next level.',
+      'New: an experience bar under every adventurer, filling up toward the next level once a fight is won.',
       'Changed: monsters, prowlers and guardians are stronger, to match a party of five. Raven Run scouts meet them as before.',
     ],
   },
