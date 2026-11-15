@@ -4,6 +4,7 @@ import { Combat } from './combat';
 import { EQUIPMENT_LIST } from './data/equipment';
 import { FLOORS } from './data/floors';
 import { makeInventory } from './data/items';
+import { MEMORIES } from './data/memories';
 import { ECHO_COST, echoBlocker, echoDef, echoGuardians, echoLevels, gearTierFor, GUARDIAN_LEVEL, hallOfEchoesOpen, rollShard, shardChance, startEchoFight } from './echoes';
 import { Game } from './game';
 import { createStartingParty, fullRestore, MAX_LEVEL, xpForLevel } from './party';
@@ -63,6 +64,21 @@ describe('the Hall of Echoes', () => {
     const g = Game.newGame(4);
     // No memories written yet: nothing can drop.
     expect(rollShard(g, 1, new Rng(1))).toBeNull();
+  });
+
+  it('keeps a memory\'s last shard for last', () => {
+    const g = Game.newGame(5);
+    MEMORIES.push({ id: 'zzTest', title: 'Test', shards: Array.from({ length: 15 }, (_, i) => ({ text: `shard ${i}` })) });
+    try {
+      const rng = new Rng(9);
+      const order: number[] = [];
+      for (let i = 0; i < 15; i++) order.push(rollShard(g, 1, rng)!.shard);
+      expect(order.slice(0, 14)).not.toContain(14);
+      expect(order[14]).toBe(14);
+      expect(rollShard(g, 1, rng)).toBeNull();
+    } finally {
+      MEMORIES.pop();
+    }
   });
 
   it('lets adventurers grow to level 150 without a full tree nagging them', () => {

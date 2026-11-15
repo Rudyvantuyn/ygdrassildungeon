@@ -174,10 +174,19 @@ export function startEchoFight(game: Game, id: string, level: number): Combat | 
   return new Combat(game.state.party, [id], game.state.inventory, game.rng, { boss: true, echo: true, oathToken: false, enemyDefs: { [id]: echoDef(id, level) } });
 }
 
-/** A memory shard not found yet, at random: { memory id, shard index }. Null when every written shard is found. */
+/**
+ * The memory shards that can be found next: every shard not found yet, except a memory's last shard, which only comes
+ * once all its others are found (it tells whose memory it is about).
+ */
 export function missingShards(game: Game): { memory: string; shard: number }[] {
   const found = game.state.memories ?? {};
-  return MEMORIES.flatMap((m) => m.shards.map((_, i) => ({ memory: m.id, shard: i })).filter((s) => !(found[m.id] ?? []).includes(s.shard)));
+  return MEMORIES.flatMap((m) => {
+    const have = found[m.id] ?? [];
+    const last = m.shards.length - 1;
+    return m.shards
+      .map((_, i) => ({ memory: m.id, shard: i }))
+      .filter((s) => !have.includes(s.shard) && (s.shard !== last || have.length === last));
+  });
 }
 
 /** Rolls for a memory shard with `chance`; the shard found (and kept), or null. */

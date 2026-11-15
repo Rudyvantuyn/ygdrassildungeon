@@ -10,7 +10,8 @@
  * - Each memory has SHARDS_PER_MEMORY shards; a shard is a short text (one to three sentences) and may have a picture
  *   (a real photo through scripts/photo-to-art.py, under art/memories/; never AI-made).
  * - Shards are found one at a time and in no fixed order, so each one should make sense on its own, and the whole
- *   memory should read well once all of its shards are found.
+ *   memory should read well once all of its shards are found. The LAST shard always comes last (only once all the
+ *   others are found): until then it stays vague who the memory is about; the last shard makes it clear.
  * - Players should come to love Ymir, and regret a little that Midgard was made from him.
  *
  * Until memories are written here, no shard can drop: the game needs nothing else to start using them.

@@ -70,7 +70,8 @@ Add new names there and keep the glossary in sync.
     in it and how he feels about it now (e.g. regret that knowledge he shared got a village killed). Shown with
     a golden glow (the same gold as the wards' runes), as text with pictures (real photos through the pixel filter,
     no AI). 10 memories of 15 shards each (`src/core/data/memories.ts`, written by Thijs). Shards drop at random and
-    rarely from guardians (chapter V on, and echo fights); a shard already found never drops again.
+    rarely from guardians (chapter V on, and echo fights); a shard already found never drops again. A memory stays vague
+    about who it is about until its last shard, which always comes last (only once the other 14 are found).
   - **The Hall of Echoes**: a place in Lindholm that opens once chapter V's guardian has fallen. Any guardian beaten
     before can be fought again as an echo, at a level the player picks (10, 20, … up to the party's level, at most
     150); a higher level gives a higher shard chance. One echo fight costs **10 Dream Embers**, which drop from
