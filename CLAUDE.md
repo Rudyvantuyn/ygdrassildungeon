@@ -65,7 +65,9 @@ Add new names there and keep the glossary in sync.
   meet them at their old strength (`SMALL_BAND_ENEMIES`).
 - **The story ends with chapter X; the game never does** (decided November 2026, with Thijs):
   - **Memory shards**: from chapter V on, glimpses of how Midgard was made, and of Ymir before it, so players come to
-    love Ymir and regret Midgard. They come from someone who is never named (it is Heimdall; never say so). Shown with
+    love Ymir and regret Midgard. In the first round they come from someone who is never named (it is Heimdall);
+    from the second round on the same shards are collected again and reveal it is Heimdall's memory, with his own part
+    in it and how he feels about it now (e.g. regret that knowledge he shared got a village killed). Shown with
     a golden glow (the same gold as the wards' runes), as text with pictures (real photos through the pixel filter,
     no AI). 10 memories of 15 shards each (`src/core/data/memories.ts`, written by Thijs). Shards drop at random and
     rarely from guardians (chapter V on, and echo fights); a shard already found never drops again.
