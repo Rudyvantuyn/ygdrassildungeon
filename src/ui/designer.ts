@@ -644,6 +644,8 @@ export class Designer {
       el('div', { className: 'draft-row' }, [this.button('Chapter II: The Drowned Roots (floors 6–10)', pick(() => rootdeepChapter(5, 'The Drowned Roots')))]),
       el('div', { className: 'draft-row' }, [this.button('Start chapter III: The Marrowdeep (empty)', pick(() => marrowdeepTemplate()), 'primary')]),
       el('div', { className: 'draft-row' }, [this.button('Chapter III: first draft, ready to reshape', pick(() => decodeChapter(MARROWDEEP_DRAFT) ?? marrowdeepTemplate()), 'primary')]),
+      el('div', { className: 'draft-row' }, [this.button('Chapter III: The Marrowdeep, as it is in the game (floors 11–15)', pick(() => rootdeepChapter(10, 'The Marrowdeep')))]),
+      el('div', { className: 'draft-row' }, [this.button('Chapter IV: The Dreaming Skull, first draft to reshape (floors 16–20)', pick(() => rootdeepChapter(15, 'The Dreaming Skull')), 'primary')]),
       el('p', {
         text: 'Chapters I and II were made before numbered stairs existed: every floor has its own entrance and stairs down. From chapter III on, only the first floor has an entrance, and floors are joined by numbered stairs (also back up) and root gates.',
       }),
