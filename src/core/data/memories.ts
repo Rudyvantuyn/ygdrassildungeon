@@ -171,6 +171,74 @@ export const MEMORIES: MemoryDef[] = [
       },
     ],
   },
+  {
+    // Written by Thijs (November 2026): a feast in Odin's hall, a friend burned three times who would not stay dead.
+    // Only the last shard names her (Gullveig, then Heiðr).
+    id: 'friendInTheHall',
+    title: 'My Friend in the Hall',
+    shards: [
+      {
+        text: "I was young then, and knew nothing of the world. I walked into the great hall with my best friend at my side, and we laughed at how loud it was.",
+        heimdall: "Before the bridge, before the horn, I was just a boy who had never been inside that hall. She was the one who wanted to go.",
+      },
+      {
+        text: "There was a feast in the high hall that night. What they were celebrating, I never learned. Mead ran across the tables like rain.",
+        heimdall: "I have asked since. No one remembers. Perhaps it was nothing at all.",
+      },
+      {
+        text: "My friend shone in that hall. Heads turned when she passed, and she did not seem to notice any of them.",
+        heimdall: "I noticed every one. I think that was the first night I learned to watch.",
+      },
+      {
+        text: "One of the Æsir rose from the high table and came to her, smiling the way men smile when they have already decided how a night will end.",
+        heimdall: "I knew his face. I will not write his name, not even here.",
+      },
+      {
+        text: "She heard him out, and then she said no. Plainly, kindly, once. The music stopped. The whole hall fell quiet.",
+        heimdall: "I should have stood beside her then. I stayed in my seat.",
+      },
+      {
+        text: "He spoke to her the way you speak to a servant who has dropped a cup. She answered him so sharply, and so well, that someone at the back laughed out loud.",
+        heimdall: "That laugh was hers to keep. It cost her everything else.",
+      },
+      {
+        text: "He did not shout. He lifted his hand, and fire came out of it, and she burned from head to foot in front of all of us.",
+        heimdall: "I smelled it for years. Some nights I still do.",
+      },
+      {
+        text: "Before the smoke had cleared, she was standing there again, whole, brushing ash from her sleeves.",
+        heimdall: "I thought I had gone mad. Then I saw that everyone else was staring too.",
+      },
+      {
+        text: "He burned her a second time, longer, until there was nothing left of her but bones on the floor of the hall.",
+        heimdall: "No one stopped him. Not the guests, not the hosts, not me.",
+      },
+      {
+        text: "The bones stood up. Flesh came back to them like a tide. And she laughed at him, out loud, in front of everyone.",
+        heimdall: "It was the bravest sound I have ever heard. I have measured every courage against it since.",
+      },
+      {
+        text: "Here and there in the hall, people began to snicker behind their hands. He heard it. I watched his face go white.",
+        heimdall: "A god can bear anything but laughter. I learned that there.",
+      },
+      {
+        text: "The third time he burned her to ash, and stamped on the ash, and stood there shaking.",
+        heimdall: "Three times. I counted. I am the one who always counts.",
+      },
+      {
+        text: "Even the ash came back. She rose out of it and looked at him as if he were very small. \"You cannot burn what shines,\" she said.",
+        heimdall: "For one heartbeat she looked at me. I have never known what she wanted me to do.",
+      },
+      {
+        text: "The next morning he forbade anyone to speak of that night. But a story like that does not stay in a hall. Within a month it was told from house to house.",
+        heimdall: "I was the one who told it first. I was young, and angry, and I told everyone who would listen. That is how the Vanir heard. That is how the war began.",
+      },
+      {
+        text: "That night she took a new name, Heiðr, the shining one, and began to walk from house to house as a seeress, working seiðr, and wicked women loved her for it. Before that, she had been my friend, and her name was Gullveig.",
+        heimdall: "The Vanir asked Asgard to pay for what was done to her. Odin threw his spear over their heads instead. Gullveig never spoke to me again.",
+      },
+    ],
+  },
 ];
 
 export const MEMORY_BY_ID: Record<string, MemoryDef> = Object.fromEntries(MEMORIES.map((m) => [m.id, m]));
