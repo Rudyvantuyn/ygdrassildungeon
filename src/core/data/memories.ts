@@ -103,6 +103,74 @@ export const MEMORIES: MemoryDef[] = [
       },
     ],
   },
+  {
+    // Written by Thijs (November 2026): lost in the World Tree, a squirrel who twists every message, and the gnawing
+    // thing he made (the Rootgnawer of chapter I). Only the last shard names the squirrel.
+    id: 'strangeSquirrel',
+    title: 'The Strange Squirrel',
+    shards: [
+      {
+        text: "I do not know how I came to be in the tree. One moment I was where I always am; the next I stood on a branch wider than a road, with the worlds hanging below me in the leaves.",
+        heimdall: "I have guarded every road into Asgard. I never found the one that took me there.",
+      },
+      {
+        text: "The bark was warm, like skin. Far above I heard wings, far below something gnawing. The strange squirrel found me before I found my feet.",
+        heimdall: "I hear grass grow and wool on sheep. I did not hear him coming. Nothing else has ever surprised me.",
+      },
+      {
+        text: "\"No one comes into the tree,\" the strange squirrel said, circling me. \"No one can. The tree does not allow it.\" He sniffed my boots as if they might explain.",
+        heimdall: "He was right. I have asked the tree since. It does not answer me either.",
+      },
+      {
+        text: "In the end the strange squirrel shrugged, as much as a squirrel can. \"One exception. Keep up, keep quiet, and do not touch the bark with bare hands.\"",
+        heimdall: "I touched it once, when he was not looking. It was beating.",
+      },
+      {
+        text: "We ran for days, up and down. The strange squirrel carried words between the eagle at the top of the tree and the dragon at its roots, and I ran behind him.",
+        heimdall: "Up there the eagle sees all the worlds. Down there the dragon feels them rot. And between them runs one small messenger.",
+      },
+      {
+        text: "At the top, the eagle spoke slowly: \"Tell the gnawer that the giant's death was a wound to us all, and that I grieve.\" The strange squirrel nodded and ran.",
+        heimdall: "I remember thinking: so even the eagle mourns him.",
+      },
+      {
+        text: "At the roots, the strange squirrel told the dragon: \"The eagle says the giant got what he deserved, and you are next.\" The dragon bit into the root until it bled sap.",
+        heimdall: "That was the moment I knew. The same words, turned upside down in a mouth the size of a hazelnut.",
+      },
+      {
+        text: "It went on like that for days. A kind word went down and arrived as an insult. A tired word came up and arrived as a threat. The whole tree shook with their anger.",
+        heimdall: "I asked myself why. I still do. Perhaps a quarrel is what holds the top and the bottom of a world together.",
+      },
+      {
+        text: "\"Why do you twist it?\" I asked. The strange squirrel did not stop running. \"Because if they ever agreed,\" he said, \"they would stop needing me.\"",
+        heimdall: "I have known gods who would say the same, and not in jest.",
+      },
+      {
+        text: "I could not bear it. While he slept, I climbed to the eagle and told it what the dragon had truly said. Then I went down to the roots and told the dragon the truth as well.",
+        heimdall: "It was the only message I ever carried honestly. It cost more than all the lies.",
+      },
+      {
+        text: "For one night the tree was still. The eagle folded its wings. The dragon stopped gnawing. I had never heard a tree so quiet.",
+        heimdall: "I listened to that silence for a long time. I have not heard it since.",
+      },
+      {
+        text: "The strange squirrel woke in a rage, fur on end, his voice thin and high. \"You do not understand what you have broken. Out. Out, and never again.\"",
+        heimdall: "Maybe I did not. Maybe that quiet was the most dangerous thing in all the worlds.",
+      },
+      {
+        text: "He went down into the roots, deeper than I dared, and came back with something behind him: a gnawing thing as long as a ship, made from the dragon's own spite. \"This will keep the tree closed,\" he said. \"To you, and to anyone after you.\"",
+        heimdall: "Long after, I saw it again, gnawing at the roots under Midgard, and people fighting it. I never told them where it came from.",
+      },
+      {
+        text: "The gnawing thing caught me on the lowest branch. I felt its teeth close, and then I woke, cold, in my own bed. I still do not know if any of it was a dream. There was sap under my nails.",
+        heimdall: "There still is, some mornings. I scrub it off before anyone sees.",
+      },
+      {
+        text: "Ages later, in a hall full of mead, a skald told the tale of the squirrel on the World Tree who runs between the eagle and the dragon and twists every word. \"His name,\" the skald said, \"is Ratatoskr.\" I set down my cup and did not pick it up again.",
+        heimdall: "That night I went to the bridge and looked at the tree for a long time. Ratatoskr. At last I knew who I owed an apology. I have never given it.",
+      },
+    ],
+  },
 ];
 
 export const MEMORY_BY_ID: Record<string, MemoryDef> = Object.fromEntries(MEMORIES.map((m) => [m.id, m]));

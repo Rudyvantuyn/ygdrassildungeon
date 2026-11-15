@@ -156,7 +156,7 @@ Gekozen personages (volgorde vrij):
 | # | Personage | Status |
 | --- | --- | --- |
 | 1 | Frigg: de lange tocht langs alle werelden om de oorlog te voorkomen | klaar ("The Long Walk") |
-| 2 | Ratatoskr, de eekhoorn tussen de adelaar en Níðhöggr | bezig |
+| 2 | Ratatoskr, de eekhoorn tussen de adelaar en Níðhöggr | klaar ("The Strange Squirrel"; de eekhoorn maakte de Rootgnawer om de verteller uit de boom te jagen) |
 | 3 | Gullveig, de zieneres die drie keer verbrand werd | |
 | 4 | Völundr, de smid en vorst van de elfen | |
 | 5 | Freyr, god van oogst en vrede, heer van Álfheim | |
