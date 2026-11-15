@@ -203,9 +203,12 @@ class Online {
 
   // ── Runestones ─────────────────────────────────────────────────────────────
 
-  /** Connects only when a session may exist; true when signed in (a guest counts). */
+  /**
+   * Connects only when a session may exist; true when signed in (a guest counts). Coming back from Google the session
+   * is only in the address, not yet stored, so that counts too (connecting is what takes it in).
+   */
   async connected(): Promise<boolean> {
-    if (!this.mayBeSignedIn && !this.client) return false;
+    if (!this.mayBeSignedIn && !this.returningFromSignIn && !this.client) return false;
     try {
       await this.init();
     } catch {

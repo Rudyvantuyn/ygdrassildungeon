@@ -18,6 +18,7 @@ export const CHANGES: ChangeDay[] = [
       'New: an experience bar under every adventurer, filling up toward the next level once a fight is won.',
       'Changed: a fallen party is no longer the end. The roots carry it home to Lindholm, but the deep keeps half your gold, items and materials (gear and Oath Tokens are kept).',
       'New: a deed for the first time the roots carry you home.',
+      'Fixed: signing in with Google sometimes only worked the second time.',
       'Changed: monsters, prowlers and guardians are stronger, to match a party of five. Raven Run scouts meet them as before.',
     ],
   },
