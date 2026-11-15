@@ -251,18 +251,18 @@ button:active {
   width: 1240px;
   height: 148px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
 }
 
 .member {
   position: relative;
   display: grid;
-  grid-template-columns: 66px 1fr;
-  grid-template-rows: auto auto auto;
-  column-gap: 12px;
+  grid-template-columns: 58px 1fr;
+  grid-template-rows: auto auto auto auto;
+  column-gap: 10px;
   row-gap: 4px;
-  padding: 10px 12px;
+  padding: 9px 10px;
   transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
 }
 
@@ -293,9 +293,9 @@ button:active {
 }
 
 .portrait {
-  grid-row: 1 / span 3;
-  width: 66px;
-  height: 66px;
+  grid-row: 1 / span 4;
+  width: 58px;
+  height: 58px;
   align-self: center;
   border-radius: 50%;
   border: 2px solid #c9a157;
@@ -414,6 +414,23 @@ button:active {
   font-family: var(--font-title);
   letter-spacing: 0.08em;
   color: #f4e2b8;
+}
+
+/* Experience toward the next level: a thin gold line under the SP bar. */
+.xp-bar {
+  position: relative;
+  height: 5px;
+  margin: 1px 4px 0;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #2c3d49;
+}
+.xp-bar > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(#ffe7a0, var(--gold) 60%, #8a6a1e);
+  transition: width 0.4s ease-out;
 }
 
 @keyframes glint {
@@ -2043,15 +2060,15 @@ body.phone #command-panel .menu-desc {
 
 /* Party cards: compact, portrait small, name and HP/SP readable. */
 body.phone .member {
-  grid-template-columns: 48px 1fr;
-  column-gap: 8px;
-  row-gap: 3px;
-  padding: 5px 8px;
+  grid-template-columns: 40px 1fr;
+  column-gap: 6px;
+  row-gap: 2px;
+  padding: 4px 6px;
 }
 body.phone .member .portrait {
-  width: 48px;
-  height: 48px;
-  grid-row: span 3;
+  width: 40px;
+  height: 40px;
+  grid-row: span 4;
   align-self: center;
 }
 body.phone .member-name {

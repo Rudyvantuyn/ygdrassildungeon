@@ -105,7 +105,7 @@ De knoppen rechts op het scherm werken ook met muis of touch.
 ### Je eigen groep, grinden en tutorials (mijlpaal 12)
 
 - **Nieuw spel = je groep oprichten**: Brynja van de Oath Hall begeleidt je bij het kiezen van klasse, naam en rij,
-  met uitleg. De eerste vier eden zijn gratis.
+  met uitleg. De eerste vijf eden zijn gratis.
 - Daarna kost elke nieuwe avonturier **goud (300, 600, 1200, …)** én een **Oath Token**. Die vind je bij bazen en
   prowlers (alleen de eerste keer; niet op expedities) en in een paar kisten.
 - **Grindy**: vijanden geven 70% van hun XP en 75% van hun goud. Doorstomen lukt niet meer; rustig trainen wel.
@@ -225,7 +225,7 @@ kunstrichting in `CLAUDE.md`). Deze paragraaf beschrijft hoe het toen was._
 
 ### De stad Lindholm (mijlpaal 2)
 
-- **Oath Hall**: meld nieuwe avonturiers aan (eigen naam, klasse naar keuze) en stel je party samen: maximaal 4 leden,
+- **Oath Hall**: meld nieuwe avonturiers aan (eigen naam, klasse naar keuze) en stel je party samen: maximaal 5 leden (hoogstens 3 per rij),
   volgorde en rij (voor/achter) kies je zelf, en tot 12 avonturiers in totaal. Reserveleden krijgen geen XP.
 - **Herberg**: uitrusten voor goud. Herstelt HP en SP, wekt gevallen leden weer tot leven en slaat op.
 - **Winkel**: items (Sap Tonic, Spirit Dew, Homing Feather) en **uitrusting** per klasse.
@@ -241,7 +241,7 @@ kunstrichting in `CLAUDE.md`). Deze paragraaf beschrijft hoe het toen was._
   gevaar) en notities met tekst per vakje. Tekenen met muis, touch (slepen) of toetsenbord.
   Drie kaartmodi: *Assisted* (standaard: je stappen worden ingekleurd, de rest teken je), *Manual* en *Auto*.
 - **Willekeurige gevechten**: de "Danger"-bol kleurt van blauw via geel naar rood naarmate het volgende gevecht dichterbij komt.
-- **Beurtgevechten** met een party van 4 (Bastion, Strider, Mender, Runecaller): aanvallen, skills (kosten SP), verdedigen, items, vluchten.
+- **Beurtgevechten** met een party van 5 (hoogstens 3 per rij): aanvallen, skills (kosten SP), verdedigen, items, vluchten.
   Voorste en achterste rij, zwaktes en resistenties (vuur/vorst/storm), kritieke treffers, Challenge en Iron Formation.
 - **Ervaring en levels**: elk level een skillpunt voor de skillboom van je klasse.
 - **Opwekken in de dungeon**: met Kindling Moss (winkel) of de Mender-skill Rekindle (level 6).

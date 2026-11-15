@@ -46,7 +46,7 @@ Add new names there and keep the glossary in sync.
   So far: Ravenspeaker (25 Raven Runs), Hornbearer (5 expeditions) and Fylgja (an animal spirit, looks are 4 bears and
   4 cats; every creature of chapter I defeated). Each needs a full tree, 8 looks, gear access,
   tactics in `tactics.ts`, and the balance check in `secretClasses.test.ts`.
-- **A new game starts by founding the party**: the player swears in their own adventurers (up to four, free) with
+- **A new game starts by founding the party**: the player swears in their own adventurers (up to five, free) with
   Brynja's guidance. After that every new adventurer costs rising gold **and an Oath Token** (found on bosses,
   prowlers and in a few chests), so the roster cannot grow endlessly.
 - **Descents start at a chapter's first floor** (floor 1, 6, 11, …), never mid-chapter. The next chapter opens once
@@ -57,6 +57,11 @@ Add new names there and keep the glossary in sync.
   the side they open from) are one-way shortcuts that stay open once opened (`progress.gatesOpen`). Chapters I and
   II stay as they are. The owner draws on a PC and sends a chapter code (`YGC1.`); turn it into floors with
   `decodeChapter` + `toFloorDefs`.
+- **A party has five adventurers** (since November 2026; it was four), at most **three in one row** (front or back,
+  as the player likes). Expeditions seat five players. The monsters were scaled up for five
+  (`SCALE`, `PROWLER_SCALE` and `GUARDIAN_SCALE` at the end of `src/core/data/enemies.ts`, measured with the
+  balance tests, which play with a party of five); Raven Run scouts still
+  meet them at their old strength (`SMALL_BAND_ENEMIES`).
 - **No difficulty setting**: everyone plays by the same rules, so expeditions stay fair.
 - **The game is meant to be grindy and challenging**: XP and gold come slowly (`XP_RATE`, `GOLD_RATE` in combat.ts);
   the balance tests check that rushing fails and steady training wins.
@@ -78,7 +83,7 @@ Add new names there and keep the glossary in sync.
   the gear cheaper or the threads more plentiful without the owner.
 
 - **Multiplayer** means going into the dungeon together: each player brings one of their own adventurers into a
-  party of up to four (an "expedition"). No shared town. Trading may come later (low priority). Leaderboards and
+  party of up to five (an "expedition"). No shared town. Trading may come later (low priority). Leaderboards and
   contests are "events" and only come once the game is finished.
 - The game is meant to be released **commercially**: keep everything we ship (art, music, names, code) cleared for
   commercial use, and keep the server authoritative so players cannot cheat.

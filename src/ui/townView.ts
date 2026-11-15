@@ -25,7 +25,7 @@ import {
   restAtInn,
   statDelta,
 } from '../core/town';
-import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow, oathCost, FOUNDING_OATHS, cleanName } from '../core/guild';
+import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, canSwitchRow, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow, oathCost, FOUNDING_OATHS, cleanName } from '../core/guild';
 import type { ClassId, Member, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
 import { el } from './dom';
@@ -487,13 +487,18 @@ export class TownView {
       [
         { label: 'Move left', disabled: i === 0, onSelect: after(() => shiftMember(this.game, i, -1), i - 1) },
         { label: 'Move right', disabled: i === s.party.length - 1, onSelect: after(() => shiftMember(this.game, i, 1), i + 1) },
-        { label: m.row === 'front' ? 'Move to the back row' : 'Move to the front row', onSelect: after(() => toggleRow(this.game, i), i) },
+        {
+          label: m.row === 'front' ? 'Move to the back row' : 'Move to the front row',
+          detail: canSwitchRow(this.game, i) ? '' : 'that row is full',
+          disabled: !canSwitchRow(this.game, i),
+          onSelect: after(() => toggleRow(this.game, i), i),
+        },
         { label: 'Send to the reserve', disabled: s.party.length <= 1, onSelect: after(() => moveToReserve(this.game, i), 0) },
         { label: 'Back', onSelect: () => this.formParty(i) },
       ],
       { onCancel: () => this.formParty(i) },
     );
-    this.dialog(`${m.name} the ${CLASSES[m.classId].name}`, [el('p', { text: 'Back-row fighters deal and take less melee damage (archers aim fine from anywhere).' })], menu);
+    this.dialog(`${m.name} the ${CLASSES[m.classId].name}`, [el('p', { text: 'Back-row fighters deal and take less melee damage (archers aim fine from anywhere). At most three stand in each row.' })], menu);
   }
 
   private dismiss(): void {

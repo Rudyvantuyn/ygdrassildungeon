@@ -1,12 +1,12 @@
 import { CLASSES } from './data/classes';
 import type { Game } from './game';
-import { createMember } from './party';
+import { createMember, MAX_PER_ROW, rowFor } from './party';
 import { unavailable } from './ravens';
 import { classUnlocked } from './deeds';
 import type { ClassId } from './types';
 
 /** The Oath Hall: register adventurers and choose who goes into the Rootdeep. */
-export const MAX_PARTY = 4;
+export const MAX_PARTY = 5;
 export const MAX_ROSTER = 12;
 export const NAME_MAX_LENGTH = 12;
 
@@ -20,7 +20,7 @@ export function nameLength(name: string): number {
   return [...name].length;
 }
 /** The first adventurers swear the oath for free; after that each oath costs gold and an Oath Token. */
-export const FOUNDING_OATHS = 4;
+export const FOUNDING_OATHS = 5;
 
 /** What swearing in the next adventurer costs. */
 export function oathCost(game: Game): { gold: number; tokens: number } {
@@ -50,8 +50,10 @@ export function registerMember(game: Game, rawName: string, classId: ClassId, lo
   game.state.oaths = (game.state.oaths ?? rosterSize(game)) + 1;
   const member = createMember(name, classId, look);
   member.oath = game.state.oaths;
-  if (game.state.party.length < MAX_PARTY) game.state.party.push(member);
-  else game.state.reserve.push(member);
+  if (game.state.party.length < MAX_PARTY) {
+    member.row = rowFor(game.state.party, member.row);
+    game.state.party.push(member);
+  } else game.state.reserve.push(member);
   return null;
 }
 
@@ -64,6 +66,7 @@ export function moveToReserve(game: Game, partyIndex: number): boolean {
 export function moveToParty(game: Game, reserveIndex: number): boolean {
   const m = game.state.reserve[reserveIndex];
   if (game.state.party.length >= MAX_PARTY || !m || unavailable(m, game.state.clock ?? 0)) return false;
+  m.row = rowFor(game.state.party, m.row);
   game.state.party.push(...game.state.reserve.splice(reserveIndex, 1));
   return true;
 }
@@ -79,9 +82,17 @@ export function shiftMember(game: Game, partyIndex: number, delta: -1 | 1): bool
 
 export function toggleRow(game: Game, partyIndex: number): boolean {
   const m = game.state.party[partyIndex];
-  if (!m) return false;
+  if (!m || !canSwitchRow(game, partyIndex)) return false;
   m.row = m.row === 'front' ? 'back' : 'front';
   return true;
+}
+
+/** Whether a party member can move to the other row (at most MAX_PER_ROW in each). */
+export function canSwitchRow(game: Game, partyIndex: number): boolean {
+  const m = game.state.party[partyIndex];
+  if (!m) return false;
+  const other = m.row === 'front' ? 'back' : 'front';
+  return game.state.party.filter((p) => p.row === other).length < MAX_PER_ROW;
 }
 
 /** Dismiss a reserve member for good (their equipment goes with them). */

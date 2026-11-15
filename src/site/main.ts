@@ -160,7 +160,7 @@ function home(): HTMLElement[] {
         { class: 'features' },
         h('div', { class: 'feature' }, img('site/shot-map.webp', 'Drawing the map'), h('h3', {}, 'Map it yourself'), h('p', {}, 'Nobody ever mapped the Rootdeep. Draw walls, marks and notes square by square while you walk, or let the map draw itself.')),
         h('div', { class: 'feature' }, img('site/shot-fight.webp', 'A fight'), h('h3', {}, 'Fight as a party'), h('p', {}, 'Turn-based battles with a front and back row, weaknesses to find, and skill trees with ten ranks per skill. Rushing ahead gets you killed.')),
-        h('div', { class: 'feature' }, img('places/hornstone.webp', 'The Hornstone'), h('h3', {}, 'Go down together'), h('p', {}, 'Sound the Hornstone and Wayfinders from other halls answer: up to four players, each bringing one of their own adventurers.')),
+        h('div', { class: 'feature' }, img('places/hornstone.webp', 'The Hornstone'), h('h3', {}, 'Go down together'), h('p', {}, 'Sound the Hornstone and Wayfinders from other halls answer: up to five players, each bringing one of their own adventurers.')),
         h('div', { class: 'feature' }, img('site/shot-town.webp', 'Lindholm'), h('h3', {}, 'Leave your mark'), h('p', {}, 'Carve runestones for other players to find, send your reserve out on Raven Runs, and earn your place on the Wayfinders\' Stone.')),
       ),
     ),
@@ -260,7 +260,7 @@ function classes(): HTMLElement[] {
   const secret = [...ids.filter((id) => SECRET_CLASSES[id]).map((id) => (me?.deeds[SECRET_CLASSES[id]!] ? card(id) : sealed())), sealed(), sealed()];
   return [
     h('section', { class: 'page-head' }, h('h1', {}, 'Classes'), h('p', { class: 'tagline' }, 'Swear them in at the Oath Hall')),
-    section('Eight to begin with', h('p', {}, 'Every adventurer swears the Pact as one of these classes, and picks one of eight looks: four men and four women. Every level brings a skill point to spend in the class\'s skill tree; every skill has ten ranks. Most parties want two in front, a healer, and someone to cast or sing.'), h('div', { class: 'class-grid' }, ...cards)),
+    section('Eight to begin with', h('p', {}, 'Every adventurer swears the Pact as one of these classes, and picks one of eight looks: four men and four women. Every level brings a skill point to spend in the class\'s skill tree; every skill has ten ranks. A party is five strong, at most three to a row: most want two or three in front, a healer, and someone to cast or sing.'), h('div', { class: 'class-grid' }, ...cards)),
     section('And those not yet found', h('div', { class: 'class-grid' }, ...secret)),
   ];
 }

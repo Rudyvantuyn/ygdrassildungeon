@@ -116,6 +116,8 @@ function fightWinRate(ids: string[], level: number, tier: number, opts: { boss?:
 // Chapter III (the Marrowdeep) is prepared before its floors are drawn, so it is checked fight by fight.
 // A party reaches it around level 37 with tier 9-10 gear. Measured on purpose (November 2026):
 // Ribwarden 41% at 38, 72% at 40; Hrungnir 7% at 38, 71% at 44; Bergrisi 16/44/63% and Ossuary Hound 5/31/74% at 38/44/48.
+// Since November 2026 parties are five strong: the monsters were scaled up (src/core/data/enemies.ts) until every
+// bound here held again with the same numbers, rather than the bounds being moved.
 describe('chapter III balance', { timeout: 120_000 }, () => {
   it('its monsters are a step up from chapter II, but a fresh party on arrival still wins them', () => {
     expect(fightWinRate(['rimeTroll', 'shardling'], 37, 10, {})).toBeGreaterThanOrEqual(0.85);

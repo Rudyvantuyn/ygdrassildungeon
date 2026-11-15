@@ -629,7 +629,9 @@ describe('Oath Hall (party management)', () => {
 
   it('the first party is free; after that each oath costs more gold and an Oath Token', () => {
     const game = Game.newGame(1, []);
-    for (const name of ['A', 'B', 'C', 'D']) expect(registerMember(game, name, 'strider')).toBeNull();
+    for (const name of ['A', 'B', 'C', 'D', 'E0']) expect(registerMember(game, name, 'strider')).toBeNull();
+    // Five striders: at most three in front, the rest take the back row.
+    expect(game.state.party.filter((m) => m.row === 'front')).toHaveLength(3);
     expect(game.state.gold).toBe(150);
     expect(registerMember(game, 'E', 'strider')).toMatch(/300 G/);
     game.state.gold = 1000;
@@ -667,7 +669,7 @@ describe('Oath Hall (party management)', () => {
     expect(moveToReserve(game, 0)).toBe(true);
     expect(game.state.reserve.map((m) => m.name)).toEqual(['Sigrun', 'Bram']);
     expect(moveToParty(game, 0)).toBe(true);
-    expect(game.state.party.map((m) => m.name)).toEqual(['Sela', 'Wren', 'Orrin', 'Sigrun']);
+    expect(game.state.party.map((m) => m.name)).toEqual(['Sela', 'Wren', 'Orrin', 'Ragna', 'Sigrun']);
     while (game.state.party.length > 1) moveToReserve(game, 0);
     expect(moveToReserve(game, 0)).toBe(false);
   });
@@ -679,6 +681,9 @@ describe('Oath Hall (party management)', () => {
     expect(shiftMember(game, 0, -1)).toBe(false);
     expect(toggleRow(game, 1)).toBe(true);
     expect(game.state.party[1].row).toBe('back');
+    // Three already stand in the back (Bram, Wren, Orrin): nobody else can join them.
+    expect(game.state.party.filter((m) => m.row === 'back')).toHaveLength(3);
+    expect(toggleRow(game, 0)).toBe(false);
     registerMember(game, 'Ulf', 'strider');
     expect(dismissMember(game, 0)).toBe(true);
     expect(game.state.reserve).toEqual([]);

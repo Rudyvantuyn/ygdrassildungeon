@@ -7,6 +7,7 @@
  */
 import { Combat } from './combat';
 import { FLOORS } from './data/floors';
+import { SMALL_BAND_ENEMIES } from './data/enemies';
 import { makeInventory } from './data/items';
 import { GATHER_KINDS, type GatherKind } from './data/gathering';
 import { isGatherTile, parseFloor } from './dungeon';
@@ -258,6 +259,11 @@ export function simulateRun(members: Member[], floor: number, length: RunLength,
     } else {
       // Scouts pick their fights: they slip past the bigger part of a pack and take on as many as they are.
       combat = new Combat(team, rng.weighted(def.encounters).enemies.slice(0, team.length), bag, rng);
+    }
+    // The deep is tuned for a party of five; a band of scouts meets the monsters at the strength made for smaller bands.
+    for (const e of combat.enemies) {
+      const small = SMALL_BAND_ENEMIES[e.def.id];
+      if (small) Object.assign(e, { def: small, hp: small.hp, maxHp: small.hp });
     }
     fought++;
     for (let round = 0; !combat.outcome && round < 200; round++) {

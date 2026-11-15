@@ -212,7 +212,7 @@ export const DEEDS: DeedDef[] = [
 
   // Sagas
   { id: 'sungOf', name: 'Sung Of', text: 'One of yours earned a byname. The skalds are singing.', kind: 'hall', tier: 'bronze', icon: 'tied-scroll', earned: (g) => roster(g).some((m) => (m.bynames?.length ?? 0) > 0) },
-  { id: 'hallOfNames', name: 'A Hall of Names', text: 'Everyone in a full party bore a byname.', kind: 'hall', tier: 'silver', icon: 'laurels', earned: (g) => g.state.party.length >= 4 && g.state.party.every((m) => !!m.byname) },
+  { id: 'hallOfNames', name: 'A Hall of Names', text: 'Everyone in a party of four or more bore a byname.', kind: 'hall', tier: 'silver', icon: 'laurels', earned: (g) => g.state.party.length >= 4 && g.state.party.every((m) => !!m.byname) },
   { id: 'guardiansBane', name: "Guardians' Bane", text: 'Struck the last blow on three different guardians.', kind: 'battle', tier: 'gold', icon: 'crossed-swords', earned: (g) => guardiansFelled(g) >= 3 },
 
   // The story

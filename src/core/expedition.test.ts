@@ -43,12 +43,21 @@ describe('expedition lobby', () => {
     expect(validMember({ ...member('Bram', 'bastion'), hp: 9999 })!.hp).toBe(member('Bram', 'bastion').hp);
   });
 
-  it('seats up to four players, once each', () => {
+  it('seats up to five players, once each', () => {
     const ex = createExpedition('host', 'Hana', member('Bram', 'bastion'), 0);
     expect(applyAction(ex, 'host', { type: 'join', player: 'Hana', member: member('Sela', 'strider') }, 0)).toMatch(/already/);
-    for (const p of ['a', 'b', 'c']) expect(applyAction(ex, p, { type: 'join', player: p, member: member('X' + p, 'strider') }, 0)).toBeNull();
+    for (const p of ['a', 'b', 'c', 'e']) expect(applyAction(ex, p, { type: 'join', player: p, member: member('X' + p, 'strider') }, 0)).toBeNull();
     expect(applyAction(ex, 'd', { type: 'join', player: 'd', member: member('Xd', 'strider') }, 0)).toMatch(/full/);
-    expect(ex.seats).toHaveLength(4);
+    expect(ex.seats).toHaveLength(5);
+  });
+
+  it('keeps at most three in a row when the party sets out', () => {
+    const ex = createExpedition('host', 'Hana', member('Bram', 'bastion'), 0);
+    for (const p of ['a', 'b', 'c', 'e']) applyAction(ex, p, { type: 'join', player: p, member: member('X' + p, 'bastion') }, 0);
+    expect(applyAction(ex, 'host', { type: 'start' }, 0)).toBeNull();
+    const rows = ex.game!.party.map((m) => m.row);
+    expect(rows.filter((r) => r === 'front')).toHaveLength(3);
+    expect(rows.filter((r) => r === 'back')).toHaveLength(2);
   });
 
   it('lets only the host set out, and can fill empty seats with the host’s own adventurers', () => {

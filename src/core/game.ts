@@ -4,7 +4,7 @@ import { FLOORS, type FloorDef } from './data/floors';
 import { ITEMS, makeInventory } from './data/items';
 import type { QuestState } from './quests';
 import { DX, DY, isGatherTile, isPassable, parseFloor, relCell, tileAt, turnDir, type FloorMap, type Tile } from './dungeon';
-import { createStartingParty, fullRestore, isAlive, memberStats, xpForLevel } from './party';
+import { createStartingParty, fitRows, fullRestore, isAlive, memberStats, xpForLevel } from './party';
 import { EQUIPMENT_LIST } from './data/equipment';
 import type { Bestiary } from './bestiary';
 import { autoSpend, clampRanks, fullScaleRank, rankOf } from './skilltree';
@@ -202,6 +202,8 @@ export class Game {
     // Number the oaths of adventurers from before oaths were numbered.
     [...state.party, ...state.reserve].forEach((m, i) => (m.oath ??= i + 1));
     [...state.party, ...state.reserve].forEach(clampRanks);
+    // At most three in a row (parties from before the rule may have four in front).
+    fitRows(state.party);
     // Difficulty settings existed briefly; everyone plays by the same rules (fair for expeditions).
     delete (state as { difficulty?: unknown }).difficulty;
     state.oaths ??= state.party.length + state.reserve.length;

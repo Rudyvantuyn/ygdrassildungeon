@@ -642,4 +642,44 @@ const list: EnemyDef[] = [
   },
 ];
 
-export const ENEMIES: Record<string, EnemyDef> = Object.fromEntries(list.map((e) => [e.id, e]));
+/**
+ * Parties are five strong (they were four until November 2026). The numbers above were tuned for four; these
+ * factors keep the fights as hard as they were, measured with the balance tests (src/core/balance.test.ts).
+ * A fifth adventurer helps most against packs, so ordinary monsters gain the most; one big foe gains less.
+ * New guardians and prowlers go in these lists too (a test checks that none is missing).
+ */
+export const GUARDIAN_IDS = ['blightedElder', 'rootgnawer', 'drownedJarl', 'hafgufa', 'ribwarden', 'hrungnir'];
+/** Each prowler's own factors: they are tuned one by one against the prowler rules (hopeless, risky, beatable). */
+const PROWLER_SCALE: Record<string, { hp: number; power: number }> = {
+  grimtusk: { hp: 1.1, power: 1.15 },
+  fenwraith: { hp: 0.66, power: 1.52 }, // a wraith: hits very hard, but does not last
+  rootDraugr: { hp: 1.1, power: 1.15 },
+  skerryjaw: { hp: 1.18, power: 1.18 },
+  brineDraugr: { hp: 1.0, power: 1.24 },
+  tidecoil: { hp: 1.36, power: 1.24 },
+  bergrisi: { hp: 1.18, power: 1.06 },
+  ossuaryHound: { hp: 1.18, power: 1.18 },
+};
+export const PROWLER_IDS = Object.keys(PROWLER_SCALE);
+const SCALE = {
+  monster: { hp: 1.35, power: 1.18 },
+  /** The Marrowdeep's packs, from the Marrowgnaw on: a party of five should still meet them a step up. */
+  marrowMonster: { hp: 1.45, power: 1.22 },
+  guardian: { hp: 1.1, power: 1.03 },
+};
+/** Guardians that needed their own factor: a five-strong party should still not rush the Blighted Elder. */
+const GUARDIAN_SCALE: Record<string, { hp: number; power: number }> = {
+  blightedElder: { hp: 1.2, power: 1.06 },
+};
+const MARROW_FROM = list.findIndex((e) => e.id === 'marrowgnaw');
+
+function scaled(e: EnemyDef, index: number): EnemyDef {
+  const k = GUARDIAN_IDS.includes(e.id)
+    ? (GUARDIAN_SCALE[e.id] ?? SCALE.guardian)
+    : (PROWLER_SCALE[e.id] ?? (index >= MARROW_FROM ? SCALE.marrowMonster : SCALE.monster));
+  return { ...e, hp: Math.round(e.hp * k.hp), atk: Math.round(e.atk * k.power), mag: Math.round(e.mag * k.power) };
+}
+
+export const ENEMIES: Record<string, EnemyDef> = Object.fromEntries(list.map((e, i) => [e.id, scaled(e, i)]));
+/** The monsters as they are when they meet a band of one to three (Raven Run scouts): the numbers above, unscaled. */
+export const SMALL_BAND_ENEMIES: Record<string, EnemyDef> = Object.fromEntries(list.map((e) => [e.id, e]));

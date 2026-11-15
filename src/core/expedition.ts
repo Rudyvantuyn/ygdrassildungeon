@@ -1,5 +1,5 @@
 /**
- * Expeditions: up to four players from different halls descend together. Each player
+ * Expeditions: up to five players from different halls descend together. Each player
  * brings one of their own adventurers; the first seat (the host) leads the way through
  * the corridors, and in a fight everyone picks the command for their own adventurer.
  *
@@ -18,13 +18,13 @@ import { ITEMS, makeInventory } from './data/items';
 import { SKILLS } from './data/skills';
 import { Game, type GameState, type StepEvent } from './game';
 import { NAME_MAX_LENGTH, cleanName, nameLength } from './guild';
-import { fullRestore, isAlive, knownSkills, MAX_LEVEL, memberStats, xpForLevel } from './party';
+import { fitRows, fullRestore, isAlive, knownSkills, MAX_LEVEL, memberStats, xpForLevel } from './party';
 import { validSkills } from './skilltree';
 import { chooseCommands } from './tactics';
 import type { ClassId, ItemId, Member } from './types';
 
 export const EXPEDITION_VERSION = 1;
-export const MAX_SEATS = 4;
+export const MAX_SEATS = 5;
 /** Time each player has to pick a command before their adventurer acts on their own. */
 export const ROUND_SECONDS = 40;
 /** A player who sends nothing for this long counts as gone (clients check in every few seconds). */
@@ -279,6 +279,8 @@ function run(state: ExpeditionState, user: string, action: Action, now: number, 
       const game = Game.newGame(seed);
       const s = game.state;
       s.party = state.seats.map((st) => clone(st.member));
+      // At most three in a row: whoever joined last steps to the other row if theirs is full.
+      fitRows(s.party);
       s.reserve = [];
       s.gold = 0;
       const kit: Partial<Record<ItemId, number>> = { homingFeather: 1 };

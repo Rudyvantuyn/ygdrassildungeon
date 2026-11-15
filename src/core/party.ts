@@ -14,12 +14,29 @@ export function createMember(name: string, classId: ClassId, look?: number): Mem
   return m;
 }
 
+/** At most this many adventurers stand in one row (front or back) of a party. */
+export const MAX_PER_ROW = 3;
+
+/** Moves adventurers so no row holds more than MAX_PER_ROW: the last ones in an overfull row step to the other. */
+export function fitRows(party: Member[]): void {
+  for (const row of ['front', 'back'] as const) {
+    const inRow = party.filter((m) => m.row === row);
+    for (const m of inRow.slice(MAX_PER_ROW)) m.row = row === 'front' ? 'back' : 'front';
+  }
+}
+
+/** The row a newcomer to `party` takes: the one they want, unless it is full. */
+export function rowFor(party: Member[], wanted: Member['row']): Member['row'] {
+  return party.filter((m) => m.row === wanted).length < MAX_PER_ROW ? wanted : wanted === 'front' ? 'back' : 'front';
+}
+
 export function createStartingParty(): Member[] {
   return [
     createMember('Bram', 'bastion', 0),
     createMember('Sela', 'strider', 4),
     createMember('Wren', 'mender', 2),
     createMember('Orrin', 'runecaller', 1),
+    createMember('Ragna', 'berserker', 5),
   ];
 }
 

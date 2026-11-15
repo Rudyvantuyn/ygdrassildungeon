@@ -133,7 +133,7 @@ describe('Raven Runs balance', { timeout: 120_000 }, () => {
     const ownFight = (floor: number, level: number) => {
       let total = 0;
       for (const s of seeds) {
-        const party = trained(['bastion', 'strider', 'mender', 'runecaller'], level, floor);
+        const party = trained(['bastion', 'strider', 'mender', 'runecaller', 'berserker'], level, floor);
         const rng = new Rng(s);
         const c = new Combat(party, rng.weighted(FLOORS[floor].encounters).enemies, makeInventory(), rng);
         for (let r = 0; r < 200 && !c.outcome; r++) c.resolveRound(chooseCommands(c));

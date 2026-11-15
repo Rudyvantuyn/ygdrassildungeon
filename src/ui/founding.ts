@@ -4,7 +4,7 @@
  */
 import { CLASSES } from '../core/data/classes';
 import { FOUNDING_OATHS, NAME_MAX_LENGTH, cleanName, nameLength } from '../core/guild';
-import { createMember } from '../core/party';
+import { createMember, rowFor } from '../core/party';
 import type { ClassId, Member } from '../core/types';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
@@ -78,11 +78,11 @@ export class Founding {
     const say =
       n === 0
         ? first
-          ? '"So you have come to swear the Pact. Good. Midgard needs Wayfinders to find the road the realms want. Nobody goes into the Rootdeep alone: choose who will walk at your side. Up to four may swear today, at no cost."'
+          ? '"So you have come to swear the Pact. Good. Midgard needs Wayfinders to find the road the realms want. Nobody goes into the Rootdeep alone: choose who will walk at your side. Up to five may swear today, at no cost."'
           : '"Who will be the first to swear?"'
         : n < FOUNDING_OATHS
-          ? `"${n} sworn. A full party has four: two to hold the front, two to work from behind. Take more, or set out as you are."`
-          : '"Four sworn, a full party. Later oaths need gold and an Oath Token, a shard of Ymir from the deep, so choose well. Ready?"';
+          ? `"${n} sworn. A full party has five, and no more than three stand in one row: some to hold the front, the rest to work from behind. Take more, or set out as you are."`
+          : '"Five sworn, a full party. Later oaths need gold and an Oath Token, a shard of Ymir from the deep, so choose well. Ready?"';
     const items: MenuItem[] = [
       ...this.members.map((m, i) => ({
         label: `${m.name}`,
@@ -136,7 +136,7 @@ export class Founding {
       };
     });
     const menu = new ListMenu(items, { onCancel: () => this.hall() });
-    const tip = front < 2 ? '"Most parties want two in front: a Bastion, Berserker, Wolfkin or Strider. And bring a Mender, or you will not last long."' : '"Two in front already. Now think of the back: a Mender to heal, and someone to cast or sing."';
+    const tip = front < 2 ? '"Most parties want two or three in front: a Bastion, Berserker, Wolfkin or Strider. And bring a Mender, or you will not last long."' : front >= 3 ? '"Three in front: that row is full. The rest stand behind: a Mender to heal, and someone to cast or sing."' : '"Two in front already. A third can join them, or think of the back: a Mender to heal, and someone to cast or sing."';
     this.dialog('Choose a class', [npcSays('brynja', tip)], menu);
   }
 
@@ -157,7 +157,10 @@ export class Founding {
       if (nameLength(name) > NAME_MAX_LENGTH) return void (error.textContent = `Names can be at most ${NAME_MAX_LENGTH} letters.`);
       if (!name) return void (error.textContent = 'Give your adventurer a name.');
       if (this.members.some((m) => m.name.toLowerCase() === name.toLowerCase())) return void (error.textContent = `There is already someone called ${name}.`);
-      this.members.push(createMember(name, classId, look));
+      const member = createMember(name, classId, look);
+      // At most three in a row: if theirs is full, they take the other.
+      member.row = rowFor(this.members, member.row);
+      this.members.push(member);
       this.hall();
     };
     const suggest = () => {

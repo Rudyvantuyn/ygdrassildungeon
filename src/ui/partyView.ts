@@ -1,5 +1,5 @@
 import { CLASSES } from '../core/data/classes';
-import { memberStats } from '../core/party';
+import { MAX_LEVEL, memberStats, xpForLevel } from '../core/party';
 import { unspentPoints } from '../core/skilltree';
 import type { Ailment, Member } from '../core/types';
 import { AILMENT_BADGE } from './combatView';
@@ -26,6 +26,8 @@ interface Card {
   hpText: HTMLElement;
   spFill: HTMLElement;
   spText: HTMLElement;
+  xpBar: HTMLElement;
+  xpFill: HTMLElement;
   ailment: HTMLElement;
   row: HTMLElement;
 }
@@ -58,6 +60,12 @@ export class PartyView {
       card.hpText.textContent = `${hp} / ${stats.hp}`;
       card.spFill.style.width = `${(sp / stats.sp) * 100}%`;
       card.spText.textContent = `${sp} / ${stats.sp}`;
+      // Experience toward the next level: fills up as the next level comes closer.
+      const from = xpForLevel(m.level);
+      const to = m.level >= MAX_LEVEL ? from : xpForLevel(m.level + 1);
+      const xpRatio = to > from ? Math.min(1, Math.max(0, (m.xp - from) / (to - from))) : 1;
+      card.xpFill.style.width = `${xpRatio * 100}%`;
+      card.xpBar.title = m.level >= MAX_LEVEL ? 'Highest level reached' : `XP ${m.xp - from} / ${to - from} to level ${m.level + 1}`;
       card.root.classList.toggle('ko', hp <= 0);
       const ailment = display.ailments?.[i] ?? null;
       card.ailment.textContent = ailment ? AILMENT_BADGE[ailment].short : '';
@@ -99,12 +107,14 @@ export class PartyView {
         <canvas class="portrait" width="132" height="132"></canvas>
         <div class="member-head"><span class="member-name"></span><span class="member-class"></span><span class="ailment hidden"></span><span class="member-row">${m.row}</span></div>
         <div class="bar hp"><i></i><span><b>HP</b><b class="v"></b></span></div>
-        <div class="bar sp"><i></i><span><b>SP</b><b class="v"></b></span></div>`;
+        <div class="bar sp"><i></i><span><b>SP</b><b class="v"></b></span></div>
+        <div class="xp-bar"><i></i></div>`;
       root.querySelector('.member-name')!.textContent = m.name;
       drawPortrait(root.querySelector<HTMLCanvasElement>('canvas.portrait')!.getContext('2d')!, 132, m.classId, m.name, def.color, m.look);
       this.container.appendChild(root);
       const hpBar = root.querySelector<HTMLElement>('.bar.hp')!;
       const spBar = root.querySelector<HTMLElement>('.bar.sp')!;
+      const xpBar = root.querySelector<HTMLElement>('.xp-bar')!;
       return {
         root,
         level: root.querySelector<HTMLElement>('.member-class')!,
@@ -113,6 +123,8 @@ export class PartyView {
         hpText: hpBar.querySelector('.v')!,
         spFill: spBar.querySelector('i')!,
         spText: spBar.querySelector('.v')!,
+        xpBar,
+        xpFill: xpBar.querySelector('i')!,
         ailment: root.querySelector<HTMLElement>('.ailment')!,
         row: root.querySelector<HTMLElement>('.member-row')!,
       };
