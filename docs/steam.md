@@ -48,8 +48,8 @@ eromheen Nederlands. Screenshots maak je met de game zelf op 1920×1080 (zie ond
 > carried.
 >
 > **More to find.**
-> - Three chapters of the Rootdeep: the Greenwood Roots, the Drowned Roots and the Marrowdeep, each with its own
->   creatures and a guardian at the bottom.
+> - Five chapters of the Rootdeep, from the Greenwood Roots down through the sea, the bones and the skull of Ymir to
+>   Ginnungagap, each with its own creatures and a guardian at the bottom.
 > - The Wyrdweave: three new floors every day, the same for every player, each with a rule of its own.
 > - Sagas: every fight is told, and your adventurers earn bynames. Bram Wolf-Feeder. Wren the Kind.
 > - The Book of Deeds: over fifty hidden medals.
@@ -64,7 +64,7 @@ eromheen Nederlands. Screenshots maak je met de game zelf op 1920×1080 (zie ond
 - First-person grid exploration with hand-drawn mapping
 - Party of five, eight classes plus secret classes, skill trees with ranks 1–10
 - Turn-based combat with elemental weaknesses, rows and roaming prowlers
-- Three chapters (15 floors) and growing; a guardian at the end of every chapter
+- Five chapters (25 floors) and growing; a guardian at the end of every chapter
 - Daily Wyrdweave run, the same for everyone
 - Co-op expeditions for up to five players
 - Sagas, bynames and over fifty hidden deeds
