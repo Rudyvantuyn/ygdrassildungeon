@@ -61,7 +61,8 @@ export type DeedCounter =
   | 'pacifist'
   | 'longWayHome'
   | 'nightOwl'
-  | 'bareHands';
+  | 'bareHands'
+  | 'carriedHome';
 
 /** Expeditions shared with another player (older saves only kept the list of shares collected). */
 function expeditionsHome(g: Game): number {
@@ -229,6 +230,7 @@ export const DEEDS: DeedDef[] = [
   { id: 'nightOwl', name: 'Night Owl', text: 'Won a fight between three and four in the morning. Go to bed.', kind: 'odd', tier: 'bronze', icon: 'raven', earned: (g) => n(g, 'nightOwl') >= 1 },
   { id: 'pacifist', name: "Pacifist's Walk", text: 'Reached the stairs down without winning a single fight on that floor.', kind: 'odd', tier: 'silver', icon: 'run', earned: (g) => n(g, 'pacifist') >= 1 },
   { id: 'bareHands', name: 'Bare Hands', text: 'Beat a guardian or a prowler with someone unarmed in the party.', kind: 'odd', tier: 'bronze', icon: 'broken-shield', earned: (g) => n(g, 'bareHands') >= 1 },
+  { id: 'rootsRemember', name: 'The Roots Remember', text: 'Fell to the last one, and woke in Lindholm. The roots always lead home.', kind: 'odd', tier: 'bronze', icon: 'tree-roots', earned: (g) => n(g, 'carriedHome') >= 1 },
   { id: 'longWayHome', name: 'The Long Way Home', text: 'Walked all the way back up to Lindholm after going down three stairs.', kind: 'odd', tier: 'silver', icon: 'stairs', earned: (g) => n(g, 'longWayHome') >= 1 },
   { id: 'stubborn', name: 'Stubborn', text: 'Walked into the same wall twenty times in a row.', kind: 'odd', tier: 'bronze', icon: 'brick-wall', earned: (g) => n(g, 'bumps') >= 20 },
 ];

@@ -62,6 +62,9 @@ Add new names there and keep the glossary in sync.
   (`SCALE`, `PROWLER_SCALE` and `GUARDIAN_SCALE` at the end of `src/core/data/enemies.ts`, measured with the
   balance tests, which play with a party of five); Raven Run scouts still
   meet them at their old strength (`SMALL_BAND_ENEMIES`).
+- **No game over**: when the whole party falls, the roots carry it home to Lindholm (`Game.carriedHome`): half the
+  gold, half of every item and material stay in the deep; gear and Oath Tokens are kept, the fallen wake with 1 HP.
+  Never send players back to an old save or the title screen for it.
 - **No difficulty setting**: everyone plays by the same rules, so expeditions stay fair.
 - **The game is meant to be grindy and challenging**: XP and gold come slowly (`XP_RATE`, `GOLD_RATE` in combat.ts);
   the balance tests check that rushing fails and steady training wins.

@@ -1682,15 +1682,27 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Your party has fallen' }), el('p', { text: 'Too hard? Try a higher test level, or soften the floor.' }), menu.el]), menu);
       return;
     }
-    const hasSave = readSave() !== null;
-    const menu = new ListMenu([
-      { label: 'Load last save', disabled: !hasSave, onSelect: () => this.loadSave() },
-      { label: 'Return to title', onSelect: () => this.showTitle() },
+    // Not the end: the roots carry the party home, and the deep keeps half of what they carried.
+    const loss = this.game.carriedHome();
+    this.save();
+    const items = Object.entries(loss.items).filter(([, n]) => (n ?? 0) > 0) as [ItemId, number][];
+    const materials = Object.values(loss.materials).reduce((a, n) => a + n, 0);
+    const lines = el('div', { className: 'rewards' }, [
+      el('span', { text: 'Gold' }), el('span', { className: 'v', text: `−${loss.gold} G` }),
+      ...items.flatMap(([id, n]) => [el('span', { text: 'Lost' }), el('span', { className: 'v', text: `${ITEMS[id].name}${n > 1 ? ` ×${n}` : ''}` })]),
+      ...(materials ? [el('span', { text: 'Materials' }), el('span', { className: 'v', text: `−${materials}` })] : []),
     ]);
+    this.noticeTip('carriedHome');
+    const go = () => {
+      this.closeOverlay();
+      this.enterTown();
+    };
+    const menu = new ListMenu([{ label: 'Wake up in Lindholm', onSelect: go }], { onCancel: go, backRow: false });
     this.openOverlay(
       el('div', { className: 'panel dialog' }, [
         el('h2', { text: 'Your party has fallen' }),
-        el('p', { text: 'The Rootdeep claims another expedition. Your last save is waiting.' }),
+        el('p', { text: 'Darkness, and then roots, carrying you up. The roots of the Great Tree always lead home: you wake in Lindholm, bruised and alive. The deep kept half of what you carried.' }),
+        lines,
         menu.el,
       ]),
       menu,

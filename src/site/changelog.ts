@@ -16,6 +16,8 @@ export const CHANGES: ChangeDay[] = [
       'New: five adventurers swear the oath for free when you found your party. Older saves can add a fifth from the Oath Hall.',
       'New: expeditions take up to five players.',
       'New: an experience bar under every adventurer, filling up toward the next level once a fight is won.',
+      'Changed: a fallen party is no longer the end. The roots carry it home to Lindholm, but the deep keeps half your gold, items and materials (gear and Oath Tokens are kept).',
+      'New: a deed for the first time the roots carry you home.',
       'Changed: monsters, prowlers and guardians are stronger, to match a party of five. Raven Run scouts meet them as before.',
     ],
   },

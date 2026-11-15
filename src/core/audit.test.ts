@@ -109,3 +109,24 @@ describe('the Wyrdweave', () => {
     }
   });
 });
+
+describe('a fallen party', () => {
+  it('is carried home, losing half its gold, items and materials but keeping Oath Tokens', () => {
+    const g = Game.newGame(5);
+    g.enterFloor(0);
+    g.state.gold = 101;
+    g.state.inventory.sapTonic = 5;
+    g.state.inventory.oathToken = 2;
+    g.state.materials = { bogJelly: 4 };
+    for (const m of g.state.party) m.hp = 0;
+    const loss = g.carriedHome();
+    expect(g.state.location).toBe('town');
+    expect(g.state.gold).toBe(50);
+    expect(loss.gold).toBe(51);
+    expect(g.state.inventory.sapTonic).toBe(2);
+    expect(g.state.inventory.oathToken).toBe(2);
+    expect(g.state.materials.bogJelly).toBe(2);
+    expect(g.state.party.every((m) => m.hp === 1)).toBe(true);
+    expect(g.state.counters?.carriedHome).toBe(1);
+  });
+});

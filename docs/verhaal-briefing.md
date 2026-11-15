@@ -58,7 +58,7 @@ spelers vanzelf goed spelen:
 | Je begint met een zelfgemaakte groep van maximaal vier, op level 1 | Waarom beginnen ze als groentjes? Wat is de eed in de Oath Hall? |
 | Meer avonturiers aannemen kost goud **en een Oath Token** dat je in de dungeon vindt | Wat is een Oath Token? Waarom kan niet iedereen zomaar de eed afleggen? |
 | Je kunt altijd terug naar de stad (trap omhoog, of de *Homing Feather*) | Waarom kan de groep veilig terugkeren? |
-| Als iedereen valt is het game over (laatste save) | Wat gebeurt er met wie valt? (Iets dat sparen en voorzichtig zijn aanmoedigt.) |
+| Als iedereen valt, dragen de wortels de party terug naar Lindholm; de helft van goud en spullen blijft achter | Wat gebeurt er met wie valt? (Iets dat sparen en voorzichtig zijn aanmoedigt.) |
 | Monsters komen steeds terug; verzamelplekken en bronnen herstellen als je in de stad bent | Waarom groeit de Rootdeep steeds opnieuw aan? |
 | *Prowlers*: enorme monsters die zichtbaar rondzwerven; je moet ze ontwijken tot je sterk genoeg bent | Wat zijn het, waarom zwerven ze? |
 | Je tekent zelf de kaart | Waarom is de Rootdeep onbekend terrein? Verandert hij? |

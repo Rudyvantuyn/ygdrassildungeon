@@ -132,7 +132,7 @@ export const TIPS: TipDef[] = [
     pages: [
       'An adventurer at 0 HP has fallen. They earn nothing until they are back on their feet.',
       'Kindling Moss or the Mender\'s Rekindle wakes them. A night at the inn heals everyone, fallen or not.',
-      'If the whole party falls, the expedition is lost and you go back to your last save.',
+      'If the whole party falls, the roots carry you home to Lindholm, but the deep keeps half your gold and supplies.',
     ],
   },
   {
@@ -171,6 +171,16 @@ export const TIPS: TipDef[] = [
     pages: [
       'Tonics, dew and moss keep you alive down there. Never descend without them.',
       'New gear comes in as explorers reach deeper floors. Sell me enough of a material and I can make something special from it.',
+    ],
+  },
+  {
+    id: 'carriedHome',
+    title: 'When the party falls',
+    speaker: 'gerd',
+    pages: [
+      'You were lucky. The roots carried you up, as they always do, and someone found you at the foot of the Great Tree.',
+      'The deep keeps its toll: half your gold, half your supplies and half of what you gathered stay down there. Your gear and Oath Tokens you keep.',
+      'Rest here before you go down again. Nobody wakes from that walk fit to fight.',
     ],
   },
   {

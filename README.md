@@ -254,7 +254,8 @@ kunstrichting in `CLAUDE.md`). Deze paragraaf beschrijft hoe het toen was._
   bron (eenmalig, slaat ook op). Op verdieping 3 bewaakt **The Blighted Elder** de trap naar beneden; op verdieping 5 wacht de
   laatste baas, **The Rootgnawer**.
 - **Opslaan** in de browser: in de stad (herberg of menu), en automatisch bij elke trap en bij de bron.
-  In de dungeon kun je niet zomaar opslaan: wie valt, begint weer bij de laatste save.
+  In de dungeon kun je niet zomaar opslaan. Valt de hele party, dan brengen de wortels haar terug naar Lindholm,
+  maar de helft van het goud, de items en de materialen blijft achter (uitrusting en Oath Tokens houd je).
 
 ### Geluid en muziek (mijlpaal 3)
 

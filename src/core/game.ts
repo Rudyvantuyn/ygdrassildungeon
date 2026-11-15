@@ -23,6 +23,13 @@ import type { Dir, ItemId, Loot, Member } from './types';
 /** Bump when the save format changes incompatibly; older saves are then discarded. */
 export const SAVE_VERSION = 3;
 
+/** What a fallen party left behind in the Rootdeep (see Game.carriedHome). */
+export interface CarriedHomeLoss {
+  gold: number;
+  items: Partial<Record<ItemId, number>>;
+  materials: Record<string, number>;
+}
+
 export interface FloorProgress {
   /** One character per cell: '1' = mapped. */
   explored: string;
@@ -540,6 +547,35 @@ export class Game {
       p.gathered = {};
       p.prowlers = initProwlers(this.floors[i]);
     });
+  }
+
+  /**
+   * The whole party has fallen. It is not the end: the roots of the Great Tree carry them home to Lindholm, but the
+   * deep keeps its toll. Half the gold, half of every item and half of every material stay behind (Oath Tokens and
+   * worn gear are kept). The fallen come round with 1 HP; the inn does the rest. Returns what was lost.
+   */
+  carriedHome(): CarriedHomeLoss {
+    const s = this.state;
+    const loss: CarriedHomeLoss = { gold: Math.ceil(s.gold / 2), items: {}, materials: {} };
+    s.gold -= loss.gold;
+    for (const id of Object.keys(s.inventory) as ItemId[]) {
+      const n = s.inventory[id] ?? 0;
+      if (id === 'oathToken' || n <= 0) continue;
+      const lost = Math.ceil(n / 2);
+      s.inventory[id] = n - lost;
+      loss.items[id] = lost;
+    }
+    for (const [id, n] of Object.entries(s.materials)) {
+      if (n <= 0) continue;
+      const lost = Math.ceil(n / 2);
+      s.materials[id] = n - lost;
+      loss.materials[id] = lost;
+    }
+    for (const m of s.party) if (m.hp <= 0) m.hp = 1;
+    delete s.fighting;
+    count(this, 'carriedHome');
+    this.returnToTown();
+    return loss;
   }
 
   useFeather(): boolean {
