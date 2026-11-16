@@ -21,8 +21,8 @@
   --corner-tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cg transform='rotate(90 11 11)'%3E%3Cpath d='M1.5 21V6.5a5 5 0 0 1 5-5H21' fill='none' stroke='%2393aebd' stroke-width='2'/%3E%3Cpath d='M5.5 21V9.5a4 4 0 0 1 4-4H21' fill='none' stroke='%23384e5c' stroke-width='1'/%3E%3Crect x='3.2' y='3.2' width='4.6' height='4.6' transform='rotate(45 5.5 5.5)' fill='%23f0cf6a'/%3E%3C/g%3E%3C/svg%3E");
   --corner-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cg transform='rotate(180 11 11)'%3E%3Cpath d='M1.5 21V6.5a5 5 0 0 1 5-5H21' fill='none' stroke='%2393aebd' stroke-width='2'/%3E%3Cpath d='M5.5 21V9.5a4 4 0 0 1 4-4H21' fill='none' stroke='%23384e5c' stroke-width='1'/%3E%3Crect x='3.2' y='3.2' width='4.6' height='4.6' transform='rotate(45 5.5 5.5)' fill='%23f0cf6a'/%3E%3C/g%3E%3C/svg%3E");
   --corner-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cg transform='rotate(270 11 11)'%3E%3Cpath d='M1.5 21V6.5a5 5 0 0 1 5-5H21' fill='none' stroke='%2393aebd' stroke-width='2'/%3E%3Cpath d='M5.5 21V9.5a4 4 0 0 1 4-4H21' fill='none' stroke='%23384e5c' stroke-width='1'/%3E%3Crect x='3.2' y='3.2' width='4.6' height='4.6' transform='rotate(45 5.5 5.5)' fill='%23f0cf6a'/%3E%3C/g%3E%3C/svg%3E");
-  --font-title: 'Pixelify Sans', monospace;
-  --font-ui: 'Pixelify Sans', monospace;
+  --font-title: 'Ygg Digits', 'Pixelify Sans', monospace;
+  --font-ui: 'Ygg Digits', 'Pixelify Sans', monospace;
 }
 
 * {
@@ -2561,8 +2561,8 @@ body.phone .menu-party {
  * inner rim, one pixel font, no gradients, glows, rounded corners or ornaments.
  */
 :root {
-  --font-title: 'Pixelify Sans', monospace;
-  --font-ui: 'Pixelify Sans', monospace;
+  --font-title: 'Ygg Digits', 'Pixelify Sans', monospace;
+  --font-ui: 'Ygg Digits', 'Pixelify Sans', monospace;
   --win: #10233a;
   --win-dark: #0a1626;
   --rim: #c8d4e0;

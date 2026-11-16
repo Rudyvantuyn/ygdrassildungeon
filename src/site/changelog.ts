@@ -12,6 +12,7 @@ export const CHANGES: ChangeDay[] = [
   {
     date: '2026-11-16',
     changes: [
+      'Changed: numbers now use clear digits everywhere (a 2, 5 and 8 were easy to mix up); letters stay pixel.',
       'New: a Font setting. Clear swaps the pixel font for a plain one that is easy to read, numbers included.',
       'New: a Lights setting. Steady holds every light in the dungeon still, if the flicker is distracting.',
       'Changed: the fastest flickers in the dungeon (torches, a hunting prowler\'s glow) are calmer by default.',

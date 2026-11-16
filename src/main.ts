@@ -10,6 +10,7 @@ import '@fontsource/pixelify-sans/latin-600.css';
 import '@fontsource/pixelify-sans/latin-700.css';
 import '@fontsource/atkinson-hyperlegible/latin-400.css';
 import '@fontsource/atkinson-hyperlegible/latin-700.css';
+import './ui/digits.css';
 import './ui/styles.css';
 import { leaveOldAddress, takeCarriedSave, takeCloudSave } from './site/transfer';
 import { online } from './net/online';

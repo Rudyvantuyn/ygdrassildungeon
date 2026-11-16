@@ -56,7 +56,7 @@ export function movementKey(k: string): string {
 
 /** The font for text drawn on a canvas (the fight view), following the font setting. */
 export function canvasFont(weight: number, size: number): string {
-  return prefs.clearFont ? `${weight} ${size}px "Atkinson Hyperlegible", sans-serif` : `${weight} ${size}px "Pixelify Sans", monospace`;
+  return prefs.clearFont ? `${weight} ${size}px "Atkinson Hyperlegible", sans-serif` : `${weight} ${size}px "Ygg Digits", "Pixelify Sans", monospace`;
 }
 
 /** Puts the font setting on the page (the stylesheet swaps the fonts for body.clear-font). */

@@ -7,7 +7,7 @@
   --gold-dark: #b8862e;
   --text: #e6e2d6;
   --muted: #9aa6ae;
-  --pixel: 'Pixelify Sans', system-ui, sans-serif;
+  --pixel: 'Ygg Digits', 'Pixelify Sans', system-ui, sans-serif;
   --read: 'Alegreya', Georgia, serif;
 }
 * { box-sizing: border-box; }

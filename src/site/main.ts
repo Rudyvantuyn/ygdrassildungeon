@@ -11,6 +11,7 @@ import '@fontsource/pixelify-sans/latin-700.css';
 import '@fontsource/alegreya/latin-400.css';
 import '@fontsource/alegreya/latin-400-italic.css';
 import '@fontsource/alegreya/latin-700.css';
+import '../ui/digits.css';
 import './site.css';
 import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
 import { BEAST_LORE } from '../core/data/beastLore';
