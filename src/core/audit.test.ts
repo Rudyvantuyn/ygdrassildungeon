@@ -113,23 +113,61 @@ describe('the Wyrdweave', () => {
 });
 
 describe('a fallen party', () => {
-  it('is carried home, losing half its gold, items and materials but keeping Oath Tokens', () => {
+  it('is carried home, losing half of what it found on this descent but nothing it set out with', () => {
     const g = Game.newGame(5);
+    g.state.gold = 100;
+    g.state.inventory.sapTonic = 4;
+    g.state.inventory.oathToken = 1;
+    g.state.materials = { bogJelly: 2 };
     g.enterFloor(0);
-    g.state.gold = 101;
-    g.state.inventory.sapTonic = 5;
+    // Found down there: 51 gold, 3 tonics, an Oath Token and 5 jelly.
+    g.state.gold = 151;
+    g.state.inventory.sapTonic = 7;
     g.state.inventory.oathToken = 2;
-    g.state.materials = { bogJelly: 4 };
+    g.state.materials = { bogJelly: 7, mossThread: 1 };
     for (const m of g.state.party) m.hp = 0;
     const loss = g.carriedHome();
     expect(g.state.location).toBe('town');
-    expect(g.state.gold).toBe(50);
-    expect(loss.gold).toBe(51);
-    expect(g.state.inventory.sapTonic).toBe(2);
+    expect(loss.gold).toBe(26);
+    expect(g.state.gold).toBe(125);
+    expect(g.state.inventory.sapTonic).toBe(5);
     expect(g.state.inventory.oathToken).toBe(2);
-    expect(g.state.materials.bogJelly).toBe(2);
+    expect(g.state.materials.bogJelly).toBe(4);
+    expect(g.state.materials.mossThread).toBe(0);
     expect(g.state.party.every((m) => m.hp === 1)).toBe(true);
     expect(g.state.counters?.carriedHome).toBe(1);
+    expect(g.state.setOut).toBeUndefined();
+  });
+
+  it('loses nothing it had in town, even when it used up its supplies down there', () => {
+    const g = Game.newGame(5);
+    g.state.gold = 300;
+    g.state.inventory.sapTonic = 6;
+    g.enterFloor(0);
+    g.state.gold = 280;
+    g.state.inventory.sapTonic = 1;
+    for (const m of g.state.party) m.hp = 0;
+    const loss = g.carriedHome();
+    expect(loss.gold).toBe(0);
+    expect(loss.items).toEqual({});
+    expect(g.state.gold).toBe(280);
+    expect(g.state.inventory.sapTonic).toBe(1);
+  });
+
+  it('starts counting again on every descent, not on every floor', () => {
+    const g = Game.newGame(5);
+    g.state.gold = 100;
+    g.enterFloor(0);
+    g.state.gold = 200;
+    g.enterFloor(1, true);
+    g.state.gold = 300;
+    for (const m of g.state.party) m.hp = 0;
+    expect(g.carriedHome().gold).toBe(100);
+    g.state.gold = 300;
+    g.enterFloor(0);
+    g.state.gold = 310;
+    for (const m of g.state.party) m.hp = 0;
+    expect(g.carriedHome().gold).toBe(5);
   });
 });
 

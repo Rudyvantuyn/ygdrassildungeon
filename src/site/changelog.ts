@@ -12,6 +12,7 @@ export const CHANGES: ChangeDay[] = [
   {
     date: '2026-11-16',
     changes: [
+      'Changed: when the whole party falls, the deep now keeps half of what you found on that descent, not half of everything you own. What you set out with is safe.',
       'Changed: the equipment shop first asks whose gear to look at, then shows only what they can wear, best first. ▲ marks an upgrade; older gear is one click away. Special gear has its own list, and every purchase asks once more.',
       'Changed: on the way down in the Wyrdweave, Go deeper comes first, and going home asks once more, so a quick Enter no longer ends the day\'s try.',
       'New: the Ygdrassil name above the game links to the website (it opens in a new tab, so your run stays where it is).',

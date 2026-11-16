@@ -109,6 +109,8 @@ export interface GameState {
   descent?: string;
   /** The descent a runestone was last carved on. */
   carvedOn?: string;
+  /** What the party set out with on this descent (gold, items, materials): a fall only costs half of what was found since. */
+  setOut?: { gold: number; inventory: Partial<Record<ItemId, number>>; materials: Record<string, number> };
   /** Runestones already read (ids, newest last): they show on the map. */
   runesRead?: number[];
   /** Fragments of the Rootdeep's past found (ids, src/core/data/fragments.ts). */
@@ -527,6 +529,7 @@ export class Game {
       setCount(this, 'downDescent', 0);
       // A name for this descent; random, but without touching the game's own dice.
       this.state.descent = `d${this.state.steps.toString(36)}-${Math.floor(Math.random() * 0x7fffffff).toString(36)}`.padEnd(10, '0');
+      this.state.setOut = { gold: this.state.gold, inventory: { ...this.state.inventory }, materials: { ...this.state.materials } };
     }
     this.state.location = 'dungeon';
     setCount(this, 'winsFloor', 0);
@@ -545,6 +548,7 @@ export class Game {
   returnToTown(): void {
     this.state.location = 'town';
     delete this.state.descent;
+    delete this.state.setOut;
     this.state.progress.forEach((p, i) => {
       p.springUsed = false;
       p.gathered = {};
@@ -553,24 +557,27 @@ export class Game {
   }
 
   /**
-   * The whole party has fallen. It is not the end: the roots of the Great Tree carry them home to Lindholm, but the
-   * deep keeps its toll. Half the gold, half of every item and half of every material stay behind (Oath Tokens and
-   * worn gear are kept). The fallen come round with 1 HP; the inn does the rest. Returns what was lost.
+   * The whole party has fallen. It is not the end: the roots carry them home to Lindholm, but the deep keeps its toll:
+   * half of what was found on this descent (gold, items and materials beyond what the party set out with) stays
+   * behind. What they already had in town is safe, and so are Oath Tokens and worn gear. The fallen come round with
+   * 1 HP; the inn does the rest. Returns what was lost.
    */
   carriedHome(): CarriedHomeLoss {
     const s = this.state;
-    const loss: CarriedHomeLoss = { gold: Math.ceil(s.gold / 2), items: {}, materials: {} };
+    const start = s.setOut ?? { gold: s.gold, inventory: { ...s.inventory }, materials: { ...s.materials } };
+    const toll = (now: number, before: number) => Math.ceil(Math.max(0, now - before) / 2);
+    const loss: CarriedHomeLoss = { gold: toll(s.gold, start.gold), items: {}, materials: {} };
     s.gold -= loss.gold;
     for (const id of Object.keys(s.inventory) as ItemId[]) {
       const n = s.inventory[id] ?? 0;
-      if (id === 'oathToken' || n <= 0) continue;
-      const lost = Math.ceil(n / 2);
+      const lost = id === 'oathToken' ? 0 : toll(n, start.inventory[id] ?? 0);
+      if (lost <= 0) continue;
       s.inventory[id] = n - lost;
       loss.items[id] = lost;
     }
     for (const [id, n] of Object.entries(s.materials)) {
-      if (n <= 0) continue;
-      const lost = Math.ceil(n / 2);
+      const lost = toll(n, start.materials[id] ?? 0);
+      if (lost <= 0) continue;
       s.materials[id] = n - lost;
       loss.materials[id] = lost;
     }

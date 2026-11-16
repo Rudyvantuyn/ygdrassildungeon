@@ -84,7 +84,7 @@ hetzelfde eerlijke antwoord (zie de antwoorden onderaan).
 >
 > **How much there is:** six chapters, 30 floors, 94 creatures, 170+ pieces of gear, 70+ hidden deeds with medals.
 > It's grindy and challenging on purpose: rushing gets you hurt, steady training wins. There's no game over, though:
-> if your whole party falls, the roots carry them home, and you lose half your gold and loot.
+> if your whole party falls, the roots carry them home, and you lose half of what you found on the way down.
 >
 > **What I'd love to hear:** where you got stuck or bored, anything that felt unfair, how it plays on your phone,
 > and bugs. There's a Feedback button on the title screen and in the menu that sends it straight to me, or just
@@ -159,7 +159,7 @@ hetzelfde eerlijke antwoord (zie de antwoorden onderaan).
 > - A daily dungeon (the Wyrdweave): three floors, the same for everyone, each with a rule like "no auto-map" or
 >   "light reaches two squares".
 > - Co-op expeditions where every player brings one adventurer from their own party.
-> - No game over: if the party falls, the roots carry them home, at the cost of half the gold and loot.
+> - No game over: if the party falls, the roots carry them home, at the cost of half of what they found on the way down.
 > - Every adventurer keeps a saga and earns bynames. They're pure honour: no stats attached.
 >
 > **The art:** pixel art throughout. Monsters and adventurers come from a free (CC0) pixel set, and places and
@@ -212,7 +212,7 @@ hetzelfde eerlijke antwoord (zie de antwoorden onderaan).
 >   forest, drowned roots, the bones of a giant, the inside of the sky, the gap of ice and fire, and the spring every
 >   river comes from.
 > - **Grindy on purpose.** No difficulty setting; rushing gets you hurt. But no game over either: a fallen party is
->   carried home and loses half its gold and loot.
+>   carried home and loses half of what it found on the way down.
 >
 > [ygdrassil-chapters.gif]
 >

@@ -85,8 +85,8 @@ Add new names there and keep the glossary in sync.
   - **After chapter X Ymir dreams the world again**: a new round with the mazes of I–X, monsters as dreamed versions
     (other colours, mixed between chapters, scaled to the chapter's level, other skills and weaknesses), and a slightly
     higher shard chance each round.
-- **No game over**: when the whole party falls, the roots carry it home to Lindholm (`Game.carriedHome`): half the
-  gold, half of every item and material stay in the deep; gear and Oath Tokens are kept, the fallen wake with 1 HP.
+- **No game over**: when the whole party falls, the roots carry it home to Lindholm (`Game.carriedHome`): half of what
+  was found on that descent (gold, items, materials beyond what the party set out with) stays in the deep (owner, November 2026); gear and Oath Tokens are kept, the fallen wake with 1 HP.
   Never send players back to an old save or the title screen for it.
 - **No difficulty setting**: everyone plays by the same rules, so expeditions stay fair.
 - **The game is meant to be grindy and challenging**: XP and gold come slowly (`XP_RATE`, `GOLD_RATE` in combat.ts);

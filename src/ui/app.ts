@@ -1769,7 +1769,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Your party has fallen' }), el('p', { text: 'Too hard? Try a higher test level, or soften the floor.' }), menu.el]), menu);
       return;
     }
-    // Not the end: the roots carry the party home, and the deep keeps half of what they carried.
+    // Not the end: the roots carry the party home, and the deep keeps half of what they found on this descent.
     const loss = this.game.carriedHome();
     this.save();
     const items = Object.entries(loss.items).filter(([, n]) => (n ?? 0) > 0) as [ItemId, number][];
@@ -1788,7 +1788,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.openOverlay(
       el('div', { className: 'panel dialog' }, [
         el('h2', { text: 'Your party has fallen' }),
-        el('p', { text: 'Darkness, and then roots, carrying you up. The roots of the Great Tree always lead home: you wake in Lindholm, bruised and alive. The deep kept half of what you carried.' }),
+        el('p', { text: 'Darkness, and then roots, carrying you up. The roots of the Great Tree always lead home: you wake in Lindholm, bruised and alive. The deep kept half of what you found on the way down; what you set out with is safe.' }),
         lines,
         menu.el,
       ]),

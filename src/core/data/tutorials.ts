@@ -132,7 +132,7 @@ export const TIPS: TipDef[] = [
     pages: [
       'An adventurer at 0 HP has fallen. They earn nothing until they are back on their feet.',
       'Kindling Moss or the Mender\'s Rekindle wakes them. A night at the inn heals everyone, fallen or not.',
-      'If the whole party falls, the roots carry you home to Lindholm, but the deep keeps half your gold and supplies.',
+      'If the whole party falls, the roots carry you home to Lindholm, but the deep keeps half of what you found on the way down.',
     ],
   },
   {
@@ -179,7 +179,7 @@ export const TIPS: TipDef[] = [
     speaker: 'gerd',
     pages: [
       'You were lucky. The roots carried you up, as they always do, and someone found you at the foot of the Great Tree.',
-      'The deep keeps its toll: half your gold, half your supplies and half of what you gathered stay down there. Your gear and Oath Tokens you keep.',
+      'The deep keeps its toll: half of what you found on this descent, gold, supplies and gathered things alike, stays down there. What you set out with is safe, and so are your gear and Oath Tokens.',
       'Rest here before you go down again. Nobody wakes from that walk fit to fight.',
     ],
   },
