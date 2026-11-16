@@ -1232,7 +1232,13 @@ const SCALE = {
 };
 /** Guardians that needed their own factor: a five-strong party should still not rush the Blighted Elder. */
 const GUARDIAN_SCALE: Record<string, { hp: number; power: number }> = {
-  blightedElder: { hp: 1.2, power: 1.06 },
+  // Chapters I and II were first tuned only as part of a whole run (worn down on the way). Measured again as a
+  // fight from full health (November 2026, a player found the Elder easy at level 9): about a third on arrival,
+  // two in three a little trained, nine in ten well trained.
+  blightedElder: { hp: 2.16, power: 1.43 },
+  rootgnawer: { hp: 1.75, power: 1.3 },
+  drownedJarl: { hp: 2.09, power: 1.42 },
+  hafgufa: { hp: 1.8, power: 1.32 },
 };
 const MARROW_FROM = list.findIndex((e) => e.id === 'marrowgnaw');
 const SKULL_FROM = list.findIndex((e) => e.id === 'mistling');

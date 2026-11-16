@@ -12,6 +12,7 @@ export const CHANGES: ChangeDay[] = [
   {
     date: '2026-11-16',
     changes: [
+      'Changed: the guardians of chapters I and II (the Blighted Elder, the Rootgnawer, the Drowned Jarl and the Hafgufa) hit harder and last longer. A few levels of training now matter.',
       'New: a Discord server for Wayfinders, linked from the site and from the game\'s title screen and menu.',
       'New: chapter VI, Hvergelmir (floors 26–30): the mist under the gap, the spring every river comes from, and the root of the Great Tree.',
       'New: chapter VI floors are bigger than any before (35 by 25 squares).',

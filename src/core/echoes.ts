@@ -54,10 +54,10 @@ export const GUARDIAN_LEVEL: Record<string, number> = {
  * guardian was first met, so each is tuned to about a two-in-three win for a party of the echo's level (balance test).
  */
 export const ECHO_TOUGHNESS: Record<string, number> = {
-  blightedElder: 2.5,
-  rootgnawer: 2.1,
-  drownedJarl: 2.1,
-  hafgufa: 2.0,
+  blightedElder: 1.25,
+  rootgnawer: 1.15,
+  drownedJarl: 1.05,
+  hafgufa: 1.05,
   ribwarden: 1.15,
   hrungnir: 1.15,
   fogWatcher: 1.05,

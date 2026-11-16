@@ -48,11 +48,15 @@ describe('balance (computer player)', { timeout: 60_000 }, () => {
     expect(avgLevel).toBeLessThan(7);
   });
 
-  it('a careful party that grinds a little and shops in town beats the Elder', () => {
-    const plain = count(seeds.map((s) => autoplay(s, { floors: 3, grindBattles: 5 })), (r) => r.bossesDefeated >= 1);
-    const town = count(seeds.map((s) => autoplay(s, { floors: 3, grindBattles: 5, town: true })), (r) => r.bossesDefeated >= 1);
+  // Made sterner in November 2026 (a player found the Elder easy at level 9): a little training is no longer enough,
+  // a party around level 8 that has trained a while and shopped in town wins.
+  it('a party that trains a while and shops in town beats the Elder; a little training is not enough', () => {
+    const little = count(seeds.map((s) => autoplay(s, { floors: 3, grindBattles: 5, town: true })), (r) => r.bossesDefeated >= 1);
+    expect(little).toBeLessThanOrEqual(8);
+    const plain = count(seeds.map((s) => autoplay(s, { floors: 3, grindBattles: 15 })), (r) => r.bossesDefeated >= 1);
+    const town = count(seeds.map((s) => autoplay(s, { floors: 3, grindBattles: 15, town: true })), (r) => r.bossesDefeated >= 1);
     expect(town).toBeGreaterThanOrEqual(plain);
-    expect(town).toBeGreaterThanOrEqual(17);
+    expect(town).toBeGreaterThanOrEqual(15);
   });
 
   it('the Rootgnawer (end of chapter I) needs real training', () => {
@@ -61,15 +65,16 @@ describe('balance (computer player)', { timeout: 60_000 }, () => {
     expect(untrained).toBeLessThanOrEqual(6);
     const some = count(seeds.map((s) => autoplay(s, { floors: 5, town: true, grindBattles: 10 })), beaten);
     expect(some).toBeLessThanOrEqual(16);
-    const trained = count(seeds.map((s) => autoplay(s, { floors: 5, town: true, grindBattles: 30 })), beaten);
-    expect(trained).toBeGreaterThanOrEqual(18);
+    const trained = count(seeds.map((s) => autoplay(s, { floors: 5, town: true, grindBattles: 45 })), beaten);
+    expect(trained).toBeGreaterThanOrEqual(17);
   });
 
   it('the Hafgufa (end of chapter II) needs even more', () => {
     const some = seeds.slice(0, 12).map((s) => autoplay(s, { floors: 10, town: true, grindBattles: 20 }));
     expect(count(some, (r) => r.bossesDefeated >= 4)).toBeLessThanOrEqual(8);
     const trained = seeds.slice(0, 12).map((s) => autoplay(s, { floors: 10, town: true, grindBattles: 40 }));
-    expect(count(trained, (r) => r.bossesDefeated >= 4)).toBeGreaterThanOrEqual(10);
+    // 9 of 12 since the guardians were made sterner on purpose (November 2026); the misses are unlucky runs on the way.
+    expect(count(trained, (r) => r.bossesDefeated >= 4)).toBeGreaterThanOrEqual(9);
     // Paced for a party around level 30; level 40 stays out of reach for now.
     const avgLevel = trained.reduce((sum, r) => sum + r.levels[0], 0) / trained.length;
     expect(avgLevel).toBeGreaterThan(26);
