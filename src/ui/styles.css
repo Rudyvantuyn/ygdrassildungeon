@@ -42,9 +42,41 @@ body {
   touch-action: manipulation;
 }
 
+#play-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #05080b;
+  border-bottom: 1px solid #1c2a36;
+  z-index: 5;
+}
+#play-logo {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  text-decoration: none;
+  text-shadow: 2px 2px 0 #000, 0 0 12px rgba(240, 207, 106, 0.35);
+}
+#play-logo:hover {
+  color: #fff1cf;
+}
+body.phone #play-bar {
+  height: 22px;
+}
+body.phone #play-logo {
+  font-size: 14px;
+}
+
 #app {
   position: fixed;
-  inset: 0;
+  inset: 38px 0 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3111,4 +3143,8 @@ body.theme-fjordnight {
   --select: #1f6a62;
   --bg: #030909;
   --muted: #9ab8b2;
+}
+
+body.phone #app {
+  inset: 22px 0 0 0;
 }

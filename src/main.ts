@@ -23,6 +23,18 @@ function start(): void {
   applyFont();
   applyLooks();
   void refreshOwned();
+  // A bar above the game with the logo: one click to the website (a new tab, so a run in progress is not lost).
+  const bar = document.createElement('div');
+  bar.id = 'play-bar';
+  const logo = document.createElement('a');
+  logo.id = 'play-logo';
+  logo.textContent = 'YGDRASSIL';
+  logo.href = __BUILD__.endsWith('-itch') ? 'https://www.ygdrassilgame.com/?from=itch' : 'https://www.ygdrassilgame.com/';
+  logo.target = '_blank';
+  logo.rel = 'noopener';
+  logo.title = 'ygdrassilgame.com: lore, bestiary, your Wayfinder and the Discord';
+  bar.append(logo);
+  document.body.prepend(bar);
   const app = new App(root);
   watchErrors(() => app.reportContext());
   // Visitor counts (Vercel Web Analytics: no cookies, no personal data; only on the live site).
@@ -39,8 +51,10 @@ function start(): void {
     const h = window.visualViewport?.height ?? window.innerHeight;
     const phone = Math.min(w / 1280, h / 720) < 0.72;
     document.body.classList.toggle('phone', phone);
+    // The logo bar takes its height off the top; the game fits in what is left.
+    const barH = document.getElementById('play-bar')?.offsetHeight ?? 0;
     const [sw, sh] = phone ? [960, 440] : [1280, 720];
-    stage.style.transform = `scale(${Math.min(w / sw, h / sh)})`;
+    stage.style.transform = `scale(${Math.min(w / sw, (h - barH) / sh)})`;
   }
   window.addEventListener('resize', fit);
   window.visualViewport?.addEventListener('resize', fit);
