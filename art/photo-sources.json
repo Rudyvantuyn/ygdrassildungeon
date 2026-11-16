@@ -231,5 +231,82 @@
     "file": "File:Ätna_Eishöhle.jpg",
     "author": "Simon Höger",
     "license": "CC0 1.0"
+  },
+  {
+    "use": "Memory picture (longWalk)",
+    "asset": "memories/longWalk.webp",
+    "file": "File:Heavy_fog_in_the_woods_(Unsplash).jpg",
+    "author": "Macie Jones macieej",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Memory picture (strangeSquirrel)",
+    "asset": "memories/strangeSquirrel.webp",
+    "file": "File:Sequoia_Trees_at_Sequoia_National_Park.jpg",
+    "author": "Daniel G. Rego",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Memory picture (friendInTheHall)",
+    "asset": "memories/friendInTheHall.webp",
+    "file": "File:Campfire_Flames.jpg",
+    "author": "Free Nature Stock",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Memory picture (sevenHundredRings)",
+    "asset": "memories/sevenHundredRings.webp",
+    "file": "File:Swans_on_Lake_Bled.jpg",
+    "author": "Aleš Krivec",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Memory picture (seedsAndSwords)",
+    "asset": "memories/seedsAndSwords.webp",
+    "file": "File:Barley_field,_Ehrenbach,_evening_sun.jpg",
+    "author": "Gerda Arendt",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Memory picture (theTraveller)",
+    "asset": "memories/theTraveller.webp",
+    "file": "File:Iceland_Housing_(3047767971).jpg",
+    "author": "cogdogblog",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Memory picture (nightOfMead)",
+    "asset": "memories/nightOfMead.webp",
+    "file": "File:Moonrise_over_snow_covered_mountains.jpg",
+    "author": "David Menke",
+    "license": "public domain"
+  },
+  {
+    "use": "Memory picture (beforeTheWorld)",
+    "asset": "memories/beforeTheWorld.webp",
+    "file": "File:Ice_Cave_svalbard.jpg",
+    "author": "PederVA",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Memory picture (threeBrothers)",
+    "asset": "memories/threeBrothers.webp",
+    "file": "File:Lava_fountaining_(11_September_2023)_(summit_of_Kilauea_Volcano,_Hawaii)_1.jpg",
+    "author": "James St. John",
+    "license": "public domain"
+  },
+  {
+    "use": "Memory picture (luckiestFriend)",
+    "asset": "memories/luckiestFriend.webp",
+    "file": "File:Mossy_rock_mountain_and_waterfall_(Unsplash).jpg",
+    "author": "Jacek Smoter jack070",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Memory picture (girlOnTheRoad)",
+    "asset": "memories/girlOnTheRoad.webp",
+    "file": "File:Bridge_To_Anywhere_(Unsplash).jpg",
+    "author": "Luís Perdigão scalabis",
+    "license": "CC0 1.0"
   }
 ]

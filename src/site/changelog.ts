@@ -16,6 +16,7 @@ export const CHANGES: ChangeDay[] = [
       'New: chapter VI floors are bigger than any before (35 by 25 squares).',
       'New: ten creatures, two prowlers and two guardians in chapter VI, each with lines in the bestiary; gear, materials, four requests, two fragments and five deeds.',
       'New: from chapter VI on, won fights can leave a Dream Ember.',
+      'New: every memory has a picture of its own, a real photo through the game\'s pixel filter, in the game and on the Memories page.',
       'Changed: numbers now use clear digits everywhere (a 2, 5 and 8 were easy to mix up); letters stay pixel.',
       'New: a Font setting. Clear swaps the pixel font for a plain one that is easy to read, numbers included.',
       'New: a Lights setting. Steady holds every light in the dungeon still, if the flicker is distracting.',

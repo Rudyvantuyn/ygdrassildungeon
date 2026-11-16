@@ -61,6 +61,12 @@ notice board are drawn in code on top of the photo.
 The full list, with file page, author and licence per asset, is `art/photo-sources.json`; `python3 scripts/credits.py`
 writes it into `public/credits.html`, which the game links from the title screen and the System menu.
 
+## Memory pictures (`public/art/memories`)
+
+One picture per memory (`src/core/data/memories.ts`), real photographs from Wikimedia Commons under CC0 or public domain
+only, run through `scripts/photo-to-art.py` like the places. Chosen to set the mood without giving away whose memory it
+is. File page, author and licence per picture are in `art/photo-sources.json` and on `public/credits.html`.
+
 ## Dungeon props
 
 Chests, springs, stairs, gathering spots and root gates are not images: the renderer models them in 3D in code, from

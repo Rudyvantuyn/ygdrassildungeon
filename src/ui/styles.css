@@ -3005,7 +3005,7 @@ body.phone .deed-banner { top: 6px; max-width: 460px; }
   text-shadow: 0 0 10px rgba(240, 207, 106, 0.55), 0 0 22px rgba(240, 207, 106, 0.3);
 }
 .memory-shards {
-  max-height: 52vh;
+  max-height: 40vh;
   overflow-y: auto;
   margin: 8px 0 12px;
   padding-left: 2.2em;
@@ -3048,4 +3048,14 @@ body.phone .deed-banner { top: 6px; max-width: 460px; }
 body.clear-font {
   --font-title: 'Atkinson Hyperlegible', sans-serif;
   --font-ui: 'Atkinson Hyperlegible', sans-serif;
+}
+
+.memory-picture {
+  display: block;
+  width: 100%;
+  max-height: 18vh;
+  object-fit: cover;
+  image-rendering: pixelated;
+  margin-bottom: 10px;
+  box-shadow: 0 0 0 2px #000, 0 0 16px rgba(240, 207, 106, 0.3);
 }

@@ -62,6 +62,7 @@ function showMemory(game: Game, id: string, open: Open, back: () => void): void 
   const menu = new ListMenu([{ label: 'Back', onSelect: back }], { onCancel: back, backRow: false });
   open(
     el('div', { className: 'panel dialog wide memories-dialog' }, [
+      ...picture(m.image),
       el('h2', { className: 'memory-glow', text: m.title }),
       el('p', { className: 'gold-line', text: whole ? `A memory of ${m.subject}` : `${have.size} of ${m.shards.length} shards` }),
       list,
@@ -79,6 +80,7 @@ export function showShardFound(found: { memory: string; shard: number }, open: O
   const menu = new ListMenu([{ label: 'Continue', onSelect: then }], { onCancel: then, backRow: false });
   open(
     el('div', { className: 'panel dialog shard-found' }, [
+      ...picture(m.image),
       el('h2', { className: 'memory-glow', text: 'A memory shard' }),
       el('p', { className: 'gold-line', text: `${m.title} · shard ${found.shard + 1} of ${m.shards.length}` }),
       el('p', { className: 'shard-text', text: shard.text }),
@@ -87,4 +89,14 @@ export function showShardFound(found: { memory: string; shard: number }, open: O
     ]),
     menu,
   );
+}
+
+/** The memory's picture, if it has one. */
+function picture(image?: string): HTMLElement[] {
+  if (!image) return [];
+  const img = document.createElement('img');
+  img.className = 'memory-picture';
+  img.src = `/art/${image}`;
+  img.alt = '';
+  return [img];
 }

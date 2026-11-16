@@ -445,6 +445,7 @@ function memoriesPage(): HTMLElement[] {
       'details',
       { class: `memory ${have.size ? '' : 'sealed'} ${whole ? 'whole' : ''}` },
       h('summary', {}, h('span', { class: 'memory-title' }, title), h('span', { class: 'muted memory-count' }, count)),
+      have.size && m.image ? img(m.image, '', 'memory-picture') : null,
       h('ol', { class: 'shards' }, ...m.shards.map((sh, i) => (have.has(i) ? h('li', { class: 'shard found' }, sh.text) : h('li', { class: 'shard missing' }, '???')))),
     );
   });

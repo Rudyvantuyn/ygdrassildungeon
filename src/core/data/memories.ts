@@ -32,6 +32,8 @@ export interface MemoryDef {
   subject: string;
   /** In reading order; found at random. */
   shards: MemoryShard[];
+  /** A picture for the whole memory, under public/art/ (a real photo through scripts/photo-to-art.py; never AI-made). */
+  image?: string;
 }
 
 export const SHARDS_PER_MEMORY = 15;
@@ -790,5 +792,13 @@ export const MEMORIES: MemoryDef[] = [
     ],
   },
 ];
+
+/**
+ * The memories' pictures: CC0 and public-domain photos (sources in art/photo-sources.json), chosen to set the mood
+ * without giving away whose memory it is.
+ */
+for (const m of MEMORIES) {
+  if (['longWalk', 'strangeSquirrel', 'friendInTheHall', 'sevenHundredRings', 'seedsAndSwords', 'theTraveller', 'nightOfMead', 'beforeTheWorld', 'threeBrothers', 'luckiestFriend', 'girlOnTheRoad'].includes(m.id)) m.image ??= `memories/${m.id}.webp`;
+}
 
 export const MEMORY_BY_ID: Record<string, MemoryDef> = Object.fromEntries(MEMORIES.map((m) => [m.id, m]));
