@@ -86,14 +86,14 @@ const RIME: Palette = {
 
 /** Niflheim: black water and mist, cold stone, the great root overhead. */
 const NIFL: Palette = {
-  textures: 'abyss',
+  textures: 'nifl',
   wall: '#3a4a58',
   wallEdge: '#10161e',
   moss: '#a0c0d0',
   floor: '#262e38',
   ceiling: '#10141c',
   fog: '#1a2028',
-  grade: 'saturate(45%) brightness(118%) contrast(92%)',
+  grade: 'saturate(75%) brightness(108%) contrast(95%)',
 };
 
 export const FLOORS: FloorDef[] = [

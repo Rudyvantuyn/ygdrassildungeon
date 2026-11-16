@@ -308,5 +308,26 @@
     "file": "File:Bridge_To_Anywhere_(Unsplash).jpg",
     "author": "Luís Perdigão scalabis",
     "license": "CC0 1.0"
+  },
+  {
+    "use": "Niflheim wall",
+    "asset": "dungeon/nifl-wall.webp",
+    "file": "File:Small_waterfall_in_a_forest_(Unsplash).jpg",
+    "author": "Mark Basarab",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Niflheim floor",
+    "asset": "dungeon/nifl-floor.webp",
+    "file": "File:Small_waterfall_in_a_forest_(Unsplash).jpg",
+    "author": "Mark Basarab",
+    "license": "CC0 1.0"
+  },
+  {
+    "use": "Niflheim ceiling",
+    "asset": "dungeon/nifl-ceiling.webp",
+    "file": "File:Bridge_To_Anywhere_(Unsplash).jpg",
+    "author": "Luís Perdigão",
+    "license": "CC0 1.0"
   }
 ]

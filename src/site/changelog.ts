@@ -17,7 +17,7 @@ export const CHANGES: ChangeDay[] = [
       'Changed: the guardians of chapters I and II (the Blighted Elder, the Rootgnawer, the Drowned Jarl and the Hafgufa) hit harder and last longer. A few levels of training now matter.',
       'New: a Discord server for Wayfinders, linked from the site and from the game\'s title screen and menu.',
       'New: chapter VI, Hvergelmir (floors 26–30): the mist under the gap, the spring every river comes from, and the root of the Great Tree.',
-      'New: chapter VI floors are bigger than any before (35 by 25 squares).',
+      'New: chapter VI floors are bigger than any before (35 by 25 squares), with walls of their own: wet stone and mist.',
       'New: ten creatures, two prowlers and two guardians in chapter VI, each with lines in the bestiary; gear, materials, four requests, two fragments and five deeds.',
       'New: from chapter VI on, won fights can leave a Dream Ember.',
       'New: every memory has a picture of its own, a real photo through the game\'s pixel filter, in the game and on the Memories page.',
