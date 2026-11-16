@@ -514,7 +514,7 @@ const SWATCH: Record<string, string> = {
 
 /** Support: a one-off gift, or a cosmetic pack kept with the account (paid through Stripe, server/shop.ts). */
 function supportPage(): HTMLElement[] {
-  const head = h('section', { class: 'page-head' }, h('h1', {}, 'Support Ygdrassil'), h('p', { class: 'tagline' }, 'Free to play, made by two people'));
+  const head = h('section', { class: 'page-head' }, h('h1', {}, 'Support Ygdrassil'), h('p', { class: 'tagline' }, 'Made by two people'));
   const thanks = new URLSearchParams(location.search).get('thanks');
   const out: HTMLElement[] = [head];
   if (thanks)
@@ -538,7 +538,7 @@ function supportPage(): HTMLElement[] {
   out.push(
     section(
       'A cup of coffee',
-      h('p', {}, 'Ygdrassil is free in your browser and will stay that way. If you enjoy it, a one-off gift helps pay for the servers, music and art, and gives us time to build the next chapter. Signed in, it also brings the Supporter badge.'),
+      h('p', {}, 'Right now you can play Ygdrassil for free in your browser. If you enjoy it, a one-off gift helps pay for the servers, music and art, and gives us time to build the next chapter. Signed in, it also brings the Supporter badge.'),
       donate,
     ),
   );
