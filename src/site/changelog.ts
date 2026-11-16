@@ -10,6 +10,16 @@ export interface ChangeDay {
 
 export const CHANGES: ChangeDay[] = [
   {
+    date: '2026-11-16',
+    changes: [
+      'New: a Font setting. Clear swaps the pixel font for a plain one that is easy to read, numbers included.',
+      'New: a Lights setting. Steady holds every light in the dungeon still, if the flicker is distracting.',
+      'Changed: the fastest flickers in the dungeon (torches, a hunting prowler\'s glow) are calmer by default.',
+      'Fixed: on a phone, tapping Done in the skills could raise a skill instead, because the text box below shrank.',
+      'Fixed: the dungeon view now starts every frame from scratch, against a smearing view some Firefox players saw.',
+    ],
+  },
+  {
     date: '2026-11-15',
     changes: [
       'New: chapter V, Ginnungagap (floors 21–25): below the skull, the gap of ice and fire the world was built over.',

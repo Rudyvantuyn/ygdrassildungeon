@@ -21,7 +21,7 @@ import type { Ailment, Element } from '../core/types';
 import { el, floater } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import type { PartyView } from './partyView';
-import { prefs } from './prefs';
+import { canvasFont, prefs } from './prefs';
 import { stagePoint } from './stagePoint';
 
 /** Touch screens have no keyboard: key hints are left out there. */
@@ -203,14 +203,14 @@ export class CombatView {
         const mods = modText(enemy.mods);
         if (mods) {
           // Next to the ailment badge when there is one, else in its place.
-          ctx.font = '700 12px "Pixelify Sans", monospace';
+          ctx.font = canvasFont(700, 12);
           ctx.textAlign = ailment ? 'left' : 'center';
           ctx.fillStyle = '#f0e0b0';
           ctx.fillText(mods, ailment ? x + 28 : x, ground + 41);
         }
         if (ailment) {
           const badge = AILMENT_BADGE[ailment];
-          ctx.font = '700 13px "Pixelify Sans", monospace';
+          ctx.font = canvasFont(700, 13);
           ctx.textAlign = 'center';
           ctx.fillStyle = badge.color;
           ctx.fillRect(x - 22, ground + 28, 44, 18);
@@ -231,7 +231,7 @@ export class CombatView {
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
-        ctx.font = '700 20px "Pixelify Sans", monospace';
+        ctx.font = canvasFont(700, 20);
         ctx.textAlign = 'center';
         ctx.lineWidth = 4;
         ctx.strokeText(enemy.name, x, top - 26);
@@ -334,7 +334,7 @@ export class CombatView {
       // Name, health, ailment and stat changes.
       const ix = tx + t + 10;
       const iw = x + cw - ix - 10;
-      ctx.font = '700 15px "Pixelify Sans", monospace';
+      ctx.font = canvasFont(700, 15);
       ctx.textAlign = 'left';
       ctx.fillStyle = chosen ? '#f0cf6a' : '#efe4cc';
       let name = enemy.name;
@@ -343,7 +343,7 @@ export class CombatView {
       this.hpBar(ctx, ix, y + 40, iw, i, enemy.maxHp);
       const ailment = this.enemyAilment[i];
       const mods = modText(enemy.mods);
-      ctx.font = '700 12px "Pixelify Sans", monospace';
+      ctx.font = canvasFont(700, 12);
       if (ailment) {
         const badge = AILMENT_BADGE[ailment];
         ctx.fillStyle = badge.color;

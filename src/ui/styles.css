@@ -3043,3 +3043,9 @@ body.phone .deed-banner { top: 6px; max-width: 460px; }
 @media (prefers-reduced-motion: reduce) {
   .shard-found { animation: none; }
 }
+
+/* The readable font setting: a plain font with clear numbers, for players who find the pixel font hard to read. */
+body.clear-font {
+  --font-title: 'Atkinson Hyperlegible', sans-serif;
+  --font-ui: 'Atkinson Hyperlegible', sans-serif;
+}

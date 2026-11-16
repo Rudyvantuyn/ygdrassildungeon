@@ -17,8 +17,11 @@ import { prefs } from '../ui/prefs';
  * a little behind its centre, so the walls at the screen edges are the walls right
  * beside the party. Geometry behind the near plane is clipped.
  */
+
 const EYE = -0.3; // eye at z = 0.3
 const NEAR = 0.06; // closest distance from the eye that is still drawn
+/** A slow sine for lights and sways; holds still (0) when the player chose steady lights. */
+const wave = (x: number): number => (prefs.steadyLights ? 0 : Math.sin(x));
 const Z_CLIP = NEAR - EYE;
 /** Half-width of the front wall one step ahead, as a fraction of the view width. */
 const RING_1 = 0.27;
@@ -625,7 +628,7 @@ export class CorridorRenderer {
     // Warm light breathing up out of the dark.
     const [gx, gy] = this.project([s, 0.5 + rise * steps, z0 + run]);
     const r = 120 * this.scaleAt(d + 0.5);
-    const pulse = 0.35 + 0.15 * Math.sin(time / 450);
+    const pulse = 0.35 + 0.15 * wave(time / 450);
     const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
     glow.addColorStop(0, `rgba(255,180,90,${pulse * (1 - f)})`);
     glow.addColorStop(1, 'rgba(255,180,90,0)');
@@ -674,7 +677,7 @@ export class CorridorRenderer {
     // Pale daylight falling from above.
     const [gx, gy] = this.project([s, -0.45, d + 0.95]);
     const r = 110 * this.scaleAt(d + 0.5);
-    const pulse = 0.3 + 0.12 * Math.sin(time / 500);
+    const pulse = 0.3 + 0.12 * wave(time / 500);
     const f = this.fog(d + 0.5);
     const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
     glow.addColorStop(0, `rgba(220,240,255,${pulse * (1 - f)})`);
@@ -690,7 +693,7 @@ export class CorridorRenderer {
     const f = this.fog(z);
     const [gx, gy] = this.project([s, 0.5, z]);
     const u = this.w * this.scaleAt(z) * 0.5;
-    const pulse = 0.5 + 0.5 * Math.sin(time / (chasing ? 120 : 380));
+    const pulse = 0.5 + 0.5 * wave(time / (chasing ? 260 : 380));
 
     // Aura
     const aura = ctx.createRadialGradient(gx, gy - u * 0.5, 0, gx, gy - u * 0.5, u * 1.1);
@@ -753,7 +756,7 @@ export class CorridorRenderer {
     const [cx, cy] = this.project([s, 0.5, cz]);
     const [ex] = this.project([s + 0.3, 0.5, cz]);
     const rx = ex - cx;
-    const bob = Math.sin(time / 500 + s) * rx * 0.08;
+    const bob = wave(time / 500 + s) * rx * 0.08;
     if (!this.floatingIcon(kind, cx, cy - rx * 1.75 + bob, rx * 0.6, f, GATHER_KINDS[kind].color)) {
       ctx.fillStyle = withAlpha(GATHER_KINDS[kind].color, 1 - f);
       ctx.fillRect(cx - 4, cy - rx * 1.75 - 4, 8, 8);
@@ -820,7 +823,7 @@ export class CorridorRenderer {
       }
       case 'mushrooms': {
         // A cluster of glowcaps at the foot of the wall.
-        const glow = 0.7 + 0.3 * Math.sin(time / 600 + seed);
+        const glow = 0.7 + 0.3 * wave(time / 600 + seed);
         const [gx, gy] = this.project(at(off, 0.42, 0.12));
         const [gx2] = this.project(at(off + 0.2, 0.42, 0.12));
         const gr = Math.abs(gx2 - gx);
@@ -846,7 +849,7 @@ export class CorridorRenderer {
         break;
       }
       case 'lantern': {
-        const glow = 0.75 + 0.25 * Math.sin(time / 230 + seed);
+        const glow = 0.8 + 0.2 * wave(time / 520 + seed);
         this.face([at(off - 0.015, -0.24, 0.01), at(off + 0.015, -0.24, 0.01), at(off + 0.015, -0.12, 0.08), at(off - 0.015, -0.12, 0.08)], '#2a2622', z, pal);
         const [lx, ly] = this.project(at(off, -0.02, 0.1));
         const [ex] = this.project(at(off + 0.1, -0.02, 0.1));
@@ -868,7 +871,7 @@ export class CorridorRenderer {
         break;
       }
       case 'embers': {
-        const pulse = 0.6 + 0.4 * Math.sin(time / 380 + seed);
+        const pulse = 0.6 + 0.4 * wave(time / 380 + seed);
         ctx.beginPath();
         const pts: [number, number][] = [[-0.3, 0.45], [-0.18, 0.3], [-0.08, 0.33], [0.02, 0.18], [0.14, 0.22], [0.22, 0.05]];
         for (let i = 0; i + 1 < pts.length; i++) this.line(at(off + pts[i][0], pts[i][1], 0.005), at(off + pts[i + 1][0], pts[i + 1][1], 0.005));
@@ -881,7 +884,7 @@ export class CorridorRenderer {
       case 'kelp': {
         for (let i = 0; i < 4; i++) {
           const u = off - 0.24 + i * 0.15, hgt = 0.45 + ((seed + i) % 3) * 0.12;
-          const sway = Math.sin(time / 700 + i + seed) * 0.04;
+          const sway = wave(time / 700 + i + seed) * 0.04;
           const strand: P3[] = [];
           for (let k = 0; k <= 6; k++) strand.push(at(u - 0.025 + Math.sin(k * 1.1 + i) * 0.03 + sway * (k / 6), 0.5 - (hgt * k) / 6, 0.08));
           for (let k = 6; k >= 0; k--) strand.push(at(u + 0.025 + Math.sin(k * 1.1 + i) * 0.03 + sway * (k / 6), 0.5 - (hgt * k) / 6, 0.08));
@@ -951,7 +954,7 @@ export class CorridorRenderer {
         break;
       }
       case 'crystals': {
-        const shine = 0.65 + 0.35 * Math.sin(time / 500 + seed);
+        const shine = 0.65 + 0.35 * wave(time / 500 + seed);
         for (let i = 0; i < 4; i++) {
           const u = off - 0.15 + i * 0.1, hgt = 0.14 + ((seed + i * 2) % 4) * 0.06, lean = (i - 1.5) * 0.03, w = 0.05 + (i % 2) * 0.04;
           this.face([at(u - 0.035, 0.5, w), at(u + 0.035, 0.5, w), at(u + lean + 0.01, 0.5 - hgt, w)], mix('#9fe4ff', '#e8fbff', i % 2 ? shine : 1 - shine), z, pal);
@@ -979,7 +982,7 @@ export class CorridorRenderer {
     ctx.lineWidth = 2;
     ctx.stroke();
     // Runes: a few cut strokes that pulse.
-    const glow = 0.55 + 0.35 * Math.sin(time / 650 + s);
+    const glow = 0.55 + 0.35 * wave(time / 650 + s);
     ctx.beginPath();
     const z0 = z - 0.002;
     this.line([x - 0.03, 0.2, z0], [x - 0.03, 0.42, z0]);
@@ -996,12 +999,12 @@ export class CorridorRenderer {
     const ctx = this.ctx;
     const z = d + 0.5;
     const f = this.fog(z);
-    const sway = Math.sin(time / 900 + d) * 0.02;
+    const sway = wave(time / 900 + d) * 0.02;
     const [hx, hy] = this.project([s + sway, 0.0, z]);
     const [fx, fy] = this.project([s, 0.5, z]);
     const [ex] = this.project([s + 0.2, 0.5, z]);
     const r = ex - fx;
-    const alpha = (0.22 + 0.08 * Math.sin(time / 400 + s)) * (1 - f);
+    const alpha = (0.22 + 0.08 * wave(time / 400 + s)) * (1 - f);
     const grad = ctx.createLinearGradient(hx, hy, fx, fy);
     grad.addColorStop(0, `rgba(200,215,230,${alpha})`);
     grad.addColorStop(1, 'rgba(200,215,230,0)');
@@ -1083,7 +1086,7 @@ export class CorridorRenderer {
     // Glints
     for (let i = 0; i < 3; i++) {
       const v = veins[i][1];
-      const a = Math.max(0, Math.sin(time / 300 + i * 2.1));
+      const a = Math.max(0, wave(time / 300 + i * 2.1));
       const [gx, gy] = this.project([s + v[0], v[1], z0]);
       ctx.fillStyle = `rgba(255,248,220,${a * (1 - f)})`;
       ctx.fillRect(gx - 9, gy - 3, 18, 6);
@@ -1141,7 +1144,7 @@ export class CorridorRenderer {
     // Reeds at the back.
     for (let i = 0; i < 9; i++) {
       const x = s - 0.3 + (i / 8) * 0.6, z = cz + 0.22 + (i % 3) * 0.02, hgt = 0.18 + ((i * 37) % 10) / 60;
-      const sway = Math.sin(time / 900 + i) * 0.015;
+      const sway = wave(time / 900 + i) * 0.015;
       ctx.beginPath();
       this.line([x, 0.5, z], [x + sway, 0.5 - hgt, z]);
       ctx.strokeStyle = mix(i % 2 ? '#4a6a2c' : '#6f8f3a', pal.fog, f);
@@ -1205,7 +1208,7 @@ export class CorridorRenderer {
     }
     const [kx, ky] = this.project([s, 0, z - 0.02]);
     const r = 34 * this.scaleAt(z);
-    const pulse = 0.55 + 0.25 * Math.sin(time / 500);
+    const pulse = 0.55 + 0.25 * wave(time / 500);
     const glow = ctx.createRadialGradient(kx, ky, 0, kx, ky, r * 2.2);
     glow.addColorStop(0, `rgba(240,207,106,${pulse * 0.6 * (1 - f)})`);
     glow.addColorStop(1, 'rgba(240,207,106,0)');
@@ -1225,7 +1228,7 @@ export class CorridorRenderer {
     const [cx, cy] = this.project([s, 0.5, z]);
     const [ex] = this.project([s + 0.42, 0.5, z]);
     const rx = ex - cx;
-    const pulse = 0.5 + 0.35 * Math.sin(time / 250);
+    const pulse = 0.5 + 0.3 * wave(time / 500);
     ctx.save();
     ctx.translate(cx, cy);
     ctx.scale(1, 0.32);
@@ -1251,7 +1254,7 @@ export class CorridorRenderer {
     ctx.fillStyle = glow;
     ctx.fillRect(cx - rx * 1.5, cy - rx * 1.5, rx * 3, rx * 3);
     // The guardian's medallion hovers over the sigil, so it reads from a distance.
-    const bob = Math.sin(time / 450 + s) * rx * 0.06;
+    const bob = wave(time / 450 + s) * rx * 0.06;
     this.floatingIcon('boss', cx, cy - rx * 1.25 + bob, rx * 1.05, f, '#ff5a40');
   }
 
@@ -1375,7 +1378,7 @@ export class CorridorRenderer {
     ctx.strokeStyle = mix('#0b0907', pal.fog, f);
     ctx.lineWidth = 3;
     ctx.stroke();
-    const glowA = used ? 0 : 0.6 + 0.3 * Math.sin(time / 400);
+    const glowA = used ? 0 : 0.6 + 0.3 * wave(time / 400);
     ctx.beginPath();
     this.line([s, 0.02, sz], [s, 0.26, sz]);
     this.line([s, 0.08, sz], [s - 0.045, 0.03, sz]);

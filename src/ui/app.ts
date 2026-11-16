@@ -49,7 +49,7 @@ import { GATHER_KINDS } from '../core/data/gathering';
 import { describeFinds } from '../core/expedition';
 import { unspentPoints } from '../core/skilltree';
 import { toFloorDefs, type ChapterDesign } from '../core/designer';
-import { movementKey, prefs, setPref, TEXT_SPEED_NAMES, TEXT_SPEED_STEP, type BattleSpeed, type TextSpeed } from './prefs';
+import { applyFont, movementKey, prefs, setPref, TEXT_SPEED_NAMES, TEXT_SPEED_STEP, type BattleSpeed, type TextSpeed } from './prefs';
 import { sendReport, type ReportKind } from '../net/reports';
 import { choose, markSeen, pendingScene, STORY, type StoryLine, type StoryScene } from '../core/data/story';
 import { drawPortrait } from '../render/portraits';
@@ -331,6 +331,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       drawTownScene(ctx, VIEW_W, VIEW_H, time, this.mode === 'title' || story ? null : this.town.focus, this.mode === 'title', !story);
     } else if (this.game) {
       this.runes.sync(!this.trial && this.game !== this.titleGame);
+      // Start every frame from black, so nothing of an earlier frame can ever show through (a player on Firefox saw
+      // the view smear more with every turn).
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
       this.corridor.draw(this.game, time);
     }
     ctx.restore();
@@ -379,7 +383,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.before.width = this.current.width = src.width;
       this.before.height = this.current.height = src.height;
     }
-    this.before.getContext('2d')!.drawImage(src, 0, 0);
+    const g = this.before.getContext('2d')!;
+    g.clearRect(0, 0, src.width, src.height);
+    g.drawImage(src, 0, 0);
   }
 
   /**
@@ -391,6 +397,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const { width: w, height: h } = ctx.canvas;
     const ease = 1 - (1 - k) * (1 - k) * (1 - k);
     const cur = this.current.getContext('2d')!;
+    cur.clearRect(0, 0, w, h);
     cur.drawImage(ctx.canvas, 0, 0);
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -2122,6 +2129,11 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     });
     const keys = choices<'turn' | 'step'>([['turn', 'Turn'], ['step', 'Side-step']], () => (prefs.strafeKeys ? 'step' : 'turn'), (v) => setPref('strafeKeys', v === 'step'));
     const motion = choices<'smooth' | 'fade'>([['smooth', 'Glide'], ['fade', 'Quick']], () => prefs.moveMotion, (v) => setPref('moveMotion', v));
+    const font = choices<'pixel' | 'clear'>([['pixel', 'Pixel'], ['clear', 'Clear']], () => (prefs.clearFont ? 'clear' : 'pixel'), (v) => {
+      setPref('clearFont', v === 'clear');
+      applyFont();
+    });
+    const lights = choices<'living' | 'steady'>([['living', 'Living'], ['steady', 'Steady']], () => (prefs.steadyLights ? 'steady' : 'living'), (v) => setPref('steadyLights', v === 'steady'));
     const look = choices<'detailed' | 'calm'>([['detailed', 'Detailed'], ['calm', 'Calm']], () => (prefs.calmTextures ? 'calm' : 'detailed'), (v) => setPref('calmTextures', v === 'calm'));
     const chart = choices<ChartMode>(
       [['assisted', 'Assisted'], ['manual', 'Manual'], ['auto', 'Auto']],
@@ -2137,6 +2149,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       { label: 'Battle speed', description: 'How fast the rounds of a fight play out. Enter during a round speeds it up even more.', control: battle.control, onAdjust: battle.onAdjust, onSelect: battle.cycle },
       { label: 'Text speed', description: 'How fast story lines appear.', control: text.control, onAdjust: text.onAdjust, onSelect: text.cycle },
       { label: 'Dungeon look', description: 'Detailed: walls and floors as painted. Calm: softer, with less contrast and grain, if the dungeon feels busy or makes you dizzy.', control: look.control, onAdjust: look.onAdjust, onSelect: look.cycle },
+      { label: 'Font', description: 'Pixel: the game\'s own pixel font. Clear: a plain font made to be easy to read, with numbers that cannot be mixed up.', control: font.control, onAdjust: font.onAdjust, onSelect: font.cycle },
+      { label: 'Lights', description: 'Living: torches flicker and glows pulse softly. Steady: every light in the dungeon holds still, if the flicker distracts you or makes you dizzy.', control: lights.control, onAdjust: lights.onAdjust, onSelect: lights.cycle },
       { label: 'Walking', description: 'Glide: the view pans when you turn and moves when you step, so you keep your bearings. Quick: a short fade, for fast walkers.', control: motion.control, onAdjust: motion.onAdjust, onSelect: motion.cycle },
       { label: 'A / D keys', description: 'Turn: A and D turn, Q and E side-step. Side-step: the other way round. The arrow keys always turn.', control: keys.control, onAdjust: keys.onAdjust, onSelect: keys.cycle },
       ...(solo

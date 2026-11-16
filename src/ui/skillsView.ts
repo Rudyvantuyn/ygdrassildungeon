@@ -63,7 +63,7 @@ export function showSkillTree(host: SkillsHost, m: Member, back: () => void, sta
       },
     };
   });
-  items.push({ label: 'Done', onSelect: back });
+  items.push({ label: 'Done', description: 'Close the skills. Points you have not spent stay for later.', onSelect: back });
   const menu = new ListMenu(items, { onCancel: back, startIndex: start });
   const points = unspentPoints(m);
   host.dialog(`${m.name} · ${CLASSES[m.classId].name} skills`, [

@@ -83,7 +83,13 @@ export class ListMenu {
   }
 
   /** Shows the focused item's description in `target` from now on. */
+  /** The tallest the description box has been, so it never shrinks (see focus). */
+  private descHeight = 0;
+
   describeInto(target: HTMLElement): void {
+    // A box shared between menus (the fight's command panel) starts again from its own size.
+    target.style.minHeight = '';
+    this.descHeight = 0;
     this.opts.descriptionEl = target;
     this.focus(this.index);
   }
@@ -104,7 +110,17 @@ export class ListMenu {
     }
     this.markOverflow();
     const item = this.items[this.index];
-    if (this.opts.descriptionEl) this.opts.descriptionEl.textContent = item.description ?? '';
+    const desc = this.opts.descriptionEl;
+    if (desc) {
+      desc.textContent = item.description ?? '';
+      // The box only grows while the menu is open: if it shrank under a finger, the dialog would shift and the tap
+      // would land on another row (a player on a phone kept raising a skill when tapping Done).
+      const h = desc.offsetHeight;
+      if (h > this.descHeight) {
+        this.descHeight = h;
+        desc.style.minHeight = `${h}px`;
+      }
+    }
     item.onFocus?.();
   }
 

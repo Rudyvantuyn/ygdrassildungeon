@@ -3,10 +3,13 @@ import { inject } from '@vercel/analytics';
 import { audio } from './audio/audio';
 import { watchErrors } from './net/reports';
 import { App } from './ui/app';
+import { applyFont } from './ui/prefs';
 // Fonts are bundled with the game (SIL Open Font License), so no font service sees players' addresses.
 import '@fontsource/pixelify-sans/latin-400.css';
 import '@fontsource/pixelify-sans/latin-600.css';
 import '@fontsource/pixelify-sans/latin-700.css';
+import '@fontsource/atkinson-hyperlegible/latin-400.css';
+import '@fontsource/atkinson-hyperlegible/latin-700.css';
 import './ui/styles.css';
 import { leaveOldAddress, takeCarriedSave, takeCloudSave } from './site/transfer';
 import { online } from './net/online';
@@ -15,6 +18,7 @@ import { readSave } from './ui/storage';
 /** Starts the game (after a save carried over from the old address, if any, has been taken in). */
 function start(): void {
   const root = document.getElementById('app')!;
+  applyFont();
   const app = new App(root);
   watchErrors(() => app.reportContext());
   // Visitor counts (Vercel Web Analytics: no cookies, no personal data; only on the live site).
