@@ -1,3 +1,4 @@
+import { ownFrame } from './cosmetics';
 import { CLASSES } from '../core/data/classes';
 import { MAX_LEVEL, memberStats, xpForLevel } from '../core/party';
 import { BYNAME_BY_ID, fullName } from '../core/sagas';
@@ -15,6 +16,8 @@ export interface PartyDisplay {
   active?: number | null;
   /** On an expedition: the player behind each card (shown instead of the row). */
   owners?: string[];
+  /** On an expedition: each player's portrait frame, as the server checked it (cosmetics). */
+  frames?: (string | undefined)[];
   /** In a fight: active buffs and debuffs, shown instead of the row (e.g. "ATK▲ DEF▼"). */
   mods?: string[];
 }
@@ -55,10 +58,13 @@ export class PartyView {
   }
 
   render(party: Member[], display: PartyDisplay = {}): void {
-    const lineup = party.map((m) => `${m.name}|${m.byname ?? ''}|${m.classId}|${m.row}|${m.look}`).join(',');
+    // Solo, every card wears the frame this player chose; on an expedition, each player's own.
+    const frames = display.frames ?? party.map(() => ownFrame());
+    const lineup = party.map((m, i) => `${m.name}|${m.byname ?? ''}|${m.classId}|${m.row}|${m.look}|${frames[i] ?? ''}`).join(',');
     if (lineup !== this.lineup) {
       this.lineup = lineup;
       this.build(party);
+      this.cards.forEach((c, i) => frames[i] && c.root.classList.add(`frame-${frames[i]}`));
     }
     party.forEach((m, i) => {
       const card = this.cards[i];

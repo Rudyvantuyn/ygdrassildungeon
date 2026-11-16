@@ -1298,7 +1298,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.dangerOrb.style.background = `radial-gradient(circle at 35% 30%, #fff, ${color} 55%, #000 120%)`;
     this.dangerOrb.style.color = color;
     this.goldEl.textContent = `${g.state.gold} G`;
-    this.party.render(g.state.party, { owners: this.coop?.owners });
+    this.party.render(g.state.party, { owners: this.coop?.owners, frames: this.coop?.frames });
     if (this.coop && g.state.location === 'dungeon') this.runes.stepped(false);
     this.checkDeeds();
     this.keyHint.textContent = prefs.strafeKeys
@@ -2368,6 +2368,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         disabled: !has,
         onSelect: () => {
           chooseLook(kind, id);
+          if (!this.coop) this.party.render(this.game.state.party);
           this.showLooks(back, items.indexOf(self));
         },
       };

@@ -308,12 +308,13 @@ class Online {
   }
 
   /** `password`: makes the expedition private. */
-  create(member: Member, startFloor: number, deepest: number, password?: string): Promise<ExpeditionRow> {
-    return this.call({ op: 'create', player: this.playerName, member, startFloor, deepest, password });
+  /** `frame`: the portrait frame this player wants others to see (the server checks they own it). */
+  create(member: Member, startFloor: number, deepest: number, password?: string, frame?: string): Promise<ExpeditionRow> {
+    return this.call({ op: 'create', player: this.playerName, member, startFloor, deepest, password, frame });
   }
 
-  join(code: string, member: Member, password?: string): Promise<ExpeditionRow> {
-    return this.call({ op: 'join', code, player: this.playerName, member, password });
+  join(code: string, member: Member, password?: string, frame?: string): Promise<ExpeditionRow> {
+    return this.call({ op: 'join', code, player: this.playerName, member, password, frame });
   }
 
   act(id: string, action: Action): Promise<ExpeditionRow> {

@@ -2,6 +2,7 @@
  * The Hornstone: Lindholm's meeting place for expeditions with other players.
  * Handles signing in, the cloud save, and gathering a party in a lobby.
  */
+import { prefs } from './prefs';
 import { CLASSES } from '../core/data/classes';
 import { chapterOf, startFloors } from '../core/data/chapters';
 import { FLOORS } from '../core/data/floors';
@@ -163,7 +164,7 @@ export class Hornstone {
   private choosePrivacy(member: Member, floor: number): void {
     const deepest = this.game.state.deepest;
     const back = () => this.chooseFloor(member);
-    const create = (password?: string) => void this.run(() => online.create(member, floor, deepest, password), (row) => this.lobby(row));
+    const create = (password?: string) => void this.run(() => online.create(member, floor, deepest, password, prefs.frame), (row) => this.lobby(row));
     const menu = new ListMenu(
       [
         { label: 'Open to all', description: 'Anyone can answer your horn.', onSelect: () => create() },
@@ -187,7 +188,7 @@ export class Hornstone {
   private async join(code: string, member: Member, password?: string): Promise<void> {
     this.message('The Hornstone', 'One moment...', false);
     try {
-      this.lobby(await online.join(code, member, password));
+      this.lobby(await online.join(code, member, password, prefs.frame));
     } catch (e) {
       if (e instanceof OnlineError && e.needsPassword) {
         this.form('A private expedition', password ? e.message : 'Ask the host for the password.', [{ label: 'Password', max: 24 }], 'Join', ([pw], fail) => {
@@ -269,7 +270,7 @@ export class Hornstone {
     const isHost = state.host === me;
     const seats = state.seats.map((s) =>
       el('div', { className: 'seat' }, [
-        el('span', { className: 'seat-player', text: s.player }),
+        el('span', { className: 'seat-player', text: `${s.look?.supporter ? '✦ ' : ''}${s.player}` }),
         el('span', { text: `${s.member.name} · Lv ${s.member.level} ${CLASSES[s.member.classId].name}` }),
       ]),
     );

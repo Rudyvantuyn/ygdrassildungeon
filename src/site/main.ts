@@ -459,6 +459,10 @@ function memoriesPage(): HTMLElement[] {
 function wayfinder(): HTMLElement[] {
   const head = h('section', { class: 'page-head' }, h('h1', {}, 'My Wayfinder'), h('p', { class: 'tagline' }, me ? `Sworn in as ${me.name}` : 'Your medals and your party'));
   if (!me) return [head, signInBox()];
+  // The Supporter badge, for those who helped the game grow (src/core/data/cosmetics.ts).
+  void online.entitlements().then((items) => {
+    if (items.includes('supporter')) head.append(h('p', { class: 'supporter-badge' }, '✦ Supporter: thank you for keeping the lanterns lit'));
+  });
   const out: HTMLElement[] = [head];
   const s = me.save;
   if (s) {

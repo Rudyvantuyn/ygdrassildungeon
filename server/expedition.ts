@@ -9,7 +9,8 @@
  *
  * Build with `npm run build:server`, which bundles it into one file for deploying.
  */
-import { applyAction, cleanPlayerName, createExpedition, players, validMember, type Action, type ExpeditionState } from '../src/core/expedition';
+import { applyAction, cleanPlayerName, createExpedition, players, validMember, type Action, type ExpeditionState, type SeatLook } from '../src/core/expedition';
+import { COSMETIC_BY_ID } from '../src/core/data/cosmetics';
 import { startFloorFor } from '../src/core/data/chapters';
 import { FLOORS } from '../src/core/data/floors';
 import { carveProblem, type CarveRequest } from '../src/core/runestones';
@@ -164,6 +165,19 @@ function newCode(): string {
   return code;
 }
 
+/**
+ * What the others see of a player's cosmetics: the frame they asked for, only if their account owns it, and the
+ * Supporter badge if they have it (the `entitlements` table, written only by the shop, server/shop.ts).
+ */
+async function lookFor(user: string, frame: unknown): Promise<SeatLook | undefined> {
+  const rows = (await rest(`entitlements?user_id=eq.${user}&select=item`).catch(() => [])) as { item: string }[];
+  const owned = new Set(rows.map((r) => r.item));
+  const look: SeatLook = {};
+  if (typeof frame === 'string' && owned.has(frame) && COSMETIC_BY_ID[frame]?.kind === 'frame') look.frame = frame;
+  if (owned.has('supporter')) look.supporter = true;
+  return look.frame || look.supporter ? look : undefined;
+}
+
 async function create(user: string, body: Record<string, unknown>): Promise<Row> {
   const active = await activeFor(user);
   if (active) throw new Refusal('You are already part of an expedition.');
@@ -175,6 +189,8 @@ async function create(user: string, body: Record<string, unknown>): Promise<Row>
   const player = cleanPlayerName(body.player);
   const state = createExpedition(user, player, member, startFloor);
   state.seats[0].seen = Date.now();
+  const look = await lookFor(user, body.frame);
+  if (look) state.seats[0].look = look;
   const password = cleanPassword(body.password);
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
@@ -265,13 +281,16 @@ Deno.serve(async (req) => {
         break;
       case 'join': {
         const code = String(body.code ?? '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
-        const action: Action = { type: 'join', player: String(body.player ?? ''), member: body.member as never };
+        const action: Action = { type: 'join', player: String(body.player ?? ''), member: body.member as never, look: await lookFor(user, body.frame) };
         row = await act(user, `code=eq.${code}`, action, body.password);
         break;
       }
       case 'act': {
         const id = String(body.id ?? '').replace(/[^0-9a-f-]/gi, '');
-        row = await act(user, `id=eq.${id}`, body.action as Action);
+        const action = body.action as Action;
+        // Cosmetics come only from the server's own check above, never from what a client sends.
+        if (action?.type === 'join') delete action.look;
+        row = await act(user, `id=eq.${id}`, action);
         break;
       }
       default:

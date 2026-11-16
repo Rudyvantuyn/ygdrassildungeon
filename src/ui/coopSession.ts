@@ -78,7 +78,12 @@ export class CoopSession {
 
   /** Player names per party slot, for the party cards. */
   get owners(): string[] {
-    return this.state.seats.map((s) => (s.left ? `${s.player} (away)` : s.player));
+    return this.state.seats.map((s) => `${s.look?.supporter ? '✦ ' : ''}${s.player}${s.left ? ' (away)' : ''}`);
+  }
+
+  /** Each player's portrait frame, as the server checked it. */
+  get frames(): (string | undefined)[] {
+    return this.state.seats.map((s) => s.look?.frame);
   }
 
   start(): void {

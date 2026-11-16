@@ -50,6 +50,14 @@ export interface Seat {
   lost?: boolean;
   /** When the player last sent anything (ms since epoch). */
   seen?: number;
+  /** Cosmetics the others see: checked by the server against what the player owns (server/expedition.ts). */
+  look?: SeatLook;
+}
+
+/** A player's cosmetics on an expedition: the portrait frame they chose, and the Supporter badge. */
+export interface SeatLook {
+  frame?: string;
+  supporter?: boolean;
 }
 
 export type Phase = 'lobby' | 'explore' | 'combat' | 'ended';
@@ -97,7 +105,7 @@ export interface ExpeditionState {
 }
 
 export type Action =
-  | { type: 'join'; player: string; member: Member }
+  | { type: 'join'; player: string; member: Member; look?: SeatLook }
   | { type: 'leave' }
   /** "Still here": keeps the player's seat. */
   | { type: 'ping' }
@@ -256,7 +264,7 @@ function run(state: ExpeditionState, user: string, action: Action, now: number, 
       if (state.seats.length >= MAX_SEATS) return 'This expedition is full.';
       const member = validMember(action.member);
       if (!member) return 'That adventurer cannot join: their gear or skills are beyond their level.';
-      state.seats.push({ user, player: cleanPlayerName(action.player), member, left: false, seen: now });
+      state.seats.push({ user, player: cleanPlayerName(action.player), member, left: false, seen: now, ...(action.look ? { look: action.look } : {}) });
       return null;
     }
 

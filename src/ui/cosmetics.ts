@@ -37,12 +37,16 @@ export async function refreshOwned(): Promise<Set<string>> {
   }
 }
 
-/** Puts the chosen frame and theme on the page, if they are owned. */
+/** The portrait frame this player chose, if they own it ('' for none). The party cards wear it (partyView.ts). */
+export function ownFrame(): string {
+  return prefs.frame && ownedCosmetics().has(prefs.frame) && COSMETIC_BY_ID[prefs.frame]?.kind === 'frame' ? prefs.frame : '';
+}
+
+/** Puts the chosen theme on the page, if it is owned (frames go on the party cards). */
 export function applyLooks(): void {
   const owned = ownedCosmetics();
   const body = document.body;
-  for (const c of [...body.classList]) if (c.startsWith('frame-') || c.startsWith('theme-')) body.classList.remove(c);
-  if (prefs.frame && owned.has(prefs.frame) && COSMETIC_BY_ID[prefs.frame]?.kind === 'frame') body.classList.add(`frame-${prefs.frame}`);
+  for (const c of [...body.classList]) if (c.startsWith('theme-')) body.classList.remove(c);
   if (prefs.uiTheme && owned.has(prefs.uiTheme) && COSMETIC_BY_ID[prefs.uiTheme]?.kind === 'theme') body.classList.add(`theme-${prefs.uiTheme}`);
 }
 

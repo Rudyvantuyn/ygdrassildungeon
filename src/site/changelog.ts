@@ -12,6 +12,7 @@ export const CHANGES: ChangeDay[] = [
   {
     date: '2026-11-16',
     changes: [
+      'New: on an expedition, the others see your portrait frame, and a ✦ beside the name of every Supporter. The Supporter badge also shows on My Wayfinder.',
       'New: a Support page. Give a one-off gift, or buy a cosmetic pack: portrait frames and window themes, chosen under Options → Looks. Looks only, never anything that changes how the game plays.',
       'Changed: the guardians of chapters I and II (the Blighted Elder, the Rootgnawer, the Drowned Jarl and the Hafgufa) hit harder and last longer. A few levels of training now matter.',
       'New: a Discord server for Wayfinders, linked from the site and from the game\'s title screen and menu.',
