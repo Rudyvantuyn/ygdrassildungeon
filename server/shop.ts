@@ -6,7 +6,7 @@
  * - POST {action:'donate', amount}: a Checkout page for a one-off donation; signed in, it also brings the Supporter
  *   badge.
  * - POST from Stripe (header Stripe-Signature): the webhook. Only checkout.session.completed with payment_status
- *   'paid' counts. The signature is checked with STRIPE_WEBHOOK_SECRET; each session is recorded once in `payments`,
+ *   'paid' and the game's own mark (metadata.game) counts; other payments on the same Stripe account are ignored. The signature is checked with STRIPE_WEBHOOK_SECRET; each session is recorded once in `payments`,
  *   and the items go into `entitlements` (server/sql/shop.sql). Only this function writes those tables.
  *
  * Secrets (Supabase dashboard, Edge Functions → Secrets): STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET.
@@ -27,6 +27,20 @@ const STRIPE_KEY = env('STRIPE_SECRET_KEY');
 const WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET');
 const SITE = 'https://www.ygdrassilgame.com';
 const TOLERANCE_S = 300;
+/** Marks the game's own Checkout sessions: the Stripe account also takes payments for other things. */
+const GAME_TAG = 'ygdrassil';
+
+/**
+ * Whether a completed Checkout session is one of the game's own (exported for testing). The webhook hears every
+ * payment on the Stripe account, so anything without the game's mark, or with a pack or amount the game does not
+ * sell, is left alone and never recorded.
+ */
+export function isGameSession(metadata: { game?: string; kind?: string; id?: string } | undefined): boolean {
+  if (metadata?.game !== GAME_TAG) return false;
+  if (metadata.kind === 'pack') return !!PACK_BY_ID[metadata.id ?? ''];
+  if (metadata.kind === 'donation') return DONATIONS.includes(Number(metadata.id));
+  return false;
+}
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -62,7 +76,7 @@ export function checkoutParams(kind: 'pack' | 'donation', id: string, amount: nu
     mode: 'payment',
     'line_items': { 0: { quantity: 1, price_data: { currency: 'eur', unit_amount: amount, product_data: { name } } } },
     client_reference_id: userId ?? undefined,
-    metadata: { kind, id },
+    metadata: { game: GAME_TAG, kind, id },
     success_url: `${SITE}/support.html?thanks=${kind}`,
     cancel_url: `${SITE}/support.html`,
     custom_text: {
@@ -111,9 +125,10 @@ async function rest(path: string, body: unknown, prefer: string): Promise<Respon
 async function webhook(req: Request): Promise<Response> {
   const body = await req.text();
   if (!WEBHOOK_SECRET || !(await validSignature(body, req.headers.get('Stripe-Signature') ?? '', WEBHOOK_SECRET))) return new Response('Bad signature.', { status: 400 });
-  const event = JSON.parse(body) as { type: string; data: { object: { id: string; payment_status?: string; amount_total?: number; client_reference_id?: string | null; metadata?: { kind?: string; id?: string } } } };
+  const event = JSON.parse(body) as { type: string; data: { object: { id: string; payment_status?: string; amount_total?: number; client_reference_id?: string | null; metadata?: { game?: string; kind?: string; id?: string } } } };
   if (event.type !== 'checkout.session.completed') return new Response('Ignored.');
   const s = event.data.object;
+  if (!isGameSession(s.metadata)) return new Response('Not a Ygdrassil payment.');
   if (s.payment_status !== 'paid') return new Response('Not paid yet.');
   const kind = s.metadata?.kind === 'pack' ? 'pack' : 'donation';
   const user = s.client_reference_id ?? null;

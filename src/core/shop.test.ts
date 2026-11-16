@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkoutParams, stripeForm, validSignature } from '../../server/shop';
+import { checkoutParams, isGameSession, stripeForm, validSignature } from '../../server/shop';
 import { COSMETIC_BY_ID, DONATIONS, euros, itemsFor, PACKS } from './data/cosmetics';
 
 describe('the shop', () => {
@@ -34,5 +34,16 @@ describe('the shop', () => {
     expect(await validSignature(body + ' ', `t=${t},v1=${sig}`, secret, t * 1000)).toBe(false);
     expect(await validSignature(body, `t=${t},v1=${sig}`, 'whsec_other', t * 1000)).toBe(false);
     expect(await validSignature(body, `t=${t},v1=${sig}`, secret, (t + 3600) * 1000)).toBe(false);
+  });
+
+  it('only records the game\'s own payments, never other sales on the same Stripe account', () => {
+    expect(stripeForm(checkoutParams('pack', 'supporterPack', 500, 'x', 'u')).join('&')).toContain('metadata%5Bgame%5D=ygdrassil');
+    expect(isGameSession({ game: 'ygdrassil', kind: 'pack', id: 'supporterPack' })).toBe(true);
+    expect(isGameSession({ game: 'ygdrassil', kind: 'donation', id: '500' })).toBe(true);
+    expect(isGameSession(undefined)).toBe(false);
+    expect(isGameSession({})).toBe(false);
+    expect(isGameSession({ kind: 'pack', id: 'supporterPack' })).toBe(false);
+    expect(isGameSession({ game: 'ygdrassil', kind: 'donation', id: '999' })).toBe(false);
+    expect(isGameSession({ game: 'ygdrassil', kind: 'pack', id: 'nothing' })).toBe(false);
   });
 });
