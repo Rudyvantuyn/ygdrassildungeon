@@ -142,6 +142,7 @@ Add new names there and keep the glossary in sync.
 
 - **Releases on itch.io: at most two a week, each with a devlog.** Don't build the itch zip (`npm run build:itch`) or
   write a devlog unless the owner asks for a release; new features can be built and pushed meanwhile.
+- **New chapters only on request**: chapter VII and later are built only when the owner asks for one (decided November 2026).
 - Don't ask the owner to test after every update. Work in larger chunks and announce a **test phase** only after
   big changes (with a short list of what to try). Keep momentum: after finishing something, pick up the next item.
 
