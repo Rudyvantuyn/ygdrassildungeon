@@ -213,3 +213,37 @@ describe('chapter V balance', { timeout: 180_000 }, () => {
     });
   }
 });
+
+// Chapter VI (Hvergelmir), the first on 35×25, tuned for a party of five (November 2026). A party arrives after the
+// Gapwarden around level 66 with tier 25 gear. Measured on purpose: Sváfnir 33/55/70% at 70/72/74; Níðhöggr 22/60% at
+// 68/74 (the computer player does worse above 75 as its runecaller spends points differently, so it is measured below);
+// the prowlers about a quarter at 70, a third to two fifths at 75, three in five at 80.
+describe('chapter VI balance', { timeout: 240_000 }, () => {
+  it('its packs are a step up from chapter V, but a party fresh from the Gapwarden wins them', () => {
+    expect(fightWinRate(['nifling', 'nifling', 'nifling'], 66, 25, {})).toBeGreaterThanOrEqual(0.85);
+    expect(fightWinRate(['carrionRaven', 'carrionRaven', 'mistPilgrim', 'carrionRaven'], 66, 25, {})).toBeGreaterThanOrEqual(0.7);
+    expect(fightWinRate(['nifling', 'nifling', 'nifling'], 58, 22, {})).toBeLessThan(0.85);
+  });
+
+  it('Sváfnir (middle of the chapter) is a fair fight around level 71', () => {
+    const early = fightWinRate(['svafnir'], 70, 25, { boss: true });
+    expect(early).toBeGreaterThanOrEqual(0.25);
+    expect(early).toBeLessThanOrEqual(0.68);
+    expect(fightWinRate(['svafnir'], 74, 27, { boss: true })).toBeGreaterThanOrEqual(0.65);
+  });
+
+  it('Níðhöggr (end of the chapter) needs training: hopeless on arrival, won in good gear', () => {
+    expect(fightWinRate(['nidhogg'], 68, 25, { boss: true })).toBeLessThanOrEqual(0.28);
+    expect(fightWinRate(['nidhogg'], 74, 27, { boss: true })).toBeGreaterThanOrEqual(0.55);
+  });
+
+  for (const id of ['grabakr', 'ofnir']) {
+    it(`${id}: hopeless on arrival, risky at 75, beatable at 80`, () => {
+      expect(fightWinRate([id], 70, 25, { prowler: true })).toBeLessThanOrEqual(0.3);
+      const at75 = fightWinRate([id], 75, 27, { prowler: true });
+      expect(at75).toBeGreaterThanOrEqual(0.08);
+      expect(at75).toBeLessThanOrEqual(0.6);
+      expect(fightWinRate([id], 80, 27, { prowler: true })).toBeGreaterThanOrEqual(0.5);
+    });
+  }
+});

@@ -78,5 +78,19 @@
  "rimedrake": "dragons/ice_dragon_new",
  "emberjotun": "fire_giant_new",
  "rimewell": "nonliving/crystal_golem",
- "gapwarden": "abyss/worldbinder"
+ "gapwarden": "abyss/worldbinder",
+ "nifling": "undead/ghost_new",
+ "wellLeech": "animals/giant_leech_new",
+ "gjollEel": "animals/shock_serpent",
+ "mireToad": "animals/blink_frog_new",
+ "carrionRaven": "raven",
+ "mistHound": "animals/war_dog",
+ "barkbiter": "animals/water_moccasin_new",
+ "mistPilgrim": "undead/silent_spectre",
+ "frostwight": "undead/wight_old",
+ "mireTroll": "deep_troll",
+ "grabakr": "animals/anaconda_new",
+ "ofnir": "lindwurm",
+ "svafnir": "dragons/hydra_3_new",
+ "nidhogg": "dragons/shadow_dragon"
 }

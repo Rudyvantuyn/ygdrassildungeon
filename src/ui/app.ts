@@ -61,7 +61,7 @@ import { TownView, type TownHost } from './townView';
 
 /** The last chapter there is so far, and the town scene that ends it (then comes "to be continued"). */
 const LAST_CHAPTER = CHAPTERS[CHAPTERS.length - 1];
-const LAST_CHAPTER_END = 'chapterFiveEnd';
+const LAST_CHAPTER_END = 'chapterSixEnd';
 
 /** Phones and tablets: the help shows taps instead of keys. */
 const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;

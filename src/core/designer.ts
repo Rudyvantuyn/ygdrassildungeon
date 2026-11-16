@@ -11,10 +11,10 @@ import type { Dir } from './types';
 
 export const DESIGN_VERSION = 1;
 export const MIN_SIZE = 8;
-export const MAX_SIZE = 30;
-export const MAX_CHESTS = 6;
-export const MAX_SPRINGS = 2;
-export const MAX_GATHER = 6;
+export const MAX_SIZE = 60;
+export const MAX_CHESTS = 8;
+export const MAX_SPRINGS = 3;
+export const MAX_GATHER = 8;
 export const MAX_PROWLERS = 4;
 export const MAX_ROUTE = 8;
 export const NAME_MAX = 24;

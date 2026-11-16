@@ -45,6 +45,8 @@ export const GUARDIAN_LEVEL: Record<string, number> = {
   dreamwarden: 54,
   rimewell: 59,
   gapwarden: 65,
+  svafnir: 71,
+  nidhogg: 78,
 };
 
 /**
@@ -62,6 +64,8 @@ export const ECHO_TOUGHNESS: Record<string, number> = {
   dreamwarden: 1.0,
   rimewell: 1.0,
   gapwarden: 0.92,
+  svafnir: 1.0,
+  nidhogg: 1.0,
 };
 
 /** Chance of a memory shard: from a guardian in the Rootdeep, and from an echo at `level` (dream round `round`). */

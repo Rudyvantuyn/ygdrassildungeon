@@ -19,6 +19,7 @@ export const CHAPTERS: ChapterDef[] = [
   { numeral: 'III', name: 'The Marrowdeep', first: 10 },
   { numeral: 'IV', name: 'The Dreaming Skull', first: 15 },
   { numeral: 'V', name: 'Ginnungagap', first: 20 },
+  { numeral: 'VI', name: 'Hvergelmir', first: 25 },
 ];
 
 /**

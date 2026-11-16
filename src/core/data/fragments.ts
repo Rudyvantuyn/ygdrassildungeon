@@ -96,6 +96,18 @@ export const FRAGMENTS: FragmentDef[] = [
     text: 'A sliver of ice from the Rimewell\'s heart, with a fleck of gold inside that moves when nothing else does. Brother Aske turns it over for a long time. "That is not metal," he says at last. "That is something someone remembered so hard that it set."',
     where: { guardian: 22 },
   },
+  {
+    id: 'smallTeeth',
+    title: 'Small teeth, big root',
+    text: 'On the riverbank lies a strip of bark torn from the great root, with two kinds of marks on it. Huge gouges, from something that gnaws. And, all along the edge, tiny neat bites, as if something small and very busy had been here, taking a little for itself.',
+    where: { chest: 26 },
+  },
+  {
+    id: 'sleepingWord',
+    title: 'What the serpent dreamt',
+    text: 'In the hollow where Sváfnir slept, the moss is pressed into a shape, the way grass is where an animal sleeps. Not a serpent\'s shape. A man\'s, lying with one arm over his eyes, as if someone had slept here once to keep watch, and then not woken in time.',
+    where: { guardian: 27 },
+  },
 ];
 
 export const FRAGMENT_BY_ID: Record<string, FragmentDef> = Object.fromEntries(FRAGMENTS.map((f) => [f.id, f]));

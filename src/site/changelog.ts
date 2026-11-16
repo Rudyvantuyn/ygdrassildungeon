@@ -12,6 +12,10 @@ export const CHANGES: ChangeDay[] = [
   {
     date: '2026-11-16',
     changes: [
+      'New: chapter VI, Hvergelmir (floors 26–30): the mist under the gap, the spring every river comes from, and the root of the Great Tree.',
+      'New: chapter VI floors are bigger than any before (35 by 25 squares).',
+      'New: ten creatures, two prowlers and two guardians in chapter VI, each with lines in the bestiary; gear, materials, four requests, two fragments and five deeds.',
+      'New: from chapter VI on, won fights can leave a Dream Ember.',
       'Changed: numbers now use clear digits everywhere (a 2, 5 and 8 were easy to mix up); letters stay pixel.',
       'New: a Font setting. Clear swaps the pixel font for a plain one that is easy to read, numbers included.',
       'New: a Lights setting. Steady holds every light in the dungeon still, if the flicker is distracting.',

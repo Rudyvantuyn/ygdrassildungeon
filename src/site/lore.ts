@@ -108,4 +108,11 @@ export const CHAPTERS: { numeral: string; name: string; floors: string; image: s
     image: 'site/ch5.webp',
     text: 'Below the skull the roots fall into the gap the world was built across: ice from the north, fire from the south, and between them the place where the first giant woke. The rime there is still alive.',
   },
+  {
+    numeral: 'VI',
+    name: 'Hvergelmir',
+    floors: 'Floors 26–30',
+    image: 'site/ch6.webp',
+    text: 'Below the gap lies Niflheim, the mist-home: the roaring spring every river comes from, a loud black river running toward the dead, and the great root of the Tree with serpents on it, and something worse beneath.',
+  },
 ];

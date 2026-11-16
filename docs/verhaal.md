@@ -142,6 +142,37 @@ werd Ymir geboren). Midgard is eroverheen gebouwd "als een deksel op een put". V
 - Open voor Thijs: wat er met de nieuwe reus gebeurt per weg; of Eira bij het begin van de wereld was; wat er onder
   de kloof ligt (hoofdstuk VI).
 
+### Hoofdstuk VI (voorstel, november 2026)
+
+Ook een voorstel in Thijs' lijn; alles mag hij veranderen. Thema gekozen door de eigenaar: **Hvergelmir en Níðhöggr**
+(Niflheim onder de kloof: de kolkende bron waar alle rivieren vandaan komen, de rivier Gjöll, en de wortel van de Boom
+met de slangen en de draak). Het eerste hoofdstuk op 35×25.
+
+- **Aankomst (The Mistlands)**: onder de wieg gaan de wortels de mist in; ergens gebrul als honderd watervallen,
+  boven je een wortel zo groot als de hemel. Per weg: werelden: een rune van de oude reuzen bij de trap; Asgard:
+  Eira's vlam dooft voor het eerst en steekt zichzelf weer aan; Midgard: een oude echo van Lindholms hoorn.
+- **Gjöll's Bank**: de luide zwarte rivier; ver stroomafwaarts glinstert een gouden brug waar de doden overgaan
+  ("niet jouw weg, nog niet").
+- **Hvergelmir** en **Sváfnir** (tussenbaas, verdieping 28, de Slaapbrenger met drie koppen): sinds de Wayfinders
+  bij de bron zijn, vallen mensen in Lindholm in slaap. Na zijn val worden alle slapers tegelijk wakker; Hjalmar
+  droomde van een **wachter die op zijn post in slaap viel**. Eira staat op en loopt zonder iets te zeggen de kou in
+  (hint: Heimdall, de wachter die nooit slaapt; zie het fragment hieronder).
+- **The Serpent Roots**: wortels zo dik als de Oath Hall, met lange grijze dingen erop (Grábakr en Ófnir, slangen uit
+  de Grímnismál, als prowlers).
+- **The Gnawed Root** en **Níðhöggr** (eindbaas, zesde ward): de rune zit in de wortel zelf, en de knaagsporen lopen er
+  rondom. **Níðhöggr knaagde niet aan de Boom, maar al die tijd aan de ward.** Na zijn val windt hij zich om de wortel
+  alsof hij hem beschermt; de hoorn klinkt vijf keer, en hoog in de Boom kwettert iets kleins, alsof het nieuws naar
+  boven gebracht wordt (Ratatoskr; zie de herinnering van de eekhoorn).
+- **Keuze 7: wat er met Níðhöggr gebeurt**: aan de werelden, met eer begraven (realms); Eira verbrandt hem en heelt de
+  wortel met zijn as (asgard; Aske: ze keek ernaar als naar een oude vijand die eindelijk stil is); zijn naam op de
+  Wayfinders' Stone, hij blijft liggen bij de wortel waarvoor hij vocht (midgard).
+- Fragmenten: **kleine tandjes, grote wortel** (naast de enorme knaagsporen kleine nette beetjes van iets kleins en
+  drukkends) en **wat de slang droomde** (in Sváfnirs holte is het mos ingedrukt in de vorm van een man die hier sliep
+  om de wacht te houden, en niet op tijd wakker werd).
+- Vanaf hier vallen ook **Dream Embers** (12% per gewonnen gevecht), voor de Hall of Echoes.
+- Open voor Thijs: of Níðhöggr de wards bevocht uit eigen wil of voor iemand; waarom Eira bij het woord "wachter"
+  weggaat; de weg naar Hel (hoofdstuk VII?).
+
 ### Geheime klassen (voorstel, november 2026)
 
 Drie klassen die je niet kunt kiezen tot je een verborgen deed haalt. Dan meldt zich een vreemdeling bij Brynja
@@ -213,6 +244,7 @@ of **midgard** (de derde weg):
 | Na Hrungnir: het stenen hart (voorstel) | terug naar de reuzen | Eira brengt het "naar huis" | begraven onder de Oath Hall |
 | Na de Dreamwarden: de droom (voorstel) | laat hem dromen van de werelden | Eira brengt hem weer in slaap | Lindholm houdt de wacht |
 | Na de Gapwarden: wat er in de kloof roert (voorstel) | de werelden voeden hem op | Eira sluit de kloof | Lindholm voedt hem op |
+| Na Níðhöggr: wat er met de draak gebeurt (voorstel) | aan de werelden, met eer begraven | Eira verbrandt hem en heelt de wortel | zijn naam op de Wayfinders' Stone |
 
 Na de eerste keuze volgt in hoofdstuk II een korte scène die erop reageert. Latere hoofdstukken moeten er ook op
 reageren. Uiteindelijk kunnen de drie uitkomsten van Thijs hier vandaan vertakken.

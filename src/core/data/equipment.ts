@@ -120,6 +120,17 @@ const list: EquipDef[] = [
   { id: 'firstfrostRod', name: 'Firstfrost Rod', slot: 'weapon', classes: CASTERS, tier: 22, price: 40500, bonus: { mag: 105 } },
   { id: 'rimeheartMail', name: 'Rimeheart Mail', slot: 'armor', classes: MAIL, tier: 22, price: 41500, bonus: { def: 94 } },
   { id: 'steamsilkRobe', name: 'Steamsilk Robe', slot: 'armor', classes: CASTERS, tier: 22, price: 40000, bonus: { def: 59, res: 80 } },
+  // Chapter VI: Hvergelmir
+  { id: 'mistforgedBlade', name: 'Mistforged Blade', slot: 'weapon', classes: BLADES, tier: 25, price: 48000, bonus: { atk: 130 } },
+  { id: 'greyyewBow', name: 'Greyyew Bow', slot: 'weapon', classes: ['strider'], tier: 25, price: 47800, bonus: { atk: 122, spd: 9 } },
+  { id: 'wellwaterRod', name: 'Wellwater Rod', slot: 'weapon', classes: CASTERS, tier: 25, price: 47500, bonus: { mag: 114 } },
+  { id: 'blackslateMail', name: 'Blackslate Mail', slot: 'armor', classes: MAIL, tier: 25, price: 48500, bonus: { def: 102 } },
+  { id: 'mistweftRobe', name: 'Mistweft Robe', slot: 'armor', classes: CASTERS, tier: 25, price: 47000, bonus: { def: 64, res: 87 } },
+  { id: 'rootcleaverAxe', name: 'Rootcleaver Axe', slot: 'weapon', classes: BLADES, tier: 27, price: 56000, bonus: { atk: 140 } },
+  { id: 'serpentstringBow', name: 'Serpentstring Bow', slot: 'weapon', classes: ['strider'], tier: 27, price: 55800, bonus: { atk: 131, spd: 9 } },
+  { id: 'kettlefireRod', name: 'Kettlefire Rod', slot: 'weapon', classes: CASTERS, tier: 27, price: 55500, bonus: { mag: 123 } },
+  { id: 'rootplateMail', name: 'Rootplate Mail', slot: 'armor', classes: MAIL, tier: 27, price: 56500, bonus: { def: 110 } },
+  { id: 'shroudweaveRobe', name: 'Shroudweave Robe', slot: 'armor', classes: CASTERS, tier: 27, price: 55000, bonus: { def: 69, res: 94 } },
   // Special gear, unlocked by selling materials. It should always beat the shop gear of the next floor down:
   // that is the reward for hunting a kind of monster on purpose.
   { id: 'briarthornSpear', name: 'Briarthorn Spear', slot: 'weapon', classes: BLADES, tier: 0, price: 220, bonus: { atk: 11 }, requires: { material: 'briarQuill', qty: 5 } },
@@ -196,6 +207,21 @@ const list: EquipDef[] = [
   { id: 'muspelironBlade', name: 'Muspel-Iron Blade', slot: 'weapon', classes: BLADES, tier: 21, price: 38500, bonus: { atk: 118 }, requires: { material: 'muspelIron', qty: 3 } },
   { id: 'firstwoodBow', name: 'Firstwood Bow', slot: 'weapon', classes: ['strider'], tier: 21, price: 38500, bonus: { atk: 112, spd: 9 }, requires: { material: 'firstwood', qty: 3 } },
   { id: 'sparkfinMail', name: 'Sparkfin Mail', slot: 'armor', classes: MAIL, tier: 21, price: 38500, bonus: { def: 91, spd: 1 }, requires: { material: 'sparkfin', qty: 3 } },
+  // Chapter VI: from Hvergelmir's creatures, prowlers, guardians and gathering spots
+  { id: 'niflmistRobe', name: 'Niflmist Robe', slot: 'armor', classes: CASTERS, tier: 25, price: 49000, bonus: { def: 66, res: 90 }, requires: { material: 'niflMist', qty: 6 } },
+  { id: 'carrionBow', name: 'Carrion Bow', slot: 'weapon', classes: ['strider'], tier: 25, price: 49500, bonus: { atk: 128, spd: 10 }, requires: { material: 'carrionQuill', qty: 5 } },
+  { id: 'barkbiterBlade', name: 'Barkbiter Blade', slot: 'weapon', classes: BLADES, tier: 26, price: 52000, bonus: { atk: 136 }, requires: { material: 'barkbiterFang', qty: 6 } },
+  { id: 'houndpeltMail', name: 'Houndpelt Mail', slot: 'armor', classes: MAIL, tier: 26, price: 52500, bonus: { def: 106 }, requires: { material: 'houndPelt', qty: 5 } },
+  { id: 'mirevenomRod', name: 'Mirevenom Rod', slot: 'weapon', classes: CASTERS, tier: 26, price: 53000, bonus: { mag: 120 }, requires: { material: 'mireVenom', qty: 6 } },
+  { id: 'wightringCloak', name: 'Wightring Cloak', slot: 'armor', classes: ALL, tier: 27, price: 53000, bonus: { def: 72, res: 72 }, requires: { material: 'wightRing', qty: 5 } },
+  { id: 'greybackBow', name: 'Greyback Bow', slot: 'weapon', classes: ['strider'], tier: 28, price: 62000, bonus: { atk: 140, spd: 11 }, requires: { material: 'greybackScale', qty: 1 } },
+  { id: 'ofnirRod', name: 'Ófnir Rod', slot: 'weapon', classes: CASTERS, tier: 28, price: 62000, bonus: { mag: 131, spd: 2 }, requires: { material: 'ofnirCoil', qty: 1 } },
+  { id: 'sleepbringerPlate', name: 'Sleep-Bringer Plate', slot: 'armor', classes: ['bastion'], tier: 27, price: 60000, bonus: { def: 118, res: 21 }, requires: { material: 'svafnirEye', qty: 1 } },
+  { id: 'malicefangBlade', name: 'Malicefang Blade', slot: 'weapon', classes: BLADES, tier: 29, price: 72000, bonus: { atk: 152 }, requires: { material: 'nidhoggFang', qty: 1 } },
+  { id: 'palebellRobe', name: 'Palebell Robe', slot: 'armor', classes: CASTERS, tier: 26, price: 53000, bonus: { def: 68, res: 92 }, requires: { material: 'paleBell', qty: 3 } },
+  { id: 'wellstoneBlade', name: 'Wellstone Blade', slot: 'weapon', classes: BLADES, tier: 26, price: 53500, bonus: { atk: 138 }, requires: { material: 'wellstone', qty: 3 } },
+  { id: 'rootsplinterBow', name: 'Rootsplinter Bow', slot: 'weapon', classes: ['strider'], tier: 26, price: 53500, bonus: { atk: 130, spd: 10 }, requires: { material: 'rootSplinter', qty: 3 } },
+  { id: 'kettletroutMail', name: 'Kettle-Trout Mail', slot: 'armor', classes: MAIL, tier: 26, price: 53500, bonus: { def: 107, spd: 1 }, requires: { material: 'kettleTrout', qty: 3 } },
 ];
 
 export const EQUIPMENT: Record<string, EquipDef> = Object.fromEntries(list.map((e) => [e.id, e]));

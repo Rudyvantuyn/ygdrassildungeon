@@ -37,7 +37,9 @@ Add new names there and keep the glossary in sync.
   with a boss. Chapter I is forest (floors 1–5), chapter II ocean (floors 6–10), chapter III
   Ymir's bones (11–15), chapter IV his skull and brain, the inside of the sky (16–20), chapter V Ginnungagap, the gap of ice and fire the world
   was built over (21–25; IV and V are first drafts the owner may redraw at the Drafting Table). **From chapter VI on the floors are bigger:**
-  chapter VI at least 35×25 (wide × high), and every chapter after that 5 wider and 5 higher (VII 40×30, VIII 45×35, …). The owner wants to draw dungeons
+  chapter VI at least 35×25 (wide × high), and every chapter after that 5 wider and 5 higher (VII 40×30, VIII 45×35, …).
+  Chapter VI is Hvergelmir (26–30: Niflheim's mist, the roaring spring, Níðhöggr at the gnawed root), a first draft made with
+  a maze generator and checked by `chapterProblems`; the owner may redraw it. The owner wants to draw dungeons
   themselves later (a dungeon editor). The editor (the Drafting Table) is a maker tool, not a player feature: it only
   shows with `?maker` in the address.
 - **Character growth is dynamic**: skill points per level, spent in a skill tree per class; skills have ranks 1–10.

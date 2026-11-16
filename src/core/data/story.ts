@@ -985,6 +985,162 @@ export const STORY: StoryScene[] = [
       { speaker: SIGRID, text: 'Whatever comes next, it was here before the gods. Go carefully, Wayfinders.' },
     ],
   },
+
+  // ── Chapter VI: Hvergelmir ─────────────────────────────────────────────────
+  // A proposal in Thijs' line (see docs/verhaal.md); he may change all of it.
+  {
+    id: 'niflArrival',
+    title: 'The mist-home',
+    when: 'floor',
+    ready: on(25),
+    lines: [
+      { speaker: NARRATOR, text: 'Below the cradle the roots go down into a mist so thick it drips. Niflheim, the old songs call it: the mist-home, older than the gods.' },
+      { speaker: NARRATOR, text: 'Somewhere ahead, a roar like a hundred waterfalls at once. And above, through the mist, a root so vast it could be the sky.' },
+    ],
+  },
+  {
+    id: 'niflRealms',
+    title: 'The oldest mark',
+    when: 'floor',
+    ready: (g) => on(25)(g) && road(g) === 'realms',
+    lines: [
+      { speaker: NARRATOR, text: 'Even the Frost Court never came this far. But someone did: at the stair is a rune of the old giants, worn almost smooth.' },
+    ],
+  },
+  {
+    id: 'niflAsgard',
+    title: 'The flame goes out',
+    when: 'floor',
+    ready: (g) => on(25)(g) && road(g) === 'asgard',
+    lines: [
+      { speaker: NARRATOR, text: 'Eira\'s flame, which has never once gone out, gutters in the mist and dies. Then, slowly, as you stare at it, it lights itself again.' },
+    ],
+  },
+  {
+    id: 'niflMidgard',
+    title: 'An old echo',
+    when: 'floor',
+    ready: (g) => on(25)(g) && road(g) === 'midgard',
+    lines: [
+      { speaker: NARRATOR, text: 'In the mist you hear Lindholm\'s horn, faint and far. No: it is an echo, and an old one. Something down here keeps every sound it ever heard.' },
+    ],
+  },
+  {
+    id: 'gjollBank',
+    title: 'The loud river',
+    when: 'floor',
+    ready: on(26),
+    lines: [
+      { speaker: NARRATOR, text: 'The river Gjöll runs out of the mist, black and cold and so loud you have to shout.' },
+      { speaker: NARRATOR, text: 'Far downstream a bridge glints gold above the water, and grey shapes cross it, one by one. The road of the dead. Not your road. Not yet.' },
+    ],
+  },
+  {
+    id: 'hvergelmir',
+    title: 'The roaring kettle',
+    when: 'floor',
+    ready: on(27),
+    lines: [
+      { speaker: NARRATOR, text: 'Hvergelmir: the spring every river in the nine worlds comes from. It boils and roars and never runs dry.' },
+      { speaker: NARRATOR, text: 'In a side pool, three heads rest on the water, eyes half closed. Since you came down here, you have been yawning.' },
+    ],
+  },
+  {
+    id: 'svafnirFallen',
+    title: 'The spring holds its breath',
+    when: 'victory',
+    ready: beaten(27),
+    lines: [
+      { speaker: NARRATOR, text: 'Sváfnir\'s three heads sink into the boiling water, and the roar of the spring changes, as if it had been holding its breath for an age.' },
+    ],
+  },
+  {
+    id: 'sleepersWake',
+    title: 'The sleepers wake',
+    when: 'town',
+    ready: beaten(27),
+    lines: [
+      { speaker: SIGRID, text: 'They woke, every sleeper in Lindholm, all at the same moment. Old Hjalmar says he dreamt of a watchman who fell asleep at his post.' },
+      { speaker: HRODNA, text: 'Every people has that story. The watchman who slept when he should have watched, and what came through while he did.' },
+      { speaker: NARRATOR, text: 'Eira gets up without a word and goes out into the cold. Nobody sees her come back.' },
+    ],
+  },
+  {
+    id: 'serpentRoots',
+    title: 'Things on the roots',
+    when: 'floor',
+    ready: on(28),
+    lines: [
+      { speaker: NARRATOR, text: 'The roots here are as thick as the Oath Hall, and they move. No. Things move on them, long and grey, winding slowly in and out of the mist.' },
+    ],
+  },
+  {
+    id: 'gnawedRoot',
+    title: 'What the dragon gnawed',
+    when: 'floor',
+    ready: on(29),
+    lines: [
+      { speaker: NARRATOR, text: 'The great root of the Tree, gnawed nearly through. In the deepest gouges something glints gold.' },
+      { speaker: NARRATOR, text: 'A rune, cut into the root itself: the sixth ward. The gouges run all around it.' },
+      { speaker: NARRATOR, text: 'Níðhöggr has not been gnawing at the Tree. For as long as there has been a world, it has been gnawing at the ward.' },
+    ],
+  },
+  {
+    id: 'nidhoggFallen',
+    title: 'The sixth ward',
+    when: 'victory',
+    ready: beaten(29),
+    lines: [
+      { speaker: NARRATOR, text: 'Níðhöggr falls, and coils as it falls, around the root, as if to guard it. The rune it gnawed at for an age cracks at last under your blades.' },
+      { speaker: NARRATOR, text: 'Far above, the horn sounds five times. And higher still, very faint, something small chatters, as if carrying the news up the Tree.' },
+    ],
+  },
+  {
+    id: 'sixthWard',
+    title: 'The dragon\'s side',
+    when: 'town',
+    ready: beaten(29),
+    lines: [
+      { speaker: SIGRID, text: 'Six wards. And the oldest monster in every song was doing what we do, all along? I do not know what to feel.' },
+      { speaker: HRODNA, text: 'Níðhöggr fought the gods\' locks since the world began. Give its body to the realms, Wayfinders. It will be buried with honour.' },
+      { speaker: EIRA, text: 'It gnawed at the root that holds all nine worlds. Burn it, and close the wound in the root with its ashes, before the Tree sickens.' },
+      { speaker: BRYNJA, text: 'Or leave it where it fell, beside the root it fought for, and carve its name on the Wayfinders\' Stone. Lindholm remembers who helped.' },
+    ],
+    choice: {
+      prompt: 'What becomes of Níðhöggr?',
+      options: [
+        {
+          id: 'hrodna', label: 'Give it to the realms', leaning: 'realms',
+          reply: [
+            { speaker: HRODNA, text: 'The Frost Court will sing it down. No one has sung for that dragon in a very long time.' },
+          ],
+        },
+        {
+          id: 'eira', label: 'Let Eira burn it and heal the root', leaning: 'asgard',
+          reply: [
+            { speaker: EIRA, text: 'Thank you. The Tree must stand. Whatever else happens, the Tree must stand.' },
+            { speaker: ASKE, text: 'She looked at the ashes the way you look at an old enemy who has finally gone quiet. Not glad. Tired.' },
+          ],
+        },
+        {
+          id: 'brynja', label: 'Carve its name in Lindholm', leaning: 'midgard',
+          reply: [
+            { speaker: BRYNJA, text: 'Torvald will need a bigger chisel. And longer than one winter to get the spelling right.' },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'chapterSixEnd',
+    title: 'Toward the dead',
+    when: 'town',
+    ready: (g) => beaten(29)(g) && g.state.story.includes('sixthWard'),
+    lines: [
+      { speaker: SIGRID, text: 'Six wards. The roots go on below the mist, Hrodna says, down along the loud river, to where the dead are going.' },
+      { speaker: SIGRID, text: 'I had hoped we would never need to walk that road while we still had breath. Rest, Wayfinders. And keep your lanterns full.' },
+    ],
+  },
 ];
 
 /** The road the party's choices lean toward most; a tie goes to Midgard's own third way. */

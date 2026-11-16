@@ -92,4 +92,20 @@ export const BEAST_LORE: Record<string, string> = {
   emberjotun: 'A giant from the fire country, wandered far north of where it should be. The ice hisses where it walks.',
   rimewell: 'A spring older than the rivers it feeds. The venom and the cold both come from here, and something in it still wells up.',
   gapwarden: 'It stands where ice meets fire, holding the two apart. Someone set it there so that nothing new would ever be born in the gap again.',
+
+  // Chapter VI: Hvergelmir
+  nifling: 'Niflheim is mostly mist, and some of the mist has opinions. Niflings drift close to the warm and breathe the cold back at it.',
+  wellLeech: 'Leeches as long as an arm that live in the black water around the great spring. They drink until you fall, then a little more.',
+  gjollEel: 'The river Gjöll runs loud and cold out of the spring, and these eels run with it, crackling like a struck flint.',
+  mireToad: 'A toad the size of a shield, sitting in the mire with its mouth open. What it spits does not wash off.',
+  carrionRaven: 'Black birds that follow the dead down the long road. They have learned that the living are only the dead a little early.',
+  mistHound: 'Grey dogs that hunt in the mist by the sound of breath. When one howls, the others come.',
+  barkbiter: 'Snakes that live on the great root and chew it, a mouthful at a time. Whatever gnaws below has many little helpers.',
+  mistPilgrim: 'The dead walk this way, toward the hall of the dead, and some of them have walked too long to remember where they were going.',
+  frostwight: 'Something buried with its rings and its grudges, and the cold kept it. It still wants what it was buried with.',
+  mireTroll: 'Trolls of the black mire, blue with cold and slow with mud. One swing will empty a front row.',
+  grabakr: 'Grey-back, the old songs call it, one of the serpents under the root. It is older than Lindholm and in no hurry at all.',
+  ofnir: 'The Winder. It coils through the roots so tightly that you see it first as a moving wall.',
+  svafnir: 'The Sleep-Bringer lies in the roaring spring with three heads above the water, and every one of them is yawning at you.',
+  nidhogg: 'Malice-Striker. It has gnawed at the root of the Great Tree since the world began, and it does not like to be interrupted.',
 };

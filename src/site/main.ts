@@ -71,7 +71,7 @@ async function loadMe(): Promise<Me | null> {
     save = null;
   }
   const d = deeds ?? {};
-  const fromDeeds = d.gap ? 5 : d.skull ? 4 : d.marrow ? 3 : d.drowned ? 2 : 1;
+  const fromDeeds = d.nifl ? 6 : d.gap ? 5 : d.skull ? 4 : d.marrow ? 3 : d.drowned ? 2 : 1;
   const fromSave = save ? Math.floor((save.deepest ?? 0) / 5) + 1 : 1;
   return { name: online.playerName, deeds: d, save, savedAt: cloud?.savedAt ?? null, chapters: Math.max(OPEN_CHAPTERS, fromDeeds, fromSave) };
 }

@@ -1008,6 +1008,189 @@ const list: EnemyDef[] = [
     material: { id: 'gapSeal', chance: 1 },
     art: { shape: 'slime', color: '#c060c0', accent: '#f0f0ff', size: 1.8 },
   },
+  // ── Chapter VI: Hvergelmir (Niflheim's mist, the roaring spring and the serpents at the root, floors 26–30) ──
+  {
+    id: 'nifling',
+    name: 'Nifling',
+    hp: 2700, atk: 185, def: 95, mag: 180, res: 140, spd: 48,
+    xp: 400, gold: 192,
+    weak: ['fire'], resist: ['frost', 'phys'],
+    skills: [
+      { name: 'Cold Breath', chance: 0.3, kind: 'magic', element: 'frost', power: 105, target: 'all' },
+    ],
+    drop: { item: 'spiritDew', chance: 0.1 },
+    material: { id: 'niflMist', chance: 0.45 },
+    art: { shape: 'moth', color: '#c0c8d0', accent: '#ffffff', size: 0.9 },
+  },
+  {
+    id: 'wellLeech',
+    name: 'Well Leech',
+    hp: 3300, atk: 205, def: 110, mag: 80, res: 90, spd: 40,
+    xp: 405, gold: 195,
+    weak: ['fire'], resist: ['frost'],
+    skills: [
+      { name: 'Draining Bite', chance: 0.3, kind: 'phys', element: 'phys', power: 200, target: 'one', inflict: { ailment: 'poison', chance: 0.35 } },
+    ],
+    material: { id: 'leechTeeth', chance: 0.45 },
+    art: { shape: 'wyrm', color: '#c02020', accent: '#601010', size: 0.9 },
+  },
+  {
+    id: 'gjollEel',
+    name: 'Gjöll Eel',
+    hp: 2800, atk: 170, def: 85, mag: 185, res: 120, spd: 70,
+    xp: 410, gold: 198,
+    weak: ['frost'], resist: ['storm'],
+    ranged: true,
+    skills: [
+      { name: 'Black Current', chance: 0.35, kind: 'magic', element: 'storm', power: 105, target: 'all', inflict: { ailment: 'paralysis', chance: 0.12 } },
+    ],
+    material: { id: 'eelHide', chance: 0.45 },
+    art: { shape: 'wyrm', color: '#20a0a0', accent: '#a0ffff', size: 1.0 },
+  },
+  {
+    id: 'mireToad',
+    name: 'Mire Toad',
+    hp: 3400, atk: 190, def: 120, mag: 170, res: 100, spd: 34,
+    xp: 405, gold: 196,
+    weak: ['storm'], resist: ['frost'],
+    skills: [
+      { name: 'Venom Spit', chance: 0.35, kind: 'magic', element: 'frost', power: 200, target: 'one', inflict: { ailment: 'poison', chance: 0.4 } },
+    ],
+    drop: { item: 'clearwater', chance: 0.15 },
+    material: { id: 'mireVenom', chance: 0.45 },
+    art: { shape: 'beast', color: '#208060', accent: '#c0ff60', size: 1.0 },
+  },
+  {
+    id: 'carrionRaven',
+    name: 'Carrion Raven',
+    hp: 2600, atk: 210, def: 80, mag: 120, res: 110, spd: 76,
+    xp: 400, gold: 194,
+    weak: ['storm'], resist: ['frost'],
+    ranged: true,
+    skills: [
+      { name: 'Eye-Peck', chance: 0.3, kind: 'phys', element: 'phys', power: 195, target: 'one', inflict: { ailment: 'paralysis', chance: 0.15 } },
+    ],
+    material: { id: 'carrionQuill', chance: 0.45 },
+    art: { shape: 'bat', color: '#202028', accent: '#606070', size: 0.9 },
+  },
+  {
+    id: 'mistHound',
+    name: 'Mist Hound',
+    hp: 3200, atk: 215, def: 100, mag: 70, res: 85, spd: 68,
+    xp: 410, gold: 198,
+    weak: ['fire'], resist: ['frost'],
+    skills: [
+      { name: 'Pack Howl', chance: 0.25, kind: 'phys', element: 'phys', power: 120, target: 'all' },
+    ],
+    material: { id: 'houndPelt', chance: 0.45 },
+    art: { shape: 'beast', color: '#504840', accent: '#c0b0a0', size: 1.0 },
+  },
+  {
+    id: 'barkbiter',
+    name: 'Barkbiter',
+    hp: 3100, atk: 220, def: 105, mag: 60, res: 80, spd: 60,
+    xp: 410, gold: 197,
+    weak: ['fire'], resist: ['phys'],
+    skills: [
+      { name: 'Root-Gnash', chance: 0.3, kind: 'phys', element: 'phys', power: 210, target: 'one', inflict: { ailment: 'poison', chance: 0.25 } },
+    ],
+    material: { id: 'barkbiterFang', chance: 0.45 },
+    art: { shape: 'wyrm', color: '#806040', accent: '#c0a080', size: 0.9 },
+  },
+  {
+    id: 'mistPilgrim',
+    name: 'Mist Pilgrim',
+    hp: 3500, atk: 175, def: 75, mag: 210, res: 150, spd: 44,
+    xp: 420, gold: 202,
+    weak: ['fire'], resist: ['phys', 'frost'],
+    skills: [
+      { name: 'Hel-Song', chance: 0.3, kind: 'magic', element: 'frost', power: 110, target: 'all', inflict: { ailment: 'sleep', chance: 0.15 } },
+    ],
+    drop: { item: 'spiritDew', chance: 0.15 },
+    material: { id: 'pilgrimShroud', chance: 0.4 },
+    art: { shape: 'moth', color: '#5040a0', accent: '#c0b0ff', size: 1.0 },
+  },
+  {
+    id: 'frostwight',
+    name: 'Frostwight',
+    hp: 3800, atk: 230, def: 130, mag: 150, res: 120, spd: 46,
+    xp: 425, gold: 205,
+    weak: ['fire'], resist: ['frost', 'storm'],
+    skills: [
+      { name: 'Barrow Cold', chance: 0.3, kind: 'phys', element: 'frost', power: 215, target: 'one', inflict: { ailment: 'paralysis', chance: 0.15 } },
+    ],
+    material: { id: 'wightRing', chance: 0.4 },
+    art: { shape: 'golem', color: '#c0b080', accent: '#e0e0ff', size: 1.1 },
+  },
+  {
+    id: 'mireTroll',
+    name: 'Mire Troll',
+    hp: 6400, atk: 300, def: 160, mag: 80, res: 90, spd: 28,
+    xp: 520, gold: 250,
+    weak: ['fire'], resist: ['frost', 'phys'],
+    skills: [
+      { name: 'Bog Smash', chance: 0.3, kind: 'phys', element: 'phys', power: 270, target: 'one' },
+      { name: 'Mire Breath', chance: 0.15, kind: 'magic', element: 'frost', power: 110, target: 'all', inflict: { ailment: 'poison', chance: 0.2 } },
+    ],
+    material: { id: 'trollHide', chance: 0.4 },
+    art: { shape: 'golem', color: '#2050a0', accent: '#60c0ff', size: 1.3 },
+  },
+  {
+    id: 'grabakr',
+    name: 'Grábakr',
+    hp: 54000, atk: 320, def: 160, mag: 220, res: 140, spd: 46,
+    xp: 7000, gold: 2900,
+    weak: ['fire'], resist: ['frost', 'phys'],
+    skills: [
+      { name: 'Grey Coil', chance: 0.3, kind: 'phys', element: 'phys', power: 270, target: 'one' },
+      { name: 'Venom Cloud', chance: 0.2, kind: 'magic', element: 'frost', power: 135, target: 'all', inflict: { ailment: 'poison', chance: 0.3 } },
+    ],
+    drop: { item: 'tideDraught', chance: 0.8 },
+    material: { id: 'greybackScale', chance: 1 },
+    art: { shape: 'wyrm', color: '#a09060', accent: '#605030', size: 1.4 },
+  },
+  {
+    id: 'ofnir',
+    name: 'Ófnir',
+    hp: 52000, atk: 300, def: 150, mag: 240, res: 150, spd: 52,
+    xp: 7200, gold: 3000,
+    weak: ['fire'], resist: ['frost', 'storm'],
+    skills: [
+      { name: 'Winding Crush', chance: 0.3, kind: 'phys', element: 'phys', power: 265, target: 'one' },
+      { name: 'Root-Venom', chance: 0.2, kind: 'magic', element: 'frost', power: 140, target: 'all', inflict: { ailment: 'poison', chance: 0.3 } },
+    ],
+    drop: { item: 'spiritDew', chance: 0.6 },
+    material: { id: 'ofnirCoil', chance: 1 },
+    art: { shape: 'wyrm', color: '#20a040', accent: '#f0d040', size: 1.4 },
+  },
+  {
+    id: 'svafnir',
+    name: 'Sváfnir',
+    hp: 58000, atk: 280, def: 145, mag: 230, res: 150, spd: 36,
+    xp: 7500, gold: 5300,
+    weak: ['fire'], resist: ['frost', 'storm'],
+    skills: [
+      { name: 'Sleep-Bringer', chance: 0.25, kind: 'magic', element: 'frost', power: 130, target: 'all', inflict: { ailment: 'sleep', chance: 0.25 } },
+      { name: 'Three Fangs', chance: 0.3, kind: 'phys', element: 'phys', power: 280, target: 'one', inflict: { ailment: 'poison', chance: 0.3 } },
+      { name: 'Kettle Steam', chance: 0.15, kind: 'magic', element: 'fire', power: 125, target: 'all' },
+    ],
+    material: { id: 'svafnirEye', chance: 1 },
+    art: { shape: 'wyrm', color: '#20a040', accent: '#e0c040', size: 1.7 },
+  },
+  {
+    id: 'nidhogg',
+    name: 'Níðhöggr',
+    hp: 96000, atk: 300, def: 165, mag: 240, res: 165, spd: 38,
+    xp: 18000, gold: 11500,
+    weak: ['fire'], resist: ['frost'],
+    skills: [
+      { name: 'Malice Strike', chance: 0.3, kind: 'phys', element: 'phys', power: 290, target: 'one' },
+      { name: 'Corpse-Venom', chance: 0.2, kind: 'magic', element: 'frost', power: 145, target: 'all', inflict: { ailment: 'poison', chance: 0.35 } },
+      { name: 'Wing of Night', chance: 0.2, kind: 'magic', element: 'storm', power: 140, target: 'all', inflict: { ailment: 'paralysis', chance: 0.15 } },
+    ],
+    material: { id: 'nidhoggFang', chance: 1 },
+    art: { shape: 'wyrm', color: '#302838', accent: '#c02040', size: 1.8 },
+  },
 ];
 
 /**
@@ -1016,7 +1199,7 @@ const list: EnemyDef[] = [
  * A fifth adventurer helps most against packs, so ordinary monsters gain the most; one big foe gains less.
  * New guardians and prowlers go in these lists too (a test checks that none is missing).
  */
-export const GUARDIAN_IDS = ['blightedElder', 'rootgnawer', 'drownedJarl', 'hafgufa', 'ribwarden', 'hrungnir', 'fogWatcher', 'dreamwarden', 'rimewell', 'gapwarden'];
+export const GUARDIAN_IDS = ['blightedElder', 'rootgnawer', 'drownedJarl', 'hafgufa', 'ribwarden', 'hrungnir', 'fogWatcher', 'dreamwarden', 'rimewell', 'gapwarden', 'svafnir', 'nidhogg'];
 /** Each prowler's own factors: they are tuned one by one against the prowler rules (hopeless, risky, beatable). */
 const PROWLER_SCALE: Record<string, { hp: number; power: number }> = {
   grimtusk: { hp: 1.1, power: 1.15 },
@@ -1031,6 +1214,8 @@ const PROWLER_SCALE: Record<string, { hp: number; power: number }> = {
   thunderwyrm: { hp: 0.85, power: 1.2 },
   rimedrake: { hp: 1.4, power: 1.05 },
   emberjotun: { hp: 1.45, power: 1.02 },
+  grabakr: { hp: 1.3, power: 1.05 },
+  ofnir: { hp: 1.45, power: 1.05 },
 };
 export const PROWLER_IDS = Object.keys(PROWLER_SCALE);
 const SCALE = {
@@ -1041,6 +1226,8 @@ const SCALE = {
   skullMonster: { hp: 1.25, power: 1.08 },
   /** Ginnungagap's packs (from the Rimeling on), tuned for five from the start. */
   gapMonster: { hp: 1.25, power: 1.08 },
+  /** Hvergelmir's packs (from the Nifling on), tuned for five from the start. */
+  niflMonster: { hp: 1.4, power: 1.15 },
   guardian: { hp: 1.1, power: 1.03 },
 };
 /** Guardians that needed their own factor: a five-strong party should still not rush the Blighted Elder. */
@@ -1050,11 +1237,12 @@ const GUARDIAN_SCALE: Record<string, { hp: number; power: number }> = {
 const MARROW_FROM = list.findIndex((e) => e.id === 'marrowgnaw');
 const SKULL_FROM = list.findIndex((e) => e.id === 'mistling');
 const GAP_FROM = list.findIndex((e) => e.id === 'rimeling');
+const NIFL_FROM = list.findIndex((e) => e.id === 'nifling');
 
 function scaled(e: EnemyDef, index: number): EnemyDef {
   const k = GUARDIAN_IDS.includes(e.id)
     ? (GUARDIAN_SCALE[e.id] ?? SCALE.guardian)
-    : (PROWLER_SCALE[e.id] ?? (index >= GAP_FROM ? SCALE.gapMonster : index >= SKULL_FROM ? SCALE.skullMonster : index >= MARROW_FROM ? SCALE.marrowMonster : SCALE.monster));
+    : (PROWLER_SCALE[e.id] ?? (index >= NIFL_FROM ? SCALE.niflMonster : index >= GAP_FROM ? SCALE.gapMonster : index >= SKULL_FROM ? SCALE.skullMonster : index >= MARROW_FROM ? SCALE.marrowMonster : SCALE.monster));
   return { ...e, hp: Math.round(e.hp * k.hp), atk: Math.round(e.atk * k.power), mag: Math.round(e.mag * k.power) };
 }
 
