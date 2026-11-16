@@ -105,3 +105,29 @@ export function statDelta(m: Member, e: EquipDef): Partial<Stats> {
   }
   return delta;
 }
+
+/** One piece of gear in the shop, seen from one adventurer: what it changes and whether it beats what they wear. */
+export interface GearOffer {
+  gear: EquipDef;
+  delta: Partial<Stats>;
+  /** The sum of every stat it changes (a rough "how much better"). */
+  gain: number;
+  worn: boolean;
+  upgrade: boolean;
+}
+
+/**
+ * What the shop has for one adventurer: everything they can wear, best gains first (weapons, then armour). An upgrade
+ * is a piece that adds more than it takes away compared to what they wear now.
+ */
+export function gearFor(game: Game, m: Member): GearOffer[] {
+  return equipmentForSale(game)
+    .filter((e) => canEquip(m, e))
+    .map((gear) => {
+      const delta = statDelta(m, gear);
+      const gain = Object.values(delta).reduce((a, b) => a + (b ?? 0), 0);
+      const worn = m[gear.slot] === gear.id;
+      return { gear, delta, gain, worn, upgrade: !worn && gain > 0 };
+    })
+    .sort((a, b) => (a.gear.slot === b.gear.slot ? b.gain - a.gain || b.gear.price - a.gear.price : a.gear.slot === 'weapon' ? -1 : 1));
+}

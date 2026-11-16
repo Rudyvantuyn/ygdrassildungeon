@@ -1347,7 +1347,6 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const next = wyrdDay(run.day).rules[k + 1];
     const menu = new ListMenu(
       [
-        { label: `Take ${have} thread${have > 1 ? 's' : ''} home`, description: 'Back to Lindholm with what you have. Today\'s try ends here.', onSelect: () => this.endWyrd(false) },
         {
           label: 'Go deeper',
           description: `Floor ${['I', 'II', 'III'][k + 1]}: ${next.name}. ${next.text} Fall, and lose half your threads.`,
@@ -1359,10 +1358,26 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             this.applyWyrdFloor();
           },
         },
+        { label: `Take ${have} thread${have > 1 ? 's' : ''} home`, description: 'Back to Lindholm with what you have. Today\'s try ends here.', onSelect: () => this.confirmWyrdHome(have) },
       ],
       { onCancel: () => this.resumeExplore(), backRow: false },
     );
     this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'The way down' }), el('p', { text: `You have ${have} Wyrd Thread${have > 1 ? 's' : ''} on this run.` }), menu.el]), menu);
+  }
+
+  /** Going home ends today's try for good, so it asks once more (a quick Enter on the stairs should never end it). */
+  private confirmWyrdHome(have: number): void {
+    const menu = new ListMenu(
+      [
+        { label: 'No, not yet', onSelect: () => this.wyrdStairs() },
+        { label: `Yes, go home with ${have} thread${have > 1 ? 's' : ''}`, onSelect: () => this.endWyrd(false) },
+      ],
+      { onCancel: () => this.wyrdStairs(), backRow: false },
+    );
+    this.openOverlay(
+      el('div', { className: 'panel dialog' }, [el('h2', { text: 'End today\'s weave?' }), el('p', { text: 'Going home ends today\'s try: the Wyrdweave opens again tomorrow.' }), menu.el]),
+      menu,
+    );
   }
 
   /** The run is over: home with what was won (half the threads after a fall). */

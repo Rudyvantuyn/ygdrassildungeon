@@ -24,6 +24,8 @@ import {
   netPrice,
   restAtInn,
   statDelta,
+  gearFor,
+  tradeInValue,
 } from '../core/town';
 import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, canSwitchRow, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow, oathCost, FOUNDING_OATHS, cleanName } from '../core/guild';
 import type { ClassId, Member, Stats } from '../core/types';
@@ -635,29 +637,110 @@ export class TownView {
     this.dialog('Items', [this.goldLine()], menu, true);
   }
 
+  /** Equipment: first pick whose gear to look at, so each list only holds what that adventurer can wear. */
   private shopEquipment(start = 0): void {
     const party = this.game.state.party;
-    const items: MenuItem[] = equipmentForSale(this.game).map((e, i) => {
-      const users = party.filter((m) => canEquip(m, e)).map((m) => m.name);
+    const special = equipmentForSale(this.game).filter((e) => e.requires);
+    const inProgress = specialGearInProgress(this.game);
+    const items: MenuItem[] = party.map((m, i) => {
+      const ups = gearFor(this.game, m).filter((o) => o.upgrade && o.gear.price - tradeInValue(m, o.gear.slot) <= this.game.state.gold).length;
+      const all = gearFor(this.game, m).filter((o) => o.upgrade).length;
       return {
-        label: e.requires ? `★ ${e.name}` : e.name,
-        detail: `${e.price} G`,
-        description: `${bonusText(e)} · ${e.slot} · for ${users.join(', ')}${e.requires ? ' · special' : ''}`,
-        onSelect: () => this.chooseWearer(e, i),
+        label: `${m.name} (${CLASSES[m.classId].name})`,
+        detail: all ? `${all} upgrade${all === 1 ? '' : 's'}` : '',
+        description: `Weapons and armour ${m.name} can wear, best first. Now: ${m.weapon ? EQUIPMENT[m.weapon].name : 'no weapon'}, ${m.armor ? EQUIPMENT[m.armor].name : 'no armour'}.${all ? ` ${ups} of the upgrades are within your gold.` : ''}`,
+        onSelect: () => this.shopFor(i, false, 0, () => this.shopEquipment(i)),
       };
     });
-    // Special gear Hilde has started on shows greyed out, with how much more she needs.
+    if (special.length || inProgress.length) {
+      items.push({
+        label: 'Special gear',
+        detail: `${special.length} ready`,
+        description: 'Gear Hilde forges from monster parts you sold her, and what she still needs for the next pieces.',
+        onSelect: () => this.shopSpecial(0, () => this.shopEquipment(party.length)),
+      });
+    }
+    items.push({ label: 'Back', onSelect: () => this.shop(1) });
+    const menu = new ListMenu(items, { onCancel: () => this.shop(1), startIndex: start });
+    this.dialog('Equipment', [npcSays('hilde', '"Who are we kitting out? I\'ll show you what fits them."'), this.goldLine()], menu, true);
+  }
+
+  /** The gear one adventurer can wear: upgrades first; older and weaker pieces only on request. */
+  private shopFor(index: number, showAll: boolean, start: number, back: () => void): void {
+    const m = this.game.state.party[index];
+    const offers = gearFor(this.game, m);
+    const shown = offers.filter((o) => showAll || o.upgrade || o.worn);
+    const hidden = offers.length - shown.length;
+    const items: MenuItem[] = shown.map((o, i) => {
+      const cost = netPrice(m, o.gear);
+      const delta = Object.entries(o.delta).map(([k, v]) => `${STAT_LABELS[k as keyof Stats]} ${v! > 0 ? '+' : ''}${v}`).join(', ');
+      return {
+        label: `${o.upgrade ? '▲ ' : ''}${o.gear.requires ? '★ ' : ''}${o.gear.name}`,
+        detail: o.worn ? 'worn' : `${cost} G`,
+        description: `${o.gear.slot === 'weapon' ? 'Weapon' : 'Armour'} · ${bonusText(o.gear)}${m[o.gear.slot] && !o.worn ? ` · against ${EQUIPMENT[m[o.gear.slot]!].name}: ${delta || 'no change'} (traded in for half price)` : ''}`,
+        disabled: o.worn || this.game.state.gold < cost,
+        onSelect: () => this.confirmGear(index, o.gear, () => this.shopFor(index, showAll, i, back)),
+      };
+    });
+    if (hidden > 0 || showAll) {
+      items.push({
+        label: showAll ? 'Only show upgrades' : `Show older gear (${hidden})`,
+        description: showAll ? 'Hide the pieces that are not better than what is worn now.' : 'Pieces that are not better than what is worn now.',
+        onSelect: () => this.shopFor(index, !showAll, 0, back),
+      });
+    }
+    items.push({ label: 'Back', onSelect: back });
+    const note = shown.length ? '▲ is better than what is worn now.' : `Nothing here beats what ${m.name} wears.`;
+    this.dialog(`For ${m.name} (${CLASSES[m.classId].name})`, [el('p', { text: note }), this.goldLine()], new ListMenu(items, { onCancel: back, startIndex: start }), true);
+  }
+
+  /** One last look before buying, so a quick double tap never spends gold by mistake. */
+  private confirmGear(index: number, e: EquipDef, back: () => void): void {
+    const m = this.game.state.party[index];
+    const cost = netPrice(m, e);
+    const items: MenuItem[] = [
+      {
+        label: `Buy for ${cost} G`,
+        disabled: this.game.state.gold < cost,
+        onSelect: () => {
+          if (!buyEquipment(this.game, e.id, index)) return this.host.toast('That did not work.');
+          audio.play('coin');
+          this.host.updateHud();
+          this.host.save();
+          this.host.toast(`${m.name} equips the ${e.name}.`);
+          back();
+        },
+      },
+      { label: 'Back', onSelect: back },
+    ];
+    const now = m[e.slot] ? EQUIPMENT[m[e.slot]!].name : 'nothing';
+    const delta = Object.entries(statDelta(m, e)).map(([k, v]) => `${STAT_LABELS[k as keyof Stats]} ${v! > 0 ? '+' : ''}${v}`).join(', ');
+    this.dialog(e.name, [el('p', { text: `${m.name} now wears ${now}. ${delta || 'No change'}.` }), this.goldLine()], new ListMenu(items, { onCancel: back }), true);
+  }
+
+  /** Special gear: ready pieces (for whoever can wear them) and the ones Hilde is still waiting on. */
+  private shopSpecial(start: number, back: () => void): void {
+    const items: MenuItem[] = equipmentForSale(this.game).filter((e) => e.requires).map((e, i) => {
+      const users = this.game.state.party.filter((m) => canEquip(m, e)).map((m) => m.name);
+      return {
+        label: `★ ${e.name}`,
+        detail: `${e.price} G`,
+        description: `${bonusText(e)} · ${e.slot === 'weapon' ? 'weapon' : 'armour'} · ${users.length ? `for ${users.join(', ')}` : 'no one in the party can wear this'}`,
+        disabled: !users.length,
+        onSelect: () => this.chooseWearer(e, () => this.shopSpecial(i, back)),
+      };
+    });
     for (const { gear, remaining } of specialGearInProgress(this.game)) {
       items.push({
         label: `☆ ${gear.name}`,
         detail: `${remaining} more ${MATERIALS[gear.requires!.material].name}`,
-        description: `${bonusText(gear)} · ${gear.slot} · Sell ${remaining} more ${MATERIALS[gear.requires!.material].name} and Hilde can forge it.`,
+        description: `${bonusText(gear)} · ${gear.slot === 'weapon' ? 'weapon' : 'armour'} · Sell ${remaining} more ${MATERIALS[gear.requires!.material].name} and Hilde can forge it.`,
         disabled: true,
         onSelect: () => {},
       });
     }
-    const menu = new ListMenu(items, { onCancel: () => this.shop(1), startIndex: start });
-    this.dialog('Equipment', [this.goldLine()], menu, true);
+    items.push({ label: 'Back', onSelect: back });
+    this.dialog('Special gear', [this.goldLine()], new ListMenu(items, { onCancel: back, startIndex: start }), true);
   }
 
   private shopSell(start = 0): void {
@@ -703,7 +786,7 @@ export class TownView {
     this.dialog(MATERIALS[id].name, [el('p', { text: MATERIALS[id].description })], menu);
   }
 
-  private chooseWearer(e: EquipDef, listIndex: number): void {
+  private chooseWearer(e: EquipDef, back: () => void): void {
     const party = this.game.state.party;
     const items: MenuItem[] = party.map((m, i) => {
       const fits = canEquip(m, e);
@@ -722,12 +805,14 @@ export class TownView {
           buyEquipment(this.game, e.id, i);
           audio.play('coin');
           this.host.updateHud();
+          this.host.save();
           this.host.toast(`${m.name} equips the ${e.name}.`);
-          this.shopEquipment(listIndex);
+          back();
         },
       };
     });
-    const menu = new ListMenu(items, { onCancel: () => this.shopEquipment(listIndex) });
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back });
     this.dialog(e.name, [el('p', { text: bonusText(e) }), this.goldLine()], menu, true);
   }
 
