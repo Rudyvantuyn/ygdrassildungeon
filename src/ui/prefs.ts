@@ -15,6 +15,9 @@ export interface Prefs {
   steadyLights: boolean;
   /** A plain, very readable font instead of the pixel font (whose numbers some players find hard to read). */
   clearFont: boolean;
+  /** Cosmetics (src/core/data/cosmetics.ts): the portrait frame and window theme picked, '' for none. */
+  frame: string;
+  uiTheme: string;
   /** Zoom step of the small map (0 shows the whole floor), see MAP_ZOOMS. */
   mapZoom: number;
   /** Zoom step of the full map. */
@@ -22,7 +25,7 @@ export interface Prefs {
 }
 
 const KEY = 'ygdrassil-prefs';
-const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false, calmTextures: false, moveMotion: 'smooth', steadyLights: false, clearFont: false, mapZoom: 0, bigMapZoom: 0 };
+const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false, calmTextures: false, moveMotion: 'smooth', steadyLights: false, clearFont: false, frame: '', uiTheme: '', mapZoom: 0, bigMapZoom: 0 };
 
 export const BATTLE_SPEED_NAMES: Record<BattleSpeed, string> = { 0: 'Slow', 1: 'Normal', 2: 'Fast', 3: 'Fastest' };
 export const TEXT_SPEED_NAMES: Record<TextSpeed, string> = { slow: 'Slow', normal: 'Normal', fast: 'Fast', instant: 'Instant' };

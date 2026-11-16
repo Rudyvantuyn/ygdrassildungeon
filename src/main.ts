@@ -4,6 +4,7 @@ import { audio } from './audio/audio';
 import { watchErrors } from './net/reports';
 import { App } from './ui/app';
 import { applyFont } from './ui/prefs';
+import { applyLooks, refreshOwned } from './ui/cosmetics';
 // Fonts are bundled with the game (SIL Open Font License), so no font service sees players' addresses.
 import '@fontsource/pixelify-sans/latin-400.css';
 import '@fontsource/pixelify-sans/latin-600.css';
@@ -20,6 +21,8 @@ import { readSave } from './ui/storage';
 function start(): void {
   const root = document.getElementById('app')!;
   applyFont();
+  applyLooks();
+  void refreshOwned();
   const app = new App(root);
   watchErrors(() => app.reportContext());
   // Visitor counts (Vercel Web Analytics: no cookies, no personal data; only on the live site).

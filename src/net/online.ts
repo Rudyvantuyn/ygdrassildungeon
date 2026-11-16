@@ -278,6 +278,35 @@ class Online {
     if (rows.length) await this.db.from('deeds').upsert(rows, { onConflict: 'user_id,deed_id', ignoreDuplicates: true });
   }
 
+  // ── Shop (cosmetics and donations, server/shop.ts) ─────────────────────────
+
+  /** The cosmetics this account owns (src/core/data/cosmetics.ts); empty when not signed in or unreachable. */
+  async entitlements(): Promise<string[]> {
+    if (!(await this.connected()) || !this.userId) return [];
+    const { data, error } = await this.db.from('entitlements').select('item').eq('user_id', this.userId);
+    if (error) return [];
+    return (data ?? []).map((r) => r.item as string);
+  }
+
+  /** Opens a Stripe payment page: a pack (signed in, not a guest) or a donation. Returns its address. */
+  async shopCheckout(body: { action: 'checkout'; pack: string } | { action: 'donate'; amount: number }): Promise<string> {
+    await this.init().catch(() => undefined);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json', apikey: SUPABASE_KEY };
+    if (this.client) {
+      const { data } = await this.db.auth.getSession();
+      if (data.session) headers.Authorization = `Bearer ${data.session.access_token}`;
+    }
+    let res: Response;
+    try {
+      res = await fetch(`${SUPABASE_URL}/functions/v1/shop`, { method: 'POST', headers, body: JSON.stringify(body) });
+    } catch {
+      throw new OnlineError('Could not reach the shop. Check your connection.');
+    }
+    const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!res.ok || !json.url) throw new OnlineError(json.error ?? 'Something went wrong.');
+    return json.url;
+  }
+
   /** `password`: makes the expedition private. */
   create(member: Member, startFloor: number, deepest: number, password?: string): Promise<ExpeditionRow> {
     return this.call({ op: 'create', player: this.playerName, member, startFloor, deepest, password });

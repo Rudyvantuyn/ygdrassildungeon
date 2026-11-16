@@ -3059,3 +3059,56 @@ body.clear-font {
   margin-bottom: 10px;
   box-shadow: 0 0 0 2px #000, 0 0 16px rgba(240, 207, 106, 0.3);
 }
+
+/* ══ Cosmetics (src/core/data/cosmetics.ts) ════════════════════════════════════
+ * Only looks: a frame around the adventurers' portraits and a theme for the windows. Bought or not, everyone plays
+ * by the same rules. Applied as body classes by src/ui/cosmetics.ts.
+ */
+body.frame-runeGold .member .portrait {
+  border: 3px solid #f0cf6a;
+  border-image: linear-gradient(135deg, #fff3b0, #f0cf6a 30%, #8a6418 50%, #f0cf6a 70%, #fff3b0) 1;
+  box-shadow: 0 0 0 2px #000, 0 0 12px rgba(240, 207, 106, 0.55);
+}
+body.frame-rootwork .member .portrait {
+  border: 3px solid #6a4a28;
+  border-image: repeating-linear-gradient(45deg, #4a321a 0 4px, #8a6a3a 4px 8px, #3d6b2a 8px 10px) 3;
+  box-shadow: 0 0 0 2px #000, 0 0 10px rgba(110, 170, 70, 0.35);
+}
+body.frame-rimeFrame .member .portrait {
+  border: 3px solid #a0e0ff;
+  border-image: linear-gradient(135deg, #ffffff, #a0e0ff 35%, #3a78b8 55%, #e0f8ff) 1;
+  box-shadow: 0 0 0 2px #000, 0 0 12px rgba(160, 224, 255, 0.55);
+}
+body.frame-emberFrame .member .portrait {
+  border: 3px solid #ff8a30;
+  border-image: linear-gradient(135deg, #ffd040, #ff6020 40%, #801000 60%, #ff9a30) 1;
+  box-shadow: 0 0 0 2px #000, 0 0 12px rgba(255, 120, 40, 0.55);
+}
+
+body.theme-birchbark {
+  --win: #3a2e22;
+  --win-dark: #2a2118;
+  --rim: #e8dcc0;
+  --rim-dark: #8a7458;
+  --select: #7a5a32;
+  --bg: #120d09;
+  --muted: #c2b29a;
+}
+body.theme-emberhall {
+  --win: #3a1414;
+  --win-dark: #260c0c;
+  --rim: #f0cf6a;
+  --rim-dark: #8a3a20;
+  --select: #8a2a1a;
+  --bg: #0c0505;
+  --muted: #c9a49a;
+}
+body.theme-fjordnight {
+  --win: #0f2a2a;
+  --win-dark: #081c1c;
+  --rim: #d0e8e4;
+  --rim-dark: #3a7068;
+  --select: #1f6a62;
+  --bg: #030909;
+  --muted: #9ab8b2;
+}

@@ -1,5 +1,5 @@
 /*
- * Clear digits inside the pixel font: the numbers 0–9 come from Atkinson Hyperlegible (bundled, SIL OFL), everything
+ * Clear digits inside the pixel font: the numbers 0–9 (and the euro sign, which the pixel font lacks) come from Atkinson Hyperlegible (bundled, SIL OFL), everything
  * else stays Pixelify Sans. Players mixed up the pixel font's 2, 5 and 8 (November 2026). Use it first in a font stack:
  * font-family: 'Ygg Digits', 'Pixelify Sans', monospace.
  */
@@ -9,7 +9,7 @@
   font-weight: 100 549;
   font-display: swap;
   src: url('../../node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-400-normal.woff2') format('woff2');
-  unicode-range: U+0030-0039;
+  unicode-range: U+0030-0039, U+20AC;
 }
 @font-face {
   font-family: 'Ygg Digits';
@@ -17,5 +17,5 @@
   font-weight: 550 900;
   font-display: swap;
   src: url('../../node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-700-normal.woff2') format('woff2');
-  unicode-range: U+0030-0039;
+  unicode-range: U+0030-0039, U+20AC;
 }

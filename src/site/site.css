@@ -227,3 +227,14 @@ button.btn { border: 0; cursor: pointer; font-size: 16px; }
 .shard.missing::marker { color: #3c4c58; }
 
 .memory-picture { display: block; width: 100%; max-height: 260px; object-fit: cover; image-rendering: pixelated; margin: 12px 0 4px; box-shadow: 0 0 0 2px #000, 0 0 16px rgba(240, 207, 106, 0.3); }
+
+/* Support page: packs and swatches */
+.packs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+.pack { background: var(--panel); padding: 18px 20px; box-shadow: inset 0 0 0 2px var(--rim), 0 0 0 2px #000; display: flex; flex-direction: column; gap: 8px; }
+.pack h3 { margin: 0; color: var(--gold); }
+.pack .btn { margin-top: auto; }
+.pack-items { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.pack-items li { display: flex; align-items: center; gap: 8px; }
+.swatch { width: 22px; height: 22px; display: inline-block; box-shadow: 0 0 0 2px #000; }
+.thanks { box-shadow: inset 0 0 0 2px var(--gold); }
+.btn[disabled] { opacity: 0.6; cursor: default; }

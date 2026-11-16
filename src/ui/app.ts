@@ -41,6 +41,8 @@ import { SideMapPen } from './sideMap';
 import { Designer, isMaker, loadDraft } from './designer';
 import { showMemories, showShardFound, shardsFound } from './memoriesView';
 import { DISCORD_URL } from './links';
+import { chooseLook, ownedCosmetics, refreshOwned } from './cosmetics';
+import { COSMETICS, PACKS, euros } from '../core/data/cosmetics';
 import { startEchoFight } from '../core/echoes';
 import { memberPicker, showSkillTree } from './skillsView';
 import { gatherPrompt } from './gatherView';
@@ -1901,6 +1903,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       ],
       options: [
         { label: 'Settings', description: 'Sound, speed, keys, map drawing and tips.', onSelect: () => this.settings(back) },
+        { label: 'Looks', description: 'Portrait frames and window themes: cosmetic only, they never change how the game plays.', onSelect: () => this.showLooks(back) },
         ...(coop || this.trial
           ? []
           : [
@@ -2348,6 +2351,49 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       menu,
     );
     this.noticeTip('fragments');
+  }
+
+  /** Cosmetics: pick a portrait frame and a window theme from what the account owns. */
+  private showLooks(back: () => void, start = 0): void {
+    const owned = ownedCosmetics();
+    const packOf = (id: string) => PACKS.find((p) => p.items.includes(id));
+    const option = (kind: 'frame' | 'theme', id: string, name: string, description: string): MenuItem => {
+      const chosen = (kind === 'frame' ? prefs.frame : prefs.uiTheme) === id;
+      const has = !id || owned.has(id);
+      const pack = packOf(id);
+      const self: MenuItem = {
+        label: name,
+        detail: chosen ? 'in use' : has ? undefined : pack ? `${pack.name}, ${euros(pack.price)}` : undefined,
+        description: has ? description : `${description} Part of the ${pack?.name ?? 'shop'}: see Get more looks.`,
+        disabled: !has,
+        onSelect: () => {
+          chooseLook(kind, id);
+          this.showLooks(back, items.indexOf(self));
+        },
+      };
+      return self;
+    };
+    const items: MenuItem[] = [];
+    items.push({ label: 'Portrait frames', disabled: true, onSelect: () => {} });
+    for (const [id, name, desc] of [['', 'No frame', 'The plain portrait.'] as const, ...COSMETICS.filter((c) => c.kind === 'frame').map((c) => [c.id, c.name, c.description] as const)]) items.push(option('frame', id, name, desc));
+    items.push({ label: 'Window themes', disabled: true, onSelect: () => {} });
+    for (const [id, name, desc] of [['', 'Nordic Night', 'The game\'s own deep-blue windows.'] as const, ...COSMETICS.filter((c) => c.kind === 'theme').map((c) => [c.id, c.name, c.description] as const)]) items.push(option('theme', id, name, desc));
+    items.push({
+      label: 'Get more looks',
+      description: 'The Supporter Pack and other packs, and a way to simply support the game (opens a new page). Cosmetic only.',
+      onSelect: () => window.open('support.html', '_blank', 'noopener'),
+    });
+    items.push({
+      label: 'Refresh what I own',
+      description: 'Bought something? Ask your account again (you need to be signed in).',
+      onSelect: () => void refreshOwned().then(() => this.showLooks(back, items.length - 2)),
+    });
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back, startIndex: Math.max(1, start) });
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    const supporter = owned.has('supporter') ? [el('p', { className: 'gold-line', text: '✦ Supporter: thank you for keeping the lanterns lit.' })] : [];
+    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Looks' }), ...supporter, menu.el, desc]), menu);
   }
 
   /** Every fragment found, to read again; the rest as ???. */

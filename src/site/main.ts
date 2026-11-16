@@ -3,6 +3,7 @@
  * Built from the game's own data, so names and pictures always match the game. The game itself lives at /play.
  */
 import { DISCORD_URL } from '../ui/links';
+import { COSMETIC_BY_ID, DONATIONS, PACK_BY_ID, PACKS, euros } from '../core/data/cosmetics';
 import '../render/roundRect';
 import { fullName } from '../core/sagas';
 import { FRAGMENTS } from '../core/data/fragments';
@@ -83,6 +84,7 @@ const NAV: [string, string][] = [
   ['classes', 'Classes'],
   ['bestiary', 'Bestiary'],
   ['devlog', 'Devlog'],
+  ['support', 'Support'],
 ];
 
 function header(): HTMLElement {
@@ -105,7 +107,7 @@ function footer(): HTMLElement {
   return h(
     'footer',
     { class: 'site-foot' },
-    h('p', {}, 'Ygdrassil is made by one person and a friend who writes the story, with art from photographers and pixel artists who share their work. ', h('a', { href: 'changelog.html' }, 'Changelog'), ' · ', h('a', { href: 'credits.html' }, 'Credits'), ' · ', h('a', { href: 'privacy.html' }, 'Privacy & terms'), ' · ', h('a', { href: 'https://rudy-van-tuijn.itch.io/ygdrassil' }, 'itch.io'), ' · ', h('a', { href: DISCORD_URL }, 'Discord')),
+    h('p', {}, 'Ygdrassil is made by one person and a friend who writes the story, with art from photographers and pixel artists who share their work. ', h('a', { href: 'changelog.html' }, 'Changelog'), ' · ', h('a', { href: 'credits.html' }, 'Credits'), ' · ', h('a', { href: 'privacy.html' }, 'Privacy & terms'), ' · ', h('a', { href: 'https://rudy-van-tuijn.itch.io/ygdrassil' }, 'itch.io'), ' · ', h('a', { href: DISCORD_URL }, 'Discord'), ' · ', h('a', { href: 'support.html' }, 'Support the game')),
     h('p', { class: 'small' }, 'Found a bug or have an idea? Use the Feedback button in the game (Menu, Options).'),
   );
 }
@@ -498,7 +500,95 @@ function wayfinder(): HTMLElement[] {
   return out;
 }
 
-const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog, changelog, wayfinder, memories: memoriesPage };
+/** Swatches that show what a cosmetic looks like, on the support page. */
+const SWATCH: Record<string, string> = {
+  runeGold: 'linear-gradient(135deg, #fff3b0, #f0cf6a 30%, #8a6418 50%, #f0cf6a 70%, #fff3b0)',
+  rootwork: 'repeating-linear-gradient(45deg, #4a321a 0 4px, #8a6a3a 4px 8px, #3d6b2a 8px 10px)',
+  rimeFrame: 'linear-gradient(135deg, #ffffff, #a0e0ff 35%, #3a78b8 55%, #e0f8ff)',
+  emberFrame: 'linear-gradient(135deg, #ffd040, #ff6020 40%, #801000 60%, #ff9a30)',
+  birchbark: 'linear-gradient(135deg, #3a2e22 50%, #e8dcc0 50%)',
+  emberhall: 'linear-gradient(135deg, #3a1414 50%, #f0cf6a 50%)',
+  fjordnight: 'linear-gradient(135deg, #0f2a2a 50%, #d0e8e4 50%)',
+  supporter: 'radial-gradient(circle, #f0cf6a 35%, #8a6418 70%)',
+};
+
+/** Support: a one-off gift, or a cosmetic pack kept with the account (paid through Stripe, server/shop.ts). */
+function supportPage(): HTMLElement[] {
+  const head = h('section', { class: 'page-head' }, h('h1', {}, 'Support Ygdrassil'), h('p', { class: 'tagline' }, 'Free to play, made by two people'));
+  const thanks = new URLSearchParams(location.search).get('thanks');
+  const out: HTMLElement[] = [head];
+  if (thanks)
+    out.push(
+      h('section', { class: 'block thanks' }, h('h2', {}, 'Thank you!'), h('p', {}, thanks === 'pack' ? 'Your pack is on its way to your account. In the game, open Options → Looks and choose Refresh what I own.' : 'Your support keeps the lanterns lit in the deep. It means a great deal.')),
+    );
+  const error = h('p', { class: 'form-error' });
+  const go = (body: Parameters<typeof online.shopCheckout>[0]) => async () => {
+    error.textContent = '';
+    try {
+      location.href = await online.shopCheckout(body);
+    } catch (e) {
+      error.textContent = (e as Error).message;
+    }
+  };
+  const donate = h('div', { class: 'cta' }, ...DONATIONS.map((amount) => {
+    const b = h('button', { class: 'btn' }, euros(amount));
+    b.addEventListener('click', () => void go({ action: 'donate', amount })());
+    return b;
+  }));
+  out.push(
+    section(
+      'A cup of coffee',
+      h('p', {}, 'Ygdrassil is free in your browser and will stay that way. If you enjoy it, a one-off gift helps pay for the servers, music and art, and gives us time to build the next chapter. Signed in, it also brings the Supporter badge.'),
+      donate,
+    ),
+  );
+  const owned = new Set<string>();
+  const cards = PACKS.map((p) => {
+    const button = h('button', { class: 'btn big' }, `Buy for ${euros(p.price)}`);
+    button.addEventListener('click', () => {
+      if (!me) {
+        error.textContent = 'Please sign in first (below), so the pack is kept with your account.';
+        return;
+      }
+      void go({ action: 'checkout', pack: p.id })();
+    });
+    const card = h(
+      'div',
+      { class: 'pack', 'data-pack': p.id },
+      h('h3', {}, p.name),
+      h('p', {}, p.description),
+      h('ul', { class: 'pack-items' }, ...p.items.map((id) => h('li', {}, h('span', { class: 'swatch', style: `background: ${SWATCH[id] ?? '#888'}` }), COSMETIC_BY_ID[id].name))),
+      button,
+    );
+    return card;
+  });
+  out.push(
+    section(
+      'Cosmetic packs',
+      h('p', {}, 'Frames for your adventurers\' portraits and new looks for the game\'s windows. Only looks: they never change how the game plays, and everyone plays by the same rules. Packs are kept with your account and work on every device you sign in on.'),
+      h('div', { class: 'packs' }, ...cards),
+      error,
+      me ? h('p', { class: 'small' }, `Signed in as ${me.name}.`) : signInBox(),
+      h('p', { class: 'small muted' }, 'Payments are handled by Stripe: we never see your card. Packs are digital and added to your account right away. See ', h('a', { href: 'privacy.html' }, 'Privacy & terms'), '.'),
+    ),
+  );
+  // Mark the packs this account already owns.
+  if (me)
+    void online.entitlements().then((items) => {
+      items.forEach((i) => owned.add(i));
+      for (const card of cards) {
+        const p = PACK_BY_ID[card.dataset.pack ?? ''];
+        if (p && p.items.every((i) => owned.has(i))) {
+          const b = card.querySelector('button')!;
+          b.textContent = 'Owned';
+          b.setAttribute('disabled', '');
+        }
+      }
+    });
+  return out;
+}
+
+const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog, changelog, wayfinder, memories: memoriesPage, support: supportPage };
 
 void (async () => {
   if (await leaveOldAddress()) return;
