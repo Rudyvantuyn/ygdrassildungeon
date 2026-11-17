@@ -34,6 +34,11 @@ export function sprite(path: string): HTMLImageElement | null {
   return null;
 }
 
+/** True when the picture at `path` could not be loaded at all (not while it is still loading). */
+export function spriteMissing(path: string): boolean {
+  return cache.get(path) === null;
+}
+
 /** Starts loading sprites ahead of time (e.g. the enemies of the floor being entered). */
 export function preload(paths: string[]): void {
   for (const path of paths) sprite(path);

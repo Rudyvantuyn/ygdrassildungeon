@@ -1633,6 +1633,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   // ── Combat ─────────────────────────────────────────────────────────────────
 
   startCombat(combat: Combat, driver: RoundDriver | null = null): void {
+    // Start loading the monsters' art at once (a fight can be with monsters this floor did not preload).
+    preload(combat.enemies.map((e) => `monsters/${e.def.id}.webp`));
     // A fight ends any story scene still on screen.
     if (this.story) {
       this.story.box.remove();

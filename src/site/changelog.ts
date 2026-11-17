@@ -19,6 +19,7 @@ export const CHANGES: ChangeDay[] = [
       'Fixed: climbing the stairs up and straight back down no longer counts as a Pacifist\'s Walk. It takes a whole floor walked from its way in without a won fight.',
       'Fixed (we hope): on some Firefox setups the dungeon walls could come out see-through. Pictures are now only drawn once fully loaded, and a texture that comes out empty is made again instead of kept.',
       'Changed: every square of the dungeon now looks a little different. Each wall shows its own part of the stone, and the floor and ceiling stay put in the world, so a step forward never shows the same picture again. (Thanks for the feedback on r/DRPG!)',
+      'Fixed: at the start of a fight a monster could show for a moment as an old drawn shape before its picture appeared. Now it simply appears once its picture is ready.',
     ],
   },
   {

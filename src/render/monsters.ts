@@ -1,6 +1,6 @@
 import type { EnemyDef } from '../core/data/enemies';
 import { shade } from './color';
-import { sprite } from './sprites';
+import { sprite, spriteMissing } from './sprites';
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -11,8 +11,8 @@ export function monsterSprite(def: EnemyDef): HTMLImageElement | null {
 
 /**
  * Draws a monster standing on (x, groundY). `u` is the base size in pixels;
- * `t` is time in ms for idle animation. Uses the painted sprite once it has
- * loaded, and the procedural shape until then.
+ * `t` is time in ms for idle animation. Uses the painted sprite; while it is still loading only the shadow shows
+ * (the old drawn shape only stands in when the sprite cannot be loaded at all).
  */
 export function drawMonster(ctx: Ctx, def: EnemyDef, x: number, groundY: number, u: number, t: number): void {
   const art = def.art;
@@ -25,6 +25,10 @@ export function drawMonster(ctx: Ctx, def: EnemyDef, x: number, groundY: number,
   ctx.ellipse(0, 0, s * 0.5, s * 0.1, 0, 0, Math.PI * 2);
   ctx.fill();
   const img = monsterSprite(def);
+  if (!img && !spriteMissing(`monsters/${def.id}.webp`)) {
+    ctx.restore();
+    return;
+  }
   if (img) {
     // Fit into a box about as tall as the shape would be, and not too wide.
     // Big bosses stay big, but always fit in the view (with room above for the name and arrow).
