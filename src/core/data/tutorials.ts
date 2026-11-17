@@ -308,6 +308,15 @@ export const TIPS: TipDef[] = [
     pages: ['Folk post their troubles here. Take a request, do it down below, and come back for the reward.'],
   },
   {
+    id: 'chapterHome',
+    title: 'The way home',
+    speaker: 'sigrid',
+    pages: [
+      'A new chapter! The wards at its start let no one in halfway, but they do know the way out.',
+      'Take the stairs up on this first floor and you can go straight home to Lindholm, without climbing back through the chapter before.',
+    ],
+  },
+  {
     id: 'photo',
     title: 'A picture for the saga',
     speaker: 'brynja',

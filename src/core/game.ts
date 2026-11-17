@@ -502,6 +502,19 @@ export class Game {
     this.enterFloor(this.state.floor + 1, true);
   }
 
+  /**
+   * On the first floor of a chapter (6, 11, 16, …) the stairs up can also take the party straight home: the gods' wards
+   * that let no one in halfway also know the way back out.
+   */
+  get canGoHomeHere(): boolean {
+    return this.floors === FLOORS && this.state.floor > 0 && this.state.floor % FLOORS_PER_CHAPTER === 0 && this.tileHere() === 'up';
+  }
+
+  /** From the stairs up at the start of a chapter, straight back to Lindholm. */
+  goHome(): void {
+    if (this.canGoHomeHere) this.returnToTown();
+  }
+
   /** Climb the stairs up: to the previous floor's stairs down, or out to town from the first floor. */
   ascend(): void {
     if (this.tileHere() !== 'up') return;

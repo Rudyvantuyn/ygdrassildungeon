@@ -6,7 +6,7 @@ import type { ChartMode } from '../core/chart';
 import type { Combat } from '../core/combat';
 import { ENEMIES } from '../core/data/enemies';
 import { FLOORS } from '../core/data/floors';
-import { CHAPTERS, chapterOf } from '../core/data/chapters';
+import { FLOORS_PER_CHAPTER, CHAPTERS, chapterOf } from '../core/data/chapters';
 import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
 import { ELEMENT_NAMES, elementIcon } from './elements';
 import { EQUIPMENT } from '../core/data/equipment';
@@ -788,6 +788,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       const queue = ['firstStep', ...this.tipQueue.splice(0)];
       if (def.prowlers.length) queue.push('prowler');
       if (this.game.state.floor >= 1 && !this.trial && !this.wyrd) queue.push('photo');
+      if (this.game.state.floor > 0 && this.game.state.floor % FLOORS_PER_CHAPTER === 0 && !this.trial && !this.wyrd) queue.push('chapterHome');
       if (def.boss && !this.game.progress.bossDefeated) queue.push('boss');
       this.tips(queue, () => {
         this.closeOverlay();
@@ -1558,6 +1559,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           return this.confirm('The way out', `Leave the Wyrdweave${threads ? ` with ${threads} Wyrd Thread${threads > 1 ? 's' : ''}` : ''}? Today's try is spent either way.`, () => this.endWyrd(false));
         }
         if (this.trial && this.game.state.floor === 0) return this.confirm('Stairs up', 'Stop the test and head back to the drafting table?', () => this.endTrial());
+        if (this.game.canGoHomeHere && !this.trial) return this.chapterStairsUp();
         const leaving = this.game.state.floor === 0;
         const text = leaving ? 'Leave the Rootdeep and return to Lindholm?' : `Climb up to ${this.game.floors[this.game.state.floor - 1].name}?`;
         this.confirm('Stairs up', text, () => {
@@ -2361,6 +2363,43 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       { onCancel: no },
     );
     this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: title }), el('p', { text }), menu.el]), menu);
+  }
+
+  /** The stairs up on the first floor of a chapter: home to Lindholm, or up to the end of the chapter before. */
+  private chapterStairsUp(): void {
+    const up = this.game.floors[this.game.state.floor - 1].name;
+    const back = () => this.resumeExplore();
+    const menu = new ListMenu(
+      [
+        {
+          label: 'Return to Lindholm',
+          description: 'The wards at the start of a chapter know the way home. Saves on arrival.',
+          onSelect: () => {
+            this.closeOverlay();
+            audio.play('stairs');
+            this.game.goHome();
+            this.save();
+            this.enterTown();
+            this.toast('Back in Lindholm. Game saved.');
+          },
+        },
+        {
+          label: `Climb up to ${up}`,
+          description: 'Up to the last floor of the chapter before.',
+          onSelect: () => {
+            this.closeOverlay();
+            audio.play('stairs');
+            this.game.ascend();
+            this.save();
+            this.resume();
+            this.toast(this.game.floorDef.name);
+          },
+        },
+        { label: 'Stay here', onSelect: back },
+      ],
+      { onCancel: back, backRow: false },
+    );
+    this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Stairs up' }), menu.el]), menu);
   }
 
   // ── Photo mode ─────────────────────────────────────────────────────────────

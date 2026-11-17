@@ -23,6 +23,7 @@ export const CHANGES: ChangeDay[] = [
       'New: footsteps on stone, left and right, with every step you take.',
       'New: a Step sway setting. On (the default), the view rises and dips a little with every step, like walking; Off keeps it level.',
       'Site: a press kit page with the facts, screenshots, GIFs, the trailer and logos to download.',
+      'New: on the first floor of every chapter, the stairs up can take you straight home to Lindholm (or up to the chapter before, as you choose).',
     ],
   },
   {

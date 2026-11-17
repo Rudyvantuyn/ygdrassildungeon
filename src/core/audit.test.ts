@@ -240,3 +240,23 @@ describe("the Pacifist's Walk", () => {
     expect(g.state.counters?.pacifist).toBe(1);
   });
 });
+
+describe('the way home from a chapter', () => {
+  it('the stairs up on the first floor of a chapter can lead straight home, nowhere else', async () => {
+    const { Game } = await import('./game');
+    const g = Game.newGame(4);
+    const stand = (tile: string) => {
+      const i = g.map.tiles.indexOf(tile as never);
+      g.state.x = i % g.map.width;
+      g.state.y = Math.floor(i / g.map.width);
+    };
+    g.enterFloor(6, true);
+    stand('up');
+    expect(g.canGoHomeHere).toBe(false);
+    g.enterFloor(5, true);
+    stand('up');
+    expect(g.canGoHomeHere).toBe(true);
+    g.goHome();
+    expect(g.state.location).toBe('town');
+  });
+});
