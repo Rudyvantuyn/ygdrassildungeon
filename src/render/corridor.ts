@@ -200,12 +200,15 @@ export class CorridorRenderer {
     const tex = this.textureSet(pal);
 
     if (tex) {
-      const key = `${pal.textures}|${pal.grade ?? ''}|${pal.fog}|${prefs.calmTextures}`;
+      // Floor and ceiling are anchored in the world, so every step shows them moved on (not the same picture again).
+      const along = [-py, px, py, -px][dir];
+      const lat = [px, py, -px, -py][dir];
+      const key = `${pal.textures}|${pal.grade ?? ''}|${pal.fog}|${prefs.calmTextures}|${mod(along, PLANE_CELLS * 2)}|${mod(lat, PLANE_CELLS * 2)}`;
       if (this.planeCache?.key !== key) {
         const canvas = this.planeCache?.canvas ?? document.createElement('canvas');
         canvas.width = w;
         canvas.height = h;
-        this.planes(canvas.getContext('2d')!, tex, pal);
+        this.planes(canvas.getContext('2d')!, tex, pal, along, lat);
         this.planeCache = { key, canvas };
       }
       ctx.drawImage(this.planeCache.canvas, 0, 0);
@@ -265,9 +268,11 @@ export class CorridorRenderer {
         const tile = tileAt(game.map, cell.x, cell.y);
         if (tile === 'wall') {
           if (tex) {
-            if (d >= 1) this.paintedFront(tex, s, d, pal);
-            if (s < 0) this.paintedSide(tex, s + 0.5, d, pal, -1);
-            if (s > 0) this.paintedSide(tex, s - 0.5, d, pal, 1);
+            // Each face of each wall shows its own part of the stone (the face toward the party: front, or the
+            // side facing the corridor), so no two squares look alike.
+            if (d >= 1) this.paintedFront(tex, s, d, pal, faceShift(cell.x, cell.y, (dir + 2) % 4));
+            if (s < 0) this.paintedSide(tex, s + 0.5, d, pal, -1, faceShift(cell.x, cell.y, (dir + 1) % 4));
+            if (s > 0) this.paintedSide(tex, s - 0.5, d, pal, 1, faceShift(cell.x, cell.y, (dir + 3) % 4));
           } else {
             if (d >= 1) this.wallFront(s, d, pal, cell.x, cell.y);
             if (s < 0) this.wallSide(s + 0.5, d, pal, cell.x, cell.y, -1);
@@ -393,7 +398,7 @@ export class CorridorRenderer {
    * Floor and ceiling as two continuous planes, drawn row by row with a repeating
    * pattern (one texture tile per cell), then darkened into the fog towards the horizon.
    */
-  private planes(ctx: CanvasRenderingContext2D, tex: TextureSet, pal: Palette): void {
+  private planes(ctx: CanvasRenderingContext2D, tex: TextureSet, pal: Palette, along: number, lat: number): void {
     const { w, h, cx, cy, sx, sy } = this;
     const T = tex.size;
     const far = MAX_DEPTH + 1 + EYE;
@@ -406,9 +411,10 @@ export class CorridorRenderer {
         const mid = y + (sign * ROW) / 2;
         const dist = (0.5 * sy) / Math.abs(mid - cy); // distance from the eye
         const z = dist - EYE;
-        const k = sx / (dist * T); // screen pixels per texture pixel at this depth
-        const v = ((z % 1) + 1) % 1;
-        pattern.setTransform(new DOMMatrix([k, 0, 0, k, cx - 0.5 * T * k, mid - v * T * k]));
+        // One texture covers PLANE_CELLS squares and lies still in the world, so a step moves it along.
+        const k = (PLANE_CELLS * sx) / (dist * T); // screen pixels per texture pixel at this depth
+        const v = mod((along + z) / PLANE_CELLS, 1);
+        pattern.setTransform(new DOMMatrix([k, 0, 0, k, cx - ((lat + 0.5) * sx) / dist, mid - v * T * k]));
         ctx.fillStyle = pattern;
         ctx.fillRect(0, sign > 0 ? y : y - ROW, w, ROW + 0.5);
       }
@@ -425,12 +431,18 @@ export class CorridorRenderer {
     }
   }
 
-  private paintedFront(tex: TextureSet, s: number, d: number, pal: Palette): void {
+  private paintedFront(tex: TextureSet, s: number, d: number, pal: Palette, shift: number): void {
     const ctx = this.ctx;
     const [x0, y0] = this.project([s - 0.5, -0.5, d]);
     const [x1, y1] = this.project([s + 0.5, 0.5, d]);
     if (x1 < 0 || x0 > this.w) return;
-    ctx.drawImage(this.wallFor(tex, y1 - y0), x0, y0, x1 - x0, y1 - y0);
+    // The texture starts `shift` of the way across and wraps round (the stone tiles seamlessly).
+    const img = this.wallFor(tex, y1 - y0);
+    const T = img.width;
+    const cut = Math.max(1, Math.min(T - 1, Math.round(shift * T)));
+    const xm = x0 + ((T - cut) / T) * (x1 - x0);
+    ctx.drawImage(img, cut, 0, T - cut, T, x0, y0, xm - x0 + 0.5, y1 - y0);
+    ctx.drawImage(img, 0, 0, cut, T, xm, y0, x1 - xm, y1 - y0);
     ctx.fillStyle = withAlpha(pal.fog, 0.1 + 0.9 * this.fog(d));
     ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
     ctx.strokeStyle = 'rgba(0,0,0,0.45)';
@@ -439,7 +451,7 @@ export class CorridorRenderer {
   }
 
   /** A side face at lateral x spanning depth d..d+1, in vertical slices so the texture follows the perspective. */
-  private paintedSide(tex: TextureSet, x: number, d: number, pal: Palette, side: number): void {
+  private paintedSide(tex: TextureSet, x: number, d: number, pal: Palette, side: number, shift: number): void {
     const { ctx, cx, cy, sx, sy } = this;
     const zNear = Math.max(d, Z_CLIP);
     const xa = cx + (x * sx) / (zNear + EYE);
@@ -460,7 +472,7 @@ export class CorridorRenderer {
       const img = this.wallFor(tex, half * 2);
       const T = img.width;
       // Left walls run front-to-back from the right edge of the texture, so it is never mirrored.
-      const tx = (side < 0 ? 1 - u : u) * T;
+      const tx = mod((side < 0 ? 1 - u : u) + shift, 1) * T;
       ctx.drawImage(img, Math.min(T - 1, tx), 0, 1, T, sxp, cy - half, STRIP + 0.6, half * 2);
     }
     // Shade: side walls are a little darker, and fade into the fog with depth.
@@ -1473,4 +1485,19 @@ function isEmpty(source: CanvasImageSource): boolean {
   } catch {
     return false;
   }
+}
+
+/** How many squares one floor or ceiling texture covers: not a whole number, so a step never shows the same floor. */
+const PLANE_CELLS = 1.5;
+
+function mod(a: number, n: number): number {
+  return ((a % n) + n) % n;
+}
+
+/** Where the stone of one wall face starts (0–1), the same every time that face is seen. */
+function faceShift(x: number, y: number, side: number): number {
+  let h = (x * 374761393 + y * 668265263 + side * 2147483647) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  h ^= h >>> 16;
+  return ((h >>> 0) % 1000) / 1000;
 }
