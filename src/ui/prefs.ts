@@ -11,6 +11,8 @@ export interface Prefs {
   calmTextures: boolean;
   /** How the view moves on a step or turn: a short glide (smooth) or a quick fade. */
   moveMotion: 'smooth' | 'fade';
+  /** The view rises and dips a little with every step (off for players who feel unwell from it). */
+  stepSway: boolean;
   /** Every light in the dungeon holds still (no flicker or pulse), for players who find it disorienting. */
   steadyLights: boolean;
   /** A plain, very readable font instead of the pixel font (whose numbers some players find hard to read). */
@@ -25,7 +27,7 @@ export interface Prefs {
 }
 
 const KEY = 'ygdrassil-prefs';
-const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false, calmTextures: false, moveMotion: 'smooth', steadyLights: false, clearFont: false, frame: '', uiTheme: '', mapZoom: 0, bigMapZoom: 0 };
+const DEFAULTS: Prefs = { battleSpeed: 1, textSpeed: 'normal', strafeKeys: false, calmTextures: false, moveMotion: 'smooth', stepSway: true, steadyLights: false, clearFont: false, frame: '', uiTheme: '', mapZoom: 0, bigMapZoom: 0 };
 
 export const BATTLE_SPEED_NAMES: Record<BattleSpeed, string> = { 0: 'Slow', 1: 'Normal', 2: 'Fast', 3: 'Fastest' };
 export const TEXT_SPEED_NAMES: Record<TextSpeed, string> = { slow: 'Slow', normal: 'Normal', fast: 'Fast', instant: 'Instant' };

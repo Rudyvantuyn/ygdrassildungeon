@@ -134,7 +134,7 @@ export function canSharePhoto(blob: Blob, name: string): boolean {
 
 export async function sharePhoto(blob: Blob, name: string): Promise<void> {
   try {
-    await navigator.share({ files: [new File([blob], name, { type: 'image/png' })], text: 'Ygdrassil · https://www.ygdrassilgame.com/play' });
+    await navigator.share({ files: [new File([blob], name, { type: 'image/png' })], text: 'Ygdrassil · https://www.ygdrassilgame.com/play?utm_source=photo' });
   } catch {
     // Cancelled.
   }

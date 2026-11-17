@@ -177,7 +177,7 @@ describe('sharing a Wyrdweave run', () => {
     expect(lines[2].startsWith('🟩 II · ')).toBe(true);
     expect(lines[3].startsWith('🟥 III · ')).toBe(true);
     expect(lines[4]).toBe('🧵 1 Wyrd Thread (fell)');
-    expect(lines[5]).toBe('https://www.ygdrassilgame.com/play');
+    expect(lines[5]).toBe('https://www.ygdrassilgame.com/play?utm_source=wyrdweave');
     for (const [i, rule] of wyrdDay(day).rules.entries()) expect(lines[i + 1]).toContain(rule.name);
   });
 

@@ -108,7 +108,7 @@ function footer(): HTMLElement {
   return h(
     'footer',
     { class: 'site-foot' },
-    h('p', {}, 'Ygdrassil is made by one person and a friend who writes the story, with art from photographers and pixel artists who share their work. ', h('a', { href: 'changelog.html' }, 'Changelog'), ' · ', h('a', { href: 'credits.html' }, 'Credits'), ' · ', h('a', { href: 'privacy.html' }, 'Privacy & terms'), ' · ', h('a', { href: 'https://rudy-van-tuijn.itch.io/ygdrassil' }, 'itch.io'), ' · ', h('a', { href: DISCORD_URL }, 'Discord'), ...(STEAM_URL ? [' · ', h('a', { href: STEAM_URL }, 'Steam')] : []), ' · ', h('a', { href: 'support.html' }, 'Support the game')),
+    h('p', {}, 'Ygdrassil is made by one person and a friend who writes the story, with art from photographers and pixel artists who share their work. ', h('a', { href: 'changelog.html' }, 'Changelog'), ' · ', h('a', { href: 'press.html' }, 'Press kit'), ' · ', h('a', { href: 'credits.html' }, 'Credits'), ' · ', h('a', { href: 'privacy.html' }, 'Privacy & terms'), ' · ', h('a', { href: 'https://rudy-van-tuijn.itch.io/ygdrassil' }, 'itch.io'), ' · ', h('a', { href: DISCORD_URL }, 'Discord'), ...(STEAM_URL ? [' · ', h('a', { href: STEAM_URL }, 'Steam')] : []), ' · ', h('a', { href: 'support.html' }, 'Support the game')),
     h('p', { class: 'small' }, 'Found a bug or have an idea? Use the Feedback button in the game (Menu, Options).'),
   );
 }
@@ -393,6 +393,95 @@ function changelog(): HTMLElement[] {
   ];
 }
 
+// ── Press ────────────────────────────────────────────────────────────────────
+
+/** A press kit: the facts, a short description, and every picture, GIF and video to download. */
+function pressPage(): HTMLElement[] {
+  const file = (path: string, label: string) => h('a', { href: `press/${path}`, download: '' }, label);
+  const shot = (path: string, alt: string) =>
+    h('a', { class: 'feature press-shot', href: `press/${path}`, target: '_blank', rel: 'noopener' }, h('img', { src: `press/${path}`, alt, loading: 'lazy' }), h('p', {}, alt));
+  const row = (k: string, ...v: Child[]) => h('tr', {}, h('th', {}, k), h('td', {}, ...v));
+  return [
+    h('section', { class: 'page-head' }, h('h1', {}, 'Press kit'), h('p', { class: 'tagline' }, 'Everything you need to write or make a video about Ygdrassil')),
+    section(
+      'Factsheet',
+      h(
+        'table',
+        { class: 'facts' },
+        row('Title', 'Ygdrassil'),
+        row('Developer', 'Rudy (solo developer), with the story written by his friend Thijs'),
+        row('Genre', 'First-person, grid-based dungeon crawler (party RPG)'),
+        row('Platform', 'Web browser, desktop and phone. A Steam version is planned.'),
+        row('Price', 'Free to play. Optional cosmetic packs and donations: looks only, never anything that changes the game.'),
+        row('Status', 'Early access, updated several times a week'),
+        row('Content', `${GAME_CHAPTERS.length} chapters, ${GAME_CHAPTERS.length * 5} floors, co-op expeditions for up to five players`),
+        row('Website', h('a', { href: 'https://www.ygdrassilgame.com' }, 'www.ygdrassilgame.com')),
+        row('Play', h('a', { href: 'play.html' }, 'www.ygdrassilgame.com/play'), ' (no download, no account needed)'),
+        row('Contact', h('a', { href: DISCORD_URL }, 'Discord'), ', or the Feedback button in the game (Menu, Options)'),
+      ),
+    ),
+    section(
+      'About the game',
+      prose(`The world was built from the frost giant Ymir, and the road down runs through his bones. **Ygdrassil** is a first-person, grid-based dungeon crawler in the tradition of the classics: lead a party of five down the roots of the Great Tree, chapter by chapter, from a forest of roots to the gap of ice and fire the world was made over.
+
+- **Map it yourself.** Draw walls, marks and notes on graph paper as you go, or let the map help you or draw itself.
+- **A party of five** from eight classes, each with a skill tree. Some secret classes only come once a hidden deed is done.
+- **Prowlers:** visible monsters that roam the deeper floors. Avoid them, or train until you can face them.
+- **A guardian at the end of every chapter**, and a story with choices that the later chapters remember.
+- **The Wyrdweave:** a daily run of three floors, each with its own rule, the same for every player.
+- **Co-op expeditions:** each player brings one of their own adventurers into a shared party.
+- **No game over:** a fallen party is carried home, minus half of what it found on that descent.
+
+**Art:** monsters and adventurers are CC0 pixel art (Dungeon Crawl Stone Soup), places and dungeon walls are real photographs run through a shared pixel palette. The portraits of the villagers in town are AI-made.`),
+      h('p', {}, 'Every artist and photographer is listed on the ', h('a', { href: 'credits.html' }, 'credits page'), '.'),
+    ),
+    section(
+      'Trailer',
+      h('video', { class: 'press-video', src: 'press/ygdrassil-trailer.mp4', poster: 'press/key-art-1024x768.png', controls: '', preload: 'metadata', playsinline: '' }),
+      h('p', {}, file('ygdrassil-trailer.mp4', 'Download the trailer (MP4, 1280×720, 1 minute)')),
+    ),
+    section(
+      'Screenshots',
+      h('p', { class: 'muted' }, 'Click a picture for the full size (1920×1080).'),
+      h(
+        'div',
+        { class: 'features' },
+        shot('screenshot-map.jpg', 'Drawing the map in the first chapter'),
+        shot('screenshot-fight.jpg', 'A fight: front row and back row'),
+        shot('screenshot-founding.jpg', 'Swearing in the party of five'),
+        shot('screenshot-drowned-roots.jpg', 'Chapter II: the drowned roots'),
+        shot('screenshot-ymirs-bones.jpg', "Chapter III: Ymir's bones"),
+        shot('screenshot-ginnungagap.jpg', 'Chapter V: Ginnungagap'),
+        shot('screenshot-guardian.jpg', 'A chapter guardian'),
+        shot('screenshot-lindholm.jpg', 'Lindholm, the town above the roots'),
+      ),
+    ),
+    section(
+      'GIFs',
+      h(
+        'div',
+        { class: 'features' },
+        shot('ygdrassil-founding.gif', 'Founding the party'),
+        shot('ygdrassil-fight.gif', 'A fight'),
+        shot('ygdrassil-prowler.gif', 'A prowler'),
+        shot('ygdrassil-guardian.gif', 'A guardian fight'),
+      ),
+    ),
+    section(
+      'Logos and key art',
+      h(
+        'ul',
+        {},
+        h('li', {}, file('logo-transparent.png', 'Logo, transparent background (PNG, 1280×720)')),
+        h('li', {}, file('key-art-1024x768.png', 'Key art with logo (PNG, 1024×768)')),
+        h('li', {}, file('header-920x430.png', 'Header with logo (PNG, 920×430)')),
+        h('li', {}, file('icon-256.png', 'Icon (PNG, 256×256)')),
+      ),
+      h('p', { class: 'muted' }, 'Feel free to use any of these in articles and videos about Ygdrassil.'),
+    ),
+  ];
+}
+
 // ── My Wayfinder ─────────────────────────────────────────────────────────────
 
 function medalCard(id: string, e: EarnedDeed): HTMLElement | null {
@@ -593,7 +682,7 @@ function supportPage(): HTMLElement[] {
   return out;
 }
 
-const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog, changelog, wayfinder, memories: memoriesPage, support: supportPage };
+const PAGES: Record<string, () => HTMLElement[]> = { index: home, world, classes, bestiary, devlog, changelog, wayfinder, memories: memoriesPage, support: supportPage, press: pressPage };
 
 void (async () => {
   if (await leaveOldAddress()) return;

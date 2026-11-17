@@ -30,6 +30,8 @@ interface Track {
 }
 
 export class AudioEngine {
+  /** Which foot the last step was on (they sound a little different). */
+  private foot = false;
   private ctx: AudioContext | null = null;
   private master!: GainNode;
   private musicBus!: GainNode;
@@ -92,9 +94,15 @@ export class AudioEngine {
     const t = ctx.currentTime + 0.005;
     const out = this.sfxBus;
     switch (name) {
-      case 'step':
-        this.noiseHit(t, 0.07, 'lowpass', 420, 0.35, out);
+      case 'step': {
+        // A footfall on stone: a soft thud, grit under the boot, and left and right feet a little apart.
+        this.foot = !this.foot;
+        const pitch = (this.foot ? 1 : 0.88) * (0.95 + Math.random() * 0.1);
+        this.tone(t, 'sine', 120 * pitch, 55 * pitch, 0.11, 0.22, out);
+        this.noiseHit(t, 0.08, 'lowpass', 700 * pitch, 0.3, out);
+        this.noiseHit(t + 0.012, 0.04, 'highpass', 2600, 0.05, out);
         break;
+      }
       case 'turn':
         this.noiseSweep(t, 0.12, 900, 2600, 0.12, out);
         break;

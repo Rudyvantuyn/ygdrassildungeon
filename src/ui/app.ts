@@ -424,6 +424,16 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         ctx.globalAlpha = alpha;
         ctx.drawImage(img, (w - w * scale) / 2, (h - h * scale) / 2, w * scale, h * scale);
       };
+      // A step rises and dips a little, like walking (Settings, Step sway): the whole view moves up and back, a
+      // touch enlarged so no edge ever shows.
+      if (prefs.stepSway) {
+        const lift = Math.sin(Math.PI * k);
+        const grow = 1 + 0.032 * lift;
+        ctx.translate(w / 2, h / 2 - lift * h * 0.014);
+        ctx.scale(grow, grow);
+        ctx.translate(-w / 2, -h / 2);
+        ctx.drawImage(this.current, 0, 0);
+      }
       if (forward > 0) {
         zoomed(this.before, 1 + 0.35 * ease, 1 - ease);
       } else {
@@ -2181,6 +2191,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       setPref('clearFont', v === 'clear');
       applyFont();
     });
+    const sway = choices<'on' | 'off'>([['on', 'On'], ['off', 'Off']], () => (prefs.stepSway ? 'on' : 'off'), (v) => setPref('stepSway', v === 'on'));
     const lights = choices<'living' | 'steady'>([['living', 'Living'], ['steady', 'Steady']], () => (prefs.steadyLights ? 'steady' : 'living'), (v) => setPref('steadyLights', v === 'steady'));
     const look = choices<'detailed' | 'calm'>([['detailed', 'Detailed'], ['calm', 'Calm']], () => (prefs.calmTextures ? 'calm' : 'detailed'), (v) => setPref('calmTextures', v === 'calm'));
     const chart = choices<ChartMode>(
@@ -2199,6 +2210,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       { label: 'Dungeon look', description: 'Detailed: walls and floors as painted. Calm: softer, with less contrast and grain, if the dungeon feels busy or makes you dizzy.', control: look.control, onAdjust: look.onAdjust, onSelect: look.cycle },
       { label: 'Font', description: 'Pixel: the game\'s own pixel font. Clear: a plain font made to be easy to read, with numbers that cannot be mixed up.', control: font.control, onAdjust: font.onAdjust, onSelect: font.cycle },
       { label: 'Lights', description: 'Living: torches flicker and glows pulse softly. Steady: every light in the dungeon holds still, if the flicker distracts you or makes you dizzy.', control: lights.control, onAdjust: lights.onAdjust, onSelect: lights.cycle },
+      { label: 'Step sway', description: 'On: the view rises and dips a little with every step, like walking. Off: it glides level, if the movement makes you feel unwell.', control: sway.control, onAdjust: sway.onAdjust, onSelect: sway.cycle },
       { label: 'Walking', description: 'Glide: the view pans when you turn and moves when you step, so you keep your bearings. Quick: a short fade, for fast walkers.', control: motion.control, onAdjust: motion.onAdjust, onSelect: motion.cycle },
       { label: 'A / D keys', description: 'Turn: A and D turn, Q and E side-step. Side-step: the other way round. The arrow keys always turn.', control: keys.control, onAdjust: keys.onAdjust, onSelect: keys.cycle },
       ...(solo

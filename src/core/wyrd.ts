@@ -350,6 +350,6 @@ export function wyrdShareText(day: number, cleared: number, fell: boolean, threa
     `Ygdrassil · Wyrdweave ${date} · ${weave.name}`,
     ...floors,
     `🧵 ${threads} Wyrd Thread${threads === 1 ? '' : 's'}${fell ? ' (fell)' : cleared === 3 ? ' (all three floors)' : ''}`,
-    'https://www.ygdrassilgame.com/play',
+    'https://www.ygdrassilgame.com/play?utm_source=wyrdweave',
   ].join('\n');
 }
