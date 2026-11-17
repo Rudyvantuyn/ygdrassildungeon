@@ -2,7 +2,7 @@
  * The website around the game (www.ygdrassilgame.com): the front page, the world, classes, bestiary and devlog.
  * Built from the game's own data, so names and pictures always match the game. The game itself lives at /play.
  */
-import { DISCORD_URL } from '../ui/links';
+import { DISCORD_URL, STEAM_URL } from '../ui/links';
 import { COSMETIC_BY_ID, DONATIONS, PACK_BY_ID, PACKS, euros } from '../core/data/cosmetics';
 import '../render/roundRect';
 import { fullName } from '../core/sagas';
@@ -98,6 +98,7 @@ function header(): HTMLElement {
       ...NAV.map(([p, label]) => h('a', { href: `${p}.html`, class: p === page || (p === 'devlog' && page === 'changelog') ? 'on' : '' }, label)),
       h('a', { href: 'wayfinder.html', class: `account ${page === 'wayfinder' || page === 'memories' ? 'on' : ''}` }, me ? me.name : 'Sign in'),
       h('a', { href: DISCORD_URL, target: '_blank', rel: 'noopener' }, 'Discord'),
+      ...(STEAM_URL ? [h('a', { href: STEAM_URL, target: '_blank', rel: 'noopener' }, 'Steam')] : []),
       h('a', { class: 'btn play', href: 'play.html' }, 'Play'),
     ),
   );
@@ -107,7 +108,7 @@ function footer(): HTMLElement {
   return h(
     'footer',
     { class: 'site-foot' },
-    h('p', {}, 'Ygdrassil is made by one person and a friend who writes the story, with art from photographers and pixel artists who share their work. ', h('a', { href: 'changelog.html' }, 'Changelog'), ' · ', h('a', { href: 'credits.html' }, 'Credits'), ' · ', h('a', { href: 'privacy.html' }, 'Privacy & terms'), ' · ', h('a', { href: 'https://rudy-van-tuijn.itch.io/ygdrassil' }, 'itch.io'), ' · ', h('a', { href: DISCORD_URL }, 'Discord'), ' · ', h('a', { href: 'support.html' }, 'Support the game')),
+    h('p', {}, 'Ygdrassil is made by one person and a friend who writes the story, with art from photographers and pixel artists who share their work. ', h('a', { href: 'changelog.html' }, 'Changelog'), ' · ', h('a', { href: 'credits.html' }, 'Credits'), ' · ', h('a', { href: 'privacy.html' }, 'Privacy & terms'), ' · ', h('a', { href: 'https://rudy-van-tuijn.itch.io/ygdrassil' }, 'itch.io'), ' · ', h('a', { href: DISCORD_URL }, 'Discord'), ...(STEAM_URL ? [' · ', h('a', { href: STEAM_URL }, 'Steam')] : []), ' · ', h('a', { href: 'support.html' }, 'Support the game')),
     h('p', { class: 'small' }, 'Found a bug or have an idea? Use the Feedback button in the game (Menu, Options).'),
   );
 }
@@ -161,7 +162,7 @@ function home(): HTMLElement[] {
     h(
       'section',
       { class: 'hero' },
-      h('div', { class: 'hero-inner' }, h('h1', {}, 'YGDRASSIL'), h('p', { class: 'tagline' }, 'The road to Asgard runs through Ymir'), h('p', { class: 'pitch' }, 'A first-person dungeon crawler beneath the Great Tree. Found your party, map the deep yourself, and decide whose side Midgard is on.'), h('div', { class: 'cta' }, h('a', { class: 'btn big', href: 'play.html' }, 'Play now in your browser'), h('a', { class: 'btn ghost', href: 'world.html' }, 'Read the lore'), h('a', { class: 'btn ghost', href: DISCORD_URL, target: '_blank', rel: 'noopener' }, 'Join the Discord')), h('p', { class: 'small' }, 'Free early playtest · Chapters I–VI · PC and phone')),
+      h('div', { class: 'hero-inner' }, h('h1', {}, 'YGDRASSIL'), h('p', { class: 'tagline' }, 'The road to Asgard runs through Ymir'), h('p', { class: 'pitch' }, 'A first-person dungeon crawler beneath the Great Tree. Found your party, map the deep yourself, and decide whose side Midgard is on.'), h('div', { class: 'cta' }, h('a', { class: 'btn big', href: 'play.html' }, 'Play now in your browser'), ...(STEAM_URL ? [h('a', { class: 'btn big', href: STEAM_URL, target: '_blank', rel: 'noopener' }, 'Wishlist on Steam')] : []), h('a', { class: 'btn ghost', href: 'world.html' }, 'Read the lore'), h('a', { class: 'btn ghost', href: DISCORD_URL, target: '_blank', rel: 'noopener' }, 'Join the Discord')), h('p', { class: 'small' }, 'Free early playtest · Chapters I–VI · PC and phone')),
     ),
     section(
       'Descend into the Rootdeep',

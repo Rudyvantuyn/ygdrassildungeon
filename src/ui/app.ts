@@ -40,7 +40,7 @@ import { MapEditor } from './mapEditor';
 import { SideMapPen } from './sideMap';
 import { Designer, isMaker, loadDraft } from './designer';
 import { showMemories, showShardFound, shardsFound } from './memoriesView';
-import { DISCORD_URL } from './links';
+import { DISCORD_URL, STEAM_URL } from './links';
 import { chooseLook, ownedCosmetics, refreshOwned } from './cosmetics';
 import { COSMETICS, PACKS, euros } from '../core/data/cosmetics';
 import { startEchoFight } from '../core/echoes';
@@ -575,6 +575,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         { label: 'How to Play', onSelect: () => this.showHelp(() => this.showTitle()) },
         { label: 'Settings', onSelect: () => this.settings(() => this.showTitle()) },
         { label: 'Feedback', onSelect: () => this.showFeedback(() => this.showTitle()) },
+        ...(STEAM_URL ? [{ label: 'Wishlist on Steam', onSelect: () => window.open(STEAM_URL, '_blank', 'noopener') }] : []),
         { label: 'Discord', onSelect: () => window.open(DISCORD_URL, '_blank', 'noopener') },
         { label: 'Privacy & Terms', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
         { label: 'Credits', onSelect: () => window.open('credits.html', '_blank', 'noopener') },
@@ -1933,6 +1934,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             ]),
         { label: 'Help', description: 'Controls and how to play.', onSelect: () => this.showHelp(back) },
         ...(coop ? [] : [{ label: 'Feedback', description: 'Report a bug or share an idea with the makers.', onSelect: () => this.showFeedback(back) }]),
+        ...(STEAM_URL ? [{ label: 'Wishlist on Steam', description: 'Put Ygdrassil on your Steam wishlist: it helps the game more than you would think (opens a new page).', onSelect: () => window.open(STEAM_URL, '_blank', 'noopener') }] : []),
         { label: 'Discord', description: 'Meet other Wayfinders: find a party for an expedition, compare Wyrdweave runs, report bugs (opens a new page).', onSelect: () => window.open(DISCORD_URL, '_blank', 'noopener') },
         { label: 'Privacy & Terms', description: 'What the game stores about you (opens a new page).', onSelect: () => window.open('privacy.html', '_blank', 'noopener') },
         { label: 'Credits', description: 'The photographers, artists and icon makers whose work is in the game (opens a new page).', onSelect: () => window.open('credits.html', '_blank', 'noopener') },

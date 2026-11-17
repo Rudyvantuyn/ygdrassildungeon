@@ -45,14 +45,14 @@ eromheen Nederlands. Screenshots maak je met de game zelf op 1920×1080 (zie ond
 >
 > **A slow, honest grind.** Ygdrassil is meant to be challenging. Experience and gold come slowly; rushing ahead fails
 > and steady training wins. When the whole party falls, the roots carry you home, but the deep keeps half of what you
-> carried.
+> found on the way down.
 >
 > **More to find.**
-> - Five chapters of the Rootdeep, from the Greenwood Roots down through the sea, the bones and the skull of Ymir to
->   Ginnungagap, each with its own creatures and a guardian at the bottom.
+> - Six chapters of the Rootdeep, from the Greenwood Roots down through the sea, the bones and the skull of Ymir and
+>   Ginnungagap to Hvergelmir, where every river begins: 30 floors and 94 creatures, a guardian at the bottom of each.
 > - The Wyrdweave: three new floors every day, the same for every player, each with a rule of its own.
 > - Sagas: every fight is told, and your adventurers earn bynames. Bram Wolf-Feeder. Wren the Kind.
-> - The Book of Deeds: over fifty hidden medals.
+> - The Book of Deeds: over seventy hidden medals.
 > - Raven Runs: send the adventurers waiting in the hall scouting while you are away.
 > - Expeditions: sound the Hornstone and go down with up to four other players, each bringing one adventurer.
 > - A story that remembers your choices: side with Asgard, with the realms, or find a third way for Midgard.
@@ -64,10 +64,10 @@ eromheen Nederlands. Screenshots maak je met de game zelf op 1920×1080 (zie ond
 - First-person grid exploration with hand-drawn mapping
 - Party of five, eight classes plus secret classes, skill trees with ranks 1–10
 - Turn-based combat with elemental weaknesses, rows and roaming prowlers
-- Five chapters (25 floors) and growing; a guardian at the end of every chapter
+- Six chapters (30 floors, 94 creatures) and growing; a guardian at the end of every chapter
 - Daily Wyrdweave run, the same for everyone
 - Co-op expeditions for up to five players
-- Sagas, bynames and over fifty hidden deeds
+- Sagas, bynames and over seventy hidden deeds
 - Pixel art from human artists, places made from real photographs
 
 ## Tags (voorstel)
@@ -87,12 +87,24 @@ Steam vraagt om "pre-generated" (vooraf gemaakt) en "live-generated" (tijdens he
 pre-generated van toepassing (de portretten). Overweeg die portretten vóór de Steam-release te vervangen, omdat
 spelers van het genre AI-art afwijzen.
 
-## Screenshots
+## Screenshots en plaatjes (klaar, november 2026)
 
-Gemaakt met de game zelf op 1920×1080: titel, Lindholm, de drie hoofdstukken, een gevecht met vijf, een
-eindbaasgevecht, de bestiary. Voor de echte pagina: neem ze opnieuw met je eigen save (echte voortgang ziet er beter
-uit dan een geprepareerde party), zonder het "Early playtest"-bordje op het titelscherm.
+- **Screenshots** (1920×1080, zonder webbalk, playtest-bordje of onderschriften): titel, de eed met uiterlijk, Lindholm,
+  het bos met de kaart, een gevecht, de zes hoofdstukken en Níðhöggr. Steam wil er minstens vijf. Echte voortgang
+  uit je eigen save ziet er nog beter uit; vervang ze gerust later.
+- **Capsules en bibliotheek**: `node scripts/steam-capsules.cjs <map>` tekent ze uit de eigen art van de game
+  (CC0-wortelfoto door het pixelfilter, de CC0-sprites van de groep en Níðhöggr, de pixelfont):
+  header 920×430, small 462×174, main 1232×706, vertical 748×896, library capsule 600×900, library header 920×430,
+  library hero 3840×1240 (zonder tekst), library logo 1280×720 (doorzichtig), page background 1438×810.
+  Controleer de maten in Steamworks voor je uploadt; Valve past ze soms aan.
+- **Trailer**: de trailer van november 2026 (62 s, 1080p). Steam toont de eerste trailer bovenaan de pagina.
 
-Nog te maken (vaste maten, check ze in Steamworks): header capsule 920×430, small capsule 462×174, main capsule
-1232×706, vertical capsule 748×896, library capsule 600×900, library hero 3840×1240, logo. Dit is grafisch werk: logo
-"YGDRASSIL" in de pixelfont op een gefilterde boomwortel-foto past bij de rest.
+## Wishlists: van pagina naar fanbase
+
+1. Zodra de pagina als *Coming soon* live staat: zet de link in `STEAM_URL` (`src/ui/links.ts`). Dan staat
+   "Wishlist on Steam" vanzelf op de site (menu, voorpagina, voet), op het titelscherm en in het menu van de game.
+2. Zet de link ook in Discord (#welcome en #announcements), op itch.io en onder elke Reddit-post.
+3. **Steam Next Fest** (drie keer per jaar) is de grootste wishlist-motor voor kleine games. Daarvoor is een
+   speelbare **demo op Steam** nodig, dus een desktopversie (zie hierboven). De browserversie mag gratis blijven.
+4. Een vaste ritme helpt meer dan één grote post: elke grote update een devlog op de site, een *event* op de
+   Steam-pagina (dat zien mensen met de game op hun wishlist) en een bericht in Discord.
