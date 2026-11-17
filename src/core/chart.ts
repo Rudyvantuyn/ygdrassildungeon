@@ -3,7 +3,9 @@
  *
  * Modes:
  *   manual   — nothing is drawn automatically
- *   assisted — cells the party walks on are filled in as floor; walls, marks and notes are up to the player
+ *   assisted — cells the party walks on are filled in as floor, and stairs, chests, springs and gathering spots the
+ *              party comes upon get their mark (once: a mark the player erases stays erased); walls and notes are
+ *              up to the player
  *   auto     — the whole map is drawn automatically from what the party has seen
  */
 export type ChartMode = 'manual' | 'assisted' | 'auto';

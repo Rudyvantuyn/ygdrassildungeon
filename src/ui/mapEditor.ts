@@ -16,7 +16,7 @@ const TOOLS: { id: Tool; label: string; glyph: string; color: string }[] = [
 ];
 
 const MODE_LABELS: Record<ChartMode, string> = {
-  assisted: 'Assisted — your steps are filled in, you draw the rest',
+  assisted: 'Assisted — your steps and the spots you find are filled in, you draw the rest',
   manual: 'Manual — you draw everything yourself',
   auto: 'Auto — the map draws itself',
 };

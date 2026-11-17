@@ -190,3 +190,30 @@ describe('bestiary deeds', () => {
     expect(checkDeeds(g, 2).map((d) => d.id)).toContain('greenwoodWeak');
   });
 });
+
+describe('the assisted map', () => {
+  it('marks the special squares the party comes upon, once', async () => {
+    const { Game } = await import('./game');
+    const g = Game.newGame(5);
+    g.enterFloor(0, true);
+    g.state.chartMode = 'assisted';
+    // Find a chest and stand in front of it.
+    const m = g.map;
+    let spot: { x: number; y: number; dir: number; chest: number } | null = null;
+    for (let y = 0; y < m.height && !spot; y++)
+      for (let x = 0; x < m.width && !spot; x++) {
+        if (m.tiles[y * m.width + x] !== 'chest') continue;
+        for (const [dir, dx, dy] of [[0, 0, 1], [1, -1, 0], [2, 0, -1], [3, 1, 0]] as const)
+          if (m.tiles[(y + dy) * m.width + x + dx] === 'floor') { spot = { x: x + dx, y: y + dy, dir, chest: y * m.width + x }; break; }
+      }
+    expect(spot).not.toBeNull();
+    const index = spot!.chest;
+    Object.assign(g.state, { x: spot!.x, y: spot!.y, dir: spot!.dir });
+    (g as unknown as { markExplored(): void }).markExplored();
+    expect(g.chart.marks[index]).toBe('chest');
+    // Erased by the player: not put back.
+    delete g.chart.marks[index];
+    (g as unknown as { markExplored(): void }).markExplored();
+    expect(g.chart.marks[index]).toBeUndefined();
+  });
+});

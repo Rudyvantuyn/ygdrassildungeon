@@ -1,4 +1,4 @@
-import { emptyChart, setTerrain, type Chart, type ChartMode } from './chart';
+import { emptyChart, setMark, setTerrain, type Chart, type ChartMode, type MarkId } from './chart';
 import { Combat, type CombatSnapshot } from './combat';
 import { FLOORS, type FloorDef } from './data/floors';
 import { ITEMS, makeInventory } from './data/items';
@@ -44,6 +44,8 @@ export interface FloorProgress {
   gathered?: Record<number, number>;
   /** Root gates opened (cell indices). They stay open for good: the shortcuts a party has earned. */
   gatesOpen?: number[];
+  /** Cells the assisted map has already marked by itself, so a mark the player erases is not put back. */
+  autoMarked?: number[];
   /** Prowlers (by index) that already gave their Oath Token: they come back, the token does not. */
   prowlerTokens?: number[];
 }
@@ -875,6 +877,32 @@ export class Game {
     this.state.encounterAt = this.rng.int(Math.round(avg * 0.6), Math.round(avg * 1.4));
   }
 
+  /** The mark the assisted map puts on a special square the party comes upon, if any. */
+  markFor(x: number, y: number): MarkId | null {
+    const tile = tileAt(this.map, x, y);
+    if (tile === 'stairs') return 'down';
+    if (tile === 'up') return 'up';
+    if (tile === 'chest') return 'chest';
+    if (tile === 'spring') return 'spring';
+    if (tile === 'link') {
+      const down = this.linkGoesDown(x, y);
+      return down === null ? null : down ? 'down' : 'up';
+    }
+    return isGatherTile(tile) ? tile : null;
+  }
+
+  /** Assisted map: marks a special square once, never over a mark of the player's own. */
+  private autoMark(x: number, y: number): void {
+    if (x < 0 || y < 0 || x >= this.map.width || y >= this.map.height) return;
+    const mark = this.markFor(x, y);
+    if (!mark) return;
+    const index = y * this.map.width + x;
+    const done = (this.progress.autoMarked ??= []);
+    if (done.includes(index)) return;
+    done.push(index);
+    if (!this.chart.marks[index]) setMark(this.chart, index, mark);
+  }
+
   /** The map the player has drawn of the current floor. */
   get chart(): Chart {
     return this.progress.chart;
@@ -885,7 +913,12 @@ export class Game {
    * plus, in assisted mode, the cell the party stands on is charted as floor.
    */
   private markExplored(): void {
-    if (this.state.chartMode === 'assisted') setTerrain(this.chart, this.state.y * this.map.width + this.state.x, 'floor');
+    if (this.state.chartMode === 'assisted') {
+      setTerrain(this.chart, this.state.y * this.map.width + this.state.x, 'floor');
+      const ahead = relCell(this.state.x, this.state.y, this.state.dir, 1, 0);
+      this.autoMark(this.state.x, this.state.y);
+      this.autoMark(ahead.x, ahead.y);
+    }
     const cells = this.progress.explored.split('');
     // The party's own square and the four beside it: what is visible without peeking round a corner.
     for (const [dx, dy] of [[0, 0], [0, -1], [1, 0], [0, 1], [-1, 0]]) {

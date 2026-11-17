@@ -2200,7 +2200,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       { label: 'Walking', description: 'Glide: the view pans when you turn and moves when you step, so you keep your bearings. Quick: a short fade, for fast walkers.', control: motion.control, onAdjust: motion.onAdjust, onSelect: motion.cycle },
       { label: 'A / D keys', description: 'Turn: A and D turn, Q and E side-step. Side-step: the other way round. The arrow keys always turn.', control: keys.control, onAdjust: keys.onAdjust, onSelect: keys.cycle },
       ...(solo
-        ? [{ label: 'Map drawing', description: 'Assisted: your steps fill in, you draw walls and marks. Manual: you draw everything. Auto: the map draws itself.', control: chart.control, onAdjust: chart.onAdjust, onSelect: chart.cycle }]
+        ? [{ label: 'Map drawing', description: 'Assisted: your steps fill in, and stairs, chests, springs and gathering spots get their mark; you draw the walls. Manual: you draw everything. Auto: the map draws itself.', control: chart.control, onAdjust: chart.onAdjust, onSelect: chart.cycle }]
         : []),
       ...(solo ? [{ label: 'Tips', description: 'Whether tips appear when something new comes up.', control: tips.control, onAdjust: tips.onAdjust, onSelect: tips.cycle }] : []),
       { label: 'Back', onSelect: back },
