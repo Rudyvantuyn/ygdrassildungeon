@@ -94,6 +94,9 @@ export class CorridorRenderer {
   private looks = new Map<string, HTMLCanvasElement>();
   /** Floor and ceiling look the same from every cell (the party always stands in a cell's middle), so they are drawn once per floor. */
   private planeCache: { key: string; canvas: HTMLCanvasElement } | null = null;
+  /** Textures already checked to have something in them. */
+  private readonly checked = new Set<string>();
+  private readonly retryAt = new Map<string, number>();
   /** Runestones and shades other players left on this floor (cell indices), set by the app. */
   marks: { stones: Set<number>; shades: Set<number> } | null = null;
   /** Shows one kind of decor wherever decor can stand (for checking how it looks), or null for the real choice. */
@@ -118,6 +121,11 @@ export class CorridorRenderer {
       g.filter = [grade, calm ? 'blur(2px) contrast(62%) saturate(70%) brightness(92%)' : ''].filter(Boolean).join(' ');
       // Draw it three times over itself, offset by the tile size, so a blur wraps round and the tile stays seamless.
       for (const dx of [-c.width, 0, c.width]) for (const dy of [-c.height, 0, c.height]) g.drawImage(img, dx, dy);
+      // Where the browser's filters paint nothing, keep the texture as painted rather than see-through.
+      if (isEmpty(c)) {
+        g.filter = 'none';
+        g.drawImage(img, 0, 0);
+      }
       this.looks.set(key, c);
     }
     return c;
@@ -130,6 +138,9 @@ export class CorridorRenderer {
     const floorImg = sprite(`dungeon/${pal.textures}-floor.webp`);
     const ceilingImg = sprite(`dungeon/${pal.textures}-ceiling.webp`);
     if (!wallImg || !floorImg || !ceilingImg) return null;
+    const key = `${wallImg.src}|${pal.grade ?? ''}|${prefs.calmTextures}`;
+    // After an empty texture, plain walls for a second before trying again (not every frame).
+    if ((this.retryAt.get(key) ?? 0) > performance.now()) return null;
     const wall = this.look(wallImg, pal.grade);
     const pattern = (img: CanvasImageSource) => {
       let p = this.patterns.get(img);
@@ -154,7 +165,24 @@ export class CorridorRenderer {
       }
       this.mips.set(wall, wallMips);
     }
-    return { wall: wallMips, floor: pattern(this.look(floorImg, pal.grade)), ceiling: pattern(this.look(ceilingImg, pal.grade)), size: floorImg.naturalWidth };
+    const floorLook = this.look(floorImg, pal.grade);
+    const ceilingLook = this.look(ceilingImg, pal.grade);
+    // A texture that came out empty would make every wall see-through for good (a player on Firefox saw this):
+    // throw it away and draw plain walls until it can be made again.
+    if (!this.checked.has(key)) {
+      if ([wallMips[0], floorLook, ceilingLook].some(isEmpty)) {
+        for (const look of [wall, floorLook, ceilingLook]) {
+          this.mips.delete(look);
+          this.patterns.delete(look);
+        }
+        for (const [k, v] of this.looks) if (v === wall || v === floorLook || v === ceilingLook) this.looks.delete(k);
+        this.planeCache = null;
+        this.retryAt.set(key, performance.now() + 1000);
+        return null;
+      }
+      this.checked.add(key);
+    }
+    return { wall: wallMips, floor: pattern(floorLook), ceiling: pattern(ceilingLook), size: floorImg.naturalWidth };
   }
 
   /** The smallest wall mip that is still at least `px` pixels big. */
@@ -1430,4 +1458,19 @@ export class CorridorRenderer {
 function cut(a: P3, b: P3): P3 {
   const t = (Z_CLIP - a[2]) / (b[2] - a[2]);
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, Z_CLIP];
+}
+
+/** True when a picture has nothing in it (every pixel see-through). Where pixels cannot be read, it is trusted. */
+function isEmpty(source: CanvasImageSource): boolean {
+  try {
+    const c = document.createElement('canvas');
+    c.width = c.height = 8;
+    const g = c.getContext('2d', { willReadFrequently: true })!;
+    g.drawImage(source, 0, 0, 8, 8);
+    const data = g.getImageData(0, 0, 8, 8).data;
+    for (let i = 3; i < data.length; i += 4) if (data[i] > 0) return false;
+    return true;
+  } catch {
+    return false;
+  }
 }

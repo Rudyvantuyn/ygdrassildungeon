@@ -3,22 +3,31 @@
  * is ready, callers fall back to the procedural drawing.
  */
 const cache = new Map<string, HTMLImageElement | null>();
+/** Sprites that have loaded and are decoded, so drawing them never paints an empty picture. */
+const ready = new Set<string>();
 const waiting = new Map<string, (() => void)[]>();
 
 /** The image for `path` (relative to the site), or null while it is still loading or missing. */
 export function sprite(path: string): HTMLImageElement | null {
   const known = cache.get(path);
-  if (known !== undefined) return known && known.complete && known.naturalWidth > 0 ? known : null;
+  if (known !== undefined) return known && ready.has(path) ? known : null;
   if (typeof Image === 'undefined') return null;
   const img = new Image();
-  img.decoding = 'async';
   img.onerror = () => {
     cache.set(path, null);
     waiting.delete(path);
   };
   img.onload = () => {
-    for (const cb of waiting.get(path) ?? []) cb();
-    waiting.delete(path);
+    // Only hand the image out once it is fully decoded. Firefox could draw an image that had loaded but was not
+    // decoded yet as nothing at all; the textures cut from it stayed empty (see-through walls, a smeared view).
+    const done = () => {
+      if (!img.naturalWidth) return;
+      ready.add(path);
+      for (const cb of waiting.get(path) ?? []) cb();
+      waiting.delete(path);
+    };
+    if (typeof img.decode === 'function') img.decode().then(done, done);
+    else done();
   };
   img.src = `art/${path}`;
   cache.set(path, img);

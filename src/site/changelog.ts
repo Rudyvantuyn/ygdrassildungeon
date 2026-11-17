@@ -17,6 +17,7 @@ export const CHANGES: ChangeDay[] = [
       'New: photo mode. Press P (or Take a picture under Journal) for a clean picture of the view with your party and the game\'s name under it, to save, copy or share. Works while exploring, in town and between rounds of a fight.',
       'With Map drawing on Assisted (the default), the map now marks the stairs, chests, springs and gathering spots you come upon by itself. Walls stay yours to draw, and a mark you erase stays erased. (Thanks for the idea!)',
       'Fixed: climbing the stairs up and straight back down no longer counts as a Pacifist\'s Walk. It takes a whole floor walked from its way in without a won fight.',
+      'Fixed (we hope): on some Firefox setups the dungeon walls could come out see-through. Pictures are now only drawn once fully loaded, and a texture that comes out empty is made again instead of kept.',
     ],
   },
   {
