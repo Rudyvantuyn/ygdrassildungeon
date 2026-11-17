@@ -137,6 +137,8 @@ Add new names there and keep the glossary in sync.
   when they swear the oath, built from the same set's player doll parts (`scripts/hero-looks.json`, `scripts/make-looks.py`);
   a new class gets 8 looks the same way (recolour or draw a 32×32 part if the set lacks one). The portraits of the people
   of Lindholm (Brynja, Sigrid, …) stay as they are: the owner decided this (November 2026), don't raise it again.
+  Because those portraits are AI-made, **never write "no AI art" or similar in any post, store page or text**. Say what is
+  true instead: monsters, adventurers, places and walls are human-made or photos; the villagers' portraits are still AI.
 
 ## Working with the owner
 
