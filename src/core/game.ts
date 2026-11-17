@@ -798,9 +798,11 @@ export class Game {
   }
 
   interact(): StepEvent {
+    const ahead = relCell(this.state.x, this.state.y, this.state.dir, 1, 0);
+    // An unopened chest ahead comes before a gathering spot underfoot: some chests can only be reached from one.
+    if (tileAt(this.map, ahead.x, ahead.y) === 'chest' && !this.isChestOpened(ahead.x, ahead.y)) return this.openChest(ahead.x, ahead.y);
     const spot = this.gatherSpotHere();
     if (spot) return { type: 'gatherSpot', ...spot };
-    const ahead = relCell(this.state.x, this.state.y, this.state.dir, 1, 0);
     if (tileAt(this.map, ahead.x, ahead.y) === 'chest') return this.openChest(ahead.x, ahead.y);
     if (tileAt(this.map, ahead.x, ahead.y) === 'gate') return this.openGate(ahead.x, ahead.y);
     return { type: 'nothing' };

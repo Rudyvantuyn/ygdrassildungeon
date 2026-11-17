@@ -260,3 +260,27 @@ describe('the way home from a chapter', () => {
     expect(g.state.location).toBe('town');
   });
 });
+
+describe('chests beside a gathering spot', () => {
+  it('a chest that can only be reached from a gathering spot still opens; then the spot works again', async () => {
+    const { Game } = await import('./game');
+    const g = Game.newGame(6);
+    g.enterFloor(18, true); // Stormcrown XIX: a chest walled in on three sides, the fourth an ore vein
+    const m = g.map;
+    let found = false;
+    for (let y = 0; y < m.height && !found; y++)
+      for (let x = 0; x < m.width && !found; x++) {
+        if (m.tiles[y * m.width + x] !== 'chest') continue;
+        for (const [dir, dx, dy] of [[0, 0, 1], [1, -1, 0], [2, 0, -1], [3, 1, 0]] as const) {
+          const t = m.tiles[(y + dy) * m.width + x + dx];
+          if (t === 'mine' || t === 'forage' || t === 'fell' || t === 'fish') {
+            Object.assign(g.state, { x: x + dx, y: y + dy, dir });
+            expect(g.interact().type).toBe('chest');
+            expect(g.interact().type).toBe('gatherSpot');
+            found = true;
+          }
+        }
+      }
+    expect(found).toBe(true);
+  });
+});
