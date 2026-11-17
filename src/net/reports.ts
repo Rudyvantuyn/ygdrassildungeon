@@ -37,7 +37,12 @@ export function watchErrors(context: () => Record<string, unknown>): void {
     }
     void sendReport('error', message, { stack: stack?.slice(0, 3000), ua: navigator.userAgent, ...where });
   };
-  window.addEventListener('error', (e) => report(String(e.message), e.error instanceof Error ? e.error.stack : undefined));
+  window.addEventListener('error', (e) => {
+    // "Script error." with nothing more is a browser hiding an error from a script that is not ours (an extension, a
+    // blocker, the browser itself): nothing to fix, so not worth a report.
+    if (e.message === 'Script error.' && !(e.error instanceof Error)) return;
+    report(String(e.message), e.error instanceof Error ? e.error.stack : undefined);
+  });
   window.addEventListener('unhandledrejection', (e) => {
     const r: unknown = e.reason;
     report(r instanceof Error ? r.message : String(r), r instanceof Error ? r.stack : undefined);
