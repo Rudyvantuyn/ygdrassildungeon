@@ -53,6 +53,8 @@ const IMAGES = [
   ['library-header-920x430.png', { w: 920, h: 430, logoTop: 0.3, partyH: 0.34, beastH: 0.62 }],
   ['library-hero-3840x1240.png', { w: 3840, h: 1240, logo: false, partyH: 0.3, beastH: 0.66 }],
   ['library-logo-1280x720.png', { w: 1280, h: 720, bg: false, party: false, beast: false, logoSize: 190 }],
+  // Link previews (Discord, Reddit, Bluesky, ...): copied to public/og.png
+  ['og-1200x630.png', { w: 1200, h: 630, logoTop: 0.24, partyH: 0.3, beastH: 0.58, tagline: 'A FREE DUNGEON CRAWLER IN YOUR BROWSER' }],
   // Store page background (optional)
   ['page-background-1438x810.png', { w: 1438, h: 810, logo: false, party: false, beast: false }],
 ];

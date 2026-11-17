@@ -77,6 +77,8 @@ chunky pixels as the walls (`src/render/corridor.ts`). Nothing to credit.
 
 - `ch1.webp` to `ch6.webp`, `shot-*.webp`: screenshots of the game itself (its corridors, a fight, the map,
   the town), so they are made only of the assets listed on this page. Retake them when the art changes.
+- `public/og.png` (link preview) and the Steam images: drawn by `scripts/steam-capsules.cjs` from the Rootdeep photo,
+  the Níðhöggr sprite, five hero looks and the bundled Pixelify Sans font, all listed on this page.
 
 ## Map icons (`public/art/icons`)
 
