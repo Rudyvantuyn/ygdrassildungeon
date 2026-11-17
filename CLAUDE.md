@@ -140,6 +140,8 @@ Add new names there and keep the glossary in sync.
 
 ## Working with the owner
 
+- **Always step by step** when the owner has to do something himself (posting, settings, accounts, uploads): give **one step at a
+  time**, and the next only after he says it is done. Never a whole list of tasks or texts at once.
 - **Releases on itch.io: at most two a week, each with a devlog.** Don't build the itch zip (`npm run build:itch`) or
   write a devlog unless the owner asks for a release; new features can be built and pushed meanwhile.
 - **New chapters only on request**: chapter VII and later are built only when the owner asks for one (decided November 2026).
