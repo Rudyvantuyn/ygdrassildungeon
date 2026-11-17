@@ -217,3 +217,26 @@ describe('the assisted map', () => {
     expect(g.chart.marks[index]).toBeUndefined();
   });
 });
+
+describe("the Pacifist's Walk", () => {
+  it('needs a floor walked from its way in, not just back up and down the stairs', async () => {
+    const { Game } = await import('./game');
+    const g = Game.newGame(9);
+    g.enterFloor(1, true);
+    const stand = (tile: string) => {
+      const i = g.map.tiles.indexOf(tile as never);
+      g.state.x = i % g.map.width;
+      g.state.y = Math.floor(i / g.map.width);
+    };
+    g.state.counters = { ...g.state.counters, winsFloor: 1 };
+    stand('up');
+    g.ascend();
+    stand('stairs');
+    g.descend();
+    expect(g.state.counters?.pacifist ?? 0).toBe(0);
+    // A real walk down a floor without a win still counts.
+    stand('stairs');
+    g.descend();
+    expect(g.state.counters?.pacifist).toBe(1);
+  });
+});

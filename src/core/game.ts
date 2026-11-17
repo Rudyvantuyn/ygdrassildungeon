@@ -125,6 +125,8 @@ export interface GameState {
   deeds?: Record<string, EarnedDeed>;
   /** Counters for deeds. */
   counters?: Partial<Record<DeedCounter, number>>;
+  /** The party came onto this floor from above (not back up its stairs), so its stairs down can count for the Pacifist's Walk. */
+  fromAbove?: boolean;
   /** Where the party last walked into a wall (for a deed). */
   lastBump?: string;
   /** The Wyrdweave: the day of the last try, threads held, pieces of Wyrd gear woven, most floors cleared in a day. */
@@ -495,7 +497,7 @@ export class Game {
   descend(): void {
     if (this.tileHere() !== 'stairs' || this.isLastFloor) return;
     // Deeds: down a floor without winning a single fight on it; how many stairs down on this descent.
-    if ((this.state.counters?.winsFloor ?? 0) === 0) count(this, 'pacifist');
+    if (this.state.fromAbove && (this.state.counters?.winsFloor ?? 0) === 0) count(this, 'pacifist');
     count(this, 'downDescent');
     this.enterFloor(this.state.floor + 1, true);
   }
@@ -509,6 +511,7 @@ export class Game {
       return;
     }
     setCount(this, 'winsFloor', 0);
+    this.state.fromAbove = false;
     this.state.floor -= 1;
     this.map = this.loadMap();
     const i = this.map.tiles.indexOf('stairs');
@@ -535,6 +538,7 @@ export class Game {
     }
     this.state.location = 'dungeon';
     setCount(this, 'winsFloor', 0);
+    this.state.fromAbove = true;
     this.state.floor = floor;
     this.state.deepest = Math.max(this.state.deepest, floor);
     this.map = this.loadMap();
@@ -828,10 +832,11 @@ export class Game {
     if (!to) return false;
     // Numbered stairs count like the plain ones for the deeds: down without a win, and a fresh floor's tally.
     if (to.floor > this.state.floor) {
-      if ((this.state.counters?.winsFloor ?? 0) === 0) count(this, 'pacifist');
+      if (this.state.fromAbove && (this.state.counters?.winsFloor ?? 0) === 0) count(this, 'pacifist');
       count(this, 'downDescent');
     }
     setCount(this, 'winsFloor', 0);
+    this.state.fromAbove = to.floor > this.state.floor;
     this.state.floor = to.floor;
     this.state.deepest = Math.max(this.state.deepest, to.floor);
     this.map = this.loadMap();
