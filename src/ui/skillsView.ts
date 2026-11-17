@@ -64,8 +64,11 @@ export function showSkillTree(host: SkillsHost, m: Member, back: () => void, sta
     };
   });
   const points = unspentPoints(m);
-  // For players who would rather not plan a build: the same build the game's own tests play with.
-  if (points > 0) {
+  // For players who would rather not plan a build: the same build the game's own tests play with. Only offered while
+  // it would spend something (once the recommended build is complete, the remaining points are the player's to place).
+  const trial = structuredClone(m);
+  autoSpend(trial);
+  if (points > 0 && unspentPoints(trial) < points) {
     items.push({
       label: 'Spend as Brynja advises',
       detail: `${points} point${points === 1 ? '' : 's'}`,
