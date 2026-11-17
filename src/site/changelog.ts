@@ -10,6 +10,13 @@ export interface ChangeDay {
 
 export const CHANGES: ChangeDay[] = [
   {
+    date: '2026-11-17',
+    changes: [
+      'New: after a Wyrdweave run, Copy my run to share puts a few lines on your clipboard (the day\'s rules, how far you got, your threads) to paste in the Discord or anywhere.',
+      'New: a tip after your first guardian about the Discord, where Wayfinders trade tales, runs and byname ideas.',
+    ],
+  },
+  {
     date: '2026-11-16',
     changes: [
       'Changed: when the whole party falls, the deep now keeps half of what you found on that descent, not half of everything you own. What you set out with is safe.',

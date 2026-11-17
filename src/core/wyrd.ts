@@ -336,3 +336,20 @@ export function wearWyrd(home: Game, gearId: string, memberIndex: number | null)
   m.armor = gearId;
   return true;
 }
+
+/**
+ * A run told in a few lines to paste in Discord or anywhere else: the day's weave, each floor's rule with how far the
+ * party got (green cleared, red where it fell, black not reached), and the threads brought home. Nothing in it spoils
+ * more than the rules, which are the same for everyone that day.
+ */
+export function wyrdShareText(day: number, cleared: number, fell: boolean, threads: number): string {
+  const weave = wyrdDay(day);
+  const date = new Date(day * DAY_MS).toISOString().slice(0, 10);
+  const floors = weave.rules.map((rule, i) => `${i < cleared ? '🟩' : i === cleared && fell ? '🟥' : '⬛'} ${['I', 'II', 'III'][i]} · ${rule.name}`);
+  return [
+    `Ygdrassil · Wyrdweave ${date} · ${weave.name}`,
+    ...floors,
+    `🧵 ${threads} Wyrd Thread${threads === 1 ? '' : 's'}${fell ? ' (fell)' : cleared === 3 ? ' (all three floors)' : ''}`,
+    'https://www.ygdrassilgame.com/play',
+  ].join('\n');
+}

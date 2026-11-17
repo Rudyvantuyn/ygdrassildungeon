@@ -22,3 +22,25 @@ export function floater(container: HTMLElement, x: number, y: number, text: stri
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
+
+/** Puts text on the clipboard; falls back to a hidden text box where the clipboard API is not allowed. */
+export async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const box = document.createElement('textarea');
+    box.value = text;
+    box.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.append(box);
+    box.select();
+    let ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch {
+      ok = false;
+    }
+    box.remove();
+    return ok;
+  }
+}

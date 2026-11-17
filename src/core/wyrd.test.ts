@@ -21,6 +21,7 @@ import {
   wyrdFloors,
   wyrdLayout,
   wyrdOpen,
+  wyrdShareText,
 } from './wyrd';
 
 const NOW = Date.UTC(2026, 10, 14, 12);
@@ -162,5 +163,26 @@ describe('the Wyrdweave', () => {
     expect(canHoldStone(code, 0, 0, NOW)).toBe(false);
     expect(rows[0][0]).toBe('#');
     expect(canHoldStone(99, 1, 1, NOW)).toBe(false);
+  });
+});
+
+describe('sharing a Wyrdweave run', () => {
+  it('tells the day, each floor and the threads, without more than the day\'s rules', () => {
+    const day = 20774;
+    const text = wyrdShareText(day, 2, true, 1);
+    const lines = text.split('\n');
+    expect(lines[0]).toContain('2026-11-17');
+    expect(lines[0]).toContain(wyrdDay(day).name);
+    expect(lines[1].startsWith('🟩 I · ')).toBe(true);
+    expect(lines[2].startsWith('🟩 II · ')).toBe(true);
+    expect(lines[3].startsWith('🟥 III · ')).toBe(true);
+    expect(lines[4]).toBe('🧵 1 Wyrd Thread (fell)');
+    expect(lines[5]).toBe('https://www.ygdrassilgame.com/play');
+    for (const [i, rule] of wyrdDay(day).rules.entries()) expect(lines[i + 1]).toContain(rule.name);
+  });
+
+  it('marks floors not reached when the party went home early, and a full run', () => {
+    expect(wyrdShareText(20774, 1, false, 1).split('\n').slice(1, 4).map((l) => [...l][0])).toEqual(['🟩', '⬛', '⬛']);
+    expect(wyrdShareText(20774, 3, false, 4)).toContain('🧵 4 Wyrd Threads (all three floors)');
   });
 });

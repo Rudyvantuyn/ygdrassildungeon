@@ -25,7 +25,7 @@ import { syncClock } from '../net/clock';
 import { RuneMarks, claimRenown, reportShade } from './runeView';
 import { checkDeeds, count, mergeDeeds } from '../core/deeds';
 import { DeedBanner, bookOfDeeds } from './deedsView';
-import { WYRD_REWARDS, bringWyrdHome, markWyrdStarted, threadsFor, wyrdDay, wyrdDayNumber, wyrdViewDepth, type WyrdResult } from '../core/wyrd';
+import { WYRD_REWARDS, bringWyrdHome, markWyrdStarted, threadsFor, wyrdDay, wyrdDayNumber, wyrdShareText, wyrdViewDepth, type WyrdResult } from '../core/wyrd';
 import { clockNow } from '../net/clock';
 import { drawTownScene, preloadTownScenes } from '../render/town';
 import { preload, sprite } from '../render/sprites';
@@ -35,7 +35,7 @@ import { CombatView, type CombatHost, type RoundDriver } from './combatView';
 import { CoopSession, type CoopHost } from './coopSession';
 import { Hornstone, shareLines, type HornstoneHost } from './hornstone';
 import { online, type ExpeditionRow } from '../net/online';
-import { el, floater } from './dom';
+import { copyText, el, floater } from './dom';
 import { MapEditor } from './mapEditor';
 import { SideMapPen } from './sideMap';
 import { Designer, isMaker, loadDraft } from './designer';
@@ -1408,7 +1408,18 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.mode = 'town';
       this.town.show();
     };
-    const menu = new ListMenu([{ label: 'Continue', onSelect: done }], { onCancel: done });
+    const share = wyrdShareText(run.day, result.cleared, fell, result.threads);
+    const menu = new ListMenu(
+      [
+        { label: 'Continue', onSelect: done },
+        {
+          label: 'Copy my run to share',
+          description: 'Copies a few lines about today\'s run (the rules, how far you got, your threads) to paste in the Discord or anywhere.',
+          onSelect: () => void copyText(share).then((ok) => this.toast(ok ? 'Copied! Paste it in the Discord\'s #wyrdweave.' : 'Could not copy here, sorry.')),
+        },
+      ],
+      { onCancel: done },
+    );
     this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: 'Back from the Wyrdweave' }), ...lines.map((t) => el('p', { text: t })), menu.el]), menu);
   }
 
@@ -1679,6 +1690,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       levelUps.push(el('div', { className: 'levelup saga', text: borne ? `The skalds have a name for ${member.name}: ${fullName(member)}!` : `${member.name} earned another byname: ${fullName({ name: member.name, byname: byname.id })}. Choose it in the saga.` }));
     }
     this.noticeTip('victory');
+    // After the first guardian, once: the community, at the moment a player is most pleased with the game.
+    if (combat.boss && !combat.echo && !this.coop && !this.trial) this.noticeTip('discord');
     if (r.levelUps.length) this.noticeTip('skillPoints');
     if (bynames.length) this.noticeTip('sagas');
     const done = () => {

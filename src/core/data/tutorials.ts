@@ -308,6 +308,15 @@ export const TIPS: TipDef[] = [
     pages: ['Folk post their troubles here. Take a request, do it down below, and come back for the reward.'],
   },
   {
+    id: 'discord',
+    title: 'Tales by the fire',
+    speaker: 'gerd',
+    pages: [
+      'A guardian fallen! The whole Stag will hear about this one. Wayfinders from every hall trade tales like that in the Discord.',
+      'Find it under Options in the menu, or on the title screen. Bring your bynames, your Wyrdweave runs and your bugs: the makers read along, and the best byname ideas end up in the game.',
+    ],
+  },
+  {
     id: 'hornstone',
     title: 'The Hornstone',
     speaker: 'ketil',
