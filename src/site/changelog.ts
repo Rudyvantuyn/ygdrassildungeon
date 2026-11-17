@@ -24,6 +24,10 @@ export const CHANGES: ChangeDay[] = [
       'New: a Step sway setting. On (the default), the view rises and dips a little with every step, like walking; Off keeps it level.',
       'Site: a press kit page with the facts, screenshots, GIFs, the trailer and logos to download.',
       'New: on the first floor of every chapter, the stairs up can take you straight home to Lindholm (or up to the chapter before, as you choose).',
+      'Changed: far fewer tips at the start. Every tip is at most two short pages, the danger orb is explained when it first turns yellow, and tips that come up in a fight now wait their turn: one at a time instead of a stack after your first win.',
+      'Changed: the title screen, the founding of your party and the story scenes no longer show an empty panel beside the picture, and the title screen no longer shows a party you have not made yet.',
+      'Changed: the story of how the world began now has a picture of its own.',
+      'New: every class shows its figure in the class list.',
     ],
   },
   {

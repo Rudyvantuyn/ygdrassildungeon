@@ -40,6 +40,8 @@ export interface StoryScene {
   ready: (game: Game) => boolean;
   lines: StoryLine[];
   choice?: StoryChoice;
+  /** A picture behind the scene (art/…), instead of the town or the dungeon around it. */
+  image?: string;
 }
 
 export const SIGRID = 'Sigrid, Warden of Lindholm';
@@ -61,6 +63,7 @@ export const STORY: StoryScene[] = [
     title: 'Before the world',
     when: 'town',
     ready: () => true,
+    image: 'memories/beforeTheWorld.webp',
     lines: [
       { speaker: NARRATOR, text: 'Before Midgard there was only Ginnungagap: the yawning void between the ice of Niflheim and the fire of Muspelheim.' },
       { speaker: NARRATOR, text: 'It belonged to no one. Across it, the realms met, bargained and traded. It was the crossroads of everything.' },

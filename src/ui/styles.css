@@ -132,6 +132,10 @@ body.phone #play-logo {
     0 10px 34px rgba(0, 0, 0, 0.8);
 }
 
+/* Title, founding and story scenes in town: no side panel, the picture centred. */
+body:not(.phone) #stage.scene #side { display: none; }
+body:not(.phone) #stage.scene #view-wrap { left: 210px; }
+
 #view {
   display: block;
   width: 100%;
@@ -3158,4 +3162,11 @@ body.theme-fjordnight {
 
 body.phone #app {
   inset: 22px 0 0 0;
+}
+
+/* Class pictures in the class lists: a little bigger than element icons, so the figure reads. */
+.el-icon[src*='/heroes/'] {
+  width: 30px;
+  height: 30px;
+  vertical-align: -9px;
 }

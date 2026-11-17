@@ -413,6 +413,7 @@ export class TownView {
       classUnlocked(this.game, id)
         ? {
             label: CLASSES[id].name,
+            icon: `art/heroes/${id}-0.webp`,
             detail: CLASSES[id].row === 'front' ? 'front row' : 'back row',
             description: CLASSES[id].description,
             onSelect: () => this.chooseLook(id),

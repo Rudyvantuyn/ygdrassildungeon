@@ -154,6 +154,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private deedBanner!: DeedBanner;
   /** A Wyrdweave run in progress: its day and how many floors are cleared. */
   private wyrd: { day: number; cleared: number } | null = null;
+  /** The picture of the story scene playing now, if it has one. */
+  private storyImage: string | undefined;
   /** The Wyrdweave's Bloodless rule: no healing outside of fights. */
   private noFieldHealing = false;
   private story: { lines: StoryLine[]; index: number; shown: number; then: () => void; box: HTMLElement } | null = null;
@@ -331,6 +333,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     }
     if ((this.mode === 'combat' || this.photoOf === 'combat') && this.combatView) {
       this.combatView.draw(ctx, VIEW_W, VIEW_H, time);
+    } else if (this.mode === 'story' && this.storyImage && sprite(this.storyImage)) {
+      // A scene with a picture of its own, filling the view.
+      const img = sprite(this.storyImage)!;
+      const k = Math.max(VIEW_W / img.naturalWidth, VIEW_H / img.naturalHeight);
+      const w = img.naturalWidth * k, h = img.naturalHeight * k;
+      ctx.drawImage(img, (VIEW_W - w) / 2, (VIEW_H - h) / 2, w, h);
     } else if (this.game?.state.location === 'town') {
       // During the story the whole town is shown, without a caption under the text box.
       const story = this.mode === 'story';
@@ -344,6 +352,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.corridor.draw(this.game, time);
     }
     ctx.restore();
+    // With the town's side panel up but no town cards (title, founding, story scenes), the side would only show an
+    // empty box: the picture then stands alone, centred.
+    this.stage.classList.toggle('scene', !this.townPanel.classList.contains('hidden') && this.townGrid.classList.contains('hidden'));
     this.drawFx(time);
     if (this.mode === 'editor') this.mapEditor?.draw(time);
     if (this.game && this.mode !== 'combat' && this.game.state.location === 'dungeon') drawMinimap(this.minimap, MAP_SIZE, this.game, time, undefined, MAP_ZOOMS[prefs.mapZoom] ?? 1, this.runes.readHere());
@@ -582,7 +593,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.showSide('town');
     this.town.show();
     this.updateHud();
-    this.party.render(this.game.state.party);
+    // No party yet on the title screen: the cards fill in as adventurers swear the oath.
+    this.party.render([]);
     const hasSave = readSave() !== null;
     const menu = new ListMenu(
       [
@@ -758,7 +770,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.mode = 'town';
     };
     // Tips noticed out of a fight (a deed earned in town, say) are shown here too, rather than on the next descent.
-    const queue = ['town', ...this.tipQueue.splice(0)];
+    const queue = ['town', ...this.nextNoticed()];
     if (s.party.some((m) => unspentPoints(m) > 0)) queue.push('skillPoints');
     if ((s.inventory.oathToken ?? 0) > 0) queue.push('oath');
     this.tips(queue, back);
@@ -785,7 +797,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     // The story belongs to your own hall; expeditions skip it.
     if (this.coop) return;
     const tips = () => {
-      const queue = ['firstStep', ...this.tipQueue.splice(0)];
+      const queue = ['firstStep', ...this.nextNoticed()];
       if (def.prowlers.length) queue.push('prowler');
       if (this.game.state.floor >= 1 && !this.trial && !this.wyrd) queue.push('photo');
       if (this.game.state.floor > 0 && this.game.state.floor % FLOORS_PER_CHAPTER === 0 && !this.trial && !this.wyrd) queue.push('chapterHome');
@@ -808,6 +820,17 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
 
   /** Tips noticed during a fight, shown once the party is exploring again. */
   private tipQueue: string[] = [];
+
+  /**
+   * The one noticed tip to show at this calm moment (the others wait for the next): a new player gets one short tip at
+   * a time, not a stack of them after their first fight.
+   */
+  private nextNoticed(): string[] {
+    const seen = this.game.state.tips ?? [];
+    this.tipQueue = this.tipQueue.filter((id) => !seen.includes(id));
+    const next = this.tipQueue.shift();
+    return next ? [next] : [];
+  }
 
   /** Remembers a tip to show at the next calm moment (used during fights). */
   noticeTip(id: string): void {
@@ -1182,7 +1205,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       return;
     }
     markSeen(this.game, scene.id);
+    if (scene.image) sprite(scene.image);
+    this.storyImage = scene.image;
     this.playLines(scene.lines, () => {
+      this.storyImage = undefined;
       if (scene.choice && !this.game.state.choices?.[scene.id]) this.tips(['choice'], () => this.storyChoice(scene, () => then(scene.id)));
       else then(scene.id);
     });
@@ -1492,6 +1518,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     for (const ev of events) this.handleStep(ev);
     this.updateHud();
     if (this.mode === 'explore' && !this.trial) this.runes.stepped(true);
+    // The danger orb is explained the first time it turns yellow, when the player can see what it means.
+    if (this.mode === 'explore' && !this.trial && !this.wyrd && this.game.dangerLevel >= 0.45 && !this.game.state.tips?.includes('danger')) {
+      this.tips(['danger'], () => this.resumeExplore());
+    }
   }
 
   private handleStep(ev: StepEvent): void {

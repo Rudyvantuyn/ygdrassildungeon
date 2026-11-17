@@ -17,10 +17,8 @@ export const TIPS: TipDef[] = [
     title: 'Lindholm',
     speaker: 'sigrid',
     pages: [
-      'This is Lindholm. Everything you need before a descent is here.',
-      'Rest at the Sleeping Stag to heal. Hilde\'s shop sells supplies and gear. The notice board has paid requests.',
-      'The Oath Hall is where Wayfinders swear the Pact and parties are formed. The Rootdeep entrance is past the well.',
-      'Wayfinders who rush in die. Wayfinders who come back, a little stronger each time, reach the bottom.',
+      'This is Lindholm. Rest at the Sleeping Stag, buy supplies and gear at Hilde\'s, take paid requests from the notice board, and form your party at the Oath Hall.',
+      'The Rootdeep lies past the well. Wayfinders who rush in die; those who come back a little stronger each time reach the bottom.',
     ],
   },
   {
@@ -28,22 +26,23 @@ export const TIPS: TipDef[] = [
     title: 'Into the Rootdeep',
     speaker: 'sigrid',
     pages: [
-      'Move with the arrow keys or the buttons. On a phone you can also swipe the view: up to walk, sideways to turn.',
-      'The danger orb turns from blue to yellow to red as you walk. Red means a fight is close.',
-      'The roots of the Great Tree always lead home: the stairs up take you back toward Lindholm. Turning back in time is no shame.',
-      'Every descent starts at the beginning of a chapter: the gods\' wards let no one in halfway. Beat its guardian to open the next.',
-      'Use Act to open chests, drink from springs and gather. The menu (Esc or ☰) holds your party, bag, journal and options.',
+      'Walk with the arrow keys, WASD or the buttons. On a phone, swipe the view: up to walk, sideways to turn.',
+      'Act opens chests, drinks from springs and gathers. The menu (Esc or ☰) holds your party, bag, journal and options. The stairs up always lead back toward Lindholm.',
     ],
+  },
+  {
+    id: 'danger',
+    title: 'The danger orb',
+    speaker: 'sigrid',
+    pages: ['See the orb by the map turning yellow? It goes from blue to yellow to red as you walk. Red means a fight is close.'],
   },
   {
     id: 'map',
     title: 'Drawing the map',
     speaker: 'ylva',
     pages: [
-      'The Rootdeep has never been mapped: before the Pact, nobody was allowed down. The map in the corner fills in where you have walked, and marks the stairs, chests, springs and gathering spots you come upon.',
-      'Open Map to draw the walls yourself, and your own marks: danger, notes, or anything the map missed.',
-      'You can also draw on the small map while you walk: pick Wall, Floor or Erase under it and draw with the mouse or a finger.',
-      'Not one for drawing? Choose Auto under Map drawing in Settings (or on the map itself) and the map draws itself. Manual leaves everything to you.',
+      'The Rootdeep has never been mapped. The map in the corner fills in where you walk and marks the stairs, chests, springs and gathering spots you come upon. Draw the walls yourself, here or on the small map.',
+      'Not one for drawing? Under Map drawing in Settings, Auto draws everything and Manual leaves everything to you.',
     ],
   },
   {
@@ -51,11 +50,8 @@ export const TIPS: TipDef[] = [
     title: 'Your first fight',
     speaker: 'brynja',
     pages: [
-      'Choose a command for every adventurer, then the round plays out. Faster fighters act first.',
-      'The front row takes most blows. The back row is safer, but weapons hit for half there, except bows.',
-      'Skills cost SP. Every foe is weak to something: fire, frost or storm. A weakness hit does half again as much.',
-      'Defend halves the damage you take this round. Fleeing works often against small fry, never against a boss.',
-      'Repeat does last round again. Auto lets the party fight on its own; stop it with Esc or a tap. Battle speed is in Settings.',
+      'Choose a command for every adventurer, then the round plays out. The front row takes most blows; the back row is safer, but only bows hit at full strength from there.',
+      'Every foe is weak to fire, frost or storm: a weakness hit does half again as much. Skills cost SP. R repeats last round, O lets the party fight on its own.',
     ],
   },
   {
@@ -63,9 +59,8 @@ export const TIPS: TipDef[] = [
     title: 'Growing stronger',
     speaker: 'brynja',
     pages: [
-      'Every fight gives experience. Levels come slowly; that is how the Rootdeep is. What dies in Ymir\'s body grows back, so there is always more to fight.',
-      'Each level brings a skill point. A ✦ on a card means points are waiting to be spent.',
-      'Monsters also leave materials. Sell them at Hilde\'s shop for gold.',
+      'Every fight gives experience and often materials to sell at Hilde\'s. Levels come slowly; that is how the Rootdeep is.',
+      'Each level brings a skill point. A ✦ on a card means points are waiting.',
     ],
   },
   {
@@ -73,10 +68,8 @@ export const TIPS: TipDef[] = [
     title: 'Skill points',
     speaker: 'brynja',
     pages: [
-      'Spend skill points in the Oath Hall (Skills) or anywhere from the menu (Party, then Skill tree).',
-      'Every skill goes from rank 1 to 10 and gets stronger with each rank. Some need a level, or another skill first.',
-      'Skills marked ◇ work on their own: they raise a stat for good.',
-      'Choose with care: the Oath Hall can let an adventurer unlearn everything, but it costs gold.',
+      'Spend skill points in the Oath Hall or from the menu (Party, Skill tree). Every skill goes from rank 1 to 10; some need a level or another skill first.',
+      'Skills marked ◇ work on their own and raise a stat for good. Choose with care: unlearning everything at the Oath Hall costs gold.',
     ],
   },
   {
@@ -219,8 +212,7 @@ export const TIPS: TipDef[] = [
     title: 'The Book of Deeds',
     speaker: 'brynja',
     pages: [
-      'That was a deed worth a medal. Lindholm keeps a book of them: you will find yours in the Journal.',
-      'Nobody will tell you what counts as a deed. Some are earned by courage, some by patience, and some by doing something nobody else would think of.',
+      'That was a deed worth a medal. Lindholm keeps a book of them in your Journal. Nobody will tell you what counts as a deed.',
     ],
   },
   {

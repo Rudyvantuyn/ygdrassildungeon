@@ -130,6 +130,7 @@ export class Founding {
       const c = CLASSES[id];
       return {
         label: c.name,
+        icon: `art/heroes/${id}-0.webp`,
         detail: c.row === 'front' ? 'starts in front' : 'starts in back',
         description: `${c.description}\n${c.row === 'front' ? 'Starts in the front row, where the blows land.' : 'Starts in the back row: safer, but weapons hit weaker there (bows excepted).'} The row can be changed in the Oath Hall.`,
         onSelect: () => this.chooseLook(id),
