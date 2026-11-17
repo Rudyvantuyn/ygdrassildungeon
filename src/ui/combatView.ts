@@ -429,6 +429,11 @@ export class CombatView {
 
   // ── Input ──────────────────────────────────────────────────────────────────
 
+  /** True while the party is choosing commands (nothing is moving), e.g. for taking a picture. */
+  get choosing(): boolean {
+    return !this.playing && !!this.menu;
+  }
+
   handleKey(key: string): boolean {
     if (this.playing) {
       if (key === 'Enter' || key === ' ' || key === 'z' || key === 'Z') this.fast = true;

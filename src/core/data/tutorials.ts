@@ -308,6 +308,15 @@ export const TIPS: TipDef[] = [
     pages: ['Folk post their troubles here. Take a request, do it down below, and come back for the reward.'],
   },
   {
+    id: 'photo',
+    title: 'A picture for the saga',
+    speaker: 'brynja',
+    pages: [
+      'Deeper already! Some sights down there deserve to be remembered.',
+      'Press P (or Take a picture under Journal in the menu) for a clean picture of what you see, with your party under it. Save it, copy it into a chat or share it from your phone.',
+    ],
+  },
+  {
     id: 'discord',
     title: 'Tales by the fire',
     speaker: 'gerd',

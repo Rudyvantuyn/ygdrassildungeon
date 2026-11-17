@@ -14,6 +14,7 @@ export const CHANGES: ChangeDay[] = [
     changes: [
       'New: after a Wyrdweave run, Copy my run to share puts a few lines on your clipboard (the day\'s rules, how far you got, your threads) to paste in the Discord or anywhere.',
       'New: a tip after your first guardian about the Discord, where Wayfinders trade tales, runs and byname ideas.',
+      'New: photo mode. Press P (or Take a picture under Journal) for a clean picture of the view with your party and the game\'s name under it, to save, copy or share. Works while exploring, in town and between rounds of a fight.',
     ],
   },
   {

@@ -6,7 +6,7 @@ import type { ChartMode } from '../core/chart';
 import type { Combat } from '../core/combat';
 import { ENEMIES } from '../core/data/enemies';
 import { FLOORS } from '../core/data/floors';
-import { CHAPTERS } from '../core/data/chapters';
+import { CHAPTERS, chapterOf } from '../core/data/chapters';
 import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
 import { ELEMENT_NAMES, elementIcon } from './elements';
 import { EQUIPMENT } from '../core/data/equipment';
@@ -36,6 +36,7 @@ import { CoopSession, type CoopHost } from './coopSession';
 import { Hornstone, shareLines, type HornstoneHost } from './hornstone';
 import { online, type ExpeditionRow } from '../net/online';
 import { copyText, el, floater } from './dom';
+import { canSharePhoto, copyPhoto, makePhoto, photoBlob, photoName, savePhoto, sharePhoto } from './photo';
 import { MapEditor } from './mapEditor';
 import { SideMapPen } from './sideMap';
 import { Designer, isMaker, loadDraft } from './designer';
@@ -163,6 +164,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   private lastMove = 0;
   private stepDir = { forward: 1, right: 0 };
   private toastTimer = 0;
+  /** While a picture is shown: the mode it was taken in (the view behind keeps drawing that). */
+  private photoOf: Mode | null = null;
   private now = 0;
 
   constructor(root: HTMLElement) {
@@ -326,7 +329,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       const k = (time - this.fx.start) / 220;
       if (k < 1) ctx.translate(Math.sin(k * 30) * 8 * (1 - k), 0);
     }
-    if (this.mode === 'combat' && this.combatView) {
+    if ((this.mode === 'combat' || this.photoOf === 'combat') && this.combatView) {
       this.combatView.draw(ctx, VIEW_W, VIEW_H, time);
     } else if (this.game?.state.location === 'town') {
       // During the story the whole town is shown, without a caption under the text box.
@@ -438,6 +441,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   // ── Input ──────────────────────────────────────────────────────────────────
 
   private onKey(key: string): boolean {
+    if ((key === 'p' || key === 'P') && this.canPhoto()) {
+      void this.takePhoto();
+      return true;
+    }
     switch (this.mode) {
       case 'title':
       case 'overlay':
@@ -770,6 +777,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const tips = () => {
       const queue = ['firstStep', ...this.tipQueue.splice(0)];
       if (def.prowlers.length) queue.push('prowler');
+      if (this.game.state.floor >= 1 && !this.trial && !this.wyrd) queue.push('photo');
       if (def.boss && !this.game.progress.bossDefeated) queue.push('boss');
       this.tips(queue, () => {
         this.closeOverlay();
@@ -1093,6 +1101,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             ['Space / Act', 'Open chests, drink from springs, gather'],
             ['M', 'Map: draw walls, marks and notes (1–9, 0 pick a tool, N a note)'],
             ['C / Esc', 'Menu: Party, Bag, Journal, Options'],
+            ['P', 'Take a picture to save or share (also in a fight and in town)'],
             ['H', 'This help'],
           ]),
           section('Fighting', [
@@ -1924,6 +1933,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
               ...(shardsFound(this.game)
                 ? [{ label: 'Memories', detail: String(shardsFound(this.game)), description: 'The memory shards you have found, each in its place.', onSelect: () => showMemories(this.game, (c, m) => this.openOverlay(c, m), back) }]
                 : []),
+              { label: 'Take a picture', detail: 'P', description: 'A clean picture of what you see, with your party and the game\'s name under it. Save it, copy it or share it.', onSelect: () => void this.takePhoto(back) },
               { label: 'Chronicle', description: 'The story so far: read every scene again.', onSelect: () => this.showChronicle(back) },
               { label: 'Guidebook', description: 'Read every tip again, and switch tips on or off.', onSelect: () => this.showGuidebook(back) },
               { label: 'Bestiary', description: 'Every monster you have met: where it lives, what it leaves behind, and the weaknesses you have found.', onSelect: () => this.tips(['bestiary'], () => this.showBestiary(back)) },
@@ -2337,6 +2347,73 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       { onCancel: no },
     );
     this.openOverlay(el('div', { className: 'panel dialog' }, [el('h2', { text: title }), el('p', { text }), menu.el]), menu);
+  }
+
+  // ── Photo mode ─────────────────────────────────────────────────────────────
+
+  private canPhoto(): boolean {
+    if (!this.game || this.game === this.titleGame || this.story) return false;
+    if (this.mode === 'combat') return !!this.combatView?.choosing;
+    return this.mode === 'explore' || this.mode === 'town';
+  }
+
+  /** Where a picture was taken, for its caption. */
+  private photoPlace(): string {
+    const g = this.game;
+    if (g.state.location === 'town') return this.combatView && (this.mode === 'combat' || this.photoOf === 'combat') ? 'The Hall of Echoes, Lindholm' : 'Lindholm';
+    if (this.wyrd) return `The Wyrdweave · ${g.floorDef.name}`;
+    return `${chapterOf(g.state.floor).name} · ${g.floorDef.name}`;
+  }
+
+  /** Photo mode: takes a clean picture of the view and offers to copy, share or save it. `back` returns to a menu. */
+  async takePhoto(back?: () => void): Promise<void> {
+    const from = this.mode;
+    // Freeze the view at once; the frames go on drawing behind the dialog.
+    const view = document.createElement('canvas');
+    view.width = VIEW_W;
+    view.height = VIEW_H;
+    const vctx = view.getContext('2d')!;
+    // In town: the whole of Lindholm, without a building's caption.
+    if (from === 'town' || (this.game.state.location === 'town' && !this.combatView)) drawTownScene(vctx, VIEW_W, VIEW_H, this.now, null, false, false);
+    else vctx.drawImage(this.view.canvas, 0, 0);
+    const place = this.photoPlace();
+    this.mode = 'busy';
+    const resume = () => {
+      this.closeOverlay();
+      this.photoOf = null;
+      if (back) return back();
+      if (from === 'combat') this.mode = 'combat';
+      else if (from === 'town') {
+        this.mode = 'town';
+        this.town.show();
+      } else this.enterExplore();
+    };
+    const picture = await makePhoto(view, { place, party: this.game.state.party });
+    const blob = await photoBlob(picture);
+    if (!blob) {
+      this.mode = from;
+      this.toast('The picture could not be made in this browser.');
+      return;
+    }
+    audio.play('menuSelect');
+    const name = photoName();
+    const url = URL.createObjectURL(blob);
+    const items: MenuItem[] = [
+      ...(typeof ClipboardItem !== 'undefined'
+        ? [{ label: 'Copy picture', description: 'Paste it straight into Discord or a chat.', onSelect: () => void copyPhoto(blob).then((ok) => this.toast(ok ? 'Copied! Paste it anywhere.' : 'This browser cannot copy pictures: save it instead.')) }]
+        : []),
+      ...(canSharePhoto(blob, name) ? [{ label: 'Share…', description: 'Send it with your phone\'s share menu.', onSelect: () => void sharePhoto(blob, name) }] : []),
+      { label: 'Save picture', description: `Saves it as ${name}.`, onSelect: () => { savePhoto(blob, name); this.toast('Picture saved.'); } },
+    ];
+    const menu = new ListMenu(items, { onCancel: () => { URL.revokeObjectURL(url); resume(); } });
+    if (from === 'combat') this.photoOf = 'combat';
+    const img = el('img', { className: 'photo-preview' }) as HTMLImageElement;
+    img.src = url;
+    img.alt = 'Your picture';
+    this.openOverlay(
+      el('div', { className: 'panel dialog wide photo' }, [el('h2', { text: 'A picture for the saga' }), img, menu.el]),
+      menu,
+    );
   }
 
   openOverlay(content: HTMLElement, menu: ListMenu, mode: Mode = 'overlay'): void {
