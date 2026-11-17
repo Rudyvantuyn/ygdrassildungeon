@@ -286,8 +286,8 @@ export const TIPS: TipDef[] = [
     title: 'The way home',
     speaker: 'sigrid',
     pages: [
-      'A new chapter! The wards at its start let no one in halfway, but they do know the way out.',
-      'Take the stairs up on this first floor and you can go straight home to Lindholm, without climbing back through the chapter before.',
+      'A new chapter lies below! Its wards let no one in halfway, but they do know the way out.',
+      'Worn out after a guardian? Go down, not back up: on the first floor of every chapter, the stairs up take you straight home to Lindholm.',
     ],
   },
   {

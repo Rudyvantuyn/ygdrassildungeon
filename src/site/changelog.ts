@@ -28,6 +28,9 @@ export const CHANGES: ChangeDay[] = [
       'Changed: the title screen, the founding of your party and the story scenes no longer show an empty panel beside the picture, and the title screen no longer shows a party you have not made yet.',
       'Changed: the story of how the world began now has a picture of its own.',
       'New: every class shows its figure in the class list.',
+      'Changed: every tip is now at most two short pages.',
+      'New: Spend as Brynja advises in the skill tree puts the points you have left into a sound build, for anyone unsure how to spend them.',
+      'New: after a chapter\'s last guardian, a tip tells you the quickest way home: down to the next chapter\'s first floor and up its stairs.',
     ],
   },
   {

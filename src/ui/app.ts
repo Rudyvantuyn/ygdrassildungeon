@@ -1743,6 +1743,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       levelUps.push(el('div', { className: 'levelup saga', text: borne ? `The skalds have a name for ${member.name}: ${fullName(member)}!` : `${member.name} earned another byname: ${fullName({ name: member.name, byname: byname.id })}. Choose it in the saga.` }));
     }
     this.noticeTip('victory');
+    // A chapter's last guardian: tell the way home now, before the walk back up.
+    if (combat.boss && !combat.echo && !this.coop && !this.trial && !this.wyrd && this.game.state.floor % FLOORS_PER_CHAPTER === FLOORS_PER_CHAPTER - 1) this.noticeTip('chapterHome');
     // After the first guardian, once: the community, at the moment a player is most pleased with the game.
     if (combat.boss && !combat.echo && !this.coop && !this.trial) this.noticeTip('discord');
     if (r.levelUps.length) this.noticeTip('skillPoints');

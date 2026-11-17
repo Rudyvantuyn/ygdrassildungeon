@@ -1,7 +1,7 @@
 /** The skill tree screen: spend skill points, one rank at a time. Used from the Oath Hall and the pack. */
 import { CLASSES } from '../core/data/classes';
 import { SKILLS, type SkillDef } from '../core/data/skills';
-import { fullScaleRank, maxRankOf, rankOf, rankedSkill, raiseBlocker, raiseSkill, unspentPoints } from '../core/skilltree';
+import { autoSpend, fullScaleRank, maxRankOf, rankOf, rankedSkill, raiseBlocker, raiseSkill, unspentPoints } from '../core/skilltree';
 import type { Member, SkillId, Stats } from '../core/types';
 import { audio } from '../audio/audio';
 import { el } from './dom';
@@ -63,9 +63,25 @@ export function showSkillTree(host: SkillsHost, m: Member, back: () => void, sta
       },
     };
   });
+  const points = unspentPoints(m);
+  // For players who would rather not plan a build: the same build the game's own tests play with.
+  if (points > 0) {
+    items.push({
+      label: 'Spend as Brynja advises',
+      detail: `${points} point${points === 1 ? '' : 's'}`,
+      description: `Puts the points you have left into the skills Brynja recommends for a ${CLASSES[m.classId].name}: a sound build if you are unsure. You can still choose every point yourself instead.`,
+      onSelect: () => {
+        autoSpend(m);
+        if (unspentPoints(m) < points) {
+          audio.play('levelUp');
+          host.changed();
+        }
+        showSkillTree(host, m, back, items.length - 2);
+      },
+    });
+  }
   items.push({ label: 'Done', description: 'Close the skills. Points you have not spent stay for later.', onSelect: back });
   const menu = new ListMenu(items, { onCancel: back, startIndex: start });
-  const points = unspentPoints(m);
   host.dialog(`${m.name} · ${CLASSES[m.classId].name} skills`, [
     el('p', { className: 'gold-line', text: points > 0 ? `Skill points to spend: ${points}` : 'No skill points left. Every level brings a new one.' }),
   ], menu);
