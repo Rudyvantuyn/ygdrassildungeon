@@ -92,8 +92,7 @@ export const TIPS: TipDef[] = [
     title: 'Gathering',
     speaker: 'torvald',
     pages: [
-      'Glowing medallions over the floor mark gathering spots: plants (a green sprig), ore (blue crystals), wood (an axe) and fish.',
-      'Someone in the party needs the matching skill: Forage, Mine, Fell or Fish. They are in every skill tree.',
+      'Glowing medallions over the floor mark gathering spots: plants, ore, wood and fish. Someone in the party needs the matching skill (Forage, Mine, Fell or Fish); every skill tree has them.',
       'Each spot gives two tries per descent. Higher ranks find more, and rarer things. The noise can draw monsters.',
     ],
   },
@@ -111,11 +110,8 @@ export const TIPS: TipDef[] = [
     title: 'Buffs and curses',
     speaker: 'brynja',
     pages: [
-      'Some skills raise or lower attack, defence, magic or resistance for a few rounds.',
-      'You see them as ATK▲ or DEF▼ on the cards and under foes. Plus 20% attack means 20% more damage.',
-      'They do not stack: each stat holds one effect. The stronger one stays, and casting again makes it last longer.',
-      'So two attack songs on one fighter are wasted. Spread them out: attack on the hitters, defence on the front row.',
-      'A magic boost on a healer makes their heals stronger too.',
+      'Some skills raise or lower attack, defence, magic or resistance for a few rounds: ATK▲ or DEF▼ on the cards and under foes. Plus 20% attack means 20% more damage.',
+      'They do not stack: each stat holds one effect, the stronger one stays. Spread them out: attack on the hitters, defence on the front row. More magic on a healer means stronger heals.',
     ],
   },
   {
@@ -123,8 +119,7 @@ export const TIPS: TipDef[] = [
     title: 'A fallen friend',
     speaker: 'aske',
     pages: [
-      'An adventurer at 0 HP has fallen. They earn nothing until they are back on their feet.',
-      'Kindling Moss or the Mender\'s Rekindle wakes them. A night at the inn heals everyone, fallen or not.',
+      'An adventurer at 0 HP has fallen and earns nothing until back on their feet. Kindling Moss or the Mender\'s Rekindle wakes them; a night at the inn heals everyone.',
       'If the whole party falls, the roots carry you home to Lindholm, but the deep keeps half of what you found on the way down.',
     ],
   },
@@ -133,10 +128,8 @@ export const TIPS: TipDef[] = [
     title: 'Prowlers',
     speaker: 'sigrid',
     pages: [
-      'That shape in the dark is a prowler: a beast that gorged on Ymir\'s flesh and grew far stronger than anything around it.',
-      'Do not fight one until you are much stronger. There is always a way around; some hunt you if you come close. On the map they show as an orange eye.',
-      'Running from a prowler works only three times in ten, however many of you try.',
-      'The first time you bring one down, it leaves an Oath Token. It is back once you have been to town; its token is not.',
+      'That shape in the dark is a prowler: a beast that gorged on Ymir\'s flesh and grew far stronger than anything around it. Do not fight one until you are much stronger. There is always a way around; some hunt you if you come close.',
+      'Running from a prowler works only three times in ten. The first one you bring down leaves an Oath Token. It is back once you have been to town; its token is not.',
     ],
   },
   {
@@ -172,8 +165,7 @@ export const TIPS: TipDef[] = [
     speaker: 'gerd',
     pages: [
       'You were lucky. The roots carried you up, as they always do, and someone found you at the foot of the Great Tree.',
-      'The deep keeps its toll: half of what you found on this descent, gold, supplies and gathered things alike, stays down there. What you set out with is safe, and so are your gear and Oath Tokens.',
-      'Rest here before you go down again. Nobody wakes from that walk fit to fight.',
+      'The deep keeps half of what you found on this descent. What you set out with is safe, and so are your gear and Oath Tokens. Rest here before you go down again.',
     ],
   },
   {
@@ -181,9 +173,8 @@ export const TIPS: TipDef[] = [
     title: 'Oaths and tokens',
     speaker: 'brynja',
     pages: [
-      'Your first party swore for free. Every oath after that costs gold, more each time, and an Oath Token.',
-      'Oath Tokens are shards of Ymir\'s bone; the realms honour no oath without one. Guardians, prowlers (once each), a few chests and the hardest requests on the Notice Board hold them.',
-      'Adventurers in the hall can swap into the party whenever you are in town.',
+      'Your first party swore for free. Every oath after that costs gold, more each time, and an Oath Token: a shard of Ymir\'s bone, held by guardians, prowlers (once each), a few chests and the hardest requests.',
+      'Adventurers waiting in the hall can swap into the party whenever you are in town.',
     ],
   },
   {
@@ -191,9 +182,8 @@ export const TIPS: TipDef[] = [
     title: 'Raven Runs',
     speaker: 'brynja',
     pages: [
-      'Adventurers waiting in the hall need not sit idle. Send one to three of them scouting on a floor your party has reached; Huginn and Muninn follow them down.',
-      'A run takes real hours: 3, 8 or 14. Come back later to hear what they found. Scouts bring materials home, never gold, and they learn nothing: training happens at your side.',
-      'Every fight on the way is a chance to fall. Send them too deep and they come back wounded, empty-handed, and need twelve hours of rest, or the healer at the Sleeping Stag.',
+      'Adventurers waiting in the hall can go scouting on a floor your party has reached, with Huginn and Muninn. A run takes real hours: 3, 8 or 14. Scouts bring materials home, never gold, and learn nothing.',
+      'Every fight on the way is a chance to fall. Send them too deep and they come back wounded and empty-handed, and need twelve hours of rest or the healer at the Sleeping Stag.',
     ],
   },
   {
@@ -201,10 +191,8 @@ export const TIPS: TipDef[] = [
     title: 'Runestones',
     speaker: 'ketil',
     pages: [
-      'Wayfinders from other halls walk the same roots. Some carve a runestone to warn or guide whoever comes next: step on one to read it.',
-      'Heed a stone that helped you; the carver hears of it in town, with a little gold from grateful Wayfinders. Mark a lying stone False: enough of those and it crumbles.',
-      'You may carve one stone yourself on every descent (Journal, Carve a runestone). Only fixed words: say what is there, where, and what to do.',
-      'Where a whole party fell, a shade lingers. Learn from it.',
+      'Wayfinders from other halls carve runestones to warn or guide whoever comes next: step on one to read it. Heed one that helped you, or mark a lying one False: enough of those and it crumbles.',
+      'You may carve one stone on every descent (Journal, Carve a runestone), with fixed words only. Where a whole party fell, a shade lingers. Learn from it.',
     ],
   },
   {
@@ -229,9 +217,8 @@ export const TIPS: TipDef[] = [
     title: 'Memory shards',
     speaker: 'torvald',
     pages: [
-      'That glow is not from any torch. It is a shard of a memory, and an old one: older than Lindholm, older than the Tree, maybe.',
-      'Every memory has fifteen shards and they come in no order, except the last, which always comes last. Only the whole memory tells you whose it is.',
-      'Read them in the Journal, under Memories, each in its place. Signed in, they also appear on the Memories page of the Wayfinders\' site.',
+      'That glow is not from any torch. It is a shard of a memory, older than Lindholm, older than the Tree, maybe. Every memory has fifteen shards; the last always comes last, and only the whole memory tells you whose it is.',
+      'Read them in the Journal, under Memories. Signed in, they also appear on the Memories page of the Wayfinders\' site.',
     ],
   },
   {
@@ -239,9 +226,8 @@ export const TIPS: TipDef[] = [
     title: 'The Hall of Echoes',
     speaker: 'torvald',
     pages: [
-      'The stone down here remembers every voice that rang in the deep. Burn ten Dream Embers on the hearth and a guardian you have beaten answers, as an echo.',
-      'You choose how strong it rises, in steps of ten levels, up to your strongest adventurer. A stronger echo is likelier to leave a memory shard.',
-      'The embers are spent win or lose. Lose, and the echo only fades: you keep everything else. The fifth guardian leaves a first handful; after that, Dream Embers come from the monsters deeper down.',
+      'Burn ten Dream Embers on the hearth and a guardian you have beaten answers as an echo, as strong as you choose, up to your strongest adventurer. A stronger echo is likelier to leave a memory shard.',
+      'The embers are spent win or lose; lose, and you keep everything else. The fifth guardian leaves a first handful, after that they come from the monsters deeper down.',
     ],
   },
   {
@@ -249,9 +235,8 @@ export const TIPS: TipDef[] = [
     title: 'Sagas and bynames',
     speaker: 'brynja',
     pages: [
-      'The skalds of Lindholm are already singing about one of yours. Do enough of something, and the songs give a person a byname.',
-      'Every fight is told: blows struck, wounds healed, falls, narrow escapes. Read each adventurer\'s saga in the Party menu or at the Oath Hall, and choose which byname they bear.',
-      'A byname is honour, nothing more. It changes nothing in a fight, but it is yours to show, on your page at the Wayfinders\' site too.',
+      'The skalds of Lindholm are already singing about one of yours. Every fight is told, and doing enough of something earns a byname.',
+      'Read each adventurer\'s saga in the Party menu or at the Oath Hall, and choose which byname they bear. A byname is honour only: it changes nothing in a fight.',
     ],
   },
   {
@@ -259,9 +244,8 @@ export const TIPS: TipDef[] = [
     title: 'The Wyrdweave',
     speaker: 'ylva',
     pages: [
-      'At the Well of Urd the Norns weave three floors a day, the same for every Wayfinder. Each floor has a rule of its own: no map, short light, no healing outside of fights.',
-      'Reach the way down of a floor and you may take your Wyrd Threads home, or go deeper. Fall, and half of them slip away. One try a day, and fights there pay half.',
-      'Threads cannot be sold. Hilde weaves them into gear with a gift, but slowly: the first piece takes thirty threads, and each one after more.',
+      'At the Well of Urd the Norns weave three floors a day, the same for every Wayfinder, each with a rule of its own. Reach a floor\'s way down and take your Wyrd Threads home, or go deeper: fall, and half of them slip away.',
+      'One try a day, and fights there pay half. Threads cannot be sold; Hilde weaves them into gear with a gift, slowly: the first piece takes thirty.',
     ],
   },
   {
@@ -278,8 +262,7 @@ export const TIPS: TipDef[] = [
     title: 'Root gates',
     speaker: 'torvald',
     pages: [
-      'Some passages are closed by root gates. They only open from one side: the deep side.',
-      'Once you reach a gate from behind and pull it open, it stays open for good. Next time you walk straight through.',
+      'Some passages are closed by root gates. They only open from the deep side, and once pulled open they stay open for good.',
       'Deeper chapters wind back on themselves: stairs lead up as well as down. Open gates are your shortcuts.',
     ],
   },
@@ -288,8 +271,7 @@ export const TIPS: TipDef[] = [
     title: 'The bestiary',
     speaker: 'ylva',
     pages: [
-      'Every beast you meet goes in here. I keep one too: you learn to read the hills that way.',
-      'Defeat one and you will know its strength and what it leaves behind.',
+      'Every beast you meet goes in here. Defeat one and you will know its strength and what it leaves behind.',
       'Its weaknesses only show once you have tried them: hit it with fire, frost or storm and see what happens.',
     ],
   },
@@ -331,10 +313,8 @@ export const TIPS: TipDef[] = [
     title: 'The Hornstone',
     speaker: 'ketil',
     pages: [
-      'Every town of the Pact has a Hornstone. Blow it and Wayfinders from other halls answer. Each brings one adventurer; up to five make an expedition.',
-      'What you find is shared when it ends; levels and XP always come home. The host may fill empty seats with their own adventurers.',
-      'If the party falls, or everyone leaves mid-fight, the haul is lost. No Oath Tokens are won on expeditions. You need an account to use the horn.',
-      'Want only your friends? Make the horn private and give them the password. If someone goes quiet for a minute, the next player leads; they can still come back.',
+      'Blow the Hornstone and Wayfinders from other halls answer: each brings one adventurer, up to five make an expedition. What you find is shared at the end; levels and XP always come home. You need an account to use it.',
+      'If the party falls, or everyone leaves mid-fight, the haul is lost, and expeditions win no Oath Tokens. Want only friends? Make the horn private and share the password.',
     ],
   },
 ];
