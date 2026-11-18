@@ -29,6 +29,7 @@ export const CHANGES: ChangeDay[] = [
       'Changed: the story of how the world began now has a picture of its own.',
       'New: every class shows its figure in the class list.',
       'Changed: every tip is now at most two short pages.',
+      'Changed: after the roots carry a fallen party home, the first night at the Sleeping Stag is free, so you are never sent down again with 1 HP for want of gold.',
       'Fixed: on Stormcrown XIX a chest that can only be reached from an ore vein could never be opened (Act always mined). A closed chest ahead now comes first.',
       'New: Spend as Brynja advises in the skill tree puts the points you have left into a sound build, for anyone unsure how to spend them.',
       'New: after a chapter\'s last guardian, a tip tells you the quickest way home: down to the next chapter\'s first floor and up its stairs.',

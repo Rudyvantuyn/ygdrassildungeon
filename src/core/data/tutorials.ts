@@ -165,7 +165,7 @@ export const TIPS: TipDef[] = [
     speaker: 'gerd',
     pages: [
       'You were lucky. The roots carried you up, as they always do, and someone found you at the foot of the Great Tree.',
-      'The deep keeps half of what you found on this descent. What you set out with is safe, and so are your gear and Oath Tokens. Rest here before you go down again.',
+      'The deep keeps half of what you found on this descent. What you set out with is safe, and so are your gear and Oath Tokens. Rest before you go down again: tonight it costs nothing.',
     ],
   },
   {

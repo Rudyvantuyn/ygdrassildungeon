@@ -7,6 +7,9 @@ import type { ItemId, Member, Stats } from './types';
 
 /** Price of a night at the inn: scales with the party's levels. */
 export function innCost(game: Game): number {
+  // The first night after the roots carry a fallen party home is on the house: otherwise a party that lost half its
+  // gold could be left unable to rest, sent down again with 1 HP, and fall again.
+  if (game.state.freeNight) return 0;
   return 10 + game.state.party.reduce((sum, m) => sum + m.level * 3, 0);
 }
 
@@ -15,6 +18,7 @@ export function restAtInn(game: Game): boolean {
   const cost = innCost(game);
   if (game.state.gold < cost) return false;
   game.state.gold -= cost;
+  delete game.state.freeNight;
   fullRestore(game.state.party);
   return true;
 }

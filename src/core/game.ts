@@ -125,6 +125,8 @@ export interface GameState {
   deeds?: Record<string, EarnedDeed>;
   /** Counters for deeds. */
   counters?: Partial<Record<DeedCounter, number>>;
+  /** The roots just carried the party home: the next night at the inn is free (see `innCost`). */
+  freeNight?: boolean;
   /** The party came onto this floor from above (not back up its stairs), so its stairs down can count for the Pacifist's Walk. */
   fromAbove?: boolean;
   /** Where the party last walked into a wall (for a deed). */
@@ -601,6 +603,7 @@ export class Game {
       loss.materials[id] = lost;
     }
     for (const m of s.party) if (m.hp <= 0) m.hp = 1;
+    s.freeNight = true;
     delete s.fighting;
     count(this, 'carriedHome');
     this.returnToTown();

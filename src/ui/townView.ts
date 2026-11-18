@@ -105,7 +105,7 @@ export class TownView {
     const s = this.game.state;
     const places: Place[] = [
       { spot: 'rootdeep', name: 'The Rootdeep', detail: '', description: 'Descend from the start of a chapter you have opened.', onSelect: () => this.rootdeep() },
-      { spot: 'inn', name: 'The Sleeping Stag', detail: `Rest · ${innCost(this.game)} G`, description: 'Rest to restore HP and SP, wake the fallen, and save.', onSelect: () => this.host.tips(['inn'], () => this.inn()) },
+      { spot: 'inn', name: 'The Sleeping Stag', detail: innCost(this.game) ? `Rest · ${innCost(this.game)} G` : 'Rest · free tonight', description: 'Rest to restore HP and SP, wake the fallen, and save.', onSelect: () => this.host.tips(['inn'], () => this.inn()) },
       { spot: 'shop', name: "Hilde's Supplies", detail: 'Shop', description: 'Buy items and gear, sell materials. Better gear appears as you go deeper.', onSelect: () => this.host.tips(['shop'], () => this.shop()) },
       { spot: 'hall', name: 'The Oath Hall', detail: ravenBadge(this.game) ? `Ravens: ${ravenBadge(this.game)}` : 'Party · Skills', description: 'Swear in adventurers, choose who walks in the party, spend skill points.', onSelect: () => this.host.tips((s.oaths ?? 0) >= FOUNDING_OATHS ? ['oath', 'skillPoints'] : ['skillPoints'], () => this.hall()) },
       { spot: 'board', name: 'The Notice Board', detail: this.boardBadge() || 'Requests', description: 'Requests from the people of Lindholm. Finished work pays well.', onSelect: () => this.host.tips(['quests'], () => this.board()) },
@@ -190,7 +190,8 @@ export class TownView {
     const menu = new ListMenu(
       [
         {
-          label: `Rest (${cost} G)`,
+          label: cost ? `Rest (${cost} G)` : 'Rest (free tonight)',
+          description: cost ? undefined : 'Gerd asks nothing of those the roots carry home. This night is on the house.',
           disabled: this.game.state.gold < cost,
           onSelect: () => {
             restAtInn(this.game);
@@ -217,7 +218,7 @@ export class TownView {
       ],
       { onCancel: back },
     );
-    this.dialog('The Sleeping Stag', [npcSays('gerd', `"Welcome, explorers! A warm bed and a hot meal for ${cost} gold."`)], menu);
+    this.dialog('The Sleeping Stag', [npcSays('gerd', cost ? `"Welcome, explorers! A warm bed and a hot meal for ${cost} gold."` : '"The roots brought you home again? Sit down, sit down. Tonight you pay nothing: a warm bed and a hot meal, on the house."')], menu);
   }
 
   private woundedHere(): Member[] {

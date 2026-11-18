@@ -284,3 +284,20 @@ describe('chests beside a gathering spot', () => {
     expect(found).toBe(true);
   });
 });
+
+describe('the night after a fall', () => {
+  it('is free once, then the inn costs again', async () => {
+    const { Game } = await import('./game');
+    const { innCost, restAtInn } = await import('./town');
+    const g = Game.newGame(2);
+    const price = innCost(g);
+    expect(price).toBeGreaterThan(0);
+    g.enterFloor(0, true);
+    g.state.party.forEach((m) => (m.hp = 0));
+    g.carriedHome();
+    g.state.gold = 0;
+    expect(innCost(g)).toBe(0);
+    expect(restAtInn(g)).toBe(true);
+    expect(innCost(g)).toBe(price);
+  });
+});
