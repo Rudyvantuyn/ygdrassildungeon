@@ -124,6 +124,23 @@ export interface GearOffer {
  * What the shop has for one adventurer: everything they can wear, best gains first (weapons, then armour). An upgrade
  * is a piece that adds more than it takes away compared to what they wear now.
  */
+/**
+ * The short list the shop shows first, per slot: what is worn now, the best upgrade, and the best upgrade the party can
+ * pay for if that is another piece. Everything else is one click away.
+ */
+export function featuredGear(game: Game, m: Member): GearOffer[] {
+  const offers = gearFor(game, m);
+  const keep = new Set<GearOffer>();
+  for (const slot of ['weapon', 'armor'] as const) {
+    const mine = offers.filter((o) => o.gear.slot === slot);
+    const worn = mine.find((o) => o.worn);
+    const ups = mine.filter((o) => o.upgrade);
+    const affordable = ups.find((o) => netPrice(m, o.gear) <= game.state.gold);
+    for (const o of [worn, ups[0], affordable]) if (o) keep.add(o);
+  }
+  return offers.filter((o) => keep.has(o));
+}
+
 export function gearFor(game: Game, m: Member): GearOffer[] {
   return equipmentForSale(game)
     .filter((e) => canEquip(m, e))

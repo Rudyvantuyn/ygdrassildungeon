@@ -24,7 +24,7 @@ import {
   netPrice,
   restAtInn,
   statDelta,
-  gearFor,
+  featuredGear, gearFor,
   tradeInValue,
 } from '../core/town';
 import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, canSwitchRow, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow, oathCost, FOUNDING_OATHS, cleanName } from '../core/guild';
@@ -671,13 +671,15 @@ export class TownView {
   private shopFor(index: number, showAll: boolean, start: number, back: () => void): void {
     const m = this.game.state.party[index];
     const offers = gearFor(this.game, m);
-    const shown = offers.filter((o) => showAll || o.upgrade || o.worn);
+    const featured = new Set(featuredGear(this.game, m).map((o) => o.gear.id));
+    const shown = offers.filter((o) => showAll || featured.has(o.gear.id));
     const hidden = offers.length - shown.length;
+    const best = new Set(['weapon', 'armor'].map((slot) => offers.find((o) => o.gear.slot === slot && o.upgrade)?.gear.id));
     const items: MenuItem[] = shown.map((o, i) => {
       const cost = netPrice(m, o.gear);
       const delta = Object.entries(o.delta).map(([k, v]) => `${STAT_LABELS[k as keyof Stats]} ${v! > 0 ? '+' : ''}${v}`).join(', ');
       return {
-        label: `${o.upgrade ? '▲ ' : ''}${o.gear.requires ? '★ ' : ''}${o.gear.name}`,
+        label: `${o.upgrade ? '▲ ' : ''}${o.gear.requires ? '★ ' : ''}${o.gear.name}${best.has(o.gear.id) ? ' (best)' : ''}`,
         detail: o.worn ? 'worn' : `${cost} G`,
         description: `${o.gear.slot === 'weapon' ? 'Weapon' : 'Armour'} · ${bonusText(o.gear)}${m[o.gear.slot] && !o.worn ? ` · against ${EQUIPMENT[m[o.gear.slot]!].name}: ${delta || 'no change'} (traded in for half price)` : ''}`,
         disabled: o.worn || this.game.state.gold < cost,
@@ -686,8 +688,8 @@ export class TownView {
     });
     if (hidden > 0 || showAll) {
       items.push({
-        label: showAll ? 'Only show upgrades' : `Show older gear (${hidden})`,
-        description: showAll ? 'Hide the pieces that are not better than what is worn now.' : 'Pieces that are not better than what is worn now.',
+        label: showAll ? 'Show the short list' : `Show all gear (${hidden} more)`,
+        description: showAll ? 'Back to what is worn now, the best upgrade and the best one you can pay for.' : 'Every other piece that fits, including smaller upgrades and older gear.',
         onSelect: () => this.shopFor(index, !showAll, 0, back),
       });
     }
