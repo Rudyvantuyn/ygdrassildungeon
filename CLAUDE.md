@@ -173,6 +173,9 @@ Add new names there and keep the glossary in sync.
   pinned to the pushed commit: an `index.ts` that imports
   `https://cdn.jsdelivr.net/gh/rudyvantuyn/ygdrassildungeon@<commit>/server/build/expedition.js` (verify_jwt off;
   the function checks tokens itself). Only that function writes the `expeditions` table.
+- **Progress counts** (`src/net/milestones.ts`): anonymous tallies per day and step in the `milestones` table, bumped once per
+  browser through the `bump_milestone` function (a fixed list of steps). Nobody can read the table through the API; read it with SQL
+  to see where new players stop. Keep `public/privacy.html` in step when adding a step.
 - Player feedback and crash reports land in the `reports` table. Players can only insert; only the owner's confirmed
   account (rudyvantuyn@gmail.com, checked by `is_report_owner()`) can read and delete them, on `inbox.html`.
   The owner deletes what is not useful; pick up what is left (read it with SQL) and fix it.

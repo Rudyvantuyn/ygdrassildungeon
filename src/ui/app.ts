@@ -36,6 +36,7 @@ import { CoopSession, type CoopHost } from './coopSession';
 import { Hornstone, shareLines, type HornstoneHost } from './hornstone';
 import { online, type ExpeditionRow } from '../net/online';
 import { copyText, el, floater } from './dom';
+import { milestone } from '../net/milestones';
 import { canSharePhoto, copyPhoto, makePhoto, photoBlob, photoName, savePhoto, sharePhoto } from './photo';
 import { MapEditor } from './mapEditor';
 import { SideMapPen } from './sideMap';
@@ -635,12 +636,14 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       },
       (party) => {
         this.game = Game.newGame(randomSeed(), party);
+        milestone('partyFounded');
         this.save();
         this.closeOverlay();
         this.enterTown();
       },
       () => this.showTitle(),
     );
+    milestone('newGame');
     founding.start();
   }
 
@@ -796,6 +799,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     this.updateHud();
     // The story belongs to your own hall; expeditions skip it.
     if (this.coop) return;
+    if (!this.trial && !this.wyrd) {
+      milestone('firstDescent');
+      if (this.game.state.floor === 5) milestone('chapter2');
+    }
     const tips = () => {
       const queue = ['firstStep', ...this.nextNoticed()];
       if (def.prowlers.length) queue.push('prowler');
@@ -1714,6 +1721,11 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       if (this.wyrd) return this.endWyrd(true);
       return this.showGameOver();
     }
+    if (combat.outcome === 'victory' && !this.coop && !this.trial && !this.wyrd && !combat.echo) {
+      milestone('firstWin');
+      if (combat.boss && this.game.state.floor === 2) milestone('elder');
+      if (combat.boss && this.game.state.floor === 4) milestone('rootgnawer');
+    }
     if (combat.outcome === 'fled') {
       if (this.coop) {
         this.coop.combatOver();
@@ -1840,6 +1852,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     }
     // Not the end: the roots carry the party home, and the deep keeps half of what they found on this descent.
     const loss = this.game.carriedHome();
+    milestone('carriedHome');
     this.save();
     const items = Object.entries(loss.items).filter(([, n]) => (n ?? 0) > 0) as [ItemId, number][];
     const materials = Object.values(loss.materials).reduce((a, n) => a + n, 0);

@@ -29,6 +29,7 @@ export const CHANGES: ChangeDay[] = [
       'Changed: the story of how the world began now has a picture of its own.',
       'New: every class shows its figure in the class list.',
       'Changed: every tip is now at most two short pages.',
+      'New: anonymous progress counts (a new game, the first win, the first guardians, …) so we can see where new players stop. No account, name or address goes with them; see Privacy & Terms.',
       'Changed: the equipment shop shows a short list per adventurer: what is worn, the best upgrade (marked best) and the best one you can pay for, for weapon and armour. Show all gear lists the rest.',
       'Changed: after the roots carry a fallen party home, the first night at the Sleeping Stag is free, so you are never sent down again with 1 HP for want of gold.',
       'Fixed: on Stormcrown XIX a chest that can only be reached from an ore vein could never be opened (Act always mined). A closed chest ahead now comes first.',
