@@ -10,7 +10,8 @@ const waiting = new Map<string, (() => void)[]>();
 /** The image for `path` (relative to the site), or null while it is still loading or missing. */
 export function sprite(path: string): HTMLImageElement | null {
   const known = cache.get(path);
-  if (known !== undefined) return known && ready.has(path) ? known : null;
+  // Decoded, and still whole: an image can still turn out broken (a failed load), and drawing one throws.
+  if (known !== undefined) return known && ready.has(path) && known.complete && known.naturalWidth > 0 ? known : null;
   if (typeof Image === 'undefined') return null;
   const img = new Image();
   img.onerror = () => {

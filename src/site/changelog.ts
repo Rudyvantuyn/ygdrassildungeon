@@ -29,6 +29,8 @@ export const CHANGES: ChangeDay[] = [
       'Changed: the story of how the world began now has a picture of its own.',
       'New: every class shows its figure in the class list.',
       'Changed: every tip is now at most two short pages.',
+      'Fixed: after leaving the Hall of Echoes the keyboard did nothing until you clicked something.',
+      'Fixed: a picture that failed to load could stop the game with an error; it is now simply left out until it loads.',
       'New: Patch up (Menu, Party): your healers mend everyone to at least 80% and wake the fallen with their own SP, in one go instead of one heal at a time.',
       'New: anonymous progress counts (a new game, the first win, the first guardians, …) so we can see where new players stop. No account, name or address goes with them; see Privacy & Terms.',
       'Changed: the equipment shop shows a short list per adventurer: what is worn, the best upgrade (marked best) and the best one you can pay for, for weapon and armour. Show all gear lists the rest.',

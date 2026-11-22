@@ -825,7 +825,7 @@ export class TownView {
   // ── Hall of Echoes ─────────────────────────────────────────────────────────
 
   private echoes(start = 0): void {
-    const back = () => this.host.closeOverlay();
+    const back = () => this.back();
     const embers = this.game.state.inventory.dreamEmber ?? 0;
     const guardians = echoGuardians(this.game);
     const items: MenuItem[] = guardians.map((id, i) => ({
