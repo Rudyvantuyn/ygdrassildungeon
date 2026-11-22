@@ -126,3 +126,48 @@ export function fullRestore(party: Member[]): void {
     m.sp = s.sp;
   }
 }
+
+/** One cast made by `patchUp`: who cast what on whom, and how much each target got back. */
+export interface PatchCast {
+  caster: number;
+  skill: SkillDef;
+  targets: number[];
+  amounts: number[];
+}
+
+/**
+ * Patches the party up outside a fight with the healers' own SP, the way a careful player would: first wakes the
+ * fallen, then heals until everyone standing is at `goal` of their max HP or nobody can heal any more. A group heal is
+ * used when two or more need it; otherwise the cheapest single heal on whoever is worst off. Returns what was cast.
+ */
+export function patchUp(party: Member[], goal = 0.8): PatchCast[] {
+  const casts: PatchCast[] = [];
+  const frac = (m: Member) => m.hp / memberStats(m).hp;
+  const cheapest = <T extends { skill: SkillDef }>(list: T[]) => [...list].sort((a, b) => a.skill.sp - b.skill.sp)[0];
+  for (let guard = 0; guard < 100; guard++) {
+    const options = party.flatMap((m, caster) => (isAlive(m) ? knownSkills(m).filter((s) => s.field && m.sp >= s.sp).map((skill) => ({ caster, skill })) : []));
+    const fallen = party.flatMap((m, i) => (isAlive(m) ? [] : [i]));
+    const hurt = party.flatMap((m, i) => (isAlive(m) && frac(m) < goal ? [i] : [])).sort((a, b) => frac(party[a]) - frac(party[b]));
+    let pick: { caster: number; skill: SkillDef; targets: number[] } | undefined;
+    const rekindle = cheapest(options.filter((o) => o.skill.kind === 'revive'));
+    if (fallen.length && rekindle) pick = { ...rekindle, targets: [fallen[0]] };
+    else if (hurt.length) {
+      const heals = options.filter((o) => o.skill.kind === 'heal');
+      const group = hurt.length >= 2 ? cheapest(heals.filter((o) => o.skill.target === 'allAllies')) : undefined;
+      const single = cheapest(heals.filter((o) => o.skill.target === 'ally' || (o.skill.target === 'self' && hurt.includes(o.caster))));
+      if (group) pick = { ...group, targets: party.flatMap((m, i) => (isAlive(m) ? [i] : [])) };
+      else if (single) pick = { ...single, targets: [single.skill.target === 'self' ? single.caster : hurt[0]] };
+      else if (heals.some((o) => o.skill.target === 'allAllies')) {
+        const any = cheapest(heals.filter((o) => o.skill.target === 'allAllies'))!;
+        pick = { ...any, targets: party.flatMap((m, i) => (isAlive(m) ? [i] : [])) };
+      }
+    }
+    if (!pick) break;
+    const caster = party[pick.caster];
+    caster.sp -= pick.skill.sp;
+    const amount = healAmount(caster, pick.skill.power);
+    const amounts = pick.targets.map((t) => (pick!.skill.kind === 'revive' ? revive(party[t], pick!.skill.power) : healMember(party[t], amount)));
+    casts.push({ caster: pick.caster, skill: pick.skill, targets: pick.targets, amounts });
+  }
+  return casts;
+}

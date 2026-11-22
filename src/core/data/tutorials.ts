@@ -291,6 +291,14 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'patchUp',
+    title: 'Mending between fights',
+    speaker: 'aske',
+    pages: [
+      'Bruised already? Your healers need not wait for the next fight. Menu, Party, Patch up: they mend everyone with their own SP, and wake the fallen if they can.',
+    ],
+  },
+  {
     id: 'photo',
     title: 'A picture for the saga',
     speaker: 'brynja',

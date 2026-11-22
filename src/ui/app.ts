@@ -14,7 +14,7 @@ import { ITEMS } from '../core/data/items';
 import { MATERIALS } from '../core/data/materials';
 import { DIR_NAMES } from '../core/dungeon';
 import { Game, type StepEvent } from '../core/game';
-import { MAX_LEVEL, healAmount, healMember, isAlive, knownSkills, memberStats, restoreSp, revive, xpForLevel } from '../core/party';
+import { MAX_LEVEL, healAmount, healMember, isAlive, knownSkills, memberStats, patchUp, restoreSp, revive, xpForLevel } from '../core/party';
 import { randomSeed } from '../core/rng';
 import type { ItemId, Loot, Member } from '../core/types';
 import { CLASSES } from '../core/data/classes';
@@ -1163,6 +1163,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             ['Rows', 'The back row takes and deals less melee damage. Archers fight fine from anywhere.'],
             ['Weakness', 'Most monsters fear one element. Big yellow numbers mean you found it.'],
             ['Danger orb', 'Blue, yellow, red: the next fight is getting close.'],
+            ['Patch up', 'Menu, Party: your healers mend everyone with their own SP in one go.'],
             ['Prowlers', 'Glowing silhouettes on deep floors. Avoid them until you are strong.'],
             ['Town', 'Rest at the Inn, sell materials, take requests from the Notice Board.'],
           ]),
@@ -1760,6 +1761,13 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     // After the first guardian, once: the community, at the moment a player is most pleased with the game.
     if (combat.boss && !combat.echo && !this.coop && !this.trial) this.noticeTip('discord');
     if (r.levelUps.length) this.noticeTip('skillPoints');
+    // Worn down after a fight, with a healer who still has SP: tell about Patch up.
+    if (!this.coop && !this.trial && !this.wyrd) {
+      const party = this.game.state.party;
+      const low = party.some((m) => isAlive(m) && m.hp < memberStats(m).hp * 0.6);
+      const healer = party.some((m) => isAlive(m) && knownSkills(m).some((sk) => sk.field && sk.kind === 'heal' && m.sp >= sk.sp));
+      if (low && healer) this.noticeTip('patchUp');
+    }
     if (bynames.length) this.noticeTip('sagas');
     const done = () => {
       this.closeOverlay();
@@ -1964,6 +1972,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           ? []
           : [
               { label: 'Skill tree', detail: points ? 'points to spend' : undefined, description: 'Spend skill points. Every level brings one; each skill goes up to rank 10.', onSelect: () => this.packSkillTree() },
+              { label: 'Patch up', description: 'Your healers mend everyone to at least 80% (and wake the fallen) with their own SP, as far as it goes. One press instead of healing one by one.', onSelect: () => this.patchUpParty() },
               { label: 'Use a skill', description: 'Use a healing skill outside of a fight.', onSelect: () => this.packSkills() },
               { label: 'Sagas', description: 'What each adventurer has done, and the bynames they have earned.', onSelect: () => sagas(this.game, (c, m) => this.openOverlay(c, m), () => this.save(), back) },
             ]),
@@ -2082,6 +2091,44 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     menu.describeInto(desc);
     const hint = el('div', { className: 'menu-hint', text: TOUCH ? 'Tap a tab to switch' : '← → switch tab · ↑↓ choose · Esc close' });
     this.openOverlay(el('div', { className: 'panel dialog wide game-menu' }, [bar, ...head, menu.el, desc, hint]), menu);
+  }
+
+  /** Patch up: the healers heal the party with their own SP, in one go (see `patchUp`). */
+  private patchUpParty(): void {
+    if (this.noFieldHealing) return this.toast('Bloodless: no healing outside of fights on this floor.');
+    const party = this.game.state.party;
+    const casts = patchUp(party);
+    if (!casts.length) {
+      const fine = party.every((m) => isAlive(m) && m.hp >= memberStats(m).hp * 0.8);
+      const hurt = party.some((m) => isAlive(m) && m.hp < memberStats(m).hp * 0.8);
+      return this.toast(fine ? 'Everyone is in good shape already.' : hurt ? 'Nobody has a healing skill and the SP to use it.' : 'Nobody here can wake the fallen: Kindling Moss or the inn will.');
+    }
+    const total = new Map<number, number>();
+    for (const c of casts) c.targets.forEach((t, i) => total.set(t, (total.get(t) ?? 0) + c.amounts[i]));
+    audio.play(casts.some((c) => c.skill.kind === 'revive') ? 'revive' : 'heal');
+    for (const [t, amount] of total) {
+      const a = this.party.anchor(t);
+      floater(this.floaters, a.x, a.y, `+${amount}`, 'heal');
+    }
+    const used = new Map<string, number>();
+    for (const c of casts) {
+      const key = `${party[c.caster].name}: ${c.skill.name}`;
+      used.set(key, (used.get(key) ?? 0) + 1);
+    }
+    this.updateHud();
+    const down = party.filter((m) => !isAlive(m)).map((m) => m.name);
+    const hurt = party.some((m) => isAlive(m) && m.hp < memberStats(m).hp * 0.8);
+    const after = [
+      ...(hurt ? ['The SP ran out before everyone was mended.'] : []),
+      ...(down.length ? [`${down.join(' and ')} ${down.length > 1 ? 'are' : 'is'} still down: Kindling Moss or the inn will wake them.`] : []),
+    ].join(' ');
+    // Close the menu so the party cards and the note of what was cast can be seen.
+    this.closeOverlay();
+    if (this.game.state.location === 'town') {
+      this.mode = 'town';
+      this.town.show();
+    } else this.mode = 'explore';
+    this.toast(`${[...used].map(([k, n]) => (n > 1 ? `${k} ×${n}` : k)).join(', ')}.${after ? ` ${after}` : ''}`, 4200);
   }
 
   private packSkills(): void {

@@ -301,3 +301,28 @@ describe('the night after a fall', () => {
     expect(innCost(g)).toBe(price);
   });
 });
+
+describe('patching up outside a fight', () => {
+  it('wakes the fallen, heals up to the goal with the healers\' own SP, and stops when the SP runs out', async () => {
+    const { createStartingParty, memberStats, patchUp, isAlive } = await import('./party');
+    const { autoSpend } = await import('./skilltree');
+    const party = createStartingParty();
+    for (const m of party) { m.level = 20; m.skills = {}; autoSpend(m); const s = memberStats(m); m.hp = s.hp; m.sp = s.sp; }
+    party[0].hp = Math.round(memberStats(party[0]).hp * 0.2);
+    party[1].hp = 0;
+    const healer = party.find((m) => m.classId === 'mender')!;
+    const spBefore = healer.sp;
+    const casts = patchUp(party);
+    expect(casts.length).toBeGreaterThan(0);
+    expect(isAlive(party[1])).toBe(true);
+    expect(healer.sp).toBeLessThan(spBefore);
+    for (const m of party) expect(m.hp / memberStats(m).hp).toBeGreaterThanOrEqual(0.8);
+    // Nothing left to do: no more casts, no SP spent.
+    const sp = healer.sp;
+    expect(patchUp(party)).toEqual([]);
+    expect(healer.sp).toBe(sp);
+    // No SP: nothing happens.
+    for (const m of party) { m.sp = 0; m.hp = 1; }
+    expect(patchUp(party)).toEqual([]);
+  });
+});
