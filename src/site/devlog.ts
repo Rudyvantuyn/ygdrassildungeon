@@ -10,6 +10,34 @@ export interface Post {
 
 export const POSTS: Post[] = [
   {
+    date: '2026-11-23',
+    title: 'Every step counts',
+    body: `This week I played the game from a brand-new save all the way to the end of chapter IV, the way a new player would, and fixed every kink I found. Everything below is now in the game, here and on itch.io.
+
+**Walking feels like walking.** Every square of the dungeon now looks a little different: each wall shows its own part of the stone, and the floor and ceiling stay put in the world, so a step forward never shows the same picture again. Footsteps on stone, and a gentle rise and dip with every step (Settings, Step sway, if you would rather glide level).
+
+**The way home.** On the first floor of every chapter, the stairs up can take you straight home to Lindholm. Worn out after a guardian? Go down, not back up.
+
+**Kinder after a fall.** When the roots carry a fallen party home, the first night at the Sleeping Stag is free. You are never sent down again with 1 HP for want of gold.
+
+**Patch up.** Menu, Party, Patch up: your healers mend everyone to at least 80% and wake the fallen with their own SP, in one go instead of one heal at a time.
+
+**Easier to start.**
+- Far fewer tips at the start, each at most two short pages, one at a time.
+- No empty panel beside the picture on the title screen and in story scenes, and the story of how the world began has a picture of its own.
+- Every class shows its figure when you choose one.
+- Spend as Brynja advises: one press puts your skill points into a sound build, for anyone unsure how to spend them.
+
+**A clearer shop.** Per adventurer, the shop first shows a short list: what they wear, the best upgrade and the best one you can pay for. Show all gear lists the rest.
+
+**Fixed.**
+- On Stormcrown XIX a chest that can only be reached from an ore vein could never be opened.
+- Leaving the Hall of Echoes left the keyboard doing nothing.
+- A monster could flash an old drawn shape at the start of a fight, and a picture that failed to load could stop the game.
+
+The full list of every change is on the changelog page. Thank you for playing, and for every report through the Feedback button: one of this week's fixes came straight from one.`,
+  },
+  {
     date: '2026-11-17',
     title: 'Three chapters deeper, and a party of five',
     body: `The biggest update yet. Everything below is now in the game, here and on itch.io.

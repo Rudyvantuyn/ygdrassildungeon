@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "screenshots": "node scripts/screenshots.cjs",
-    "build:itch": "ITCH=1 vite build && mv dist-itch/play.html dist-itch/index.html && cd dist-itch && rm -f ../ygdrassil-itch.zip && zip -qr ../ygdrassil-itch.zip .",
+    "build:itch": "ITCH=1 vite build && mv dist-itch/play.html dist-itch/index.html && rm -rf dist-itch/press && cd dist-itch && rm -f ../ygdrassil-itch.zip && zip -qr ../ygdrassil-itch.zip .",
     "build:server": "esbuild server/expedition.ts --bundle --format=esm --platform=neutral --target=es2022 --minify --legal-comments=none --outfile=server/build/expedition.js && esbuild server/wyrd-discord.ts --bundle --format=esm --platform=neutral --target=es2022 --minify --legal-comments=none --outfile=server/build/wyrd-discord.js && esbuild server/shop.ts --bundle --format=esm --platform=neutral --target=es2022 --minify --legal-comments=none --outfile=server/build/shop.js"
   },
   "devDependencies": {
