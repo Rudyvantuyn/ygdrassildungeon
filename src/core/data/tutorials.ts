@@ -291,6 +291,14 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'advice',
+    title: "Brynja's advice",
+    speaker: 'brynja',
+    pages: [
+      'Not sure what to do next? Look under the town\'s name: I keep one line there with the next thing worth doing. Click it and I will take you to the right place. If you would rather find your own way, switch it off under Options, Settings.',
+    ],
+  },
+  {
     id: 'patchUp',
     title: 'Mending between fights',
     speaker: 'aske',

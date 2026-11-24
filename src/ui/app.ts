@@ -2279,6 +2279,10 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       s.tipsOff = v === 'off';
       this.save();
     });
+    const adviceLine = choices<'on' | 'off'>([['on', 'On'], ['off', 'Off']], () => (s.adviceOff ? 'off' : 'on'), (v) => {
+      s.adviceOff = v === 'off';
+      this.save();
+    });
     const keys = choices<'turn' | 'step'>([['turn', 'Turn'], ['step', 'Side-step']], () => (prefs.strafeKeys ? 'step' : 'turn'), (v) => setPref('strafeKeys', v === 'step'));
     const motion = choices<'smooth' | 'fade'>([['smooth', 'Glide'], ['fade', 'Quick']], () => prefs.moveMotion, (v) => setPref('moveMotion', v));
     const font = choices<'pixel' | 'clear'>([['pixel', 'Pixel'], ['clear', 'Clear']], () => (prefs.clearFont ? 'clear' : 'pixel'), (v) => {
@@ -2311,6 +2315,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         ? [{ label: 'Map drawing', description: 'Assisted: your steps fill in, and stairs, chests, springs and gathering spots get their mark; you draw the walls. Manual: you draw everything. Auto: the map draws itself.', control: chart.control, onAdjust: chart.onAdjust, onSelect: chart.cycle }]
         : []),
       ...(solo ? [{ label: 'Tips', description: 'Whether tips appear when something new comes up.', control: tips.control, onAdjust: tips.onAdjust, onSelect: tips.cycle }] : []),
+      ...(solo ? [{ label: "Brynja's advice", description: 'A line in Lindholm with the next thing worth doing (skill points, a rest, a request to hand in, the next guardian).', control: adviceLine.control, onAdjust: adviceLine.onAdjust, onSelect: adviceLine.cycle }] : []),
       { label: 'Back', onSelect: back },
     ];
     const menu = new ListMenu(items, { onCancel: back, startIndex: start });

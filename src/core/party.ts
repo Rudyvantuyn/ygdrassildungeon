@@ -11,6 +11,10 @@ export function createMember(name: string, classId: ClassId, look?: number): Mem
   const m: Member = { name, classId, row: def.row, level: 1, xp: 0, hp: def.base.hp, sp: def.base.sp, skills: {} };
   if (look !== undefined && Number.isInteger(look) && look >= 0 && look < 8) m.look = look;
   autoSpend(m);
+  // Start whole: passive skills from the first point can raise the maximum above the class's base.
+  const max = memberStats(m);
+  m.hp = max.hp;
+  m.sp = max.sp;
   return m;
 }
 

@@ -127,6 +127,8 @@ export interface GameState {
   counters?: Partial<Record<DeedCounter, number>>;
   /** The roots just carried the party home: the next night at the inn is free (see `innCost`). */
   freeNight?: boolean;
+  /** Brynja's advice line in town switched off (src/core/advice.ts). */
+  adviceOff?: boolean;
   /** The party came onto this floor from above (not back up its stairs), so its stairs down can count for the Pacifist's Walk. */
   fromAbove?: boolean;
   /** Where the party last walked into a wall (for a deed). */

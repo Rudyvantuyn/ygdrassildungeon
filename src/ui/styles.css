@@ -3170,3 +3170,32 @@ body.phone #app {
   height: 30px;
   vertical-align: -9px;
 }
+
+/* Brynja's advice: one next step under the town's header. */
+.town-goal {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: -4px 0 0;
+  padding: 5px 16px;
+  background: rgba(8, 14, 20, 0.85);
+  border: 2px solid #000;
+  box-shadow: inset 0 0 0 1px var(--rim-dark);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+.town-goal:hover {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+.town-goal-who {
+  color: var(--gold);
+  font-weight: 800;
+}
+body.phone .town-goal {
+  font-size: 13px;
+  padding: 3px 12px;
+  margin: 0;
+}

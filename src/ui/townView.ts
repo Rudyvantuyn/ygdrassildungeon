@@ -30,6 +30,7 @@ import {
 import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, canSwitchRow, dismissMember, moveToParty, moveToReserve, registerMember, rosterSize, shiftMember, toggleRow, oathCost, FOUNDING_OATHS, cleanName } from '../core/guild';
 import type { ClassId, Member, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
+import { advice } from '../core/advice';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import { npcFromName, npcSays } from './npc';
@@ -72,6 +73,8 @@ export interface TownHost {
   /** Shows tips not seen yet, then continues. */
   tips(ids: string[], then: () => void): void;
   showGuidebook(back: () => void): void;
+  /** Remembers a tip to show at the next calm moment. */
+  noticeTip(id: string): void;
 }
 
 interface Place {
@@ -147,6 +150,15 @@ export class TownView {
       audio.play('menuSelect');
       this.host.openMenu();
     });
+    // Brynja's advice: one next step, under the header. Clicking it opens the place it points at.
+    const tip = advice(this.game);
+    const goal = el('button', { className: 'town-goal' }, [el('span', { className: 'town-goal-who', text: 'Brynja:' }), el('span', { text: ` ${tip?.text ?? ''}` })]);
+    goal.title = 'Brynja\'s advice. Switch it off under Options, Settings.';
+    goal.addEventListener('click', () => {
+      const i = all.findIndex((p) => p.spot === tip?.spot);
+      if (i >= 0) activate(i);
+    });
+    if (tip) this.host.noticeTip('advice');
     this.grid.replaceChildren(
       el('div', { className: 'town-head' }, [
         el('div', { className: 'town-name', text: 'Lindholm' }),
@@ -154,6 +166,7 @@ export class TownView {
         el('div', { className: 'town-gold', text: `${s.gold} G` }),
         menuButton,
       ]),
+      ...(tip ? [goal] : []),
       el('div', { className: `town-cards${places.length > 6 ? ' seven' : ''}` }, nodes),
     );
     select(Math.min(this.lastIndex, all.length - 1));

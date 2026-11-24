@@ -12,6 +12,8 @@ export const CHANGES: ChangeDay[] = [
   {
     date: '2026-11-24',
     changes: [
+      'New: Brynja\'s advice. Under the town\'s name, one line with the next thing worth doing: skill points to spend, a rest, a request to hand in, gear you can afford, or how strong to be before the next guardian. Click it to go there. It can be switched off in Settings.',
+      'Fixed: a new adventurer whose first skill raises their HP or SP now starts with it full.',
       'New: Quick start at the Oath Hall. Brynja picks a balanced party of five for you, with names and looks, so you can be in Lindholm in a few presses. Release anyone you like and swear in your own instead.',
     ],
   },
