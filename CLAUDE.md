@@ -144,6 +144,9 @@ Add new names there and keep the glossary in sync.
 
 - **Always step by step** when the owner has to do something himself (posting, settings, accounts, uploads): give **one step at a
   time**, and the next only after he says it is done. Never a whole list of tasks or texts at once.
+- **Posts the owner puts out (Reddit, Discord, devlogs) sound like him, not like a press release**: short, casual, first person,
+  plain sentences. No bold section headers, no neat three-part lists, no slogans or sign-offs like "brutal honesty welcome".
+  Say a thing once, keep small doubts in ("I think it's fixed"), and leave out what nobody asked about.
 - **Releases on itch.io: at most two a week, each with a devlog.** Don't build the itch zip (`npm run build:itch`) or
   write a devlog unless the owner asks for a release; new features can be built and pushed meanwhile.
 - **New chapters only on request**: chapter VII and later are built only when the owner asks for one (decided November 2026).
