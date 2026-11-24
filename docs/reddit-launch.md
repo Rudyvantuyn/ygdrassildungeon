@@ -21,6 +21,10 @@ om te kopiëren; de uitleg eromheen is voor de eigenaar.
 
 ## Volgorde en timing
 
+**Vanaf 24 november 2026 (besluit eigenaar):** dezelfde subreddits (r/DRPG, r/WebGames, r/etrianodyssey), elk hooguit
+één keer per week, met een update-post over wat er veranderd is. r/playmygame blijft één keer per kalendermaand.
+Eén subreddit per dag, stap voor stap.
+
 Niet alles op één dag: dan lijkt het spam, en je kunt de reacties niet bijhouden. Post op dinsdag t/m donderdag
 tussen **15:00 en 17:00 Nederlandse tijd** (ochtend in de VS). Houd de eerste **drie uur** vrij om te reageren:
 de eerste uren bepalen of een post blijft hangen.
