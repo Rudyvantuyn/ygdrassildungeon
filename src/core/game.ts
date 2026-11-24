@@ -129,6 +129,8 @@ export interface GameState {
   freeNight?: boolean;
   /** Brynja's advice line in town switched off (src/core/advice.ts). */
   adviceOff?: boolean;
+  /** Floors whose map Sigrid has bought (src/core/charting.ts): each pays once. */
+  mapsSold?: number[];
   /** The party came onto this floor from above (not back up its stairs), so its stairs down can count for the Pacifist's Walk. */
   fromAbove?: boolean;
   /** Where the party last walked into a wall (for a deed). */
@@ -219,6 +221,12 @@ export class Game {
     state.choices ??= {};
     if (!Number.isFinite(state.gold)) state.gold = 0;
     if (!Number.isInteger(state.deepest) || state.deepest < 0) state.deepest = 0;
+    // Sigrid only began buying maps in November 2026: saves from before count the earlier chapters' maps as sold, so a
+    // deep party is not paid for thirty floors at once; the chapter it is in still pays.
+    if (!Array.isArray(state.mapsSold)) {
+      const start = state.deepest - (state.deepest % FLOORS_PER_CHAPTER);
+      state.mapsSold = Array.from({ length: start }, (_, f) => f);
+    } else state.mapsSold = state.mapsSold.filter((f) => Number.isInteger(f) && f >= 0);
     // Number the oaths of adventurers from before oaths were numbered.
     [...state.party, ...state.reserve].forEach((m, i) => (m.oath ??= i + 1));
     [...state.party, ...state.reserve].forEach(clampRanks);

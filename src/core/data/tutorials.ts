@@ -291,6 +291,14 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'maps',
+    title: "Sigrid's maps",
+    speaker: 'sigrid',
+    pages: [
+      'Lindholm needs to know what lies below. Walk a floor nearly end to end, nine squares in ten, and I will buy its map when you come home. Once per floor, and the deeper, the more it is worth. The map shows how much you have seen.',
+    ],
+  },
+  {
     id: 'advice',
     title: "Brynja's advice",
     speaker: 'brynja',

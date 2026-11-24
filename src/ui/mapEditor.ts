@@ -1,5 +1,7 @@
 import { CHART_MODES, MARKS, NOTE_MAX_LENGTH, eraseCell, setMark, setNote, setTerrain, type ChartMode, type MarkId } from '../core/chart';
 import type { Game } from '../core/game';
+import { MAP_SHARE, mapped } from '../core/charting';
+import { FLOORS } from '../core/data/floors';
 import { MAP_ZOOMS, MARK_ICONS, drawMinimap, mapLayout } from '../render/minimap';
 import { prefs, setPref } from './prefs';
 import { iconPath } from '../render/icons';
@@ -126,7 +128,13 @@ export class MapEditor {
       close,
     ]);
     this.el = el('div', { className: 'panel dialog map-editor' }, [
-      el('h2', { text: game.floorDef.name }),
+      el('h2', {}, [
+        document.createTextNode(game.floorDef.name),
+        // How much of the floor has been seen: Sigrid buys the map at 90%.
+        ...(game.floors === FLOORS && !game.state.expedition
+          ? [el('span', { className: 'map-seen', text: game.state.mapsSold?.includes(game.state.floor) ? ' · map sold to Sigrid' : ` · ${Math.floor(mapped(game, game.state.floor) * 100)}% seen${mapped(game, game.state.floor) >= MAP_SHARE ? ', Sigrid will buy it' : ''}` })]
+          : []),
+      ]),
       el('div', { className: 'map-body' }, [this.canvas, side]),
     ]);
     this.selectTool('wall');

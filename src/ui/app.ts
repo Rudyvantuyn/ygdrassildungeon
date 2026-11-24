@@ -6,6 +6,7 @@ import type { ChartMode } from '../core/chart';
 import type { Combat } from '../core/combat';
 import { ENEMIES } from '../core/data/enemies';
 import { FLOORS } from '../core/data/floors';
+import { sellMaps } from '../core/charting';
 import { FLOORS_PER_CHAPTER, CHAPTERS, chapterOf } from '../core/data/chapters';
 import { ELEMENTS, bestiaryOrder, elementKnown } from '../core/bestiary';
 import { ELEMENT_NAMES, elementIcon } from './elements';
@@ -755,6 +756,17 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         this.toast(`Your runestones were heeded ${r.heeds} time${r.heeds === 1 ? '' : 's'}.${gold}`, 4000);
       });
     }
+    // Sigrid buys the maps of floors walked nearly end to end, on coming home.
+    if (this.game !== this.titleGame && !this.coop && !this.trial) {
+      const sale = sellMaps(this.game);
+      if (sale.floors.length) {
+        this.save();
+        this.updateHud();
+        const names = sale.floors.map((f) => FLOORS[f].name);
+        this.toast(`Sigrid bought your map${names.length > 1 ? 's' : ''} of ${names.join(', ')}: +${sale.gold} G`, 5000);
+        this.town.show();
+      }
+    }
     const tips = () => this.townTips();
     // Scenes waiting in town play one after the other.
     const story = (): void => {
@@ -776,6 +788,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     const queue = ['town', ...this.nextNoticed()];
     if (s.party.some((m) => unspentPoints(m) > 0)) queue.push('skillPoints');
     if ((s.inventory.oathToken ?? 0) > 0) queue.push('oath');
+    if (s.deepest >= 1) queue.push('maps');
     this.tips(queue, back);
   }
 
