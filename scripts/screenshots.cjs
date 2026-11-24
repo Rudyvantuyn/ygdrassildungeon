@@ -36,6 +36,7 @@ const out = 'screenshots';
 
   await press('Enter'); // New Game -> founding the party at the Oath Hall
   await shot('01b-founding');
+  await press('ArrowUp'); // from Quick start (where a new game begins) up to Swear in an adventurer
   // Swear in four adventurers: [name, steps down the class list].
   for (const [name, down] of [['Bram', 0], ['Sela', 1], ['Wren', 2], ['Orrin', 3], ['Ragna', 5]]) {
     await press('Enter'); // Swear in an adventurer

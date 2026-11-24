@@ -10,6 +10,12 @@ export interface ChangeDay {
 
 export const CHANGES: ChangeDay[] = [
   {
+    date: '2026-11-24',
+    changes: [
+      'New: Quick start at the Oath Hall. Brynja picks a balanced party of five for you, with names and looks, so you can be in Lindholm in a few presses. Release anyone you like and swear in your own instead.',
+    ],
+  },
+  {
     date: '2026-11-17',
     changes: [
       'New: after a Wyrdweave run, Copy my run to share puts a few lines on your clipboard (the day\'s rules, how far you got, your threads) to paste in the Discord or anywhere.',

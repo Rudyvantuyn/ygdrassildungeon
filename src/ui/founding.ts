@@ -19,6 +19,13 @@ export interface FoundingHost {
   preview(party: Member[]): void;
 }
 
+/** The quick-start party: three in front to hold the line, a healer and a caster behind. */
+const QUICK_PARTY: ClassId[] = ['bastion', 'berserker', 'strider', 'mender', 'runecaller'];
+
+/** Names for the quick-start party, by the look they go with. */
+const WOMEN = ['Astrid', 'Dagny', 'Freya', 'Halla', 'Jorunn', 'Liv', 'Nanna', 'Ragna', 'Solvei', 'Tove', 'Vigdis', 'Ingrid'];
+const MEN = ['Bjorn', 'Eirik', 'Gunnar', 'Ivar', 'Knut', 'Magnus', 'Orm', 'Sigurd', 'Ulf', 'Yngvar', 'Hakon', 'Leif'];
+
 /** Names offered with "Suggest a name", so nobody has to type on a phone. */
 const NAMES = [
   'Astrid', 'Bjorn', 'Dagny', 'Eirik', 'Freya', 'Gunnar', 'Halla', 'Ivar', 'Jorunn', 'Knut', 'Liv', 'Magnus',
@@ -78,8 +85,8 @@ export class Founding {
     const say =
       n === 0
         ? first
-          ? '"So you have come to swear the Pact. Good. Midgard needs Wayfinders to find the road the realms want. Nobody goes into the Rootdeep alone: choose who will walk at your side. Up to five may swear today, at no cost."'
-          : '"Who will be the first to swear?"'
+          ? '"So you have come to swear the Pact. Good. Midgard needs Wayfinders to find the road the realms want. Nobody goes into the Rootdeep alone: choose who will walk at your side, five at no cost. Or let me pick a party that works well together."'
+          : '"Who will be the first to swear? Or shall I pick a party for you?"'
         : n < FOUNDING_OATHS
           ? `"${n} sworn. A full party has five, and no more than three stand in one row: some to hold the front, the rest to work from behind. Take more, or set out as you are."`
           : '"Five sworn, a full party. Later oaths need gold and an Oath Token, a shard of Ymir from the deep, so choose well. Ready?"';
@@ -97,6 +104,13 @@ export class Founding {
         disabled: n >= FOUNDING_OATHS,
         onSelect: () => this.chooseClass(),
       },
+      ...(n < FOUNDING_OATHS
+        ? [{
+            label: n ? 'Fill the party for me' : 'Quick start: a party picked for you',
+            description: `Brynja picks ${n ? 'the rest' : 'five who work well together'}: ${QUICK_PARTY.map((c) => CLASSES[c].name).join(', ')}, with names and looks. You can release anyone and swear in your own instead.`,
+            onSelect: () => this.quickStart(),
+          }]
+        : []),
       {
         label: 'Set out for Lindholm',
         description: n ? 'Begin your story with this party.' : 'Swear in at least one adventurer first.',
@@ -105,8 +119,28 @@ export class Founding {
       },
       { label: 'Back to the title', onSelect: () => this.leave() },
     ];
-    const menu = new ListMenu(items, { onCancel: () => this.leave(), startIndex: start || (n < FOUNDING_OATHS ? n : n + 1) });
+    // A new player starts on the quick start; once anyone has sworn, on swearing the next.
+    const menu = new ListMenu(items, { onCancel: () => this.leave(), startIndex: start || (n === 0 ? 1 : n < FOUNDING_OATHS ? n : n + 1) });
     this.dialog('The Oath Hall', [npcSays('brynja', say)], menu);
+  }
+
+  /** Fills the free seats with a well-rounded party, with free names and random looks, then shows the hall to check. */
+  private quickStart(): void {
+    const taken = () => this.members.map((m) => m.name.toLowerCase());
+    for (const classId of QUICK_PARTY) {
+      if (this.members.length >= FOUNDING_OATHS) break;
+      // Skip classes already sworn, as long as enough others are left to fill the party.
+      const left = QUICK_PARTY.filter((c) => !this.members.some((m) => m.classId === c)).length;
+      if (this.members.some((m) => m.classId === classId) && left >= FOUNDING_OATHS - this.members.length) continue;
+      // Looks 0-3 are men, 4-7 women: the name goes with the look.
+      const woman = Math.random() < 0.5;
+      const free = (woman ? WOMEN : MEN).filter((x) => !taken().includes(x.toLowerCase()));
+      const name = free[Math.floor(Math.random() * free.length)] ?? `Wayfinder ${this.members.length + 1}`;
+      const member = createMember(name, classId, (woman ? 4 : 0) + Math.floor(Math.random() * 4));
+      member.row = rowFor(this.members, member.row);
+      this.members.push(member);
+    }
+    this.hall(false, this.members.length + 1);
   }
 
   /** Back to the title; asks first when adventurers have already sworn. */

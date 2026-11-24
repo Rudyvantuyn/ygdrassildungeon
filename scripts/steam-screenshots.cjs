@@ -39,7 +39,7 @@ const out = process.argv[2];
 
   await p.goto('http://localhost:5173/play.html'); await wait(2000); await clean();
   await shot('01-title');
-  await press('Enter', 1, 600); await press('Enter', 1, 600); await press('ArrowDown', 2, 300); await press('Enter', 1, 700); await press('ArrowRight', 3, 300);
+  await press('Enter', 1, 600); await press('ArrowUp', 1, 300); await press('Enter', 1, 600); await press('ArrowDown', 2, 300); await press('Enter', 1, 700); await press('ArrowRight', 3, 300);
   await shot('02-oath-looks');
   await press('Enter', 1, 500); await p.keyboard.type('Sela'); await press('Enter', 1, 500);
   for (const [nm, d] of [['Bram', 0], ['Orrin', 3], ['Ragna', 5], ['Wren', 1]]) { await press('Enter'); await press('ArrowDown', d); await press('Enter'); await press('Enter'); await p.keyboard.type(nm); await press('Enter'); }
