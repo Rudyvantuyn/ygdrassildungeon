@@ -492,6 +492,7 @@ export class CombatView {
       }
       if (cmd.kind === 'item') {
         if ((this.combat.inventory[cmd.item] ?? 0) <= 0) return false;
+        if (ITEMS[cmd.item].effect === 'throw') return this.combat.livingEnemies().length > 0;
         return ITEMS[cmd.item].effect === 'revive' ? !isAlive(party[cmd.target]) : isAlive(party[cmd.target]);
       }
       if (cmd.kind === 'flee') return this.combat.canFlee;
@@ -605,7 +606,9 @@ export class CombatView {
         description: ITEMS[id].description,
         disabled: left <= 0,
         onSelect: () =>
-          this.chooseAlly((t) => this.setCommand({ kind: 'item', item: id, target: t }), () => this.showItemMenu(), ITEMS[id].effect === 'revive'),
+          ITEMS[id].effect === 'throw'
+            ? this.chooseEnemy((t) => this.setCommand({ kind: 'item', item: id, target: t }), () => this.showItemMenu())
+            : this.chooseAlly((t) => this.setCommand({ kind: 'item', item: id, target: t }), () => this.showItemMenu(), ITEMS[id].effect === 'revive'),
       };
     });
     this.showPanel('Items', new ListMenu(items, { onCancel: () => this.showCommandMenu() }), 'Esc back');

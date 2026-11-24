@@ -2191,8 +2191,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     if (this.noFieldHealing) return this.toast('Bloodless: no healing outside of fights on this floor.');
     const party = this.game.state.party;
     const inv = this.game.state.inventory;
-    // Ailments only exist in a fight, so cures are left out here; feathers and tokens have their own uses.
-    const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => !['home', 'token', 'cure'].includes(ITEMS[id].effect));
+    // Ailments only exist in a fight, so cures (and flasks, thrown at enemies) are left out here; feathers and tokens have their own uses.
+    const usable = (Object.keys(ITEMS) as ItemId[]).filter((id) => !['home', 'token', 'cure', 'throw'].includes(ITEMS[id].effect));
     const items: MenuItem[] = usable.map((id) => ({
       label: ITEMS[id].name,
       detail: `×${inv[id] ?? 0}`,

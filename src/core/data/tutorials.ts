@@ -291,6 +291,14 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'flasks',
+    title: 'Flasks',
+    speaker: 'hilde',
+    pages: [
+      'Some of what waits down there only falls to fire, frost or storm. No caster in your party? Throw a flask: Ember, Rime or Storm. Each hits like a rune at the thrower\'s level. They are dear, and a guardian takes a good many.',
+    ],
+  },
+  {
     id: 'deeperOath',
     title: 'Deeper oaths',
     speaker: 'brynja',

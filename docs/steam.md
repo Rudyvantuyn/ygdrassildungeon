@@ -108,3 +108,15 @@ spelers van het genre AI-art afwijzen.
    speelbare **demo op Steam** nodig, dus een desktopversie (zie hierboven). De browserversie mag gratis blijven.
 4. Een vaste ritme helpt meer dan één grote post: elke grote update een devlog op de site, een *event* op de
    Steam-pagina (dat zien mensen met de game op hun wishlist) en een bericht in Discord.
+
+## Later: een app voor iOS en Android (idee, november 2026)
+
+Pas na Steam 1.0. Meer dan de helft van de bezoekers van /play zit op een telefoon (vooral via de Reddit-app), maar
+kopers van dit genre zitten vooral op Steam; de app is de tweede stap.
+
+- Dezelfde code als app via Capacitor; geen tweede spel. Apple Developer $99 per jaar, Google Play eenmalig $25.
+- Model: gratis downloaden met hoofdstuk I, één keer betalen (bijv. €7,99) voor de rest. Past bij "één keer betalen,
+  nooit pay-to-win"; de browserversie blijft de demo.
+- Apple houdt 15% (kleine ontwikkelaars) tot 30% in. Wie in de app met Google laat inloggen, moet ook "Sign in with
+  Apple" bieden. Cosmetica in de app gaan via Apples eigen aankopen.
+- Liggend spelen blijft de bedoeling (de eigenaar wil geen staande versie).

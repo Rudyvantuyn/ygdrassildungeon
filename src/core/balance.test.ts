@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { autoplay, chooseCommands, type AutoplayResult } from './autoplay';
 import { Combat } from './combat';
 import { EQUIPMENT_LIST } from './data/equipment';
-import { createStartingParty, fullRestore, xpForLevel } from './party';
+import { createMember, createStartingParty, fitRows, fullRestore, xpForLevel } from './party';
 import { Rng } from './rng';
 import { autoSpend } from './skilltree';
 import { makeInventory } from './data/items';
+import { SKILLS } from './data/skills';
 
 /** A party at `level` wearing the best regular gear the shop sells by floor index `tier` (no special gear: that takes extra hunting). */
 function trainedParty(level: number, tier: number, oath = 0) {
@@ -268,5 +269,54 @@ describe('deeper oaths do not skip the training', { timeout: 240_000 }, () => {
 
   it('but an oath does help', () => {
     expect(fightWinRate(['gapwarden'], 62, 21, { boss: true, oath: 4 })).toBeGreaterThan(fightWinRate(['gapwarden'], 62, 21, { boss: true }));
+  });
+});
+
+// Flasks (Ember, Rime and Storm Flask, from chapter III in the shop) give a party without a caster a way past a guardian
+// that only its weakness brings down, for a price. Measured on purpose (November 2026), a party of two Bastions, a
+// Wolfkin and two Menders at level 44 against Hrungnir (weak to storm, resists phys): 0% with none, 0% with 20 Storm
+// Flasks, 100% with 60 (18,000 G). The Quick start party goes from 58% to 73% / 82%.
+describe('flasks open a way past a weakness, at a price', { timeout: 240_000 }, () => {
+  const casterless = ['bastion', 'bastion', 'wolfkin', 'mender', 'mender'] as const;
+  const party = (level: number, tier: number) => {
+    const p = casterless.map((c, i) => createMember(`M${i}`, c, 0));
+    for (const m of p) {
+      m.level = level;
+      m.xp = xpForLevel(level);
+      m.skills = {};
+      autoSpend(m);
+      for (const slot of ['weapon', 'armor'] as const) {
+        m[slot] = EQUIPMENT_LIST.filter((e) => e.slot === slot && !e.requires && e.tier <= tier && e.classes.includes(m.classId)).sort((a, b) => b.price - a.price)[0]?.id;
+      }
+    }
+    fitRows(p);
+    fullRestore(p);
+    return p;
+  };
+  // Whoever would only strike with a plain attack or an off-element blow throws a Storm Flask instead.
+  const withFlasks = (c: Combat) => {
+    const cmds = chooseCommands(c);
+    return cmds.map((cmd, i) => {
+      if (!cmd) return cmd;
+      const skill = cmd.kind === 'skill' ? SKILLS[cmd.skill] : null;
+      const blow = cmd.kind === 'attack' || (skill && (skill.kind === 'phys' || skill.kind === 'magic') && skill.power > 0 && skill.element !== 'storm');
+      const left = c.inventory.stormFlask - cmds.slice(0, i).filter((x) => x?.kind === 'item' && x.item === 'stormFlask').length;
+      return blow && left > 0 ? { kind: 'item' as const, item: 'stormFlask' as const, target: c.livingEnemies()[0] } : cmd;
+    });
+  };
+  const rate = (flasks: number, fights = 40) => {
+    let wins = 0;
+    for (let seed = 1; seed <= fights; seed++) {
+      const c = new Combat(party(44, 12), ['hrungnir'], makeInventory({ sapTonic: 3, spiritDew: 1, stormFlask: flasks }), new Rng(seed), { boss: true });
+      for (let r = 0; r < 100 && !c.outcome; r++) c.resolveRound(withFlasks(c));
+      if (c.outcome === 'victory') wins++;
+    }
+    return wins / fights;
+  };
+
+  it('a party without a caster cannot beat Hrungnir on its own, a few flasks are not enough, many are', () => {
+    expect(rate(0)).toBeLessThanOrEqual(0.1);
+    expect(rate(20)).toBeLessThanOrEqual(0.35);
+    expect(rate(60)).toBeGreaterThanOrEqual(0.7);
   });
 });

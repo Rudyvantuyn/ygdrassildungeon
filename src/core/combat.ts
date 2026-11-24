@@ -431,6 +431,18 @@ export class Combat {
           events.push({ type: 'info', text: `There is no ${item.name} left.` });
           return;
         }
+        if (item.effect === 'throw') {
+          const t = this.retargetEnemy(cmd.target);
+          if (t < 0) return;
+          events.push({ type: 'act', side: 'party', actor: i, text: `${m.name} throws ${item.name}!` });
+          this.inventory[cmd.item] -= 1;
+          this.itemsUsed += 1;
+          // As strong as a Runecaller's rune at the thrower's level (gear and class do not matter).
+          const rune = CLASSES.runecaller;
+          const mag = rune.base.mag + rune.growth.mag * (m.level - 1);
+          this.hitEnemy(i, t, item.amount, 'magic', item.element ?? 'fire', events, mag);
+          return;
+        }
         const target = this.party[cmd.target];
         events.push({ type: 'act', side: 'party', actor: i, text: `${m.name} uses ${item.name}.` });
         // Revive items only work on the fallen; everything else only on the living.
@@ -497,17 +509,21 @@ export class Combat {
     kind: 'phys' | 'magic',
     element: Element,
     events: CombatEvent[],
+    /** A thrown flask hits with this magic instead of the thrower's own. */
+    magOverride?: number,
   ): void {
     const m = this.party[memberIndex];
     const enemy = this.enemies[enemyIndex];
     const stats = memberStats(m);
+    if (magOverride !== undefined) stats.mag = magOverride;
 
     if (kind === 'phys' && this.rng.chance(0.04)) {
       events.push({ type: 'miss', side: 'enemy', target: enemyIndex });
       return;
     }
 
-    let base = kind === 'phys' ? stats.atk * 1.6 - enemy.def.def * 0.8 : stats.mag * 1.7 - enemy.def.res * 0.8;
+    // A flask bursts on its target: no resistance of the enemy's own softens it, only its elements.
+    let base = kind === 'phys' ? stats.atk * 1.6 - enemy.def.def * 0.8 : stats.mag * 1.7 - (magOverride !== undefined ? 0 : enemy.def.res * 0.8);
     base = Math.max(stats.atk * 0.3, base);
     base *= modFactor(this.status[memberIndex].mods, enemy.mods, kind);
     if (kind === 'phys' && m.row === 'back' && !CLASSES[m.classId].ranged) base *= 0.5;
