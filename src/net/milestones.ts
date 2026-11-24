@@ -15,6 +15,7 @@ export type Milestone =
   | 'chapter2'
   | 'carriedHome'
   // Between the first win and the first guardian (added November 2026, to see where players stop there).
+  | 'firstFight'
   | 'floor2'
   | 'floor3'
   | 'level3'

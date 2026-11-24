@@ -910,6 +910,8 @@ export class Game {
 
   private rollEncounterAt(): void {
     const avg = this.floorDef.encounterSteps;
+    // A brand-new party meets its first fight soon, so the first minutes show what the game is (6–9 steps).
+    if (this.state.battles === 0 && this.state.floor === 0 && this.floors === FLOORS) return void (this.state.encounterAt = this.rng.int(6, 9));
     this.state.encounterAt = this.rng.int(Math.round(avg * 0.6), Math.round(avg * 1.4));
   }
 

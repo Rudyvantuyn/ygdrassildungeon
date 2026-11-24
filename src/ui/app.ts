@@ -1711,6 +1711,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       this.mode = 'busy';
       return this.tips(['battle'], () => this.startCombat(combat, driver));
     }
+    if (!this.coop && !this.trial && !this.wyrd && this.game !== this.titleGame) milestone('firstFight');
     this.closeOverlay();
     this.mode = 'combat';
     this.toastEl.classList.add('hidden');
