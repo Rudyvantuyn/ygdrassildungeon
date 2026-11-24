@@ -31,6 +31,7 @@ import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, canSwitchRow, dismissMember, mo
 import type { ClassId, Member, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
 import { advice } from '../core/advice';
+import { milestone } from '../net/milestones';
 import { OATH_BONUS, OATH_NAMES, changeClass, classChangeCost, classChangeProblem, deeperOathCost, deeperOathProblem, oathName, oathOf, swearDeeperOath } from '../core/oaths';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
@@ -209,6 +210,7 @@ export class TownView {
           disabled: this.game.state.gold < cost,
           onSelect: () => {
             restAtInn(this.game);
+            milestone('innRest');
             audio.play('heal');
             this.host.save();
             this.back();

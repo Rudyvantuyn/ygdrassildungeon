@@ -37,7 +37,7 @@ import { CoopSession, type CoopHost } from './coopSession';
 import { Hornstone, shareLines, type HornstoneHost } from './hornstone';
 import { online, type ExpeditionRow } from '../net/online';
 import { copyText, el, floater } from './dom';
-import { milestone } from '../net/milestones';
+import { milestone, noteFirstDay, noteReturn } from '../net/milestones';
 import { canSharePhoto, copyPhoto, makePhoto, photoBlob, photoName, savePhoto, sharePhoto } from './photo';
 import { MapEditor } from './mapEditor';
 import { SideMapPen } from './sideMap';
@@ -645,6 +645,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       () => this.showTitle(),
     );
     milestone('newGame');
+    noteFirstDay();
     founding.start();
   }
 
@@ -659,6 +660,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       return;
     }
     this.closeOverlay();
+    noteReturn();
     this.resume();
     this.toast('Game loaded.');
     void this.syncDeeds();
@@ -815,6 +817,8 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     if (!this.trial && !this.wyrd) {
       milestone('firstDescent');
       if (this.game.state.floor === 5) milestone('chapter2');
+      if (this.game.state.floor === 1) milestone('floor2');
+      if (this.game.state.floor === 2) milestone('floor3');
     }
     const tips = () => {
       const queue = ['firstStep', ...this.nextNoticed()];
@@ -1737,6 +1741,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
     }
     if (combat.outcome === 'victory' && !this.coop && !this.trial && !this.wyrd && !combat.echo) {
       milestone('firstWin');
+      const top = Math.max(...this.game.state.party.map((m) => m.level));
+      if (top >= 3) milestone('level3');
+      if (top >= 6) milestone('level6');
       if (combat.boss && this.game.state.floor === 2) milestone('elder');
       if (combat.boss && this.game.state.floor === 4) milestone('rootgnawer');
     }

@@ -5,7 +5,49 @@
  */
 import { SUPABASE_KEY, SUPABASE_URL } from './online';
 
-export type Milestone = 'newGame' | 'partyFounded' | 'firstDescent' | 'firstWin' | 'elder' | 'rootgnawer' | 'chapter2' | 'carriedHome';
+export type Milestone =
+  | 'newGame'
+  | 'partyFounded'
+  | 'firstDescent'
+  | 'firstWin'
+  | 'elder'
+  | 'rootgnawer'
+  | 'chapter2'
+  | 'carriedHome'
+  // Between the first win and the first guardian (added November 2026, to see where players stop there).
+  | 'floor2'
+  | 'floor3'
+  | 'level3'
+  | 'level6'
+  | 'innRest'
+  | 'returned';
+
+const FIRST_DAY = 'ygdrassil-first-day';
+
+/** The UTC day, as the milestones table counts it. */
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** Notes the day this browser started its first game (for `returned`). */
+export function noteFirstDay(): void {
+  try {
+    if (!localStorage.getItem(FIRST_DAY)) localStorage.setItem(FIRST_DAY, today());
+  } catch {
+    // no storage: nothing to compare later
+  }
+}
+
+/** Counts `returned` once, when a save is continued on a later day than the first game was started. */
+export function noteReturn(): void {
+  try {
+    const first = localStorage.getItem(FIRST_DAY);
+    if (!first) return void localStorage.setItem(FIRST_DAY, today());
+    if (first !== today()) milestone('returned');
+  } catch {
+    // no storage
+  }
+}
 
 export function milestone(step: Milestone): void {
   if (__BUILD__ === 'dev') return;
