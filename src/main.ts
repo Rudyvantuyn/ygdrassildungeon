@@ -2,6 +2,7 @@ import './render/roundRect';
 import { inject } from '@vercel/analytics';
 import { audio } from './audio/audio';
 import { watchErrors } from './net/reports';
+import { milestone } from './net/milestones';
 import { App } from './ui/app';
 import { applyFont } from './ui/prefs';
 import { applyLooks, refreshOwned } from './ui/cosmetics';
@@ -66,9 +67,20 @@ function start(): void {
   rotate.innerHTML = '<div class="rotate-icon">⟳</div><p>Turn your phone sideways to play.</p>';
   const anyway = document.createElement('button');
   anyway.textContent = 'Play upright anyway';
-  anyway.addEventListener('click', () => rotate.classList.add('dismissed'));
+  anyway.addEventListener('click', () => {
+    rotate.classList.add('dismissed');
+    milestone('phoneAnyway');
+  });
   rotate.append(anyway);
   document.body.append(rotate);
+  // Count how many phones arrive upright, and how many then turn sideways (or play upright): to see who stops here.
+  const upright = window.matchMedia('(orientation: portrait) and (pointer: coarse)');
+  if (upright.matches) {
+    milestone('phoneUpright');
+    upright.addEventListener('change', (e) => {
+      if (!e.matches) milestone('phoneTurned');
+    });
+  }
 
   // On touch devices the first tap goes full screen (where the browser allows it) and asks for landscape.
   const touch = window.matchMedia('(pointer: coarse)').matches;

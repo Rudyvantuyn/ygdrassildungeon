@@ -13,7 +13,7 @@ export const CHANGES: ChangeDay[] = [
     date: '2026-11-24',
     changes: [
       'Changed: a new party meets its first fight within a few steps of the first floor, instead of after a long quiet walk.',
-      'Changed: the anonymous progress counts now also count the first fight, the second and third floor, levels 3 and 6, the first night at the inn and coming back on a later day, so we can see where new players get stuck before the first guardian. Still no account, name or address; see Privacy & Terms.',
+      'Changed: the anonymous progress counts now also count the first fight, the second and third floor, phones opened upright and then turned, levels 3 and 6, the first night at the inn and coming back on a later day, so we can see where new players get stuck before the first guardian. Still no account, name or address; see Privacy & Terms.',
       'New: Oath Tokens have more uses. At the Oath Hall an adventurer can swear a deeper oath (Second Oath up to Fifth Oath): each adds 3% to their own stats at every level. The next oath opens with every chapter you finish and asks for some levels. (Thanks for the question on Reddit!)',
       'New: Change class. For an Oath Token and some gold, an adventurer swears again as another class, keeping their level and oath, with every skill point back to spend.',
       'New: Sigrid buys your maps. Walk a floor nearly end to end (nine squares in ten) and she pays for its map when you come home, once per floor, more the deeper it is. The map shows how much of the floor you have seen.',

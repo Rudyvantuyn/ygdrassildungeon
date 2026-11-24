@@ -21,7 +21,11 @@ export type Milestone =
   | 'level3'
   | 'level6'
   | 'innRest'
-  | 'returned';
+  | 'returned'
+  // Phones that arrive held upright, and what they do then.
+  | 'phoneUpright'
+  | 'phoneTurned'
+  | 'phoneAnyway';
 
 const FIRST_DAY = 'ygdrassil-first-day';
 
