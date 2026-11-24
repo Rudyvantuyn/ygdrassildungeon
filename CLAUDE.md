@@ -147,6 +147,7 @@ Add new names there and keep the glossary in sync.
 - **Posts the owner puts out (Reddit, Discord, devlogs) sound like him, not like a press release**: short, casual, first person,
   plain sentences. No bold section headers, no neat three-part lists, no slogans or sign-offs like "brutal honesty welcome".
   Say a thing once, keep small doubts in ("I think it's fixed"), and leave out what nobody asked about.
+  Run every such text through the `humanizer` skill (`.claude/skills/humanizer`, MIT, from github.com/blader/humanizer) before giving it.
 - **Releases on itch.io: at most two a week, each with a devlog.** Don't build the itch zip (`npm run build:itch`) or
   write a devlog unless the owner asks for a release; new features can be built and pushed meanwhile.
 - **New chapters only on request**: chapter VII and later are built only when the owner asks for one (decided November 2026).
