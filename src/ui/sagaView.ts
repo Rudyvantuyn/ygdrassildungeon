@@ -8,6 +8,7 @@ import type { Member } from '../core/types';
 import { drawPortrait } from '../render/portraits';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
+import { oathName } from '../core/oaths';
 
 type Open = (content: HTMLElement, menu: ListMenu) => void;
 
@@ -89,7 +90,7 @@ function saga(game: Game, m: Member, open: Open, save: () => void, back: () => v
   open(
     el('div', { className: 'panel dialog wide' }, [
       el('h2', { text: `The saga of ${fullName(m)}` }),
-      el('div', { className: 'menu-member' }, [c, el('div', {}, [el('b', { text: fullName(m) }), el('span', { text: `Lv ${m.level} ${CLASSES[m.classId].name}` })])]),
+      el('div', { className: 'menu-member' }, [c, el('div', {}, [el('b', { text: fullName(m) }), el('span', { text: `Lv ${m.level} ${CLASSES[m.classId].name}${m.oathRank ? ` · ${oathName(m)}` : ''}` })])]),
       el('div', { className: 'rewards saga-facts' }, facts.flatMap(([k, v]) => [el('span', { text: k }), el('span', { className: 'v', text: v })])),
       el('p', { text: earned.length ? `Bynames earned: ${earned.length}. ${left ? 'There are more to earn.' : 'Every byname there is.'}` : 'No byname yet. Fight, heal, endure: the skalds are listening.' }),
       menu.el,

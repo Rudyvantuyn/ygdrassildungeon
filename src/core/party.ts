@@ -45,9 +45,19 @@ export function createStartingParty(): Member[] {
 }
 
 /** Stats from class and level alone, without equipment. */
+/** Each deeper oath (src/core/oaths.ts) adds this share to an adventurer's own stats. Kept small: levels stay what counts. */
+export const OATH_BONUS = 0.03;
+
+/** First Oath 1, Second Oath 1.03, … Fifth Oath 1.12. */
+export function oathMultiplier(m: Member): number {
+  const o = m.oathRank ?? 0;
+  return 1 + OATH_BONUS * (Number.isInteger(o) && o > 0 && o <= 4 ? o : 0);
+}
+
 export function baseStats(m: Member): Stats {
   const { base, growth } = CLASSES[m.classId];
-  const at = (key: keyof Stats) => Math.round(base[key] + growth[key] * (m.level - 1));
+  const mult = oathMultiplier(m);
+  const at = (key: keyof Stats) => Math.round((base[key] + growth[key] * (m.level - 1)) * mult);
   return { hp: at('hp'), sp: at('sp'), atk: at('atk'), def: at('def'), mag: at('mag'), res: at('res'), spd: at('spd') };
 }
 

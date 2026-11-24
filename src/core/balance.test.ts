@@ -8,10 +8,11 @@ import { autoSpend } from './skilltree';
 import { makeInventory } from './data/items';
 
 /** A party at `level` wearing the best regular gear the shop sells by floor index `tier` (no special gear: that takes extra hunting). */
-function trainedParty(level: number, tier: number) {
+function trainedParty(level: number, tier: number, oath = 0) {
   const party = createStartingParty();
   for (const m of party) {
     m.level = level;
+    if (oath) m.oathRank = oath;
     m.xp = xpForLevel(level);
     m.skills = {};
     autoSpend(m);
@@ -108,10 +109,10 @@ describe('prowler balance', () => {
 });
 
 /** Win rate of a trained party in a single fight from full health. */
-function fightWinRate(ids: string[], level: number, tier: number, opts: { boss?: boolean; prowler?: boolean }, fights = 80): number {
+function fightWinRate(ids: string[], level: number, tier: number, opts: { boss?: boolean; prowler?: boolean; oath?: number }, fights = 80): number {
   let wins = 0;
   for (let seed = 1; seed <= fights; seed++) {
-    const combat = new Combat(trainedParty(level, tier), ids, makeInventory({ sapTonic: 3, spiritDew: 1, kindlingMoss: 0, homingFeather: 0 }), new Rng(seed), opts);
+    const combat = new Combat(trainedParty(level, tier, opts.oath), ids, makeInventory({ sapTonic: 3, spiritDew: 1, kindlingMoss: 0, homingFeather: 0 }), new Rng(seed), opts);
     for (let r = 0; r < 100 && !combat.outcome; r++) combat.resolveRound(chooseCommands(combat));
     if (combat.outcome === 'victory') wins++;
   }
@@ -251,4 +252,21 @@ describe('chapter VI balance', { timeout: 240_000 }, () => {
       expect(fightWinRate([id], 80, 27, { prowler: true })).toBeGreaterThanOrEqual(0.5);
     });
   }
+});
+
+// Deeper oaths (src/core/oaths.ts) add 3% per oath to an adventurer's own stats. Measured on purpose (November 2026)
+// at the deepest oath a party can hold when it meets each guardian, oath 0 → deepest: Hafgufa 38→51% at 28,
+// Hrungnir 33→49% at 40, Dreamwarden 20→63% at 50, Gapwarden 16→21% at 58 and 39→53% at 62, Níðhöggr 28→41% at 68.
+// Worth two to four levels of training: they help, but a party fresh on arrival still has to train.
+describe('deeper oaths do not skip the training', { timeout: 240_000 }, () => {
+  it('a party at its deepest oath is still not ready on arrival', () => {
+    expect(fightWinRate(['hafgufa'], 28, 9, { boss: true, oath: 1 })).toBeLessThanOrEqual(0.65);
+    expect(fightWinRate(['dreamwarden'], 50, 17, { boss: true, oath: 3 })).toBeLessThanOrEqual(0.75);
+    expect(fightWinRate(['gapwarden'], 58, 20, { boss: true, oath: 4 })).toBeLessThanOrEqual(0.35);
+    expect(fightWinRate(['nidhogg'], 68, 25, { boss: true, oath: 4 })).toBeLessThanOrEqual(0.55);
+  });
+
+  it('but an oath does help', () => {
+    expect(fightWinRate(['gapwarden'], 62, 21, { boss: true, oath: 4 })).toBeGreaterThan(fightWinRate(['gapwarden'], 62, 21, { boss: true }));
+  });
 });

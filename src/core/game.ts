@@ -10,6 +10,7 @@ import type { Bestiary } from './bestiary';
 import { autoSpend, clampRanks, fullScaleRank, rankOf } from './skilltree';
 import { GATHER_AMBUSH, GATHER_KINDS, GATHER_TABLES, GATHER_USES, type GatherKind } from './data/gathering';
 import { FLOORS_PER_CHAPTER, startFloors } from './data/chapters';
+import { validOath } from './oaths';
 import { STORY } from './data/story';
 import { initProwlers, moveProwlers, type ProwlerState } from './prowlers';
 import { Rng } from './rng';
@@ -230,6 +231,8 @@ export class Game {
     // Number the oaths of adventurers from before oaths were numbered.
     [...state.party, ...state.reserve].forEach((m, i) => (m.oath ??= i + 1));
     [...state.party, ...state.reserve].forEach(clampRanks);
+    // An oath beyond the adventurer's level cannot be honest (src/core/oaths.ts).
+    for (const m of [...state.party, ...state.reserve]) if (!validOath(m.oathRank, m.level)) delete m.oathRank;
     // At most three in a row (parties from before the rule may have four in front).
     fitRows(state.party);
     // Difficulty settings existed briefly; everyone plays by the same rules (fair for expeditions).

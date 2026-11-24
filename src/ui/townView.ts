@@ -31,6 +31,7 @@ import { MAX_PARTY, MAX_ROSTER, NAME_MAX_LENGTH, canSwitchRow, dismissMember, mo
 import type { ClassId, Member, Stats } from '../core/types';
 import type { TownSpot } from '../render/town';
 import { advice } from '../core/advice';
+import { OATH_BONUS, OATH_NAMES, changeClass, classChangeCost, classChangeProblem, deeperOathCost, deeperOathProblem, oathName, oathOf, swearDeeperOath } from '../core/oaths';
 import { el } from './dom';
 import { ListMenu, type MenuItem } from './menu';
 import { npcFromName, npcSays } from './npc';
@@ -356,6 +357,16 @@ export class TownView {
         },
         { label: 'Sagas', description: 'What each adventurer has done, and the bynames they have earned.', onSelect: () => sagas(this.game, (c, m) => this.host.openOverlay(c, m), () => this.host.save(), () => this.hall(3)) },
         { label: 'Unlearn skills', description: 'Take back all skill points of one adventurer, for a fee.', onSelect: () => this.unlearn() },
+        {
+          label: 'Swear a deeper oath',
+          description: `Oath Tokens make an adventurer stronger: every deeper oath adds ${Math.round(OATH_BONUS * 100)}% to their own stats, at every level. You have ${s.inventory.oathToken ?? 0} token${(s.inventory.oathToken ?? 0) === 1 ? '' : 's'}.`,
+          onSelect: () => this.host.tips(['deeperOath'], () => this.deeperOath()),
+        },
+        {
+          label: 'Change class',
+          description: 'For an Oath Token, an adventurer swears again as another class. They keep their level and oath, and get every skill point back.',
+          onSelect: () => this.changeClassPick(),
+        },
         { label: 'Dismiss', description: 'Release an adventurer from the reserve for good.', disabled: s.reserve.length === 0, onSelect: () => this.dismiss() },
         {
           label: 'Raven Runs',
@@ -379,7 +390,7 @@ export class TownView {
         updateHud: () => this.host.updateHud(),
         toast: (text) => this.host.toast(text),
       },
-      () => this.hall(5),
+      () => this.hall(8),
     );
     view.open();
   }
@@ -399,7 +410,7 @@ export class TownView {
 
   private unlearn(): void {
     const all = [...this.game.state.party, ...this.game.state.reserve];
-    const back = () => this.hall(3);
+    const back = () => this.hall(4);
     const items: MenuItem[] = all.map((m) => {
       const fee = unlearnFee(m);
       return {
@@ -419,6 +430,77 @@ export class TownView {
     });
     items.push({ label: 'Back', onSelect: back });
     this.dialog('Unlearn skills', [this.goldLine()], new ListMenu(items, { onCancel: back }), true);
+  }
+
+  /** Deeper oaths: pick an adventurer, see what the next oath needs, swear it. */
+  private deeperOath(start = 0): void {
+    const all = [...this.game.state.party, ...this.game.state.reserve];
+    const back = () => this.hall(5);
+    const items: MenuItem[] = all.map((m, i) => {
+      const problem = deeperOathProblem(this.game, m);
+      const next = OATH_NAMES[oathOf(m) + 1];
+      const cost = deeperOathCost(m);
+      return {
+        label: m.name,
+        detail: oathName(m),
+        description: problem ?? `${m.name} can swear the ${next} for ${cost} Oath Token${cost === 1 ? '' : 's'}: +${Math.round(OATH_BONUS * 100)}% to their own stats.`,
+        disabled: problem !== null,
+        onSelect: () =>
+          this.host.confirm(next ?? '', `${m.name} swears the ${next}. Give ${cost} Oath Token${cost === 1 ? '' : 's'}?`, () => {
+            swearDeeperOath(this.game, m);
+            this.host.save();
+            this.host.updateHud();
+            this.host.toast(`${m.name} has sworn the ${next}.`);
+            this.deeperOath(i);
+          }, () => this.deeperOath(i)),
+      };
+    });
+    items.push({ label: 'Back', onSelect: back });
+    const tokens = this.game.state.inventory.oathToken ?? 0;
+    this.dialog('Swear a deeper oath', [npcSays('brynja', `"Each oath binds you deeper to Midgard, and Midgard gives back. ${OATH_NAMES.join(', ')}: the next opens with every chapter you finish." You have ${tokens} Oath Token${tokens === 1 ? '' : 's'}.`)], new ListMenu(items, { onCancel: back, startIndex: start }), true);
+  }
+
+  /** Change of class: pick the adventurer, then the class. */
+  private changeClassPick(start = 0): void {
+    const all = [...this.game.state.party, ...this.game.state.reserve];
+    const back = () => this.hall(6);
+    const items: MenuItem[] = all.map((m, i) => {
+      const cost = classChangeCost(m);
+      return {
+        label: m.name,
+        detail: `${CLASSES[m.classId].name} · Lv ${m.level}`,
+        description: `A new oath for ${m.name}: ${cost.tokens} Oath Token and ${cost.gold} G.`,
+        disabled: m.ravenRun !== undefined,
+        onSelect: () => this.changeClassTo(m, i),
+      };
+    });
+    items.push({ label: 'Back', onSelect: back });
+    this.dialog('Change class', [npcSays('brynja', '"The bone remembers who you were, and lets you swear again. Your strength stays; your skills you learn anew."'), this.goldLine()], new ListMenu(items, { onCancel: back, startIndex: start }), true);
+  }
+
+  private changeClassTo(m: Member, index: number): void {
+    const back = () => this.changeClassPick(index);
+    const cost = classChangeCost(m);
+    const items: MenuItem[] = (Object.keys(CLASSES) as ClassId[]).filter((id) => classUnlocked(this.game, id)).map((id) => {
+      const problem = classChangeProblem(this.game, m, id);
+      const lost = (['weapon', 'armor'] as const).filter((slot) => m[slot] && !EQUIPMENT[m[slot]!]?.classes.includes(id)).map((slot) => EQUIPMENT[m[slot]!].name);
+      return {
+        label: CLASSES[id].name,
+        icon: `art/heroes/${id}-0.webp`,
+        description: problem ?? `${CLASSES[id].description}${lost.length ? `\n${lost.join(' and ')} cannot be worn as a ${CLASSES[id].name}: Hilde buys it back for half.` : ''}`,
+        disabled: problem !== null,
+        onSelect: () =>
+          this.host.confirm('Change class', `${m.name} swears again as a ${CLASSES[id].name}, at level ${m.level}, and gets every skill point back. Pay ${cost.tokens} Oath Token and ${cost.gold} G?`, () => {
+            changeClass(this.game, m, id);
+            this.host.save();
+            this.host.updateHud();
+            this.host.toast(`${m.name} is a ${CLASSES[id].name} now. Spend their skill points in the Oath Hall.`);
+            this.changeClassPick(index);
+          }, back),
+      };
+    });
+    items.push({ label: 'Back', onSelect: back });
+    this.dialog(`A new oath for ${m.name}`, [this.goldLine()], new ListMenu(items, { onCancel: back, startIndex: Math.max(0, items.findIndex((it) => !it.disabled)) }), true);
   }
 
   private chooseClass(): void {

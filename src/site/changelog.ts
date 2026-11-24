@@ -12,6 +12,8 @@ export const CHANGES: ChangeDay[] = [
   {
     date: '2026-11-24',
     changes: [
+      'New: Oath Tokens have more uses. At the Oath Hall an adventurer can swear a deeper oath (Second Oath up to Fifth Oath): each adds 3% to their own stats at every level. The next oath opens with every chapter you finish and asks for some levels. (Thanks for the question on Reddit!)',
+      'New: Change class. For an Oath Token and some gold, an adventurer swears again as another class, keeping their level and oath, with every skill point back to spend.',
       'New: Sigrid buys your maps. Walk a floor nearly end to end (nine squares in ten) and she pays for its map when you come home, once per floor, more the deeper it is. The map shows how much of the floor you have seen.',
       'New: Brynja\'s advice. Under the town\'s name, one line with the next thing worth doing: skill points to spend, a rest, a request to hand in, gear you can afford, or how strong to be before the next guardian. Click it to go there. It can be switched off in Settings.',
       'Fixed: a new adventurer whose first skill raises their HP or SP now starts with it full.',

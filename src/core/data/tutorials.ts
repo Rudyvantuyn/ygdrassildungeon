@@ -291,6 +291,15 @@ export const TIPS: TipDef[] = [
     ],
   },
   {
+    id: 'deeperOath',
+    title: 'Deeper oaths',
+    speaker: 'brynja',
+    pages: [
+      'Oath Tokens are not only for new faces. Give them to someone you already trust and they swear a deeper oath: each adds a little to their own strength, at every level. The next oath opens with every chapter you finish, and asks for some levels.',
+      'A token also lets an adventurer swear again as another class. They keep their level and oath, and learn their skills anew. Gear their new class cannot wear, Hilde buys back.',
+    ],
+  },
+  {
     id: 'maps',
     title: "Sigrid's maps",
     speaker: 'sigrid',

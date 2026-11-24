@@ -20,6 +20,7 @@ import { Game, type GameState, type StepEvent } from './game';
 import { NAME_MAX_LENGTH, cleanName, nameLength } from './guild';
 import { fitRows, fullRestore, isAlive, knownSkills, MAX_LEVEL, memberStats, xpForLevel } from './party';
 import { validSkills } from './skilltree';
+import { validOath } from './oaths';
 import { chooseCommands } from './tactics';
 import type { ClassId, ItemId, Member } from './types';
 
@@ -170,6 +171,9 @@ export function validMember(raw: unknown): Member | null {
   const member: Member = { name, classId, row: m.row === 'back' ? 'back' : 'front', level, xp, hp: 1, sp: 0, skills: { ...skills } };
   if (Number.isInteger(m.oath) && (m.oath as number) > 0) member.oath = m.oath;
   if (Number.isInteger(m.look) && (m.look as number) >= 0 && (m.look as number) < 8) member.look = m.look;
+  // A deeper oath needs the level for it (src/core/oaths.ts); anything else does not join.
+  if (!validOath(m.oathRank, level)) return null;
+  if (m.oathRank) member.oathRank = m.oathRank;
   // The byname they bear is shown to the others; it changes nothing in a fight.
   if (typeof m.byname === 'string' && m.byname in BYNAME_BY_ID) member.byname = m.byname;
   if (weapon) member.weapon = weapon;

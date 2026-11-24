@@ -124,6 +124,8 @@ export interface Member {
   oath?: number;
   /** Ranks bought with skill points (1–10). Saves from before skill points get a recommended build. */
   skills?: Partial<Record<SkillId, number>>;
+  /** The deepest oath sworn (src/core/oaths.ts): 0 First Oath … 4 Fifth Oath. Each adds 3% to their own stats. */
+  oathRank?: number;
   /** How they look: 0–3 a man, 4–7 a woman (a pixel figure per class). Older saves pick one by name. */
   look?: number;
   /** Out on a Raven Run (its id): not in the party, not on expeditions, until the run is collected. */
