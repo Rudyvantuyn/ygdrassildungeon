@@ -414,9 +414,16 @@ export class CorridorRenderer {
         // One texture covers PLANE_CELLS squares and lies still in the world, so a step moves it along.
         const k = (PLANE_CELLS * sx) / (dist * T); // screen pixels per texture pixel at this depth
         const v = mod((along + z) / PLANE_CELLS, 1);
-        pattern.setTransform(new DOMMatrix([k, 0, 0, k, cx - ((lat + 0.5) * sx) / dist, mid - v * T * k]));
+        // Scale and place the pattern through the canvas's own transform, not pattern.setTransform: some mobile
+        // browsers ignore that, and then the floor and ceiling show the bare texture repeated small, without depth.
+        const ox = cx - ((lat + 0.5) * sx) / dist;
+        const oy = mid - v * T * k;
+        const top = sign > 0 ? y : y - ROW;
+        ctx.save();
+        ctx.transform(k, 0, 0, k, ox, oy);
         ctx.fillStyle = pattern;
-        ctx.fillRect(0, sign > 0 ? y : y - ROW, w, ROW + 0.5);
+        ctx.fillRect(-ox / k, (top - oy) / k, w / k, (ROW + 0.5) / k);
+        ctx.restore();
       }
       // Fog towards the horizon
       const fog = ctx.createLinearGradient(0, horizon, 0, edge);
@@ -610,9 +617,12 @@ export class CorridorRenderer {
       const img = this.wallFor(tex, px);
       const pattern = ctx.createPattern(img, 'repeat')!;
       const k = px / img.width;
-      pattern.setTransform(new DOMMatrix([k, 0, 0, k, 0, 0]));
+      // Scaled through the canvas transform (the path keeps its place), as some browsers ignore pattern.setTransform.
+      ctx.save();
+      ctx.scale(k, k);
       ctx.fillStyle = pattern;
       ctx.fill();
+      ctx.restore();
       ctx.fillStyle = `rgba(0,0,0,${Math.min(0.92, dark)})`;
       ctx.fill();
       if (f > 0.02) {

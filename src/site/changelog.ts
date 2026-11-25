@@ -14,6 +14,7 @@ export const CHANGES: ChangeDay[] = [
     changes: [
       'New: the small map has a button (⤢) that opens the full map, and a Marks button next to Erase, so marks and notes are one click away. (Thanks for the idea on Reddit!)',
       'New: press R in the dungeon to patch up the party.',
+      'Fixed: on some phones the dungeon floor and ceiling showed a small repeating pattern without depth. They are now drawn in a way every browser supports.',
       'Changed: Patch up shares the work between your healers instead of always using the first one\'s SP.',
       'New: the Journal lists the requests you took on, how far along each is, and which are ready to hand in.',
     ],
