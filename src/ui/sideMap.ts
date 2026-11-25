@@ -25,7 +25,7 @@ export class SideMapPen {
   constructor(
     private readonly canvas: HTMLCanvasElement,
     private readonly size: number,
-    private readonly host: { game: Game | null; canDraw(): boolean; changed(): void },
+    private readonly host: { game: Game | null; canDraw(): boolean; changed(): void; openMap(): void },
   ) {
     this.el = el('div', { id: 'map-pen' });
     for (const p of PENS) {
@@ -35,6 +35,11 @@ export class SideMapPen {
       this.buttons.set(p.id, b);
       this.el.append(b);
     }
+    // Marks (chests, stairs, …) and notes are placed on the full map: one press away from here.
+    const marks = el('button', { text: 'Marks' });
+    marks.title = 'Open the full map to place marks (chests, stairs, …) and notes (M)';
+    marks.addEventListener('click', () => this.host.openMap());
+    this.el.append(marks);
     this.select('wall');
     canvas.addEventListener('pointerdown', (e) => {
       if (!this.host.canDraw()) return;

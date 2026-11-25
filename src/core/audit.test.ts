@@ -325,4 +325,18 @@ describe('patching up outside a fight', () => {
     for (const m of party) { m.sp = 0; m.hp = 1; }
     expect(patchUp(party)).toEqual([]);
   });
+
+  it('shares the work between two healers instead of draining the first', async () => {
+    const { createMember, memberStats, patchUp } = await import('./party');
+    const { autoSpend } = await import('./skilltree');
+    const party = [createMember('A', 'bastion'), createMember('B', 'berserker'), createMember('C', 'mender'), createMember('D', 'mender')];
+    for (const m of party) { m.level = 20; m.skills = {}; autoSpend(m); const s = memberStats(m); m.hp = s.hp; m.sp = s.sp; }
+    party[0].hp = 1;
+    party[1].hp = 1;
+    const casts = patchUp(party);
+    const by = (i: number) => casts.filter((c) => c.caster === i).length;
+    expect(by(2)).toBeGreaterThan(0);
+    expect(by(3)).toBeGreaterThan(0);
+    expect(Math.abs(party[2].sp - party[3].sp)).toBeLessThanOrEqual(10);
+  });
 });

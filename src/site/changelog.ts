@@ -10,6 +10,15 @@ export interface ChangeDay {
 
 export const CHANGES: ChangeDay[] = [
   {
+    date: '2026-11-25',
+    changes: [
+      'New: the small map has a button (⤢) that opens the full map, and a Marks button next to Erase, so marks and notes are one click away. (Thanks for the idea on Reddit!)',
+      'New: press R in the dungeon to patch up the party.',
+      'Changed: Patch up shares the work between your healers instead of always using the first one\'s SP.',
+      'New: the Journal lists the requests you took on, how far along each is, and which are ready to hand in.',
+    ],
+  },
+  {
     date: '2026-11-24',
     changes: [
       'Changed: a new party meets its first fight within a few steps of the first floor, instead of after a long quiet walk.',

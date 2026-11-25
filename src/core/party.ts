@@ -157,7 +157,10 @@ export interface PatchCast {
 export function patchUp(party: Member[], goal = 0.8): PatchCast[] {
   const casts: PatchCast[] = [];
   const frac = (m: Member) => m.hp / memberStats(m).hp;
-  const cheapest = <T extends { skill: SkillDef }>(list: T[]) => [...list].sort((a, b) => a.skill.sp - b.skill.sp)[0];
+  // Cheapest skill first; between healers with the same cost, whoever has the most SP left (as a share), so the SP
+  // is spread over them instead of the first healer in the row running dry.
+  const spShare = (i: number) => party[i].sp / Math.max(1, memberStats(party[i]).sp);
+  const cheapest = <T extends { caster: number; skill: SkillDef }>(list: T[]) => [...list].sort((a, b) => a.skill.sp - b.skill.sp || spShare(b.caster) - spShare(a.caster))[0];
   for (let guard = 0; guard < 100; guard++) {
     const options = party.flatMap((m, caster) => (isAlive(m) ? knownSkills(m).filter((s) => s.field && m.sp >= s.sp).map((skill) => ({ caster, skill })) : []));
     const fallen = party.flatMap((m, i) => (isAlive(m) ? [] : [i]));

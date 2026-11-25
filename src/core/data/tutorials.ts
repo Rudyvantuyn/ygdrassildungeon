@@ -328,7 +328,7 @@ export const TIPS: TipDef[] = [
     title: 'Mending between fights',
     speaker: 'aske',
     pages: [
-      'Bruised already? Your healers need not wait for the next fight. Menu, Party, Patch up: they mend everyone with their own SP, and wake the fallen if they can.',
+      'Bruised already? Your healers need not wait for the next fight. Press R, or Menu, Party, Patch up: they mend everyone with their own SP, and wake the fallen if they can.',
     ],
   },
   {

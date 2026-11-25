@@ -41,6 +41,8 @@ import { milestone, noteFirstDay, noteReturn } from '../net/milestones';
 import { canSharePhoto, copyPhoto, makePhoto, photoBlob, photoName, savePhoto, sharePhoto } from './photo';
 import { MapEditor } from './mapEditor';
 import { SideMapPen } from './sideMap';
+import { QUESTS, type QuestDef } from '../core/data/quests';
+import { questGoal, questProgress, questStage, rewardText } from '../core/quests';
 import { Designer, isMaker, loadDraft } from './designer';
 import { showMemories, showShardFound, shardsFound } from './memoriesView';
 import { DISCORD_URL, STEAM_URL } from './links';
@@ -203,6 +205,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       },
       canDraw: () => this.mode === 'explore' && this.game?.state.location === 'dungeon' && this.game.state.chartMode !== 'auto',
       changed: () => {},
+      openMap: () => {
+        if (this.mode === 'explore') this.showMapOverlay();
+      },
     });
     const mapZoom = el('div', { id: 'map-zoom' });
     for (const [label, step, title] of [['−', -1, 'Show more of the floor'], ['+', 1, 'Zoom in around the party']] as const) {
@@ -214,6 +219,14 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
       });
       mapZoom.append(b);
     }
+    // The whole map, with marks and notes: the same as M.
+    const open = el('button', { text: '⤢' });
+    open.title = 'Open the full map: marks (chests, stairs, …), notes and more (M)';
+    open.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (this.mode === 'explore') this.showMapOverlay();
+    });
+    mapZoom.append(open);
     const mapPanel = el('div', { id: 'map-panel', className: 'panel' }, [minimapCanvas, mapZoom, this.mapPen.el, this.keyHint]);
     const statusRow = el('div', { id: 'status-row', className: 'panel' }, [
       el('div', { id: 'danger' }, [this.dangerOrb, el('span', { text: 'Danger' })]),
@@ -533,6 +546,9 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         return true;
       case 'm':
         this.showMapOverlay();
+        return true;
+      case 'r':
+        this.patchUpParty();
         return true;
       case 'h':
         this.showHelp(() => {
@@ -1159,6 +1175,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
             ['Space / Act', 'Open chests, drink from springs, gather'],
             ['M', 'Map: draw walls, marks and notes (1–9, 0 pick a tool, N a note)'],
             ['C / Esc', 'Menu: Party, Bag, Journal, Options'],
+            ['R', 'Patch up: your healers mend the party with their SP'],
             ['P', 'Take a picture to save or share (also in a fight and in town)'],
             ['H', 'This help'],
           ]),
@@ -1993,7 +2010,7 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
           ? []
           : [
               { label: 'Skill tree', detail: points ? 'points to spend' : undefined, description: 'Spend skill points. Every level brings one; each skill goes up to rank 10.', onSelect: () => this.packSkillTree() },
-              { label: 'Patch up', description: 'Your healers mend everyone to at least 80% (and wake the fallen) with their own SP, as far as it goes. One press instead of healing one by one.', onSelect: () => this.patchUpParty() },
+              { label: 'Patch up', description: 'Your healers mend everyone to at least 80% (and wake the fallen) with their own SP, as far as it goes, sharing the work between them. One press instead of healing one by one. In the dungeon: R.', onSelect: () => this.patchUpParty() },
               { label: 'Use a skill', description: 'Use a healing skill outside of a fight.', onSelect: () => this.packSkills() },
               { label: 'Sagas', description: 'What each adventurer has done, and the bynames they have earned.', onSelect: () => sagas(this.game, (c, m) => this.openOverlay(c, m), () => this.save(), back) },
             ]),
@@ -2018,6 +2035,12 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
         ...(coop
           ? []
           : [
+              {
+                label: 'Requests',
+                detail: this.activeRequests().length ? `${this.activeRequests().length} taken` : undefined,
+                description: 'The requests you took on at the Notice Board, and how far along they are.',
+                onSelect: () => this.showRequests(back),
+              },
               { label: 'Fragments', detail: `${s.fragments?.length ?? 0}/${FRAGMENTS.length}`, description: 'Pieces of the Rootdeep\'s past you have found.', onSelect: () => this.showFragments(back) },
               ...(shardsFound(this.game)
                 ? [{ label: 'Memories', detail: String(shardsFound(this.game)), description: 'The memory shards you have found, each in its place.', onSelect: () => showMemories(this.game, (c, m) => this.openOverlay(c, m), back) }]
@@ -2676,6 +2699,31 @@ export class App implements CombatHost, TownHost, CoopHost, HornstoneHost {
   }
 
   /** Every fragment found, to read again; the rest as ???. */
+  /** Requests taken on at the Notice Board and not handed in yet. */
+  private activeRequests(): QuestDef[] {
+    return QUESTS.filter((q) => ['active', 'ready'].includes(questStage(this.game, q)));
+  }
+
+  /** The Journal's list of requests taken: what is asked, how far along, and who waits for it. */
+  private showRequests(back: () => void): void {
+    const items: MenuItem[] = this.activeRequests().map((q) => {
+      const ready = questStage(this.game, q) === 'ready';
+      const { current, target } = questProgress(this.game, q);
+      return {
+        label: q.title,
+        detail: ready ? 'done: hand it in' : `${Math.min(current, target)}/${target}`,
+        description: `${questGoal(q)}. For ${q.giver}. Reward: ${rewardText(q)}.${ready ? ' Hand it in at the Notice Board in Lindholm.' : ''}`,
+        onSelect: () => {},
+      };
+    });
+    if (!items.length) items.push({ label: 'No requests taken', description: 'Take on requests at the Notice Board in Lindholm.', disabled: true, onSelect: () => {} });
+    items.push({ label: 'Back', onSelect: back });
+    const menu = new ListMenu(items, { onCancel: back });
+    const desc = el('div', { className: 'menu-desc' });
+    menu.describeInto(desc);
+    this.openOverlay(el('div', { className: 'panel dialog wide' }, [el('h2', { text: 'Requests' }), menu.el, desc]), menu);
+  }
+
   private showFragments(back: () => void, start = 0): void {
     const found = new Set(this.game.state.fragments ?? []);
     const items: MenuItem[] = FRAGMENTS.map((f) => ({
